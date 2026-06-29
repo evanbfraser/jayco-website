@@ -53,14 +53,14 @@
     const hamburger = document.getElementById('hamburger');
     const nav       = document.getElementById('main-nav');
 
-    // Fade-in opacity as user scrolls — fully dark at 320px
-    const MAX_OPACITY  = 0.88;
+    // Fade to Jayco blue as user scrolls — fully blue at 320px
+    const MAX_OPACITY  = 0.96;
     const FULL_SCROLL  = 320;
 
     function updateHeaderBg() {
       const scrollY   = window.scrollY;
       const opacity   = Math.min(scrollY / FULL_SCROLL, 1) * MAX_OPACITY;
-      header.style.background = `rgba(0, 0, 0, ${opacity})`;
+      header.style.background = `rgba(0, 122, 194, ${opacity})`;
 
       if (scrollY > 60) {
         header.classList.add('scrolled');
@@ -85,19 +85,75 @@
     });
   }
 
-  /* ---------- Hero Entry Animations ---------- */
-  function initHero() {
-    const eyebrow  = document.querySelector('.hero-eyebrow');
-    const words    = document.querySelectorAll('.hero-heading .word');
-    const tagline  = document.querySelector('.hero-tagline');
-    const ctas     = document.querySelector('.hero-ctas');
+  /* ---------- Hero — image slider + progress dots + corner video ---------- */
+  function initHeroSlider() {
+    console.log('[Jayco v2] hero build: slider-2 (kenburns + eyebrow + video title + play cursor)');
+    const slides = gsap.utils.toArray('.hero-slide');
+    const panels = gsap.utils.toArray('.hero-panel');
+    const dots   = gsap.utils.toArray('.hero-dot');
+    const n = slides.length;
+    if (!n || panels.length !== n || dots.length !== n) return;
 
-    const tl = gsap.timeline({ delay: 0.4 });
+    const DURATION = 4;   // seconds per slide
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = -1;
+    let tween = null;
 
-    tl.to(eyebrow, { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' })
-      .to(words, { opacity: 1, y: 0, stagger: 0.16, duration: 1.2, ease: 'power2.out' }, '-=0.5')
-      .to(tagline, { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, '-=0.4')
-      .to(ctas,    { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out' }, '-=0.4');
+    function goTo(i) {
+      if (i === current) return;
+      const prev = current;
+      current = i;
+      slides.forEach((s, k) => s.classList.toggle('is-active', k === i));
+      panels.forEach((p, k) => p.classList.toggle('is-active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+      if (prev >= 0) gsap.set(dots[prev].querySelector('.hero-dot-fill'), { width: '0%' });
+
+      if (tween) tween.kill();
+      if (reduce) return;                          // no auto-advance with reduced motion
+      const fill = dots[i].querySelector('.hero-dot-fill');
+      tween = gsap.fromTo(fill, { width: '0%' }, {
+        width: '100%', duration: DURATION, ease: 'none',
+        onComplete: () => goTo((i + 1) % n),
+      });
+    }
+
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+    // pause/resume the countdown when the tab is hidden
+    document.addEventListener('visibilitychange', () => {
+      if (!tween) return;
+      if (document.hidden) tween.pause(); else tween.resume();
+    });
+
+    goTo(0);
+
+    // ---- corner video → fullscreen ----
+    const opener = document.querySelector('.hero-video');
+    const modal  = document.querySelector('.hero-video-modal');
+    const full   = modal && modal.querySelector('.hero-video-full');
+    const closeBtn = modal && modal.querySelector('.hero-video-close');
+    if (opener && modal && full) {
+      const open = () => {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (lenis) lenis.stop();
+        full.currentTime = 0;
+        full.muted = false;
+        full.play().catch(() => {});
+      };
+      const close = () => {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (lenis) lenis.start();
+        full.pause();
+      };
+      opener.addEventListener('click', open);
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('is-open')) close(); });
+    }
   }
 
   /* ---------- Section Parallax ---------- */
@@ -120,38 +176,83 @@
     });
   }
 
-  /* ---------- Category Cards — each card triggers independently ---------- */
-  function initCategories() {
-    // Section header
-    const header = document.querySelector('.categories-header');
-    if (header) {
-      gsap.from(header.children, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.18,
-        duration: 1.6,
-        ease: 'power1.out',
-        scrollTrigger: {
-          trigger: header,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      });
+  /* ---------- Class Scroller — Towable / Driveable pinned accordion ---------- */
+  function initClassScroller() {
+    console.log('[Jayco v2] class-scroller build: groups-2 (full img, smoother, quicker)');
+    const stage  = document.querySelector('.cs-stage');
+    if (!stage) return;
+    const groups = gsap.utils.toArray('.cs-group');      // [towable, driveable]
+    const slides = gsap.utils.toArray('.cs-slide');
+    if (groups.length < 2 || !slides.length) return;
+    const GROUP_KEYS = groups.map((g) => g.dataset.group);
+
+    // ---- right-side image carousel ----
+    let slideTimer = null;
+    let shownSlide = null;
+    function show(slide) {
+      if (shownSlide === slide) return;
+      if (shownSlide) shownSlide.classList.remove('is-shown');
+      slide.classList.add('is-shown');
+      shownSlide = slide;
+    }
+    function startCarousel(groupKey) {
+      if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+      const set = slides.filter((s) => s.dataset.group === groupKey);
+      if (!set.length) return;
+      let i = 0;
+      show(set[0]);
+      slideTimer = setInterval(() => { i = (i + 1) % set.length; show(set[i]); }, 2200);
     }
 
-    // Each card gets its own scroll trigger so they reveal one by one as user scrolls
-    document.querySelectorAll('.category-card').forEach((card) => {
-      gsap.from(card, {
-        opacity: 0,
-        y: 32,
-        duration: 1.5,
-        ease: 'power1.out',
-        scrollTrigger: {
-          trigger: card,
-          start: 'top 90%',
-          toggleActions: 'play none none reverse',
-        },
+    // ---- active group (accordion) ----
+    let activeGroup = -1;
+    function setGroup(idx) {
+      if (idx === activeGroup) return;
+      activeGroup = idx;
+      groups.forEach((g, i) => g.classList.toggle('is-active', i === idx));
+      startCarousel(GROUP_KEYS[idx]);
+    }
+
+    // Desktop only: pin the stage; first half = towable, second half = driveable.
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 901px)', () => {
+      setGroup(0);
+
+      // Hover a vehicle button → show that vehicle, pause auto-cycle; leave → resume.
+      const btnHandlers = [];
+      stage.querySelectorAll('.cs-vehicle-btn').forEach((btn) => {
+        const enter = () => {
+          if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+          const slide = slides.find((s) => s.dataset.vehicle === btn.dataset.vehicle);
+          if (slide) show(slide);
+        };
+        const leave = () => startCarousel(GROUP_KEYS[activeGroup]);
+        btn.addEventListener('mouseenter', enter);
+        btn.addEventListener('mouseleave', leave);
+        btnHandlers.push([btn, enter, leave]);
       });
+
+      const trigger = ScrollTrigger.create({
+        trigger: stage,
+        start: 'top top',
+        end: () => '+=' + Math.round(window.innerHeight * 0.9),
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate(self) { setGroup(self.progress < 0.5 ? 0 : 1); },
+      });
+
+      return () => {
+        trigger.kill();
+        if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+        btnHandlers.forEach(([btn, enter, leave]) => {
+          btn.removeEventListener('mouseenter', enter);
+          btn.removeEventListener('mouseleave', leave);
+        });
+        groups.forEach((g) => g.classList.remove('is-active'));
+        activeGroup = -1;
+      };
     });
   }
 
@@ -192,30 +293,53 @@
     });
   }
 
-  /* ---------- Lifestyle Section ---------- */
-  function initNewsCards() {
-    const cursor = document.querySelector('.cursor');
+  /* ---------- News — pinned scroll reveal (text, then cards one at a time) ---------- */
+  function initNewsSection() {
+    const section = document.getElementById('news-cta');
+    if (!section) return;
+    console.log('[Jayco v2] news build: cat-2 (pinned reveal)');
+    const bg    = section.querySelector('.parallax-bg');
+    const head  = section.querySelectorAll('.news-cta-head > *');
+    const cards = gsap.utils.toArray(section.querySelectorAll('.news-cat-card'));
+    if (!head.length || cards.length < 3) return;
 
-    document.querySelectorAll('.news-card').forEach((card) => {
-      const video = card.querySelector('.news-card-video');
-      if (!video) return;
+    const mm = gsap.matchMedia();
 
-      const showFirstFrame = () => { video.currentTime = 0.001; };
-      if (video.readyState >= 1) {
-        showFirstFrame();
-      } else {
-        video.addEventListener('loadedmetadata', showFirstFrame, { once: true });
-      }
+    // Desktop: pin the section and scrub a long scroll. First you just see the TOP of
+    // the background image (an initial hold), then the text appears, then each category
+    // card one at a time — while the background slowly pans down.
+    mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.set([...head, ...cards], { opacity: 0, y: 40 });
+      if (bg) gsap.set(bg, { yPercent: 0 });
 
-      card.addEventListener('mouseenter', () => {
-        video.play();
-        if (cursor) cursor.classList.add('reading');
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '+=150%',
+          pin: true,
+          anticipatePin: 1,
+          scrub: true,
+        },
       });
-      card.addEventListener('mouseleave', () => {
-        video.pause();
-        video.currentTime = 0.001;
-        if (cursor) cursor.classList.remove('reading');
-      });
+      // Brief hold on the bg, then reveal text, then the three cards one at a time.
+      tl.to(head, { opacity: 1, y: 0, stagger: 0.12, duration: 0.5, ease: 'power2.out' }, 0.35)
+        .to(cards[0], { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.2')
+        .to(cards[1], { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.25')
+        .to(cards[2], { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.25')
+        .to({}, { duration: 0.3 });   // small trailing hold
+      // Background pans from its top across the whole pinned scroll.
+      if (bg) tl.fromTo(bg, { yPercent: 0 }, { yPercent: -16, ease: 'none', duration: tl.duration() }, 0);
+
+      return () => {
+        gsap.set([...head, ...cards], { clearProps: 'opacity,transform' });
+        if (bg) gsap.set(bg, { clearProps: 'transform' });
+      };
+    });
+
+    // Mobile / reduced motion: no pin — keep everything visible.
+    mm.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
+      gsap.set([...head, ...cards], { opacity: 1, y: 0 });
     });
   }
 
@@ -272,96 +396,6 @@
     });
   }
 
-  /* ---------- Final CTA ---------- */
-  function initFinalCta() {
-    const section  = document.getElementById('final-cta');
-    if (!section) return;
-    const video    = section.querySelector('.final-cta-video');
-    const children = section.querySelectorAll('.section-label, .cta-heading, .cta-body, .cta-buttons');
-
-    // Hide text until video finishes
-    gsap.set(children, { opacity: 0, y: 28 });
-
-    if (!video) return;
-
-    function setupScrollVideo() {
-      const duration       = video.duration;
-      const scrollDistance = Math.round(duration * 180);
-
-      // Prime the decode pipeline so the first frame paints and seeking is reliable.
-      // The video is muted, so autoplay policies allow this.
-      video.play().then(() => video.pause()).catch(() => {});
-
-      // Rapid scroll issues seeks faster than the decoder can finish them, and
-      // overlapping seeks get dropped — which is what leaves the video stuck on
-      // frame 0. Track the pending seek and only apply the latest target once the
-      // previous one resolves, so the frame keeps tracking scroll.
-      let seeking    = false;
-      let pendingTime = null;
-
-      function seekTo(time) {
-        if (seeking) {
-          pendingTime = time;
-          return;
-        }
-        seeking = true;
-        video.currentTime = time;
-      }
-
-      video.addEventListener('seeked', () => {
-        seeking = false;
-        if (pendingTime !== null) {
-          const next = pendingTime;
-          pendingTime = null;
-          seekTo(next);
-        }
-      });
-
-      let revealed = false;
-
-      const trigger = ScrollTrigger.create({
-        trigger:       section,
-        start:         'top top',
-        end:           `+=${scrollDistance}`,
-        pin:           true,
-        anticipatePin: 1,
-        scrub:         true,
-        onUpdate(self) {
-          seekTo(self.progress * duration);
-
-          const threshold = (duration - 2) / duration;
-          if (self.progress >= threshold && !revealed) {
-            revealed = true;
-            gsap.to(children, {
-              opacity: 1,
-              y: 0,
-              stagger: 0.18,
-              duration: 1.0,
-              ease: 'power2.out',
-            });
-          } else if (self.progress < threshold && revealed) {
-            revealed = false;
-            gsap.to(children, { opacity: 0, y: 28, duration: 0.25 });
-          }
-        },
-      });
-
-      ScrollTrigger.refresh();
-
-      // If the video finished loading while the user was already inside the pinned
-      // range, sync the frame to the current scroll position instead of frame 0.
-      seekTo(trigger.progress * duration);
-    }
-
-    // Wait for actual frame data (HAVE_CURRENT_DATA), not just metadata — otherwise
-    // seeks fire before any frame is buffered and the video stays on frame 0.
-    if (video.readyState >= 2) {
-      setupScrollVideo();
-    } else {
-      video.addEventListener('loadeddata', setupScrollVideo, { once: true });
-    }
-  }
-
   /* ---------- Footer Reveal ---------- */
   function initFooter() {
     const footer = document.querySelector('.site-footer');
@@ -385,7 +419,7 @@
 
     const cursor = document.createElement('div');
     cursor.className = 'cursor';
-    cursor.innerHTML = '<span class="cursor-label cursor-label--article">Read Article</span><span class="cursor-label cursor-label--review">What People<br>Are Saying</span>';
+    cursor.innerHTML = '<span class="cursor-label cursor-label--specs">View Model<br>Specs</span><span class="cursor-label cursor-label--article">Read Articles</span><span class="cursor-label cursor-label--play"><svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor" aria-hidden="true"><path d="M15 9 0 18V0z"/></svg><span class="cursor-label-text">Play Video</span></span>';
     document.body.appendChild(cursor);
 
     // xPercent/yPercent centres the circle on the exact pointer position
@@ -405,16 +439,29 @@
       if (!e.relatedTarget) cursor.classList.add('visible');
     });
 
-    // Grow + intensify glow over interactive elements (exclude news cards and review buttons — they use their own states)
+    // Grow + intensify glow over interactive elements (exclude news cards, review buttons and the hero video — they use their own states)
     document.addEventListener('mouseover', (e) => {
-      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest('.news-card') && !e.target.closest('.model-review-btn')) {
+      if (e.target.closest('a, button, [role="button"], .cs-vehicle-btn') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-video') && !e.target.closest('.news-cat-card')) {
         cursor.classList.add('hovering');
       }
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest('.news-card') && !e.target.closest('.model-review-btn')) {
+      if (e.target.closest('a, button, [role="button"], .cs-vehicle-btn') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-video') && !e.target.closest('.news-cat-card')) {
         cursor.classList.remove('hovering');
       }
+    });
+
+    // Hero corner video → cursor expands into a play button with "Play Video" (same family as the article cursor)
+    const heroVideo = document.querySelector('.hero-video');
+    if (heroVideo) {
+      heroVideo.addEventListener('mouseenter', () => cursor.classList.add('playing'));
+      heroVideo.addEventListener('mouseleave', () => cursor.classList.remove('playing'));
+    }
+
+    // News category cards → cursor expands with "Read Articles" (same family as the Specs cursor)
+    document.querySelectorAll('.news-cat-card').forEach((card) => {
+      card.addEventListener('mouseenter', () => cursor.classList.add('reading'));
+      card.addEventListener('mouseleave', () => cursor.classList.remove('reading'));
     });
   }
 
@@ -422,6 +469,7 @@
   function initDealerMap() {
     if (!document.getElementById('dealer-map')) return;
     if (typeof L === 'undefined') return;
+    console.log('[Jayco v2] dealer build: split-1 (1/3 text + 2/3 map)');
 
     const map = L.map('dealer-map', {
       center: [39.5, -98.35],
@@ -542,55 +590,123 @@
     document.getElementById('dealer-search-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
+
+    // The map lives in a 2/3-width grid card now — make Leaflet re-measure so
+    // tiles fill it with no grey gutter, and re-fit when it stacks on mobile.
+    setTimeout(() => map.invalidateSize(), 200);
+    window.addEventListener('resize', () => map.invalidateSize());
   }
 
-  /* ---------- Crafted For — Pinned Wipe Section ---------- */
-  function initCraftedSection() {
-    const section = document.getElementById('crafted');
+  /* ---------- Built For — scroll-scrubbed exterior→interior video ---------- */
+  function initBuiltFor() {
+    const section = document.getElementById('builtfor');
     if (!section) return;
+    console.log('[Jayco v2] builtfor build: scrub-1 (expand + video scrub + text crossfade)');
 
-    const panel2           = document.getElementById('crafted-panel-2');
-    const panel3           = document.getElementById('crafted-panel-3');
-    const panel4           = document.getElementById('crafted-panel-4');
-    const wordRoad         = document.getElementById('word-road');
-    const wordComfort      = document.getElementById('word-comfort');
-    const wordYou          = document.getElementById('word-you');
-    const wordExploration  = document.getElementById('word-exploration');
+    const stage = section.querySelector('.builtfor-stage');
+    const video = section.querySelector('.builtfor-video');
+    const lines = section.querySelectorAll('.builtfor-line');
+    const btn   = section.querySelector('.builtfor-btn');
+    if (!stage || !video || lines.length < 2) return;
 
-    const stats = section.querySelectorAll('.crafted-stat');
+    const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
-    gsap.set([panel2, panel3, panel4], { yPercent: 100 });
-    gsap.set(wordRoad,    { opacity: 1, y: 0 });
-    gsap.set([wordComfort, wordYou, wordExploration], { opacity: 0, y: 30 });
-    gsap.set(stats, { opacity: 0, y: 14 });
+    const mm = gsap.matchMedia();
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: '+=400%',
-        scrub: true,
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-      },
+    // ---- Desktop: pinned scroll-scrub, container expands, text crossfades ----
+    mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
+      let onSeeked = null;
+      let onLoaded = null;
+
+      function setupScrollVideo() {
+        const duration       = video.duration || 1;
+        const scrollDistance = Math.round(duration * 160);
+
+        // Prime the decode pipeline so the first frame paints and seeking is reliable.
+        video.play().then(() => video.pause()).catch(() => {});
+
+        // Rapid scroll issues seeks faster than the decoder finishes them, and
+        // overlapping seeks get dropped. Track the pending seek and only apply the
+        // latest once the previous resolves, so the frame keeps tracking scroll.
+        let seeking = false;
+        let pendingTime = null;
+        function seekTo(time) {
+          if (seeking) { pendingTime = time; return; }
+          seeking = true;
+          video.currentTime = time;
+        }
+        onSeeked = () => {
+          seeking = false;
+          if (pendingTime !== null) {
+            const next = pendingTime;
+            pendingTime = null;
+            seekTo(next);
+          }
+        };
+        video.addEventListener('seeked', onSeeked);
+
+        const trigger = ScrollTrigger.create({
+          trigger:       section,
+          start:         'top top',
+          end:           `+=${scrollDistance}`,
+          pin:           true,
+          anticipatePin: 1,
+          scrub:         true,
+          onUpdate(self) {
+            const p = self.progress;
+            // scrub the footage exterior → interior
+            seekTo(p * duration);
+            // expand the container from content-width to full-bleed over the first 25%
+            // (CSS computes the inset from --exp using the same clamp as the dealer padding)
+            const e = Math.min(p / 0.25, 1);
+            stage.style.setProperty('--exp', String(1 - e));
+            // crossfade the headline around mid-scroll (video reaches the interior)
+            lines[0].style.opacity = clamp01((0.55 - p) / 0.15);
+            lines[1].style.opacity = clamp01((p - 0.45) / 0.15);
+            // reveal the "Why Jayco" button once the second headline is in
+            if (btn) {
+              const b = clamp01((p - 0.62) / 0.08);
+              btn.style.opacity = b;
+              btn.style.transform = `translateY(${(1 - b) * 12}px)`;
+              btn.style.pointerEvents = b > 0.9 ? 'auto' : 'none';
+            }
+          },
+        });
+
+        // Sync the frame to the current scroll position (handles late load inside the pin).
+        seekTo(trigger.progress * duration);
+        ScrollTrigger.refresh();
+      }
+
+      // Wait for real frame data (HAVE_CURRENT_DATA), not just metadata.
+      if (video.readyState >= 2) {
+        setupScrollVideo();
+      } else {
+        onLoaded = setupScrollVideo;
+        video.addEventListener('loadeddata', onLoaded, { once: true });
+      }
+
+      // matchMedia auto-kills the ScrollTrigger; clean up our own listeners + inline styles.
+      return () => {
+        if (onSeeked) video.removeEventListener('seeked', onSeeked);
+        if (onLoaded) video.removeEventListener('loadeddata', onLoaded);
+        stage.style.removeProperty('--exp');
+        lines[0].style.opacity = '';
+        lines[1].style.opacity = '';
+        if (btn) { btn.style.opacity = ''; btn.style.transform = ''; btn.style.pointerEvents = ''; }
+      };
     });
 
-    tl
-      .to(panel2,          { yPercent: 0,  ease: 'none',        duration: 1    }, 0)
-      .to(wordRoad,        { opacity: 0,   y: -30, duration: 0.2, ease: 'power1.in'  }, 0.35)
-      .fromTo(wordComfort, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, 0.6)
-      .to(panel3,              { yPercent: 0,  ease: 'none',        duration: 1    }, 1)
-      .to(wordComfort,         { opacity: 0,   y: -30, duration: 0.2, ease: 'power1.in'  }, 1.35)
-      .fromTo(wordExploration, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, 1.6)
-      .to(panel4,              { yPercent: 0,  ease: 'none',        duration: 1    }, 2)
-      .to(wordExploration,     { opacity: 0,   y: -30, duration: 0.2, ease: 'power1.in'  }, 2.35)
-      .fromTo(wordYou,         { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, 2.6);
-
-    stats.forEach((stat, i) => {
-      tl.to(stat, { opacity: 1, y: 0, duration: 0.18, ease: 'power1.out' }, 3.0 + i * 0.2);
+    // ---- Mobile / reduced-motion: full-width looping video, both lines shown ----
+    mm.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
+      stage.style.clipPath = 'none';
+      video.loop = true;
+      video.play().catch(() => {});
+      return () => {
+        video.loop = false;
+        stage.style.clipPath = '';
+      };
     });
-
   }
 
   /* ---------- Popular Models Carousel ---------- */
@@ -633,166 +749,224 @@
     goTo(0);
   }
 
-  /* ---------- Model Card Reviews ---------- */
-  const modelReviews = {
-    'Greyhawk': [
-      { headline: 'A home that goes everywhere.', review: 'We\'ve crossed 22 states in our Greyhawk. The living space feels genuinely residential — full kitchen, comfortable beds, and enough storage for months on the road.', byline: 'Mark & Linda H. — Ohio' },
-      { headline: 'Family adventures redefined.', review: 'Four kids and a dog. The Greyhawk handles it all with ease. Storage is incredible and the kids love their own sleeping space.', byline: 'The Williams Family — Georgia' },
-      { headline: 'Worth every penny.', review: 'Retired last year and bought the Greyhawk. It\'s been flawless across 14,000 miles. Build quality is head and shoulders above anything else I tested.', byline: 'Don F. — Arizona' },
-    ],
-    'Alante': [
-      { headline: 'Grand touring at its best.', review: 'The Alante drives like a dream and lives even better. We park it at campgrounds and people stop to ask about it every single time.', byline: 'Robert & Jan S. — California' },
-      { headline: 'Full-time living, no compromises.', review: 'We sold our house and hit the road in an Alante. A year in and we couldn\'t be happier — it has everything we need and more.', byline: 'Chris & Amy D. — Colorado' },
-      { headline: 'Our home on wheels.', review: 'The quality of the cabinetry, the slide-outs, the kitchen — everything is top tier. Jayco clearly put thought into every detail.', byline: 'Tom K. — Tennessee' },
-    ],
-    'Swift': [
-      { headline: 'Light, quick, and incredibly capable.', review: 'Hitches up in minutes and handles mountain passes with no drama. We\'ve taken it to Glacier, Zion, and Acadia — it never skips a beat.', byline: 'Jake M. — Montana' },
-      { headline: 'Perfect for weekend warriors.', review: 'We use it almost every weekend from May to October. Setup is fast, tow weight is manageable, and the interior is surprisingly well-appointed.', byline: 'Sarah & Ben T. — Colorado' },
-      { headline: 'Converted us to RV life.', review: 'We were tent campers for 20 years. The Swift changed everything — comfortable, well-built, and priced just right.', byline: 'Paul & Diane N. — Wisconsin' },
-    ],
-    'Pinnacle': [
-      { headline: 'Luxury that actually delivers.', review: 'I\'ve owned three fifth wheels over the years. The Pinnacle is in a different class entirely — fit, finish, and feature list are all exceptional.', byline: 'Gary L. — Texas' },
-      { headline: 'Our retirement dream come true.', review: 'Spent a year researching fifth wheels before choosing the Pinnacle. Best decision we ever made. The master suite alone is worth it.', byline: 'Frank & Mary B. — Florida' },
-      { headline: 'Neighbors keep asking for a tour.', review: 'Everyone at the campground wants to see inside. The kitchen layout, the fireplace, the bedroom — it genuinely feels like a luxury apartment.', byline: 'Kevin & Trish O. — Michigan' },
-    ],
-    'North Point': [
-      { headline: 'Sets the standard for luxury.', review: 'We\'ve stayed in five-star hotels that don\'t feel this premium. The attention to detail in the North Point is remarkable.', byline: 'David & Susan M. — California' },
-      { headline: 'Full-timing made effortless.', review: 'Three years full-time in our North Point. The quality holds up beautifully and Jayco support has been outstanding every step of the way.', byline: 'Jim & Carla W. — Texas' },
-      { headline: 'Nothing else comes close.', review: 'Looked at everything on the market before settling on the North Point. Once you step inside, the competition simply doesn\'t exist.', byline: 'Ray P. — Colorado' },
-    ],
-    'Jay Feather': [
-      { headline: 'Light enough, fun enough, perfect enough.', review: 'At 6,200 lbs, our half-ton tows it without breaking a sweat. Interior is thoughtfully designed with storage for all our gear.', byline: 'Alex T. — Oregon' },
-      { headline: 'The ultimate getaway machine.', review: 'We leave Friday evening and we\'re set up at the campsite by dark. The Jay Feather makes weekend trips feel completely effortless.', byline: 'Meg & Chris R. — Washington' },
-      { headline: 'Our first trailer, and our best.', review: 'Easy to tow, quick to set up, and comfortable enough to stay a week. Couldn\'t have chosen a better first RV.', byline: 'Lisa & Tom P. — Idaho' },
-    ],
+  /* ---------- Model Card Specs ---------- */
+  const modelSpecs = {
+    'North Point': {
+      tagline: 'Luxury That Leads the Way',
+      specs: [
+        ['Type', 'Luxury Fifth Wheel'],
+        ['Sleeps', 'Up to 9'],
+        ['Length', '36’ 0”–44’ 9”'],
+        ['Unloaded Weight', '13,375–16,195 lbs.'],
+        ['Floorplans', '8'],
+      ],
+    },
+    'Alante': {
+      tagline: 'Big Adventure, Made Easy',
+      specs: [
+        ['Type', 'Class A Gas Motorhome'],
+        ['Sleeps', 'Up to 8'],
+        ['Length', '29’ 11”–32’ 2”'],
+        ['Floorplans', '3'],
+        ['Chassis', 'Ford® F53'],
+        ['GVWR', '18,000 lbs.'],
+      ],
+    },
+    'Pinnacle': {
+      tagline: 'The Height of Life on the Road',
+      specs: [
+        ['Type', 'Luxury Fifth Wheel'],
+        ['Sleeps', 'Up to 6'],
+        ['Length', '36’ 0”–44’ 6”'],
+        ['Unloaded Weight', '13,545–15,870 lbs.'],
+        ['Floorplans', '6'],
+      ],
+    },
+    'Greyhawk': {
+      tagline: 'More Comfort for Every Mile',
+      specs: [
+        ['Type', 'Class C Gas Motorhome'],
+        ['Sleeps', 'Up to 7'],
+        ['Length', '29’ 11”–32’ 6”'],
+        ['Chassis', 'Ford® E-450'],
+        ['GVWR', '14,500 lbs.'],
+        ['Engine', '7.3L V8, 325 hp'],
+      ],
+    },
+    'Jay Feather': {
+      tagline: 'Lightweight Freedom, Full-Sized Comfort',
+      specs: [
+        ['Type', 'Lightweight Travel Trailer'],
+        ['Sleeps', 'Up to 10'],
+        ['Length', 'Approximately 24’–36’'],
+        ['Unloaded Weight', '4,755–6,970 lbs.'],
+        ['Floorplans', '16'],
+      ],
+    },
+    'Swift': {
+      tagline: 'Your Next Adventure Starts Here',
+      specs: [
+        ['Type', 'Class B Camper Van'],
+        ['Sleeps', '2 standard; up to 4 with available pop-top'],
+        ['Length', '20’ 11”'],
+        ['Floorplans', '3'],
+        ['Chassis', 'RAM® ProMaster 3500'],
+        ['Interior', 'Full kitchen and wet bath'],
+      ],
+    },
   };
 
-  function initModelReviews() {
+  function initModelSpecs() {
+    console.log('[Jayco v2] models build: specs-1');
     document.querySelectorAll('.model-card').forEach((card) => {
       const modelName = card.querySelector('.card-top h3')?.textContent.trim();
-      const reviews   = modelReviews[modelName];
-      if (!reviews?.length) return;
+      const data = modelSpecs[modelName];
+      const btn  = card.querySelector('.model-specs-btn');
+      if (!data || !btn) return;
 
-      const modal        = card.querySelector('.model-review-modal');
-      const headline     = modal.querySelector('.model-review-headline');
-      const text         = modal.querySelector('.model-review-text');
-      const byline       = modal.querySelector('.model-review-byline');
-      const reviewBtn    = card.querySelector('.model-review-btn');
-      const nextBtn      = modal.querySelector('.model-review-next');
-      const closeBtn     = modal.querySelector('.model-review-close');
-      const reviewImgEl  = modal.querySelector('.model-review-model-img');
-      const buildImg     = card.querySelector('.model-build-img');
-      if (reviewImgEl && buildImg) {
-        reviewImgEl.src = buildImg.getAttribute('src');
-        reviewImgEl.alt = modelName;
+      // Build the blue specs panel
+      const panel = document.createElement('div');
+      panel.className = 'model-specs-panel';
+      panel.setAttribute('aria-hidden', 'true');
+
+      const name = document.createElement('h4');
+      name.className = 'model-specs-name';
+      name.textContent = modelName;
+
+      // Model render image (reuse the card's build image), shown above the tagline
+      const buildImg = card.querySelector('.model-build-img');
+      let img = null;
+      if (buildImg) {
+        img = document.createElement('img');
+        img.className = 'model-specs-img';
+        img.src = buildImg.getAttribute('src');
+        img.alt = modelName;
       }
 
-      let idx = 0;
+      const tagline = document.createElement('p');
+      tagline.className = 'model-specs-tagline';
+      tagline.textContent = data.tagline;
 
-      function showReview(i) {
-        const r = reviews[i];
-        headline.textContent = r.headline;
-        text.textContent     = r.review;
-        byline.textContent   = r.byline;
-      }
-
-      reviewBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showReview(idx);
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden', 'false');
+      const list = document.createElement('ul');
+      list.className = 'model-specs-list';
+      data.specs.forEach(([k, v]) => {
+        const li = document.createElement('li');
+        const ks = document.createElement('span');
+        ks.className = 'spec-k';
+        ks.textContent = k;
+        const vs = document.createElement('span');
+        vs.className = 'spec-v';
+        vs.textContent = v;
+        li.append(ks, vs);
+        list.appendChild(li);
       });
 
-      nextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        idx = (idx + 1) % reviews.length;
-        showReview(idx);
-      });
+      const cta = document.createElement('a');
+      cta.className = 'model-specs-cta';
+      cta.href = '#';
+      cta.textContent = 'Learn More';
 
-      closeBtn.addEventListener('click', (e) => {
+      if (img) panel.append(img);
+      panel.append(name, tagline, list, cta);
+      card.appendChild(panel);
+
+      const setOpen = (open) => {
+        card.classList.toggle('is-specs', open);
+        panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      };
+
+      // Open the specs panel on CLICK of the icon (toggle); never trigger the card's link.
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
+        setOpen(!card.classList.contains('is-specs'));
       });
+      // Clicks inside the open panel shouldn't bubble to the card link (the Learn More link still works).
+      panel.addEventListener('click', (e) => e.stopPropagation());
     });
   }
 
-  /* ---------- Review Cursor ---------- */
-  function initReviewCursor() {
+  /* ---------- Specs Cursor ---------- */
+  function initSpecsCursor() {
     const cursor = document.querySelector('.cursor');
     if (!cursor) return;
 
-    document.querySelectorAll('.model-review-btn').forEach((btn) => {
-      btn.addEventListener('mouseenter', () => cursor.classList.add('reviewing'));
-      btn.addEventListener('mouseleave', () => cursor.classList.remove('reviewing'));
+    document.querySelectorAll('.model-specs-btn').forEach((btn) => {
+      btn.addEventListener('mouseenter', () => cursor.classList.add('specs'));
+      btn.addEventListener('mouseleave', () => cursor.classList.remove('specs'));
     });
   }
 
-  /* ---------- Quiz Prompt Cards ---------- */
-  function initQuizCards() {
+  /* ---------- Find Your Match — needs slider (typed phrases) ---------- */
+  function initFeatureSlider() {
+    console.log('[Jayco v2] feature build: slider-2 (needs crossfade + typed phrase)');
     const section = document.querySelector('#feature');
-    const card    = section ? section.querySelector('.quiz-card') : null;
-    const textEl  = card ? card.querySelector('.quiz-card-text') : null;
-    if (!textEl) return;
+    if (!section) return;
+    const content = section.querySelector('.feature-content');
+    const slides  = gsap.utils.toArray('.feature-slide');
+    const textEl  = section.querySelector('.feature-word-text');
+    const n = slides.length;
+    if (!n || !textEl) return;
 
-    const questions = [
-      'What is a great model for my family?',
-      'I need a full size kitchen.',
-      'I need off-road capability.',
-      'What size RV can I tow?',
-      'I need to be able to sleep 6 people.',
-      'What is the water capacity?',
-      'I need this to be a smooth drive.',
-      "I'm more interested in comfort.",
+    // Phrase per slide — order matches the images
+    const phrases = [
+      'holds all my gear',
+      'perfect for my family',
+      'is peak comfort',
+      'is a smooth ride',
+      'can go off-road',
+      'allows me to work',
+      'entertains my guests',
     ];
 
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let started = false;
-    let index   = 0;
+    let index = 0;
+
+    function showSlide(i) {
+      slides.forEach((s, k) => s.classList.toggle('is-active', k === i));
+    }
 
     const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
     async function typeOut(text) {
       for (let i = 1; i <= text.length; i++) {
         textEl.textContent = text.slice(0, i);
-        await wait(48);
+        await wait(55);
       }
     }
-
     async function eraseAll() {
-      const len = textEl.textContent.length;
-      for (let i = len - 1; i >= 0; i--) {
+      for (let i = textEl.textContent.length - 1; i >= 0; i--) {
         textEl.textContent = textEl.textContent.slice(0, i);
-        await wait(24);
+        await wait(28);
       }
     }
 
     async function runLoop() {
+      textEl.textContent = '';
       while (true) {
-        await typeOut(questions[index]);
-        await wait(1800);
+        showSlide(index);          // crossfade the matching image in
+        await typeOut(phrases[index]);
+        await wait(1600);
         await eraseAll();
-        await wait(320);
-        index = (index + 1) % questions.length;
+        await wait(280);
+        index = (index + 1) % n;
       }
     }
 
-    gsap.set(card, { opacity: 0, y: 16 });
-
+    // fade the content in on first view, then start typing
+    gsap.set(content, { opacity: 0, y: 16 });
     const observer = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting || started) return;
       started = true;
-      gsap.to(card, {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'power2.out',
-        onComplete: runLoop,
+      gsap.to(content, {
+        opacity: 1, y: 0, duration: 0.9, ease: 'power2.out',
+        onComplete: () => {
+          if (reduce) { showSlide(0); textEl.textContent = phrases[0]; }
+          else runLoop();
+        },
       });
     }, { threshold: 0.3 });
-
     observer.observe(section);
   }
 
@@ -818,24 +992,45 @@
     });
   }
 
+  /* ---------- Jayco Difference — scroll reveal (logo, then statements one by one) ---------- */
+  function initDifference() {
+    const section = document.getElementById('difference');
+    if (!section) return;
+    console.log('[Jayco v2] difference build: anim-1');
+    const icon  = section.querySelector('.diff-icon');
+    const stats = gsap.utils.toArray(section.querySelectorAll('.diff-stat'));
+    if (!icon || !stats.length) return;
+
+    // Reduced motion: leave everything visible, no animation.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.set([icon, ...stats], { opacity: 0, y: 24 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: section, start: 'top 78%', toggleActions: 'play none none reverse' },
+    });
+    tl.to(icon, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' })
+      .to(stats, { opacity: 1, y: 0, duration: 0.6, stagger: 0.2, ease: 'power2.out' }, '-=0.15');
+  }
+
   /* ---------- Init All ---------- */
   function initAnimations() {
     gsap.registerPlugin(ScrollTrigger);
     initLenis();
     initHeader();
-    initHero();
-initParallax();
+    initHeroSlider();
+    initParallax();
+    initClassScroller();   // pinned — must init before later pinned sections (DOM order)
     initDealerMap();
-    initCraftedSection();
+    initBuiltFor();   // pinned scroll-scrub video (#builtfor, below the dealer map)
+    initDifference();
     initModelCarousel();
-    initModelReviews();
-    initCategories();
+    initModelSpecs();
     initSectionAnimations();
-    initQuizCards();
+    initFeatureSlider();
     initCursor();
-    initNewsCards();
-    initReviewCursor();
-    initFinalCta();
+    initNewsSection();
+    initSpecsCursor();
     initFaq();
     initFooter();
     ScrollTrigger.refresh();
