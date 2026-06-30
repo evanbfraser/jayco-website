@@ -6,9 +6,9 @@
   <title>Jayco — Built for the Road</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=47" />
+  <link rel="stylesheet" href="css/style.css?v=v3-build-74" />
   <link rel="preload" href="../assets/jayco-model-quiz-v2.jpg" as="image" />
 </head>
 <body>
@@ -31,25 +31,29 @@
         <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
       </a>
       <nav class="header-nav" id="main-nav">
-        <ul class="nav-primary">
+        <ul class="nav-primary nav-left">
           <li><a href="#">RVs</a></li>
           <li><a href="#">Find Your RV</a></li>
           <li><a href="#">Shop &amp; Tools</a></li>
           <li><a href="#">Owners</a></li>
-          <li><a href="#">Resources</a></li>
-          <li><a href="#">About</a></li>
         </ul>
-        <ul class="nav-actions">
-          <li><a href="#" class="btn-nav-filled">Build &amp; Price</a></li>
-          <li><a href="#" class="btn-nav-outline">Find a Dealer</a></li>
-          <li>
-            <button class="nav-search-btn" aria-label="Search">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-            </button>
-          </li>
-        </ul>
+        <div class="nav-right">
+          <ul class="nav-primary">
+            <li><a href="#">Resources</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+          <ul class="nav-actions">
+            <li><a href="#" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="#" class="btn-nav-outline">Find a Dealer</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
       </nav>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -65,16 +69,25 @@
       </video>
     </div>
     <div class="hero-overlay"></div>
-    <div class="hero-content">
-<h1 class="hero-heading">
-        <span class="word">Live</span>
-        <span class="word">Without</span>
-        <span class="word">Limits.</span>
-      </h1>
-      <p class="hero-tagline">From weekends to lifetimes — Jayco builds the RV<br>your adventure deserves.</p>
-      <div class="hero-ctas">
-        <a href="#" class="btn-primary">Build &amp; Price</a>
-        <a href="#" class="btn-secondary">Find Your RV</a>
+    <div class="hero-cta-scrim" aria-hidden="true"></div>
+    <div class="hero-ctas">
+      <span class="hero-ctas-prompt">How can we help?</span>
+      <div class="hero-cta-row">
+        <a href="#" class="hero-cta">
+          <span class="hero-cta-label">Build &amp; Price</span>
+        </a>
+        <a href="#" class="hero-cta">
+          <span class="hero-cta-label">Download a Brochure</span>
+        </a>
+        <a href="#" class="hero-cta">
+          <span class="hero-cta-label">Find a Dealer</span>
+        </a>
+        <button class="hero-chatbot" aria-label="Chat with us">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+        </button>
       </div>
     </div>
     <div class="scroll-indicator">
@@ -85,124 +98,88 @@
     </div>
   </section>
 
-  <!-- ===== CATEGORY STRIP ===== -->
-  <section class="categories" id="categories">
-    <div class="categories-header">
-      <span class="section-label">Explore Our Lineup</span>
-      <h2 class="section-heading">Find Your Perfect RV</h2>
+  <!-- ===== HERO INTRO ===== -->
+  <section class="hero-intro" id="hero-intro">
+    <div class="hero-intro-inner">
+      <h1 class="hero-heading">
+        <span class="word">Live</span> <span class="word">Without</span> <span class="word">Limits.</span>
+      </h1>
+      <div class="hero-points">
+        <p class="hero-point"><strong>Explore</strong> an award-winning lineup built for every kind of adventure.</p>
+        <p class="hero-point"><strong>Trust</strong> more than 55 years of craftsmanship and an industry-leading warranty.</p>
+        <p class="hero-point"><strong>Go farther</strong> with a nationwide dealer network ready to support every journey.</p>
+      </div>
     </div>
-    <div class="category-grid">
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-travel-trailers.jpg" alt="Travel Trailers" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Travel Trailers</h3>
-            <p>Versatile towables for every adventure</p>
+  </section>
+
+  <!-- ===== MODEL CAROUSEL ===== -->
+  <section class="model-carousel" id="categories" style="background-image: url('../assets/jayco-model-carousel-backgound-landscape.jpg');">
+    <div class="model-carousel-header">
+      <h2 class="section-heading">
+        <span class="mc-line">One Brand</span>
+        <span class="mc-line">8 Model Classes</span>
+        <span class="mc-line">30+ Models</span>
+      </h2>
+    </div>
+    <div class="mt-stage">
+      <div class="mt-viewport">
+        <div class="mt-track" id="mt-track">
+          <div class="mt-slide" data-index="0" data-name="Travel Trailers" data-tagline="Versatile towables for every adventure">
+            <img class="mt-img" src="../assets/jayco-travel-trailer-button.png" alt="Travel Trailers" />
           </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
+          <div class="mt-slide" data-index="1" data-name="Destination Trailers" data-tagline="Luxury retreats that feel like home">
+            <img class="mt-img" src="../assets/jayco-destination-trailer-button.png" alt="Destination Trailers" />
           </div>
-        </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-bungalow.jpg" alt="Destination Trailers" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Destination Trailers</h3>
-            <p>Luxury retreats that feel like home</p>
+          <div class="mt-slide" data-index="2" data-name="Fifth Wheels" data-tagline="Spacious luxury for full-time living">
+            <img class="mt-img" src="../assets/jayco-fifth-wheel-button.png" alt="Fifth Wheels" />
           </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
+          <div class="mt-slide" data-index="3" data-name="Toy Haulers" data-tagline="Built for adventure, packed for gear">
+            <img class="mt-img" src="../assets/jayco-toy-hauler-button.png" alt="Toy Haulers" />
           </div>
-        </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-fifth-wheel.jpg" alt="Fifth Wheels" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Fifth Wheels</h3>
-            <p>Spacious luxury for full-time living</p>
+          <div class="mt-slide" data-index="4" data-name="Class B" data-tagline="Compact camper vans built to roam">
+            <img class="mt-img" src="../assets/jayco-class-b-button.png" alt="Class B" />
           </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
+          <div class="mt-slide" data-index="5" data-name="Class C" data-tagline="Family-sized comfort, endlessly versatile">
+            <img class="mt-img" src="../assets/jayco-class-c-button.png" alt="Class C" />
           </div>
-        </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-toy-hauler.jpg" alt="Toy Haulers" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Toy Haulers</h3>
-            <p>Built for adventure, packed for gear</p>
+          <div class="mt-slide" data-index="6" data-name="Super C" data-tagline="Diesel power meets luxury living">
+            <img class="mt-img" src="../assets/jayco-super-c-button.png" alt="Super C" />
           </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
+          <div class="mt-slide" data-index="7" data-name="Class A" data-tagline="Premium motorhomes, unmatched comfort">
+            <img class="mt-img" src="../assets/jayco-class-a-button.png" alt="Class A" />
           </div>
         </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-b.jpg" alt="Class B" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Class B</h3>
-            <p>Compact camper vans built to roam</p>
-          </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
-          </div>
+        <button class="mt-arrow mt-prev" id="mt-prev" aria-label="Previous"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="mt-arrow mt-next" id="mt-next" aria-label="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="mt-caption" id="mt-caption">
+        <h3 class="mt-name"></h3>
+        <p class="mt-tagline"></p>
+        <div class="mt-btns">
+          <a href="#" class="btn-primary mt-btn">Explore</a>
+          <a href="#" class="mt-build">
+            <img class="mt-build-img" src="" alt="" />
+            <span>Build Yours</span>
+          </a>
         </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-c.jpg" alt="Class C" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Class C</h3>
-            <p>Family-sized comfort, endlessly versatile</p>
-          </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
-          </div>
-        </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-super-c.jpg" alt="Super C" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Super C</h3>
-            <p>Diesel power meets luxury living</p>
-          </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
-          </div>
-        </div>
-      </a>
-      <a href="#" class="category-card">
-        <img src="../assets/jayco-model-class-a.jpg" alt="Class A" />
-        <div class="card-overlay">
-          <div class="card-top">
-            <h3>Class A</h3>
-            <p>Premium motorhomes, unmatched comfort</p>
-          </div>
-          <div class="card-bottom">
-            <span class="card-learn-more">View Models</span>
-          </div>
-        </div>
-      </a>
+      </div>
     </div>
   </section>
 
   <!-- ===== MODEL QUIZ CTA ===== -->
-  <section class="feature-section parallax-section" id="feature">
-    <div class="parallax-bg" style="background-image: url('../assets/jayco-model-quiz-v2.jpg');"></div>
-    <div class="feature-overlay"></div>
-    <div class="feature-content align-left" data-animation="slide-right" data-persist="true">
-      <span class="section-label light">Find Your Match</span>
-      <h2 class="section-heading light">Which Jayco<br>is Yours?</h2>
-      <p class="section-body light">Not sure where to start? Answer a few quick questions and we'll match you with the model built for the way you travel.</p>
-      <a href="#" class="btn-primary">Start the Quiz</a>
-    </div>
-    <div class="quiz-cards" aria-hidden="true">
-      <div class="quiz-card"><span class="quiz-card-text"></span><span class="quiz-card-cursor"></span></div>
+  <section class="quiz-section" id="feature">
+    <div class="quiz-inner">
+      <div class="quiz-text" data-animation="fade-up" data-persist="true">
+        <span class="section-label">Find Your Match</span>
+        <h2 class="section-heading">Which Jayco<br>is Yours?</h2>
+        <p class="section-body">Not sure where to start? Answer a few quick questions and we'll match you with the model built for the way you travel.</p>
+        <a href="#" class="btn-primary">Start the Quiz</a>
+      </div>
+      <div class="quiz-media">
+        <video class="quiz-video" autoplay muted loop playsinline>
+          <source src="../assets/jayco-model-change-v2.mp4" type="video/mp4">
+        </video>
+      </div>
     </div>
   </section>
 
@@ -215,14 +192,16 @@
       <h2 class="section-heading dark">200+ Dealers<br>Nationwide.</h2>
       <p class="section-body dark">Find the nearest Jayco dealer and start your journey.</p>
       <div class="dealer-search">
-        <input
-          id="dealer-search-input"
-          class="dealer-search-input"
-          type="text"
-          placeholder="City, state, or ZIP code"
-          autocomplete="off"
-        />
-        <button id="dealer-search-btn" class="dealer-search-btn">
+        <div class="dealer-search-field">
+          <input
+            id="dealer-search-input"
+            class="dealer-search-input"
+            type="text"
+            placeholder="City, state, or ZIP code"
+            autocomplete="off"
+          />
+        </div>
+        <button id="dealer-search-btn" class="dealer-search-btn" aria-label="Search">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2"
                stroke-linecap="round" stroke-linejoin="round">
@@ -234,67 +213,64 @@
     </div>
   </section>
 
-  <!-- ===== CRAFTED FOR SECTION ===== -->
-  <section class="crafted-section" id="crafted">
-    <div class="crafted-panel" id="crafted-panel-1"
-         style="background-image:url('../assets/jayco-homepage-road.jpg');"></div>
-    <div class="crafted-panel" id="crafted-panel-2"
-         style="background-image:url('../assets/jayco-homepage-comfort.jpg');"></div>
-    <div class="crafted-panel" id="crafted-panel-3"
-         style="background-image:url('../assets/jayco-homepage-exploration.jpg');"></div>
-    <div class="crafted-panel" id="crafted-panel-4"
-         style="background-image:url('../assets/jayco-homepage-you.jpg');"></div>
-    <div class="crafted-overlay"></div>
-    <div class="crafted-text">
-      <span class="crafted-static">Crafted for</span>
-      <div class="crafted-words">
-        <span class="crafted-word" id="word-road">The Road.</span>
-        <span class="crafted-word" id="word-comfort">Comfort.</span>
-        <span class="crafted-word" id="word-you">You.</span>
-        <span class="crafted-word" id="word-exploration">Exploration.</span>
+  <!-- ===== BUILT FOR — LINE-DRAW JOURNEY ===== -->
+  <section class="build-journey" id="build-journey">
+    <img class="bj-topo" src="../assets/topography-map.svg" alt="" aria-hidden="true" />
+    <svg class="bj-line-svg" aria-hidden="true">
+      <path class="bj-line-base"/>
+      <path class="bj-line-trail"/>
+    </svg>
+    <span class="bj-dot" aria-hidden="true"></span>
+
+    <div class="bj-beat" data-side="left">
+      <figure class="bj-img"><img src="../assets/jayco-homepage-road.jpg" alt="" /></figure>
+      <div class="bj-copy">
+        <h2 class="bj-title">Built for the long haul.</h2>
+        <p class="bj-body">Rugged, road-ready construction made for distance — from spur-of-the-moment weekend escapes to cross-country adventures.</p>
       </div>
-      <div class="crafted-stats" id="crafted-stats">
+    </div>
 
-        <span class="crafted-stat">
-          <svg class="crafted-stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" fill="none">
-            <path fill="currentColor"
-              d="M100.8,49c3.3-3.3,3.3-8.8,0-12.1-3.1-3.1-7.9-3.3-11.3-.7-1-1.9-3-3.2-5.3-3.2h-24.1c-2.4,0-4.4,1.4-5.4,3.4-1.5-1.3-3.4-2-5.4-2s-4.4.9-6,2.5-2.5,3.8-2.5,6,.9,4.4,2.5,6l10.9,10.9c.3.3.4.6.4,1s-.1.7-.4,1c-.5.5-1.4.5-1.9,0l-2.8,2.8c1,1,2.4,1.6,3.8,1.6s2.8-.6,3.8-1.6,1.6-2.4,1.6-3.8,0-.7,0-1c2,3.9,4.6,7.6,7.8,10.8s3.9,5.8,3.9,9.3v.7h0c0,3.8-1.3,7.3-3.7,9.7l-3.6,3.5h-5.8c-1.1,0-2,.9-2,2v11.2h-4v4h41.7v-4h-4v-11.2c0-1.1-.9-2-2-2h-5.6l-3.4-3.5c-2.3-2.4-3.7-6-3.7-9.7h0v-.7c0-3.5,1.4-6.8,3.9-9.3s5.5-6.5,7.5-10.2c0,1.5.4,3,1.5,4.2,1,1,2.4,1.6,3.8,1.6s2.8-.6,3.8-1.6l-2.8-2.8c-.5.5-1.4.5-1.9,0s-.5-1.4,0-1.9l10.8-10.9ZM57,57.1l-10.9-10.9c-.9-.9-1.3-2-1.3-3.2s.5-2.4,1.3-3.2,2-1.3,3.2-1.3,2.4.5,3.2,1.3l1.6,1.6c0,5.7,1.1,11.2,3.3,16.3-.1-.3-.3-.4-.4-.6ZM84.8,107h-25.6v-9.2h25.6s0,9.2,0,9.2ZM75,93.1l.7.7h-7.1l.7-.7c1.1-1.2,2.1-2.5,2.8-4,.8,1.5,1.7,2.8,2.9,4ZM75.2,67.8c-1.2,1.2-2.3,2.6-3.1,4.1-.8-1.5-1.8-2.9-3.1-4.1-7.1-7.1-11-16.5-11-26.5v-2.3c0-1.1.9-2,2-2h24.1c1.1,0,2,.9,2,2v2.4c0,9.9-3.8,19.4-10.9,26.4ZM87.1,57c2-4.9,3-10.2,3-15.7v-.2l1.4-1.4c1.8-1.8,4.7-1.8,6.4,0,1.7,1.8,1.8,4.7,0,6.4l-10.8,10.9Z"/>
-          </svg>
-          <span class="crafted-stat-title">Award-Winning Lineup</span>
-          <span class="crafted-stat-desc">Explore a celebrated lineup of RVs recognized for quality, innovation and thoughtful design.</span>
-        </span>
+    <div class="bj-beat" data-side="right">
+      <figure class="bj-img"><img src="../assets/jayco-homepage-comfort.jpg" alt="" /></figure>
+      <div class="bj-copy">
+        <h2 class="bj-title">Built for comfort.</h2>
+        <p class="bj-body">Thoughtful interiors, residential touches, and room to spread out — so every mile on the road feels like home.</p>
+      </div>
+    </div>
 
-        <span class="crafted-stat">
-          <svg class="crafted-stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" fill="none">
-            <path fill="currentColor"
-              d="M72.5,114.9h.6c0,0,.6,0,.6,0,.4,0,10.2-2.7,19.9-13.1,8.9-9.3,19.5-27.2,19.5-59.2v-2.5h-2.5c-12.6,0-25.1-3.3-36.1-9.6l-1.4-.8-1.4.8c-11,6.3-23.5,9.6-36.1,9.6h-5v2.5c0,32,11.3,50,20.7,59.4,10.4,10.3,20.8,12.9,21.2,13ZM73.1,35.4c10.7,5.9,22.7,9.2,35,9.6-.4,22.7-6.6,41.1-17.8,53.2-7.5,8-15,11-17.2,11.7-4.9-1.5-36.5-13.4-37.5-64.9,13.1,0,26-3.3,37.5-9.6Z"/>
-          </svg>
-          <span class="crafted-stat-title">Industry-Leading Warranty</span>
-          <span class="crafted-stat-desc">Travel with confidence knowing your Jayco is backed by one of the industry's strongest warranties.</span>
-        </span>
+    <div class="bj-beat" data-side="left">
+      <figure class="bj-img"><img src="../assets/jayco-hero-slider-craftsmanship.jpg" alt="" /></figure>
+      <div class="bj-copy">
+        <h2 class="bj-title">Built with unique craftsmanship.</h2>
+        <p class="bj-body">Every Jayco is assembled with meticulous attention to detail and materials chosen to stand up to the journey.</p>
+      </div>
+    </div>
 
-        <span class="crafted-stat">
-          <svg class="crafted-stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" fill="none">
-            <path fill="currentColor"
-              d="M100.9,38.7h-6.7v-6.7h-4.4v6.7h-35.5v-6.7h-4.4v6.7h-6.7c-6.1,0-11.1,5-11.1,11.1v51.1c0,6.1,5,11.1,11.1,11.1h57.7c6.1,0,11.1-5,11.1-11.1v-51.1c0-6.1-5-11.1-11.1-11.1ZM107.5,100.9c0,3.7-3,6.7-6.7,6.7h-57.7c-3.7,0-6.7-3-6.7-6.7v-40h71.1v40ZM107.5,56.5H36.5v-6.7c0-3.7,3-6.7,6.7-6.7h6.7v4.4h4.4v-4.4h35.5v4.4h4.4v-4.4h6.7c3.7,0,6.7,3,6.7,6.7v6.7Z"/>
-          </svg>
-          <span class="crafted-stat-title">55+ Years of History</span>
-          <span class="crafted-stat-desc">For more than 55 years, Jayco has helped generations of families make lasting memories on the road.</span>
-        </span>
+    <div class="bj-beat" data-side="right">
+      <figure class="bj-img"><img src="../assets/jayco-homepage-you.jpg" alt="" /></figure>
+      <div class="bj-copy">
+        <h2 class="bj-title">Built with you in mind.</h2>
+        <p class="bj-body">Designed around how real people travel, with smart layouts and features that make life on the road effortless.</p>
+      </div>
+    </div>
 
-        <span class="crafted-stat">
-          <svg class="crafted-stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" fill="none">
-            <path fill="currentColor"
-              d="M70,103.5c.4.7,1.2,1.1,2,1.1s.8,0,1.1-.3c.3-.2.6-.5.8-.8,1.8-3.1,4.3-6.6,7-10.3,7.5-10.3,16.9-23.2,16.9-38s-2.7-13.4-7.6-18.3c-4.9-4.9-11.4-7.6-18.3-7.6-6.9,0-13.4,2.7-18.3,7.6h0c-4.9,4.9-7.6,11.4-7.6,18.3,0,14.8,9.4,27.6,16.9,38,2.7,3.7,5.2,7.2,7,10.2ZM72,34c5.7,0,11,2.2,15,6.3,4,4,6.2,9.4,6.2,15.1,0,13.3-8.5,25-16,35.3v.2c-2,2.5-3.7,5-5.3,7.3-1.5-2.3-3.3-4.8-5.1-7.3v-.2c-7.6-10.3-16.1-22-16.1-35.3s2.2-11,6.2-15.1c4-4,9.4-6.2,15-6.3Z"/>
-            <path fill="currentColor"
-              d="M94.9,97.4c-1.1-1.3-2.8-2.6-4.8-3.6-.5-.3-1.2-.3-1.7-.1-.6.2-1,.6-1.3,1.1-.3.5-.3,1.2-.1,1.7.2.6.6,1,1.1,1.3h0c1.4.8,2.6,1.6,3.3,2.5h0c.5.7.8,1.4.8,2,0,1.7-1.9,3.5-5.2,4.9-4,1.7-9.3,2.7-15,2.7s-11.1-1-15-2.7c-3.3-1.5-5.2-3.3-5.2-4.9s.7-2,2-3c1.6-1.3,4-2.4,7-3.2,1.2-.3,1.9-1.6,1.6-2.8-.3-1.2-1.6-1.9-2.8-1.6-3.5,1-6.5,2.4-8.6,4-2.4,1.9-3.7,4.2-3.7,6.6,0,3.6,2.8,6.8,8,9.1,4.5,2,10.5,3.1,16.9,3.1s12.3-1.1,16.9-3.1c5.1-2.3,8-5.5,8-9.1s-.6-3.3-1.9-4.8h-.1Z"/>
-            <path fill="currentColor"
-              d="M72,68.7c3.6,0,7-1.4,9.5-3.9,2.5-2.5,3.9-5.9,3.9-9.5s-1.4-7-3.9-9.5c-2.5-2.5-5.9-3.9-9.5-3.9h-.4s0,0,0,0c-3.4.1-6.5,1.5-9,3.8h-.1c-2.5,2.6-3.9,6-3.9,9.6s1.4,7,3.9,9.5c2.5,2.5,5.9,3.9,9.5,3.9ZM63.1,55.3c0-2.4.9-4.6,2.6-6.3h0c1.7-1.7,3.9-2.6,6.2-2.6s4.4.8,6.1,2.4l.2.2c1.7,1.7,2.6,3.9,2.6,6.3s-.9,4.6-2.6,6.3c-1.7,1.7-3.9,2.6-6.3,2.6s-4.6-.9-6.3-2.6c-1.7-1.7-2.6-3.9-2.6-6.3Z"/>
-          </svg>
-          <span class="crafted-stat-title">200+ Dealers</span>
-          <span class="crafted-stat-desc">With more than 200 dealers across North America, trusted Jayco support is never far away.</span>
-        </span>
-
+    <div class="hero-diff bj-diff">
+      <div class="hero-diff-icon">
+        <img src="../assets/warranty_2+3-white.svg" alt="" class="hero-diff-icon-img" />
+      </div>
+      <div class="hero-diff-stats">
+        <div class="hero-diff-stat hero-diff-stat--top">
+          <h3 class="hero-diff-title">Award-Winning Lineup</h3>
+          <p class="hero-diff-body">Explore a celebrated lineup of RVs recognized for quality, innovation and thoughtful design.</p>
+        </div>
+        <div class="hero-diff-stat hero-diff-stat--bl">
+          <h3 class="hero-diff-title">55+ Years of History</h3>
+          <p class="hero-diff-body">For more than 55 years, Jayco has helped generations of families make lasting memories on the road.</p>
+        </div>
+        <div class="hero-diff-stat hero-diff-stat--br">
+          <h3 class="hero-diff-title">200+ Dealers</h3>
+          <p class="hero-diff-body">With more than 200 dealers across North America, trusted Jayco support is never far away.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -309,211 +285,86 @@
       <div class="models-viewport">
         <div class="models-track" id="models-track">
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-northpoint.jpg" alt="North Point" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>North Point</h3>
-                <p>Luxury That Leads the Way.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover North Point</span>
-                <span class="model-card-build">
-                  <img src="../assets/northpoint-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-north-point.png" alt="North Point" /></div>
+            <h3 class="fav-name">North Point</h3>
+            <p class="fav-tagline">Luxury That Leads the Way.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover North Point</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/northpoint-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-alante.jpg" alt="Alante" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>Alante</h3>
-                <p>Big Adventures Start Here.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover Alante</span>
-                <span class="model-card-build">
-                  <img src="../assets/alante-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-greyhawk.png" alt="Greyhawk" /></div>
+            <h3 class="fav-name">Greyhawk</h3>
+            <p class="fav-tagline">Go Further. Live Greater.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover Greyhawk</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/greyhawk-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-pinnacle.jpg" alt="Pinnacle" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>Pinnacle</h3>
-                <p>The Height of Life on the Road.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover Pinnacle</span>
-                <span class="model-card-build">
-                  <img src="../assets/pinnacle-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-swift.png" alt="Swift" /></div>
+            <h3 class="fav-name">Swift</h3>
+            <p class="fav-tagline">Adventure Moves Fast.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover Swift</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/swift-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-greyhawk.jpg" alt="Greyhawk" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>Greyhawk</h3>
-                <p>Go Further. Live Greater.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover Greyhawk</span>
-                <span class="model-card-build">
-                  <img src="../assets/greyhawk-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-jay-feather.png" alt="Jay Feather" /></div>
+            <h3 class="fav-name">Jay Feather</h3>
+            <p class="fav-tagline">Travel Light. Live Fully.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover Jay Feather</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/jay-feather-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-jay-feather.jpg" alt="Jay Feather" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>Jay Feather</h3>
-                <p>Travel Light. Live Fully.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover Jay Feather</span>
-                <span class="model-card-build">
-                  <img src="../assets/jay-feather-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-alante.png" alt="Alante" /></div>
+            <h3 class="fav-name">Alante</h3>
+            <p class="fav-tagline">Big Adventures Start Here.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover Alante</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/alante-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
-          <a href="#" class="model-card">
-            <img src="../assets/popular%20model-swift.jpg" alt="Swift" />
-            <div class="model-card-overlay">
-              <div class="card-top">
-                <h3>Swift</h3>
-                <p>Adventure Moves Fast.</p>
-              </div>
-              <div class="model-card-bottom">
-                <span class="model-card-discover">Discover Swift</span>
-                <span class="model-card-build">
-                  <img src="../assets/swift-model.png" alt="" class="model-build-img" />
-                  <span>Build Yours</span>
-                </span>
-              </div>
+          <div class="fav-card">
+            <div class="fav-img"><img src="../assets/jayco-favorite-pinnacle.png" alt="Pinnacle" /></div>
+            <h3 class="fav-name">Pinnacle</h3>
+            <p class="fav-tagline">The Height of Life on the Road.</p>
+            <div class="fav-btns">
+              <a href="#" class="btn-primary fav-discover">Discover Pinnacle</a>
+              <a href="#" class="fav-build">
+                <img class="fav-build-img" src="../assets/pinnacle-model.png" alt="" />
+                <span>Build Yours</span>
+              </a>
             </div>
-            <button class="model-review-btn" aria-label="Read reviews">
-              <img src="../assets/icon-reviews.svg" class="model-review-icon" alt="" />
-            </button>
-            <div class="model-review-modal" aria-hidden="true">
-              <button class="model-review-close" aria-label="Close">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <div class="model-review-content">
-                <img class="model-review-model-img" src="" alt="" />
-                <h4 class="model-review-headline"></h4>
-                <p class="model-review-text"></p>
-                <span class="model-review-byline"></span>
-                <button class="model-review-next">Read Another</button>
-              </div>
-            </div>
-          </a>
+          </div>
 
         </div><!-- /models-track -->
+
       </div><!-- /models-viewport -->
 
       <button class="models-arrow models-prev" id="models-prev" aria-label="Previous">
@@ -531,12 +382,14 @@
     </div><!-- /models-carousel -->
   </section>
 
-  <!-- ===== NEWS CTA SECTION ===== -->
-  <section class="news-cta parallax-section" id="news-cta">
-    <div class="parallax-bg" style="background-image: url('../assets/jayco-homepage-news.jpg');"></div>
+  <!-- ===== NEWS BANNER ===== -->
+  <section class="news-cta" id="news-cta">
+    <div class="news-cta-media">
+      <img class="news-cta-img" src="../assets/jayco-blog-background.jpg" alt="" />
+    </div>
     <div class="news-cta-overlay"></div>
-    <div class="news-cta-content" data-animation="slide-left" data-persist="true">
-      <span class="section-label light">News / Updates / Tips</span>
+    <div class="news-cta-content" data-animation="fade-up" data-persist="true">
+      <span class="section-label light centered">News / Updates / Tips</span>
       <h2 class="section-heading light">Stories from<br>the road.</h2>
       <p class="section-body light">New models, industry awards, product launches, and the latest from Jayco HQ — stay up to date with everything happening at America's most trusted RV brand.</p>
       <a href="#" class="btn-primary">Visit Newsroom</a>
@@ -548,36 +401,66 @@
     <div class="news-cards-grid">
 
       <a href="#" class="news-card">
-        <video class="news-card-video" src="../assets/jayco-news-model.mp4" muted loop playsinline preload="metadata"></video>
-        <div class="news-card-overlay"></div>
-        <span class="news-card-tag">Buyers Guide</span>
+        <div class="news-card-media">
+          <video class="news-card-video" src="../assets/jayco-news-model.mp4" muted loop playsinline preload="metadata"></video>
+        </div>
+        <span class="news-card-tag">Buying Guide</span>
         <h3 class="news-card-headline">A Shopping Guide for New RVers</h3>
       </a>
 
       <a href="#" class="news-card">
-        <video class="news-card-video" src="../assets/jayco-news-family.mp4" muted loop playsinline preload="metadata"></video>
-        <div class="news-card-overlay"></div>
+        <div class="news-card-media">
+          <video class="news-card-video" src="../assets/jayco-news-family.mp4" muted loop playsinline preload="metadata"></video>
+        </div>
         <span class="news-card-tag">Family Travel</span>
         <h3 class="news-card-headline">Why We RV With Kids</h3>
       </a>
 
       <a href="#" class="news-card">
-        <video class="news-card-video" src="../assets/jayco-news-hookups.mp4" muted loop playsinline preload="metadata"></video>
-        <div class="news-card-overlay"></div>
-        <span class="news-card-tag">Travel Tips</span>
+        <div class="news-card-media">
+          <video class="news-card-video" src="../assets/jayco-news-hookups.mp4" muted loop playsinline preload="metadata"></video>
+        </div>
+        <span class="news-card-tag">How-To</span>
         <h3 class="news-card-headline">Everything You Need to Know About RV Hookups</h3>
       </a>
 
     </div>
   </section>
 
-  <!-- ===== FINAL CTA ===== -->
-  <section class="final-cta" id="final-cta">
-    <video class="final-cta-video" src="../assets/jayco-evening-scrub.mp4" muted playsinline preload="auto"></video>
-    <div class="final-cta-bg"></div>
-    <div class="final-cta-content">
-      <span class="section-label light centered">Ready When You Are</span>
-      <h2 class="cta-heading">Your Next Adventure<br>Starts Here.</h2>
+  <!-- ===== NEWSLETTER SIGNUP ===== -->
+  <section class="newsletter" id="newsletter">
+    <div class="newsletter-box">
+      <h2 class="newsletter-title">Subscribe to<br>Jayco's Newsletter</h2>
+      <p class="newsletter-sub">Subscribe for the latest news, updates and adventures.</p>
+      <form class="nl-form" novalidate>
+        <div class="nl-field">
+          <input type="text" id="nl-fname" placeholder=" " autocomplete="given-name" />
+          <label for="nl-fname">First Name<span class="nl-req">*</span></label>
+        </div>
+        <div class="nl-field">
+          <input type="email" id="nl-email" placeholder=" " autocomplete="email" />
+          <label for="nl-email">Email address<span class="nl-req">*</span></label>
+        </div>
+        <div class="nl-field">
+          <input type="text" id="nl-zip" placeholder=" " autocomplete="postal-code" inputmode="numeric" />
+          <label for="nl-zip">Zip code<span class="nl-req">*</span></label>
+        </div>
+        <button type="submit" class="nl-submit">Subscribe</button>
+      </form>
+      <p class="nl-note">We ask for your name and ZIP code to personalize content and share relevant updates, events, and offers in your area.</p>
+    </div>
+  </section>
+
+  <!-- ===== NEXT ADVENTURE — layered parallax ===== -->
+  <section class="adventure" id="final-cta">
+    <img class="adv-layer adv-l1" src="../assets/jayco-landscape-parallax-layer-1.png" alt="" aria-hidden="true" />
+    <h2 class="adv-line adv-line-1">Your Next</h2>
+    <img class="adv-layer adv-l2" src="../assets/jayco-landscape-parallax-layer-2.png" alt="" aria-hidden="true" />
+    <h2 class="adv-line adv-line-2">Adventure</h2>
+    <img class="adv-layer adv-l3" src="../assets/jayco-landscape-parallax-layer-3.png" alt="" aria-hidden="true" />
+    <h2 class="adv-line adv-line-3">Starts Here.</h2>
+    <img class="adv-layer adv-l4" src="../assets/jayco-landscape-parallax-layer-4.png?v=2" alt="" aria-hidden="true" />
+    <div class="adv-cta">
       <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by industry-leading support — before, during, and long after the sale.</p>
       <div class="cta-buttons">
         <a href="#" class="btn-primary">Build &amp; Price</a>
@@ -798,6 +681,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=v3-build-74"></script>
 </body>
 </html>
