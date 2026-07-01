@@ -879,7 +879,12 @@
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setOpen(!card.classList.contains('is-specs'));
+        const open = !card.classList.contains('is-specs');
+        setOpen(open);
+        // panel open → icon is now an X (close), so drop the "View Model Specs" cursor;
+        // panel closed → still hovering the icon, so bring it back
+        const cursor = document.querySelector('.cursor');
+        if (cursor) cursor.classList.toggle('specs', !open);
       });
       // Clicks inside the open panel shouldn't bubble to the card link (the Learn More link still works).
       panel.addEventListener('click', (e) => e.stopPropagation());
@@ -892,7 +897,11 @@
     if (!cursor) return;
 
     document.querySelectorAll('.model-specs-btn').forEach((btn) => {
-      btn.addEventListener('mouseenter', () => cursor.classList.add('specs'));
+      const card = btn.closest('.model-card');
+      btn.addEventListener('mouseenter', () => {
+        if (card && card.classList.contains('is-specs')) return;   // panel already open → no "View Model Specs"
+        cursor.classList.add('specs');
+      });
       btn.addEventListener('mouseleave', () => cursor.classList.remove('specs'));
     });
   }

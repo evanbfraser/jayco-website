@@ -2215,6 +2215,22 @@ ul { list-style: none; }
   display: block;
 }
 
+/* when the specs panel is open, the icon becomes an X to close it */
+.model-card.is-specs .model-specs-icon { display: none; }
+.model-card.is-specs .model-specs-btn::before,
+.model-card.is-specs .model-specs-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+.model-card.is-specs .model-specs-btn::before { transform: translate(-50%, -50%) rotate(45deg); }
+.model-card.is-specs .model-specs-btn::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
 /* The whole card turns blue and shows the spec list — opened by CLICKING the specs icon.
    z-index below the icon (15) keeps the icon clickable to close. */
 .model-specs-panel {
