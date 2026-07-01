@@ -2209,8 +2209,8 @@ ul { list-style: none; }
   transform: scale(1.1);
 }
 .model-specs-icon {
-  width: 27px;
-  height: 27px;
+  width: auto;      /* keep the icon's aspect (v2 icon is portrait) */
+  height: 18.9px;   /* 30% smaller than the original 27px */
   filter: brightness(0) invert(1);
   display: block;
 }
@@ -2223,7 +2223,7 @@ ul { list-style: none; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 20px;
+  width: 14px;     /* 30% smaller X (was 20px) */
   height: 2px;
   background: #fff;
   border-radius: 2px;
