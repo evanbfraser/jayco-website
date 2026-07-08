@@ -318,7 +318,6 @@
           start: 'top top',
           end: '+=150%',
           pin: true,
-          anticipatePin: 1,
           scrub: true,
         },
       });
