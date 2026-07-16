@@ -240,6 +240,11 @@
         pinSpacing: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        // Pinned sections must refresh in DOM order, otherwise a later pin measures its
+        // start before an earlier pin's spacer exists. #builtfor is created late (it waits
+        // on a 24MB video), so creation order can't be relied on — set the order here.
+        // Highest refreshes first: #categories > #builtfor > #news-cta.
+        refreshPriority: 3,
         onUpdate(self) { setGroup(self.progress < 0.5 ? 0 : 1); },
       });
 
@@ -319,6 +324,7 @@
           end: '+=150%',
           pin: true,
           scrub: true,
+          refreshPriority: 1,   // DOM-order pin refresh — see #categories
         },
       });
       // Brief hold on the bg, then reveal text, then the three cards one at a time.
@@ -651,6 +657,7 @@
           pin:           true,
           anticipatePin: 1,
           scrub:         true,
+          refreshPriority: 2,   // DOM-order pin refresh — see #categories
           onUpdate(self) {
             const p = self.progress;
             // scrub the footage exterior → interior
