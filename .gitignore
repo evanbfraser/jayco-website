@@ -7,3 +7,4 @@ Jayco website.pdf
 # Stray skill folders (not part of the website)
 claude:skills:frontend-design:/
 claude:skills:video-to-website:/
+assets/models/*.psd

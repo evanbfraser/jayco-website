@@ -1,0 +1,10 @@
+# Publish the repo root so version-4's ../assets/* references resolve.
+# The site entry point is /version-4/; redirect the root there.
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/version-4/"
+  status = 302
+  force = true
