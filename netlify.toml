@@ -1,10 +1,11 @@
-# Publish the repo root so version-4's ../assets/* references resolve.
-# The site entry point is /version-4/; redirect the root there.
+# Publish the repo root so each version's ../assets/* references resolve.
+# The site entry point is /version-5/; redirect the root there. Earlier
+# iterations stay reachable at their own paths (/version-4/, /version-1/).
 [build]
   publish = "."
 
 [[redirects]]
   from = "/"
-  to = "/version-4/"
+  to = "/version-5/"
   status = 302
   force = true
