@@ -716,6 +716,10 @@ ul { list-style: none; }
   flex-shrink: 0;
   display: block;
 }
+/* A flex child will not shrink past its longest word unless told to. Without
+   this, "Destination Trailers" holds the chip open and the label runs out the
+   side rather than wrapping onto a second line. */
+.cs-vehicle-btn span { min-width: 0; }
 
 /* RIGHT — the looping model-change video.
    Deliberately unlike v2's 72vh image carousel: the source is a 1440² file with the
@@ -750,6 +754,15 @@ ul { list-style: none; }
   .cs-group-detail-inner { overflow: visible; }
   .cs-buttons { max-width: none; }
   .cs-media { order: -1; width: 100%; flex: none; transform: none; margin-bottom: 2.5rem; }
+}
+
+/* Below this the two-column chip row cannot hold its longest label. The number
+   is derived, not guessed: a chip spends ~111px on padding, the 66px model
+   image and the gap, and "Destination Trailers" needs ~145px of text. Two
+   columns plus the grid gap inside a 6vw-padded page therefore stop working
+   around 640px, so the chips go full width and each label gets a whole line. */
+@media (max-width: 640px) {
+  .cs-buttons { grid-template-columns: 1fr; }
 }
 
 /* ---------- Feature Section ---------- */
