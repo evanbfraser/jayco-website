@@ -771,6 +771,25 @@ ul { list-style: none; }
     grid-template-columns: minmax(0, max-content);
     justify-content: center;
   }
+
+  /* Motorized names are short — Class A/B/C, Super C — so two columns fit here
+     where "Destination Trailers" cannot. width:max-content on the grid with
+     1fr columns is what keeps the pair equal AND content-sized: the container
+     hugs its widest chip, then the two columns split that evenly, and
+     margin-inline centres the block. The tighter gap and side padding buy back
+     the ~20px two chips need to clear a 375px phone without the label wrapping. */
+  .cs-group[data-group="driveable"] .cs-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+    gap: 0.6rem;
+  }
+  .cs-group[data-group="driveable"] .cs-vehicle-btn {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    gap: 0.55rem;
+  }
 }
 
 /* ---------- Feature Section ---------- */
