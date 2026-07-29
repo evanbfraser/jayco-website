@@ -758,11 +758,19 @@ ul { list-style: none; }
 
 /* Below this the two-column chip row cannot hold its longest label. The number
    is derived, not guessed: a chip spends ~111px on padding, the 66px model
-   image and the gap, and "Destination Trailers" needs ~145px of text. Two
-   columns plus the grid gap inside a 6vw-padded page therefore stop working
-   around 640px, so the chips go full width and each label gets a whole line. */
+   image and the gap, and "Destination Trailers" needs ~145px of text, so two
+   columns plus the grid gap stop fitting inside a 6vw-padded page around 640px.
+
+   One column, sized to max-content: the column takes the width of the widest
+   chip — "Destination Trailers", ~256px — and every other chip stretches to
+   match, so the row is a set of equal buttons no wider than their longest
+   label needs. minmax(0, …) rather than a bare max-content so a very narrow
+   phone wraps the label instead of pushing the chip off the page. */
 @media (max-width: 640px) {
-  .cs-buttons { grid-template-columns: 1fr; }
+  .cs-buttons {
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+  }
 }
 
 /* ---------- Feature Section ---------- */
