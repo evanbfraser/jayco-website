@@ -8,3 +8,14 @@ Jayco website.pdf
 claude:skills:frontend-design:/
 claude:skills:video-to-website:/
 assets/models/*.psd
+
+# Print-res model photography (8K+ stills, 70 MB+ video) stays local.
+# Only the web derivatives under each model's web/ folder are committed —
+# they sit one level deeper, so these patterns leave them alone.
+assets/model details/*/*.jpg
+assets/model details/*/*.png
+assets/model details/*/*.mp4
+assets/model details/*/*.mov
+
+# Local Netlify folder
+.netlify
