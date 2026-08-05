@@ -403,7 +403,7 @@ window.JAYCO_QUIZ = (function () {
       id: 'mq',
       when: (a) => a.family === 'motorized',
       photo: PH + 'q-mq.webp',
-      alt: 'The driver’s seat of a motorhome, looking out over the desert through the windshield',
+      alt: 'A camper van parked beside a river, two people sitting on the rocks by it',
       question: 'How big a vehicle do you want to drive?',
       why: 'You will be driving this every mile of the trip, not just living in it.',
       options: [
@@ -426,7 +426,7 @@ window.JAYCO_QUIZ = (function () {
          it, so this shows the Super C — the heavy chassis this question exists
          to sort out. */
       photo: PH + 'q-mq2.webp',
-      alt: 'A Super C motorhome on a desert track, built on a heavy-duty truck chassis',
+      alt: 'A Class A motorhome parked on red rock in open desert',
       question: 'Will you tow anything behind it?',
       why: 'Towing capacity is the difference between two coaches that look alike.',
       options: [
@@ -455,7 +455,7 @@ window.JAYCO_QUIZ = (function () {
          the count from 7 to 6. */
       when: (a) => a.family === 'towable' && !a._helped,
       photo: PH + 'q-tq1.webp',
-      alt: 'A fifth wheel and the pickup that brought it, parked in an open field',
+      alt: 'A pickup towing a Jayco fifth wheel along a country highway',
       question: 'What will you tow it with?',
       why: 'This is a hard limit, so it is the one answer we will not bend later.',
       options: [
@@ -487,8 +487,8 @@ window.JAYCO_QUIZ = (function () {
       /* This screen only ever runs on the towable side — `when` above says so —
          so it takes the towable photograph directly rather than through
          `photos` below. */
-      photo: PH + 'q-tq2-tow.webp',
-      alt: 'The bedroom of a fifth wheel, with a window seat looking out over open country',
+      photo: PH + 'q-tq2.webp',
+      alt: 'A fifth wheel toy hauler with its ramp door down, parked on a bluff',
       question: 'Bringing anything with a motor?',
       why: 'A toy hauler is a different shape of trailer, not an add-on.',
       options: [
@@ -508,6 +508,12 @@ window.JAYCO_QUIZ = (function () {
       id: 's1',
       photo: PH + 'q-s1.webp',
       alt: 'A family sitting on the step of a Class C motorhome at a forest site',
+      photos: {
+        towable:   { src: PH + 'q-s1-tow.webp',
+                     alt: 'The bedroom of a fifth wheel, with a window seat looking out over open country' },
+        motorized: { src: PH + 'q-s1-drive.webp',
+                     alt: 'A child on the overhead bunk of a motorhome, passing photographs down' },
+      },
       question: 'How many people sleep on board?',
       why: 'Counted in real beds, from Jayco’s published floorplans.',
       options: [
@@ -524,6 +530,12 @@ window.JAYCO_QUIZ = (function () {
       id: 's2',
       photo: PH + 'q-s2.webp',
       alt: 'A fifth wheel on mown grass at a campground, chairs set out beside it',
+      photos: {
+        towable:   { src: PH + 'q-s2-tow.webp',
+                     alt: 'A Seismic toy hauler parked in open desert with its awning out' },
+        motorized: { src: PH + 'q-s2-drive.webp',
+                     alt: 'A Class C motorhome camped below a canyon wall at dusk' },
+      },
       question: 'Where do you see yourself parked?',
       why: 'Off-grid asks more of the tanks, the battery and the roof.',
       options: [
@@ -540,6 +552,12 @@ window.JAYCO_QUIZ = (function () {
       id: 's3',
       photo: PH + 'q-s3.webp',
       alt: 'Looking down on a fifth wheel parked among pines, long evening shadows',
+      photos: {
+        towable:   { src: PH + 'q-s3-tow.webp',
+                     alt: 'A travel trailer at a forest campsite, bikes and chairs set out' },
+        motorized: { src: PH + 'q-s3-drive.webp',
+                     alt: 'The back of a motorhome with its awning out, set up on desert ground' },
+      },
       question: 'How long are you out for?',
       why: 'A weekend and a winter want different amounts of tank and storage.',
       options: [
@@ -564,8 +582,8 @@ window.JAYCO_QUIZ = (function () {
       photos: {
         towable:   { src: PH + 'q-s4-tow.webp',
                      alt: 'The living room of a fifth wheel — fireplace, island and a bank of windows' },
-        motorized: { src: PH + 'q-s4.webp',
-                     alt: 'A fifth wheel galley with an island, a fireplace and a pantry' },
+        motorized: { src: PH + 'q-s4-drive.webp',
+                     alt: 'The dinette and entertainment centre inside a motorhome' },
       },
       question: 'Where should we start on price?',
       /* The three option labels are written at runtime from the actual MSRP of
