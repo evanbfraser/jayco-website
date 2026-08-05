@@ -1129,6 +1129,32 @@
   letter-spacing: -0.01em;
   color: var(--blue);
 }
+/* A range is two figures and a connector — near enough double the width of a
+   single price, which at the size above wraps mid-range on any laptop. So it
+   sets below the heading rather than above it, and leans on blue against the
+   heading's near-black to stay the thing the eye lands on. flex, so if the
+   column ever does get narrow the break happens at the dash and never inside a
+   price: "$37," on one line and "493" on the next is not a number. */
+.md-price-msrp-value--range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.32em;
+  /* Sized so the pair clears the column with room to spare, not so it merely
+     fits: at 3.4vw it filled all 456px of the 1440 column exactly and wrapped
+     by 1280, which is ordinary laptop width. The endpoints are the ramp's Title
+     and Headline steps rather than numbers picked to taste — the fit only
+     needed a ceiling, and documented steps sit inside it. */
+  font-size: clamp(1.6rem, 2.9vw, 2.4rem);
+}
+.md-price-end { white-space: nowrap; }
+/* Lighter and shorter than the figures: it joins them rather than competing,
+   and at 800 weight a dash this wide reads as a minus sign. */
+.md-price-dash {
+  font-weight: 400;
+  color: var(--blue-light);
+}
+
 .md-price-msrp-note {
   display: block;
   margin-top: 1rem;

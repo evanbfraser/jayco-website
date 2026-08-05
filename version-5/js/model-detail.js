@@ -958,10 +958,56 @@
     });
   }
 
-  /* ---------- Pricing ---------- */
+  /* ---------- Pricing ----------
+
+     One figure or two. A model whose floorplans all cost the same (Swift) says
+     one number; a model whose floorplans span sixteen thousand dollars says
+     both ends, because a lone "from" price reads as the price and sets up a
+     surprise at the dealer.
+
+     The range is set in model-data.js rather than derived from the floorplan
+     table on purpose: the copy beside it names the two floorplans by code, and
+     a silently-derived pair would drift out of step with that sentence the
+     first time a plan is added. What runs here instead is the check — the pair
+     is proved against the same table the floorplan list prints from, so the
+     two can never disagree without saying so. */
+  function priceRangeCheck(p) {
+    const priced = (model.floorplans || [])
+      .map((f) => f.price).filter((n) => typeof n === 'number');
+    if (priced.length < 2) return;
+    const low = Math.min.apply(null, priced);
+    const high = Math.max.apply(null, priced);
+    if (p.msrp !== low || (p.msrpHigh != null && p.msrpHigh !== high)) {
+      console.warn('[jayco] pricing range is out of step with the floorplan table. '
+        + 'Shown ' + money(p.msrp) + (p.msrpHigh ? '–' + money(p.msrpHigh) : '')
+        + ', floorplans run ' + money(low) + '–' + money(high) + '. '
+        + 'Fix pricing.msrp / pricing.msrpHigh in model-data.js — and the '
+        + 'floorplan codes named in msrpNote, which will have moved too.');
+    }
+  }
+
+  /* Ranges set smaller than a single figure. Two prices and a dash is more than
+     twice the characters, and at the display size it would wrap mid-range on
+     any laptop; the number is still the largest thing in the card. */
+  function priceFigure(p) {
+    if (p.msrpHigh == null) {
+      return `<span class="md-price-msrp-value">${money(p.msrp)}</span>`;
+    }
+    return `<span class="md-price-msrp-value md-price-msrp-value--range">`
+      + `<span class="md-price-end">${money(p.msrp)}</span>`
+      /* The dash is shape, not speech — an en dash is read out inconsistently
+         and sometimes not at all, which would leave two prices and nothing
+         joining them. Spoken as the word instead. */
+      + `<span class="md-price-dash" aria-hidden="true">–</span>`
+      + `<span class="sr-only"> to </span>`
+      + `<span class="md-price-end">${money(p.msrpHigh)}</span>`
+      + `</span>`;
+  }
+
   function renderPricing() {
     const p = model.pricing;
     if (!p) { drop('#md-pricing'); return; }
+    priceRangeCheck(p);
 
     const mandatory = p.mandatory ? `
       <div class="md-price-card md-price-card--pkg">
@@ -999,7 +1045,7 @@
           <div class="md-section-head md-section-head--left">
             <h2 class="section-heading dark">${esc(p.heading)}</h2>
             <div class="md-price-msrp">
-              <span class="md-price-msrp-value">${money(p.msrp)}</span>
+              ${priceFigure(p)}
               <span class="md-price-msrp-note">${esc(p.msrpNote)}</span>
             </div>
           </div>

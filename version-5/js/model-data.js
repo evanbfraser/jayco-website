@@ -1007,8 +1007,16 @@ window.JAYCO_MODEL_DETAIL = (function () {
     pricing: {
       label: 'Pricing',
       heading: 'What it costs.',
+      /* A range, because sixteen floorplans do not share a price and a single
+         "from" figure quietly implies they do. Both ends are real published
+         MSRPs — the 18RBF floor and the 29QBH ceiling — and both are checked
+         against the floorplan table at render time (see renderPricing), so an
+         edit to build-data.js cannot leave this pair stale and wrong.
+         Fifteen of the sixteen are priced; Jayco has not published 33BH, which
+         is why the floorplan list prints "Pricing to come" against it. */
       msrp: 37493,
-      msrpNote: 'Starting MSRP, 2027 Jay Feather 18RBF. Excludes freight, dealer prep, taxes and title.',
+      msrpHigh: 53243,
+      msrpNote: 'MSRP spans the 2027 floorplans, from the 18RBF up to the 29QBH — where you land depends on the floorplan you choose. Excludes freight, dealer prep, taxes and title.',
       mandatory: {
         name: 'Customer Value Package',
         price: 6000,
