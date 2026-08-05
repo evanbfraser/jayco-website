@@ -781,23 +781,46 @@
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(245,242,238,0.55);
+  /* Full strength, not the 55% tint the other labels on this band carry: it
+     names the control beside it rather than sitting quietly above a heading. */
+  color: var(--text-light);
 }
-.md-fp-chips { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+/* Pills, in the white-tint-on-dark recipe this site uses for every control
+   standing on a dark ground — the same glass as the floorplan selector's
+   trigger directly below, so the two read as one set of controls rather than
+   a row of links above a button. Gap tightens from 1.25rem to 0.6rem: text
+   links needed the air to read as separate, pills carry their own edges. */
+.md-fp-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .md-chip {
-  border: none;
-  background: none;
-  padding: 0.25rem 0;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.10);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   font-family: var(--font-body);
   font-size: 0.85rem;
-  color: rgba(245,242,238,0.7);      /* = .section-body.light */
-  border-bottom: 1px solid transparent;
+  color: rgba(245,242,238,0.85);
   cursor: pointer;
-  transition: color 0.25s, border-color 0.25s;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
 }
-.md-chip:hover { color: var(--text-light); }
-.md-chip.is-on { color: var(--text-light); border-bottom-color: var(--blue-light); }
-.md-chip--clear { color: rgba(245,242,238,0.55); }
+.md-chip:hover { background: rgba(255,255,255,0.2); color: var(--text-light); }
+.md-chip:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+/* Selected fills solid — on glass, a border alone is not a strong enough
+   difference to say "this filter is on" at a glance. */
+.md-chip.is-on {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+/* Clear is not a filter, so it does not wear a filter's shape: no fill, no
+   border, and it only looks like a control on hover. */
+.md-chip--clear {
+  background: none;
+  border-color: transparent;
+  color: rgba(245,242,238,0.6);
+}
+.md-chip--clear:hover { background: rgba(255,255,255,0.12); color: var(--text-light); }
 
 /* ---------- Floorplan selector ----------
    The page's only dropdown, and the first in the project. Built as a listbox
