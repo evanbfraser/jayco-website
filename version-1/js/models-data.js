@@ -204,7 +204,7 @@ window.JAYCO = (function () {
       tagline: 'Adventure Moves Fast.',
       img: '../assets/models/Jayco-swift-class-b.png',
       specs: { Sleeps: 'Up to 2', Length: '20–21 ft', Chassis: 'Ram ProMaster' },
-      floorplans: [ fp('20E', 0, 2, '20′ 11″', 0), fp('20T', 0, 2, '20′ 11″', 0) ],
+      floorplans: [ fp('20A', 0, 2, '20′ 11″', 0), fp('20D', 1100, 2, '20′ 11″', 0), fp('20T', 950, 2, '20′ 11″', 0) ],
     },
     'terrain': {
       name: 'Terrain', category: 'class-b', year: 2027, basePrice: 203625,

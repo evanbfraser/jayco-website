@@ -45,6 +45,8 @@
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
+    // other page scripts (model-detail.js) scroll through the same instance
+    window.__jaycoLenis = lenis;
   }
 
   /* ---------- Header ---------- */
@@ -86,11 +88,16 @@
       const priceFmt = (n) =>
         '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+      // only models with a detail record get a working Explore link
+      const detail = window.JAYCO_MODEL_DETAIL || {};
+      const exploreHref = (id) => (detail[id] ? 'model.html?model=' + id : '#');
+
       // group models by category id, preserving data order
+      // (each row carries its slug so it can link to the model detail page)
       const byCat = {};
       Object.keys(data.models).forEach((id) => {
         const m = data.models[id];
-        (byCat[m.category] = byCat[m.category] || []).push(m);
+        (byCat[m.category] = byCat[m.category] || []).push(Object.assign({ slug: id }, m));
       });
 
       data.categories.forEach((cat) => {
@@ -104,7 +111,7 @@
               <span class="mm-model-name">${m.name}</span>
               <span class="mm-model-price">Starting at ${priceFmt(m.basePrice)}</span>
               <div class="mm-model-ctas">
-                <a href="#" class="mm-model-cta mm-model-discover">Explore</a>
+                <a href="${exploreHref(m.slug)}" class="mm-model-cta mm-model-discover">Explore</a>
                 <a href="#" class="mm-model-cta mm-model-build">Build Yours</a>
               </div>
             </div>
@@ -522,7 +529,7 @@
 
     const cursor = document.createElement('div');
     cursor.className = 'cursor';
-    cursor.innerHTML = '<span class="cursor-label cursor-label--article">Read Article</span><span class="cursor-label cursor-label--specs">View Model<br>Specs</span><span class="cursor-label cursor-label--chat">Let\'s Chat</span>';
+    cursor.innerHTML = '<span class="cursor-label cursor-label--article">Read Article</span><span class="cursor-label cursor-label--specs">View Model<br>Specs</span><span class="cursor-label cursor-label--chat">Let\'s Chat</span><span class="cursor-label cursor-label--tour">View 3D Model</span>';
     document.body.appendChild(cursor);
 
     // xPercent/yPercent centres the circle on the exact pointer position
@@ -542,14 +549,16 @@
       if (!e.relatedTarget) cursor.classList.add('visible');
     });
 
-    // Grow + intensify glow over interactive elements (exclude news cards and specs buttons — they use their own states)
+    // Grow + intensify glow over interactive elements (exclude news cards, specs
+    // buttons and the floorplan 3D tour — they each expand into a labelled state)
+    const OWN_STATE = '.news-card, .model-specs-btn, .hero-chat-btn, .md-plan-360';
     document.addEventListener('mouseover', (e) => {
-      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest('.news-card') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-chat-btn')) {
+      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest(OWN_STATE)) {
         cursor.classList.add('hovering');
       }
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest('.news-card') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-chat-btn')) {
+      if (e.target.closest('a, button, [role="button"], .category-card') && !e.target.closest(OWN_STATE)) {
         cursor.classList.remove('hovering');
       }
     });
@@ -1193,6 +1202,9 @@ initParallax();
     initNewsletter();
     initFooter();
     ScrollTrigger.refresh();
+    // page-specific scripts (model-detail.js) register their own ScrollTriggers
+    // once GSAP + Lenis are live
+    document.dispatchEvent(new CustomEvent('jayco:animations-ready'));
   }
 
   /* ---------- Boot ---------- */

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build &amp; Price — Jayco</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=47" />
+  <link rel="stylesheet" href="css/build.css?v=1" />
+</head>
+<body class="build-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <ul class="nav-actions">
+          <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+          <li><a href="index.html#dealer" class="btn-nav-outline">Find a Dealer</a></li>
+          <li>
+            <button class="nav-search-btn" aria-label="Search">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== BUILDER ===== -->
+  <main class="builder" id="builder">
+
+    <!-- Step tracker -->
+    <nav class="builder-steps" id="builder-steps" aria-label="Build steps">
+      <div class="steps-track">
+        <ol class="builder-steps-list" id="steps-list"><!-- pills injected by build.js --></ol>
+        <div class="steps-rail"><span class="steps-rail-fill" id="steps-rail-fill"></span></div>
+      </div>
+    </nav>
+
+    <!-- Layout: main panel + sticky summary -->
+    <div class="builder-layout">
+      <section class="builder-main" id="builder-main">
+        <div class="step-panel" id="step-panel"><!-- active step injected by build.js --></div>
+
+        <div class="builder-nav">
+          <button class="build-back" id="build-back" type="button" aria-label="Previous step">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <span>Back</span>
+          </button>
+          <button class="build-next btn-nav-filled" id="build-next" type="button">
+            <span>Next</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Sticky summary sidebar -->
+      <aside class="build-summary" id="build-summary" aria-label="Your build">
+        <div class="summary-model">
+          <div class="summary-model-media">
+            <img id="summary-img" src="" alt="" />
+          </div>
+          <div class="summary-model-head">
+            <button class="summary-model-nav" id="model-prev" type="button" aria-label="Previous model">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="summary-model-name">
+              <span class="summary-model-year" id="summary-year">2027</span>
+              <h2 id="summary-name">—</h2>
+              <span class="summary-model-cat" id="summary-cat"></span>
+            </div>
+            <button class="summary-model-nav" id="model-next" type="button" aria-label="Next model">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <ul class="summary-lines" id="summary-lines"><!-- line items injected --></ul>
+
+        <div class="summary-total">
+          <span class="summary-total-label">MSRP as built</span>
+          <span class="summary-total-value" id="summary-total">$0</span>
+        </div>
+        <p class="summary-disclaimer">Estimated MSRP. Excludes tax, title, freight &amp; dealer prep. See your dealer for final pricing.</p>
+
+        <button class="btn-primary summary-cta" id="summary-quote" type="button">Request a Quote</button>
+        <a class="build-summary-dealer" href="index.html#dealer">Find a Dealer</a>
+      </aside>
+    </div>
+
+    <!-- Mobile price bar (shown < 768px) -->
+    <div class="mobile-bar" id="mobile-bar">
+      <div class="mobile-bar-price">
+        <span class="mobile-bar-label">MSRP as built</span>
+        <span class="mobile-bar-value" id="mobile-total">$0</span>
+      </div>
+      <button class="btn-nav-filled mobile-bar-next" id="mobile-next" type="button">Next</button>
+    </div>
+  </main>
+
+  <!-- ===== REQUEST A QUOTE MODAL ===== -->
+  <div class="quote-modal" id="quote-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="quote-title">
+    <div class="quote-backdrop" id="quote-backdrop"></div>
+    <div class="quote-dialog">
+      <button class="quote-close" id="quote-close" type="button" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="quote-body" id="quote-body">
+        <span class="section-label">Request a Quote</span>
+        <h3 class="quote-heading" id="quote-title">Get pricing on your build</h3>
+        <p class="quote-sub" id="quote-sub">A Jayco dealer will reach out with your no-obligation quote.</p>
+        <form class="quote-form" id="quote-form">
+          <div class="quote-field"><label>Full name<input type="text" name="name" required autocomplete="name" /></label></div>
+          <div class="quote-field"><label>Email<input type="email" name="email" required autocomplete="email" /></label></div>
+          <div class="quote-field"><label>ZIP code<input type="text" name="zip" required inputmode="numeric" autocomplete="postal-code" /></label></div>
+          <button class="btn-primary quote-submit" type="submit">Send my request</button>
+        </form>
+      </div>
+      <div class="quote-success" id="quote-success" hidden>
+        <div class="quote-check">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h3 class="quote-heading">Request sent</h3>
+        <p class="quote-sub" id="quote-success-sub">Thanks! A dealer near you will be in touch shortly about your build.</p>
+        <button class="btn-primary" type="button" id="quote-done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="index.html#dealer" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+        <div class="footer-apps">
+          <a href="#" class="footer-app-badge" aria-label="Download on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+          <a href="#" class="footer-app-badge" aria-label="Get it on Google Play">
+            <img src="../assets/google_play_badge-new.svg" alt="Get it on Google Play" class="footer-app-badge-img" />
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html">All RVs</a></li>
+            <li><a href="index.html">Travel Trailers</a></li>
+            <li><a href="index.html">Fifth Wheels</a></li>
+            <li><a href="index.html">Toy Haulers</a></li>
+            <li><a href="index.html">Motorhomes</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="index.html#dealer">Find a Dealer</a></li>
+            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="#">Brochures</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="#">Owner Services</a></li>
+            <li><a href="#">Warranty Coverage</a></li>
+            <li><a href="#">Wingmate App</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">The Jayco Difference</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="js/models-data.js?v=1"></script>
+  <script src="js/build.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,2157 @@
+/* ===================================================
+   Jayco — Model Detail page (motorized template)
+   Editorial layout: full-bleed imagery, a narrow text
+   spine, hairlines instead of cards, blue kept rare.
+   Tokens, buttons, header, footer and the FAQ accordion
+   all come from style.css.
+   =================================================== */
+
+.model-page {
+  --md-pad: var(--page-pad);
+  --md-subnav-h: 60px;
+  --md-header-h: 86px;
+  --md-frame: 1440px;          /* contained content width */
+  /* Inset panels only — carousel cards, the floorplan surface, the cutaway
+     drawing. Photography is NOT sized by this: on this site radius follows
+     bleed, so anything edge-to-edge stays square and unframed. */
+  --md-panel: min(calc(100% - 2 * var(--md-pad)), calc(var(--md-frame) - 2 * var(--md-pad)));
+  /* Hidden headroom above and below every full-bleed photo, so the parallax
+     drift can never expose an edge. The JS derives its travel from this. */
+  --md-drift: 8%;
+  /* THE PAGE'S VERTICAL RHYTHM — three steps, and every gap on the page is
+     one of them. All three cap at ~1440px and shrink with the viewport below
+     that, on vw slopes in the same ratio as the caps, so the relationship
+     between them holds at every width.
+
+       --md-gap-section  150px desktop — between one component and the next.
+                         Replaces --space-xl (13rem / 208px) throughout: the
+                         global step is tuned for the homepage's full-bleed
+                         blocks and left this page's contained sections
+                         reading as unrelated pages rather than one document.
+       --md-gap-head     100px desktop — below a section's headline, before
+                         the content that headline introduces.
+       --md-gap-tight     40px desktop — a full-bleed photo to the component
+                         that belongs to it, close enough to read as one unit.
+                         The one gap that is INSIDE a component, not between
+                         two, which is why it sits far below the other two. */
+  --md-gap-section: clamp(5rem, 10.4vw, 9.375rem);
+  --md-gap-head: clamp(3.5rem, 7vw, 6.25rem);
+  --md-gap-tight: clamp(1.5rem, 2.8vw, 2.5rem);
+  /* The Layout band. The navy is the homepage newsroom block's ground
+     (style.css .news-cta / .news-cards-section). Duplicated here rather than
+     tokenised in style.css: that file is shared with index.html, which carries
+     its own cache-bust token, so editing it from this page would ship the
+     homepage a stylesheet its markup has not asked for. */
+  --md-band-bg: #012638;
+  /* The band's inset: 100px between its contents and its top and bottom edges.
+     Caps from ~1430px up, the same width the other two band tokens cap at, and
+     eases to a 56px floor so a phone does not spend a third of the screen on
+     navy. One knob for both edges — the band is symmetrical. */
+  --md-band-pad: clamp(3.5rem, 7vw, 6.25rem);
+  /* Gap between the two containers in the Layout band. They sit fully apart —
+     an earlier pass had the right one lapping onto the drawing so its blur had
+     art behind it, which is why the panel still carries a backdrop-filter that
+     now has only flat navy to work on (see .md-plan-zones). */
+  --md-split-gap: clamp(1.25rem, 2.5vw, 2.5rem);
+  /* Inset of the features panel. Named because two rules depend on it being
+     the same number: the panel's own padding, and the tab row's inset — which
+     is what puts a tab label on the same axis as the feature names below it. */
+  --md-feat-pad: clamp(1.5rem, 3vw, 2.75rem);
+  background: var(--canvas);   /* same field the homepage sections sit on */
+  color: var(--text-dark);
+}
+
+/* ---------- Full-bleed photography ----------
+   The homepage rule: media that touches the viewport edge is square and
+   unshadowed (.hero-bg video, .news-cta-img, .final-cta-video). The wrapper is
+   a clipped window; the image is oversized inside it by --md-drift so the
+   scroll drift never exposes an edge. These sit directly in <main>, which has
+   no width constraint — width:100%, never 100vw (that overflows by the
+   scrollbar width). */
+.md-intro-media:not(.md-intro-media--render),
+.md-scenery-band {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--surface);   /* holds the slab while a lazy image decodes */
+}
+.md-intro-media:not(.md-intro-media--render) > img,
+.md-scenery-band-img {
+  position: absolute;
+  top: calc(-1 * var(--md-drift));
+  left: 0;
+  width: 100%;
+  /* explicit height, not `inset: -x 0` — for an absolutely positioned replaced
+     element with height:auto the `bottom` offset is ignored and the image
+     collapses to its intrinsic height */
+  height: calc(100% + 2 * var(--md-drift));
+  object-fit: cover;
+}
+
+/* Text spine — every headline and paragraph on the page starts at the same
+   left edge of the frame, and wraps at --measure. One vertical spine, top
+   to bottom, so the full-bleed imagery has something to play against. */
+.model-page .md-measure,
+.model-page .md-intro-text,
+.model-page .md-scenery-band-copy,
+.model-page .md-section-head,
+.model-page .md-cta-lead {
+  width: 100%;
+  max-width: var(--md-frame);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--md-pad);
+  padding-right: var(--md-pad);
+}
+.model-page .md-measure > *,
+.model-page .md-intro-text > *,
+.model-page .md-scenery-band-copy > *,
+.model-page .md-section-head > *,
+.model-page .md-cta-lead > * {
+  max-width: var(--measure);
+}
+/* .faq-header is deliberately NOT on this spine. The FAQ is the homepage's
+   component, centred inside its own panel on its own 680px measure — putting it
+   on this page's 1440px spine is what pulled the heading out of line with the
+   accordion beneath it. */
+
+/* Labels and headings are the homepage's — blue eyebrow, same weight and
+   tracking — only the size scales up a little for this page's wider frame. */
+.model-page .section-heading {
+  line-height: 1.02;
+  font-size: clamp(2.4rem, 4vw, 3.8rem);
+}
+.model-page .section-body {
+  font-size: clamp(1rem, 1.1vw, 1.08rem);
+  line-height: 1.78;
+  max-width: var(--measure);   /* style.css caps this at 480px — the spine is wider */
+}
+
+/* ---------- Hero ---------- */
+.md-hero {
+  position: relative;
+  height: 100vh;
+  min-height: 620px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.md-hero-media {
+  position: absolute;
+  inset: -6% 0;
+  z-index: 0;
+}
+.md-hero-video,
+.md-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.md-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* lighter than a full scrim — the footage should still read */
+  background: linear-gradient(to top,
+    rgba(15,11,9,0.72) 0%,
+    rgba(15,11,9,0.22) 42%,
+    rgba(15,11,9,0.10) 70%,
+    rgba(15,11,9,0.30) 100%);
+}
+/* hero copy sits on the same left spine as the rest of the page */
+.md-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad) clamp(4rem, 9vh, 7rem);
+  color: #fff;
+}
+.md-hero-heading,
+.md-hero-tagline { max-width: var(--measure); }
+/* eyebrow + heading mirror the homepage hero */
+.md-hero-eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 1.2rem;
+}
+.md-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 8vw, 7rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+.md-hero-tagline {
+  margin-top: 1.35rem;
+  max-width: 30ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+}
+.md-hero-price {
+  margin-top: 1.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+.md-hero-price strong {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+  margin-left: 0.5rem;
+}
+.md-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 2.25rem;
+}
+
+/* ---------- Sticky sub-nav — a floating rounded bar, not a full-width band ---------- */
+.md-subnav {
+  position: fixed;
+  top: calc(var(--md-header-h) + 0.75rem);
+  left: 0;
+  right: 0;
+  z-index: 899;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem;
+  opacity: 0;
+  visibility: hidden;                   /* opacity alone leaves it focusable */
+  transform: translateY(-8px);
+  pointer-events: none;                 /* only the bar itself is clickable */
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+}
+.md-subnav.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.md-subnav.is-visible .md-subnav-inner { pointer-events: auto; }
+
+.md-subnav-inner {
+  max-width: 100%;
+  height: var(--md-subnav-h);
+  padding: 0 0.4rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-btn);
+  box-shadow: 0 6px 24px rgba(15,11,9,0.08);
+}
+.md-subnav-model {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dark);
+  white-space: nowrap;
+}
+/* the bar itself is the container now — the links sit inside it plainly,
+   with the active section marked by a filled pill */
+.md-subnav-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: 0 1 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+/* the sliding highlight — GSAP drives left/width (see the liquid stretch in
+   model-detail.js); CSS only owns the fade */
+.md-subnav-pill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: var(--radius-btn);
+  background: rgba(0,122,194,0.1);
+  transform: translateY(-50%);
+  transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
+  z-index: 0;
+}
+.md-subnav-links::-webkit-scrollbar { display: none; }
+.md-subnav-links a {
+  position: relative;      /* sits above the sliding highlight */
+  z-index: 1;
+  display: block;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--text-mid);
+  white-space: nowrap;
+  border-radius: var(--radius-btn);
+  transition: color 0.3s var(--ease-out), background 0.25s;
+}
+.md-subnav-links a:hover { color: var(--text-dark); }
+.md-subnav-links a:not(.is-active):hover { background: rgba(15,11,9,0.05); }
+.md-subnav-links a.is-active { color: var(--blue); }
+
+/* ---------- Shared section furniture ---------- */
+.md-section-head {
+  margin-bottom: var(--md-gap-head);
+}
+.md-section-head--left { margin-left: 0; }
+
+/* ---------- Intro ----------
+   The whole section is the studio: the cyclorama runs edge to edge behind the
+   copy, the coach and the stat strip, so the three read as one scene rather
+   than three stacked blocks. Full-bleed, so square — see Shapes in DESIGN.md.
+   `cover`, not a stretch: the section is always taller than the backdrop's
+   1.86:1, so cover scales it by height — the whole sweep stays visible top to
+   bottom and only the featureless side edges crop. A stretch would smear the
+   floor line by 6x on a phone.
+
+   WHY THE PHOTO IS ON A PSEUDO-ELEMENT AND NOT ON THIS BOX
+   The backdrop's floor line has to pass through the middle of the coach, and it
+   did not: it sat 63px low at 1440 and 150px low at 768, moving with every
+   reflow. The obvious fix — nudge background-position-y — does nothing at all
+   here. Because the section is always taller than 1.86:1, cover scales the
+   image by height, so the rendered background is EXACTLY the section's height.
+   With zero vertical overflow there is no slack for background-position to
+   take up, and the seam is pinned at 62.38% of the section no matter what.
+   So the box the image covers has to change instead. The pseudo below is flush
+   with the section's bottom and hangs ABOVE its top by --md-crease-lift;
+   raising that top edge makes cover scale the image taller, which walks the
+   seam up the section. model-detail.js measures the coach and sets the lift.
+   At 0 — no JS, or a model with no render — this renders exactly as it did
+   before, so the fallback is the old behaviour rather than a broken one. */
+.md-intro {
+  position: relative;
+  overflow: hidden;            /* fallback for the line below */
+  overflow: clip;              /* clips the overhang WITHOUT making this a
+                                  scroll container or a block formatting
+                                  context, so a sticky child later still works */
+  /* Load-bearing, not decoration: it makes this section a stacking context so
+     the pseudo's z-index: -1 is trapped here, above the --surface fill and
+     below the copy. Without it the -1 escapes to the root and the backdrop
+     hides behind .model-page's canvas — the image simply vanishes. */
+  isolation: isolate;
+  padding-top: var(--md-gap-section);
+  padding-bottom: var(--md-gap-section);
+  background: var(--surface);  /* the photo lives on ::before now */
+}
+.md-intro::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;                   /* pinned to the floor; only the top edge moves */
+  top: calc(-1 * var(--md-crease-lift, 0px));
+  background: url('../../assets/model-background-v2.jpg') center / cover no-repeat;
+  /* Below every child, above the section's own fill. Paired with isolation
+     above — the two are one idea and must not be separated. */
+  z-index: -1;
+  pointer-events: none;
+}
+.md-intro-text .section-body + .section-body { margin-top: 1.35rem; }
+
+/* The intro is the page's one centred block — it steps off the left text spine
+   (see "Text spine" above) on purpose, so the label, headline and copy stack on
+   the same axis as the coach standing under them. The spine rule caps children
+   at --measure with no auto margins, so they need centring too or the block
+   would sit centre-aligned but flush left. */
+.model-page .md-intro-text { text-align: center; }
+.model-page .md-intro-text > * { margin-left: auto; margin-right: auto; }
+.md-intro-media {
+  margin-top: var(--md-gap-head);
+  height: clamp(50vh, 55vw, 78vh);
+}
+
+/* Cut-out studio render standing in the section's sweep. The backdrop belongs
+   to the whole intro (see .md-intro above), so the render itself carries no box
+   and no contact shadow — just the coach. */
+.md-intro-media--render {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+}
+.md-intro-media--render img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  /* half its former size, capped so it does not grow on very wide screens */
+  width: min(44%, 720px);
+  height: auto;
+  margin-inline: auto;
+  object-fit: contain;
+  will-change: auto;
+}
+
+/* ---------- High-level stats (inside the intro) ----------
+   These sat in their own section once; alone they were a stat row anchored to
+   nothing. Under the render they read as callouts of the object above them. */
+.md-stats {
+  max-width: var(--md-frame);
+  margin: var(--space-lg) auto 0;
+  padding: 0 var(--md-pad);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+.md-stat {
+  padding: 0 1.5rem;
+  border-left: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.md-stat:first-child { border-left: none; padding-left: 0; }
+.md-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--blue);
+}
+.md-stat-label {
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.md-stat-note {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-mid);
+}
+
+/* ---------- Scenery band + detail carousel ----------
+   Closes the orientation: one full-bleed exterior with the headline standing in
+   its bottom-left corner (the page's third white-on-photo treatment, on the same
+   scrim as the hero), then a row of detail cards below it. Square and unframed
+   like every other edge-to-edge photo here; the drift comes from --md-drift via
+   the full-bleed rules at the top of this file. */
+/* This is the whole gap to .md-plan, which carries no padding-top of its own —
+   see the floorplans block. */
+.md-scenery { padding-bottom: var(--md-gap-section); }
+.md-scenery-band {
+  height: clamp(52vh, 54vw, 82vh);
+  display: flex;
+  align-items: flex-end;
+}
+.md-scenery-band-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* weighted to the bottom-left, where the headline stands */
+  background:
+    linear-gradient(to top, rgba(15,11,9,0.70) 0%, rgba(15,11,9,0.16) 45%, rgba(15,11,9,0) 72%),
+    linear-gradient(to right, rgba(15,11,9,0.42) 0%, rgba(15,11,9,0) 52%);
+}
+.md-scenery-band-copy {
+  position: relative;
+  z-index: 2;
+  padding-bottom: clamp(2.5rem, 6vh, 5rem);
+  color: #fff;
+}
+.md-scenery-band-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  max-width: 12ch;               /* breaks after "van." — two lines, like the hero */
+}
+
+/* Frames: one in focus at the centre of the viewport, its neighbours running
+   off both edges so the row reads as continuing rather than ending. The track
+   is padded by exactly the leftover width, which is what lets frame k rest at
+   k * step — the caption and the rail both derive their position from that. */
+.md-scenery-carousel {
+  --frame: min(54vw, 108vh);       /* the height cap keeps a 3:2 frame under 72vh */
+  --frame-gap: 1.25rem;
+  position: relative;
+  width: 100%;
+  margin-top: var(--md-gap-tight);
+}
+.md-scenery-track {
+  display: flex;
+  gap: var(--frame-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-inline: calc((100% - var(--frame)) / 2);
+  cursor: grab;
+}
+.md-scenery-track::-webkit-scrollbar { display: none; }
+/* Snapping has to be off while anything else is writing scrollLeft — a mandatory
+   snap treats each write as a finished scroll and yanks it back to the nearest
+   frame, which stops both the drag and the eased glide dead. */
+.md-scenery-track.is-dragging,
+.md-scenery-track.is-gliding {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+.md-scenery-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.md-scenery-card {
+  flex: 0 0 var(--frame);
+  scroll-snap-align: center;
+  margin: 0;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-scenery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;            /* drags start on the track, not the image */
+  user-select: none;
+}
+
+/* Caption and controls share the focused frame's width, so the copy starts on
+   its left edge and the controls end on its right — the row below reads as
+   belonging to the photograph above it rather than to the page. */
+.md-scenery-foot {
+  width: var(--frame);
+  margin: 1.6rem auto 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.md-scenery-caption { max-width: 44ch; }
+
+/* Copy leaves quickly and arrives slowly. The exit is a short ease-in so the
+   old line is gone before the new frame lands; the entry is a long decelerating
+   curve, which is what makes it read as settling into place rather than
+   blinking on. The body follows the headline by a beat. Durations here are the
+   contract for the 220ms swap timer in model-detail.js setActive(). */
+.md-scenery-title,
+.md-scenery-body {
+  transition: opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.md-scenery-body { transition-delay: 80ms; }
+.md-scenery-caption.is-out .md-scenery-title,
+.md-scenery-caption.is-out .md-scenery-body {
+  opacity: 0;
+  transform: translateY(14px);
+  transition-duration: 0.22s;
+  transition-delay: 0s;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+/* the design system's `title` step, verbatim */
+.md-scenery-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+/* .section-body carries size, leading and colour; only the rhythm changes —
+   it is answering a headline here, not opening a section */
+.md-scenery-body {
+  max-width: none;
+  margin-top: 0.65rem;
+}
+
+.md-scenery-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+/* same chrome as the gallery arrows, sized down and set in the flow instead of
+   hung off the carousel's sides. Defined once and shared with the video rail's
+   arrows — two carousels on one page pointing at each other with different
+   buttons is how a page stops looking designed. */
+.md-scenery-btn,
+.md-video-nav {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(15,11,9,0.14);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.md-scenery-btn:hover,
+.md-video-nav:not([disabled]):hover {
+  background: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(15,11,9,0.14);
+}
+/* An end of the rail is worth saying out loud. Dimmed rather than removed, so
+   the pair keeps its shape and the row does not reflow on every scroll. */
+.md-video-nav[disabled] {
+  opacity: 0.32;
+  cursor: default;
+}
+.md-scenery-btn--play { margin-left: 0.4rem; }
+/* one button, two glyphs — whichever state it will put you in */
+.md-scenery-btn .md-scenery-ico-play,
+.md-scenery-btn.is-paused .md-scenery-ico-pause { display: none; }
+.md-scenery-btn.is-paused .md-scenery-ico-play { display: block; }
+
+/* The rail: position across the set, and — while it is playing — how much of
+   this frame's time is left. */
+.md-scenery-rail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 0.4rem;
+}
+.md-scenery-tick {
+  width: 12px;
+  height: 3px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: rgba(15,11,9,0.16);
+  overflow: hidden;
+  cursor: pointer;
+  transition: width 0.35s var(--ease-out), background 0.25s;
+}
+.md-scenery-tick:hover { background: rgba(15,11,9,0.32); }
+.md-scenery-tick.is-on { width: 40px; }
+.md-scenery-tick i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.md-scenery-tick.is-on.is-filling i { animation: md-tick-fill var(--tick-dur, 5200ms) linear forwards; }
+.md-scenery-rail.is-paused .md-scenery-tick i { animation-play-state: paused; }
+/* nothing is timing itself, so the current tick is simply full */
+.md-scenery-rail.is-static .md-scenery-tick.is-on i { animation: none; transform: scaleX(1); }
+@keyframes md-tick-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* the group name keeps the label treatment; the note is prose and must not
+   inherit the header's uppercase + 0.2em tracking */
+.md-spec-group-name { display: block; }
+.md-spec-group-note {
+  display: block;
+  max-width: 60ch;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-mid);
+}
+
+/* ---------- Closing band: see it in person ---------- */
+.md-cta-note {
+  display: block;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: rgba(245,242,238,0.6);
+}
+/* Two equal panels, side by side. Equal columns and stretch, so the pair reads
+   as one row rather than two blocks that happen to be adjacent. */
+.md-cta-secondary {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255,255,255,0.14);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 1.8vw, 1.75rem);
+  align-items: stretch;
+}
+.md-cta-panel {
+  position: relative;
+  overflow: hidden;               /* the photo is clipped by the panel's radius */
+  border-radius: var(--radius-card);
+  min-height: clamp(300px, 26vw, 380px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 3.4vw, 3.25rem);
+  text-align: center;
+}
+/* Band navy, not Jayco Blue: the design system keeps blue for actions and
+   eyebrows and rules out a blue background wash. This is the same navy the
+   Layout band uses, so the page already owns it. */
+.md-cta-panel--solid { background: var(--md-band-bg); }
+
+.md-cta-panel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the copy sits on the photograph, so it needs its own ground — the two-stop
+   dark gradient the design system asks for over card imagery */
+.md-cta-panel-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15,11,9,0.82) 0%, rgba(15,11,9,0.5) 55%, rgba(15,11,9,0.34) 100%);
+}
+.md-cta-panel-text {
+  position: relative;
+  z-index: 1;
+  max-width: 34ch;
+}
+.md-cta-panel-text h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  color: #fff;
+  margin-bottom: 0.85rem;
+}
+.md-cta-panel-text p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(245,242,238,0.72);
+  margin-bottom: 1.75rem;
+}
+
+/* ---------- Floorplans ----------
+   The one coloured band on the page. .md-scenery's padding-bottom keeps its
+   100px of canvas ABOVE the navy, so the band reads as a block set into the
+   page rather than butting the carousel; --md-band-pad is the navy's own inset,
+   and is the single knob for how much air the band carries inside itself. */
+.md-plan {
+  padding-top: var(--md-band-pad);
+  padding-bottom: var(--md-band-pad);
+  background: var(--md-band-bg);
+}
+/* The one deliberate exception to the 100px head step. Every other section on
+   the page uses --md-gap-head; here the headline and the selector are one unit
+   — the heading asks a question the control answers — so they sit closer than
+   a section head normally does from what follows it. Changing this to 100
+   would undo that pairing, so it stays at the md step until asked otherwise. */
+.md-plan .md-section-head { margin-bottom: var(--space-md); }
+
+.md-fp-filter {
+  max-width: var(--md-frame);      /* same left spine as the tabs below it */
+  margin: 0 auto var(--space-md);
+  padding: 0 var(--md-pad);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.md-fp-filter-label {
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.md-fp-chips { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.md-chip {
+  border: none;
+  background: none;
+  padding: 0.25rem 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s, border-color 0.25s;
+}
+.md-chip:hover { color: var(--text-dark); }
+.md-chip.is-on { color: var(--text-dark); border-bottom-color: var(--blue); }
+.md-chip--clear { color: var(--text-mid); }
+
+/* ---------- Floorplan selector ----------
+   The page's only dropdown, and the first in the project. Built as a listbox
+   rather than a <select> because the open panel has to carry the same frosted
+   treatment as the band it sits on, which a native option list cannot. The
+   trigger keeps the pill geometry every other control here uses; the glass is
+   the white-tint-on-dark recipe from .card-learn-more / .model-card-build,
+   which is the site's vocabulary for a control standing on a dark ground. */
+.md-fp-select {
+  max-width: var(--md-frame);
+  margin: 0 auto var(--space-md);
+  padding: 0 var(--md-pad);
+}
+.md-fp-select-label {
+  display: block;
+  margin-bottom: 0.85rem;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245,242,238,0.5);   /* = .section-label.light */
+}
+/* the list is absolute against this, not against the full-width frame */
+.md-fp-select-shell {
+  position: relative;
+  width: min(100%, 340px);
+}
+.md-fp-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem 0.9rem 1.5rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: var(--radius-btn);
+  background: rgba(255,255,255,0.10);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s;
+}
+.md-fp-select-trigger:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.34);
+}
+/* base --blue sits too close to the band's navy to read as a focus ring */
+.md-fp-select-trigger:focus-visible,
+.md-fp-select-list:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 3px;
+}
+.md-fp-select-chev { flex: none; transition: transform 0.3s var(--ease-out); }
+.md-fp-select-trigger[aria-expanded="true"] .md-fp-select-chev { transform: rotate(180deg); }
+
+.md-fp-select-list {
+  position: absolute;
+  z-index: 20;                    /* over the frosted zone panel below it */
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.14);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.4);   /* the documented dark-ground lift */
+}
+.md-fp-select-list[hidden] { display: none; }
+.md-fp-option {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 14px;            /* DESIGN.md rounded.field, inside a 20px box */
+  cursor: pointer;
+  color: rgba(245,242,238,0.78);
+  transition: background 0.2s, color 0.2s;
+}
+/* A plan shape, not a legible drawing — at this size it reads as a silhouette
+   that tells the two layouts apart at a glance. It stands on the option itself
+   with no backing box, so the art's own transparency is what you see. */
+.md-fp-option-thumb {
+  flex: none;
+  width: 62px;
+  aspect-ratio: 1800 / 920;       /* the floorplan export's own ratio */
+}
+.md-fp-option-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.md-fp-option-text { min-width: 0; }
+/* .is-cursor is the keyboard position — the list holds focus and points at it
+   with aria-activedescendant, so the option itself never takes a focus ring */
+.md-fp-option:hover,
+.md-fp-option.is-cursor {
+  background: rgba(255,255,255,0.12);
+  color: var(--text-light);
+}
+.md-fp-option[aria-selected="true"] { background: rgba(0,122,194,0.28); color: #fff; }
+.md-fp-option.is-hidden { display: none; }
+.md-fp-option-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.md-fp-option-note {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: rgba(245,242,238,0.62);   /* 0.55 measured 4.34:1 on the glass — under AA */
+}
+.md-fp-option[aria-selected="true"] .md-fp-option-note { color: rgba(255,255,255,0.72); }
+
+/* An inset surface panel at 20px, the way the homepage frames its content
+   blocks (.quiz-media, .dealer-ui, .newsletter-box) — it holds a spec table
+   and body copy, not photography, so it does not bleed. */
+.md-fp-panels { position: relative; }
+.md-fp-panel { display: none; }
+.md-fp-panel.is-active { display: block; }
+
+/* the info column: an inset surface panel under the stage and its zones */
+.md-fp-info {
+  width: var(--md-panel);
+  margin: var(--space-md) auto 0;
+  padding: clamp(2rem, 3.4vw, 3.25rem);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 3vw, 3.5rem);
+  align-items: start;
+}
+.md-fp-info .md-fp-name { grid-column: 1; }
+.md-fp-info .md-fp-blurb { grid-column: 1; }
+.md-fp-info .md-fp-specs { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+.md-fp-info .md-fp-ctas { grid-column: 1; }
+.md-fp-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.md-fp-blurb {
+  margin-top: 1.1rem;
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--text-mid);
+  max-width: 46ch;
+}
+.md-fp-specs {
+  margin-top: 2rem;
+  border-top: 1px solid var(--hairline);
+}
+.md-fp-specs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 0.88rem;
+}
+.md-fp-specs li span:first-child { color: var(--text-mid); }
+.md-fp-specs li span:last-child  { font-weight: 500; color: var(--text-dark); }
+.md-fp-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+/* The 3D tour briefly lived in this CTA row as a .md-fp-360 pill. It now sits
+   on the drawing beside the zoom — see .md-plan-tools. */
+.md-fp-empty {
+  max-width: var(--measure-wide);
+  margin: var(--space-md) auto 0;
+  padding: 0 var(--md-pad);
+  font-size: 0.9rem;
+  color: var(--text-mid);
+}
+
+/* ---------- Pricing ---------- */
+.md-pricing { padding: var(--md-gap-section) 0 0; }
+.md-pricing-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(2rem, 6vw, 7rem);
+  align-items: start;
+}
+/* The headline and the MSRP ride in their own panel, pinned while the cards
+   beside them scroll past — the price is the one figure that should never be
+   off screen while someone reads what is included.
+   The offset clears the fixed header AND the fixed sub-nav, using the same two
+   custom properties navOffset() reads so the sticky stop and the deep-link
+   landing can never disagree.
+   Sticky survives here because `overflow-x: hidden` sits on <body> with <html>
+   unset, so it propagates to the viewport rather than making an ancestor a
+   scroll container — and Lenis runs in its default mode, moving real scroll
+   position rather than transforming a wrapper. Both were checked; either one
+   would have silently killed this. */
+.md-price-lead {
+  position: sticky;
+  top: calc(var(--md-header-h) + var(--md-subnav-h) + 1.5rem);
+  padding: clamp(1.75rem, 2.6vw, 2.5rem);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-pricing .md-section-head--left {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+.md-price-msrp { margin-top: 2.25rem; }
+.md-price-msrp-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 5.5vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--blue);
+}
+.md-price-msrp-note {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text-mid);
+  max-width: 38ch;
+}
+.md-price-cards {
+  display: grid;
+  gap: var(--space-md);
+}
+.md-price-card {
+  background: none;
+  border: none;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 1.75rem 0 0;
+}
+.md-price-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+}
+.md-price-tag {
+  width: 100%;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+.md-price-card-head h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.md-price-figure {
+  margin-left: auto;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.md-price-list li {
+  position: relative;
+  padding: 0.4rem 0 0.4rem 1.25rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-mid);
+}
+.md-price-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.95rem;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-mid);
+  opacity: 0.5;
+}
+.md-price-options li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.md-price-options li:first-child { border-top: 1px solid var(--hairline); }
+.md-opt-name  { display: block; font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+.md-opt-note  { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-mid); }
+.md-opt-price { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); white-space: nowrap; }
+.md-price-disclaimer {
+  max-width: var(--md-frame);
+  margin: var(--space-md) auto 0;
+  padding: 0 var(--md-pad);
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: var(--text-mid);
+}
+
+/* ---------- Features ----------
+   A photo-free reference list: the categories as a tab row, the chosen one's
+   rows in a surface panel. The rows keep the spec table's idiom (hairline
+   separators, the same 42% key column) so this section and the specifications
+   below it read as one reference zone rather than two designs.
+   The panel is the design system's sanctioned ground for content that is not
+   photography — the same one .md-fp-info stands on. */
+/* The section step, like every other break on the page. Worth knowing that the
+   navy band above closes with its own 100px inset, so the gap the eye actually
+   sees between the floorplan specs and the first feature is that inset plus
+   this 150. */
+.md-features { padding-top: var(--md-gap-section); }
+.md-features-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+/* The inner already carries the page gutter; without this the head carries it
+   a second time and the heading stands ~87px right of the tab row under it. */
+.md-features .md-section-head { padding-left: 0; padding-right: 0; max-width: none; }
+/* Full width of the inner, which is --md-panel — the same width .md-fp-info
+   carries in the Layout section, so the page's two content panels agree.
+   (This used to be capped so the rows lined up with the spec table's 880px
+   measure; matching the floorplan panel wins, and the body cap below keeps the
+   descriptions off a 90-character line.) */
+.md-feat-panel { max-width: 100%; }
+/* The tab row is NOT capped to the panel: five uppercase category names do not
+   fit across 880px, and a five-tab control that wraps onto a second line reads
+   as an accident. It still starts on the panel's inner edge (padding-inline
+   below), so the two share a left axis. */
+.md-feat-tabs { max-width: 100%; }
+
+/* Tabs take the page's established switch idiom (.md-fp-tab, .md-spec-switch-btn):
+   no fill, no box, ink on the active one with a blue rule under it. Padded to
+   the panel's inner edge so a tab label starts on the same axis as the feature
+   names below it. */
+.md-feat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  padding-inline: var(--md-feat-pad);
+}
+.md-feat-tab {
+  border: none;
+  background: none;
+  padding: 0.4rem 0;
+  font-family: var(--font-display);
+  font-size: 0.9rem;             /* up from the 0.7rem the category headings were */
+  font-weight: 600;
+  letter-spacing: 0.1em;         /* 0.2em gets very wide once the size goes up */
+  text-transform: uppercase;
+  color: var(--text-mid);
+  cursor: pointer;
+  border-bottom: 1.5px solid transparent;
+  transition: color 0.3s, border-color 0.3s;
+}
+/* The chevron only exists for the accordion below 768px; up here the active
+   tab is marked by the blue rule under it. */
+.md-feat-chev { display: none; }
+.md-feat-tab:hover { color: var(--text-dark); }
+.md-feat-tab.is-active { color: var(--text-dark); border-bottom-color: var(--blue); }
+.md-feat-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.md-feat-panel {
+  display: none;
+  padding: var(--md-feat-pad);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-feat-panel.is-active { display: block; }
+.md-feat-panel:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.md-featlist { margin: 0; }
+/* The name column is sized, the description column is capped, and the row is
+   left-packed — at the panel's full width a 1fr description would run past 90
+   characters, well past the 65–75 the design system asks for. The hairline
+   still spans the whole panel, so the rule reads as the table's, not the
+   text's. */
+.md-featrow {
+  display: grid;
+  /* 52ch, not 62: this face's "0" is wide (9.78px at 0.94rem), so a ch cap
+     buys more characters than it looks like. Measured, 62ch ran to 88
+     characters a line — 52ch lands inside the 65–75 the system asks for. */
+  grid-template-columns: minmax(0, 27%) minmax(0, 52ch);
+  gap: 0.35rem 2.5rem;
+  padding: 1.1rem 0;                /* = .md-spec-table cell padding */
+  border-bottom: 1px solid var(--hairline);
+}
+/* inside a panel the last rule has nothing to separate — it just underlines the box */
+.md-featrow:last-child { border-bottom: none; padding-bottom: 0; }
+.md-featrow:first-child { padding-top: 0; }
+.md-feat-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+/* margin:0 is load-bearing — the UA default is margin-left:40px on <dd> */
+.md-feat-body {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+}
+
+/* ---------- The Layout — the page's signature section ----------
+   The drawing carries numbered hotspots; each one opens the real photograph of
+   that zone. Desktop stacks the zones in one grid cell and crossfades; ≤900px
+   the same nodes become a numbered vertical list. */
+.md-plan-stage {
+  position: relative;
+  /* width, not padding — .md-hot is positioned with left:X% against the
+     padding box, so padding here would desync every hotspot from the art */
+  width: var(--md-panel);
+  margin-inline: auto;
+  overflow: visible;              /* hotspots sit on the edges of the drawing */
+  /* --exp 0 = open. Declared open so a dead script leaves it correct; the
+     focal timeline writes 1 and animates back to 0. */
+  --exp: 0;
+  --exp-x: 8%;
+}
+.md-plan-stage.is-drawing {
+  clip-path: inset(0 calc(var(--exp) * var(--exp-x)) 0 calc(var(--exp) * var(--exp-x))
+                   round calc(var(--exp) * var(--radius-card)));
+}
+/* a line drawing on the canvas: no box, so nothing to round */
+.md-plan-drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+.md-hot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(255,255,255,0.96);
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* The ring is what separates the dot from the drawing's own white fills; the
+     drop is warm ink, never pure black. */
+  box-shadow: 0 0 0 1.5px rgba(15,11,9,0.14),
+              0 3px 14px rgba(15,11,9,0.28);
+  transition: transform 0.3s var(--ease-out), background 0.3s, color 0.3s,
+              box-shadow 0.3s;
+}
+.md-hot:hover,
+.md-hot.is-on {
+  background: var(--blue);
+  color: #fff;
+  transform: translate(-50%, -50%) scale(1.18);
+  /* the one coloured shadow the design system allows, and only under blue */
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.5),
+              0 4px 18px rgba(0,122,194,0.45);
+}
+.md-hot:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* The open zone's dot pings, so the drawing says which zone is on screen.
+   On ::after, not on the button: the button's transform is doing the centring
+   and a pulse there would fight it, and a pseudo-element on a flex container
+   must be absolute or it lays out as a third flex item beside the numeral.
+   scale + opacity only — animating width/height would relayout every frame. */
+.md-hot.is-on::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--blue);
+  pointer-events: none;
+  animation: md-hot-ping 1.9s var(--ease-out) infinite;
+}
+@keyframes md-hot-ping {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { opacity: 0; }
+  100% { transform: scale(2.3); opacity: 0; }
+}
+
+/* Two containers side by side: the drawing left, the open zone right. */
+.md-plan-split {
+  width: var(--md-panel);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--md-split-gap);
+  /* stretch, not center: the two boxes are a matched pair, and centring the
+     shorter one against the taller left them looking unrelated. The drawing is
+     centred inside its own box instead (see align-content below). */
+  align-items: stretch;
+}
+
+/* The floorplan's own container. Same frosted recipe as the zone panel beside
+   it so the two read as a pair. The PADDING lives here and never on the stage:
+   hotspots are positioned as percentages of the stage's padding box, so padding
+   there would desync all twelve dots from the art. */
+.md-plan-stage-box {
+  position: relative;              /* the zoom button anchors to this */
+  display: grid;
+  align-content: center;           /* the drawing rides centred in the taller box */
+  padding: clamp(1.25rem, 1.8vw, 1.75rem);
+  border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.10);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.20);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.4);   /* the documented dark-ground lift */
+  overflow: visible;               /* dots and their pings sit past the art */
+}
+/* The stage keeps --md-panel for the bare, containerless case. Inside the box
+   that token would inset it by the page gutter a second time — the split has
+   already applied it — leaving the drawing far short of its column. */
+.md-plan-split .md-plan-stage { width: 100%; }
+
+/* Round glass control, the white-tint-on-dark variant (cf. .model-specs-btn).
+   Bottom-right, which is clear of every hotspot in both floorplans — the
+   nearest dots there are the 20E galley (x44/y63) and the 20T entry (x57/y68),
+   both well inboard of the corner. */
+/* The rail owns the corner; the controls in it own only their own shape. The
+   zoom used to position itself here, which is why it sat alone — with a second
+   control the offsets have to move up to the group or the two would stack on
+   the same point. The clamps are the stage box's own padding, so the rail
+   insets by exactly the frame it sits in. */
+.md-plan-tools {
+  position: absolute;
+  z-index: 3;
+  bottom: clamp(1.25rem, 1.8vw, 1.75rem);
+  right: clamp(1.25rem, 1.8vw, 1.75rem);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+.md-plan-tool {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.md-plan-tool:hover { background: rgba(255,255,255,0.28); transform: scale(1.06); }
+.md-plan-tool:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+/* The tour glyph is a filled path, not a stroked one like the zoom's, so it
+   takes its colour from fill — currentColor carries it to white and through
+   the hover with everything else on the rail. */
+.md-plan-360 svg { fill: currentColor; }
+
+/* Zones: one list, two layouts. Desktop = a single grid cell, crossfaded.
+   The frosted box belongs to the CONTAINER, not to each zone — glass on every
+   zone would make the panel itself blink on each hotspot change.
+   The backdrop-filter is kept for parity with the stage box beside it, but it
+   stands on flat navy now, so what it actually renders is the white tint. It
+   would start doing real work the moment this band gets a textured ground. */
+.md-plan-zones {
+  position: relative;
+  display: grid;
+  width: auto;                    /* a grid child now, not a centred block */
+  margin: 0;
+  padding: clamp(1.5rem, 2.2vw, 2.25rem);
+  border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.10);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.20);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.4);   /* the documented dark-ground lift */
+}
+.md-plan-zone {
+  grid-area: 1 / 1;               /* the crossfade deck */
+  display: block;                 /* photo over copy — the column is narrow now */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease-out), visibility 0.3s;
+}
+.md-plan-zone.is-on { opacity: 1; visibility: visible; }
+.md-plan-photo {
+  aspect-ratio: 3 / 2;
+  margin-bottom: 1.25rem;
+  border-radius: var(--radius-card);   /* inset, therefore rounded */
+  overflow: hidden;
+  background: var(--surface);
+}
+.md-plan-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Floorplan zoom modal ----------
+   The plan alone, as large as the viewport allows — the point of zooming is to
+   read the dimensions printed on the art, so no hotspots ride along to cover
+   them. Lives on <body>, not inside the section: Lenis can transform a
+   scroll wrapper, and a transformed ancestor would make position:fixed resolve
+   against it instead of the viewport.
+   z-index clears the fixed header (1000) and the mobile menu (998) and stays
+   under the loader (9999). */
+.md-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3.5rem);
+  opacity: 0;
+  /* Deliberately NOT transitioning `visibility`. The usual fade-then-hide trick
+     pairs it with opacity, but Chrome flips a discrete visibility transition at
+     50% progress — 150ms in — and focus() inside a still-hidden subtree is a
+     silent no-op, which stranded keyboard focus on the page behind the modal.
+     The closed state is the [hidden] attribute instead: display:none is not
+     transitioned, so the element is focusable the instant it is unhidden. */
+  transition: opacity 0.3s var(--ease-out);
+}
+.md-zoom[hidden] { display: none; }
+.md-zoom.is-open { opacity: 1; }
+/* It stays displayed through the fade-out, and an opacity:0 element still
+   swallows clicks — so it must not be hit-testable unless it is open. */
+.md-zoom:not(.is-open) { pointer-events: none; }
+.md-zoom-scrim {
+  position: absolute;
+  inset: 0;
+  /* --md-band-bg (#012638) at 94%, so the scrim is the band's own navy rather
+     than a third invented dark. Written as a literal because rgba() cannot take
+     a hex custom property, and color-mix() failing to parse would leave the
+     scrim transparent — the one failure mode this element must not have. */
+  background: rgba(1,38,56,0.94);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.md-zoom-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1800px;              /* the drawing's own export width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.md-zoom-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* leave room for the caption and the padding so the plan is never cropped */
+  max-height: calc(100vh - clamp(1rem, 4vw, 3.5rem) * 2 - 3.5rem);
+  object-fit: contain;
+  border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.06);
+}
+.md-zoom-caption {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245,242,238,0.5);
+}
+.md-zoom-close {
+  position: absolute;
+  z-index: 2;
+  top: clamp(0.75rem, 2vw, 1.5rem);
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.md-zoom-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.06); }
+.md-zoom-close:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+
+/* Zone copy now stands on the navy band, so every colour below is the light
+   counterpart of what it was. The values track style.css's .light modifiers so
+   the band matches the rest of the site's dark grounds. */
+.md-plan-num {
+  display: block;
+  /* 1.2rem is not a style flourish: Blue Bright on this panel measures 3.39:1,
+     which clears AA for large text (>=18.66px bold) but not for small. Sizing
+     the figure up keeps the documented blue AND passes — dropping to a paler
+     blue would have meant inventing a colour the system does not have. It also
+     pairs the numeral with the enlarged dot it refers to on the drawing. */
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  /* Blue Bright, not base blue: DESIGN.md keeps it for exactly this — an
+     eyebrow figure on a dark ground, where --blue goes muddy. */
+  color: var(--blue-light);
+  margin-bottom: 0.55rem;
+  line-height: 1;
+}
+.md-plan-eyebrow {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(245,242,238,0.6);
+  margin-bottom: 0.7rem;
+}
+.md-plan-title {
+  font-family: var(--font-display);
+  /* stepped down from 2.3rem: the copy sits in a ~1/3 column now, not half the frame */
+  font-size: clamp(1.35rem, 1.9vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  color: var(--text-light);
+  margin-bottom: 0.8rem;
+}
+.md-plan-body {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(245,242,238,0.7);   /* = .section-body.light */
+  max-width: 46ch;
+}
+.md-plan-stat {
+  display: inline-block;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  /* --hairline is warm ink at 12% — invisible on navy */
+  border-top: 1px solid rgba(255,255,255,0.18);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+/* ---------- Videos ----------
+   A rail of facades: thumbnail, play mark, title. The iframe only exists once
+   a card is clicked, so the section costs one lazy image per card at rest
+   instead of eight embedded players. */
+.md-videos { padding-top: var(--md-gap-section); }
+.md-videos-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+/* The inner already carries the page gutter, so the head inside it must not
+   carry it a second time — same correction .md-specs makes below. */
+.md-videos .md-section-head { padding-left: 0; padding-right: 0; max-width: none; }
+
+/* Heading left, arrows right, both sitting on the rail's top edge. */
+.md-videos-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: var(--md-gap-head);
+}
+.md-videos-head .md-section-head { margin-bottom: 0; }
+.md-video-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding-bottom: 0.35rem;         /* optical: sits the pair on the baseline */
+}
+
+/* The rail is a sibling of .md-videos-inner, not a child: it spans the section
+   — which is unconstrained, sitting directly in <main> — so cards run off the
+   right of the viewport instead of stopping at a gutter. width:100%, never
+   100vw, per the full-bleed rule at the top of this file.
+
+   --vlead is the distance from the viewport edge to the contained spine, so
+   card one starts under the heading and only the right side bleeds. The
+   `max()` handles both cases in one expression: below 1440 the frame is the
+   window and the lead is just the page gutter; above it, half the leftover
+   plus that gutter.
+
+   Card width is measured off the contained frame, NOT off the rail's own
+   width — that is what makes a wider window show *more* cards at the same size
+   rather than the same cards larger. Three and a half within the frame; the
+   rest of the bleed is whatever the window has room for.
+
+   Mind the two percentage bases below. A custom property resolves where it is
+   *used*, not where it is written: --vlead is used in padding on the rail, so
+   its 100% is the section — the window. --vframe is used in flex-basis on a
+   card, so its 100% is the rail's content box, which is already the window
+   less the lead and the trailing gutter. That is why --vframe cannot just be
+   --md-panel: doing so subtracts the page gutter a second time and every card
+   comes out ~15% narrow. Below 1440 the rail's content box already equals the
+   contained width, and above it the min() caps to the frame — so this one
+   expression is correct on both sides. */
+.md-video-track {
+  --vgap: clamp(1rem, 1.6vw, 1.5rem);
+  --vframe: min(100%, calc(var(--md-frame) - 2 * var(--md-pad)));
+  --vcard: calc((var(--vframe) - var(--vgap) * 3) / 3.5);
+  --vlead: max(var(--md-pad), calc((100% - var(--md-frame)) / 2 + var(--md-pad)));
+  display: flex;
+  gap: var(--vgap);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  list-style: none;
+  margin: 0;
+  /* A scroll container clips on every side; the block inset is the room a
+     focus ring needs. The lead doubles as that room on the inline start. */
+  padding: 7px var(--md-pad) 7px var(--vlead);
+  /* Snap measures from the padding box, so the snapport start has to be moved
+     to the content edge — otherwise the rail rests with card one jammed
+     against the viewport instead of on the spine. */
+  scroll-padding-inline-start: var(--vlead);
+}
+.md-video-track::-webkit-scrollbar { display: none; }
+.md-video {
+  flex: 0 0 var(--vcard);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.md-video-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.md-video-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+
+/* 3:4, not 16:9 — these are vertically-shot videos. YouTube pads them into a
+   16:9 thumbnail with a blurred backdrop either side; a 3:4 box with
+   object-fit:cover crops to the central ~540px of the 1280px frame, which is
+   the real footage almost to the pixel. A 16:9 card would show the padding. */
+.md-video-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-card);   /* inset, therefore rounded */
+  overflow: hidden;
+  background: var(--surface);          /* holds the tile while the thumb loads */
+  margin-bottom: 1rem;
+}
+.md-video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+.md-video-btn:hover .md-video-thumb img { transform: scale(1.04); }
+
+/* the round control idiom, on photography rather than beside it */
+.md-video-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3px;                   /* optical centring for a triangle */
+  color: var(--text-dark);
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1);
+  transition: transform 0.3s var(--ease-out), background 0.25s;
+}
+.md-video-btn:hover .md-video-play {
+  background: #fff;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* the player takes the thumbnail's exact box, so nothing shifts on play — and
+   3:4 gives a vertical video far more of the frame than 16:9 would */
+.md-video-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--navy);
+  margin-bottom: 1rem;
+}
+
+.md-video-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-dark);
+}
+.md-video-note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-mid);
+}
+
+/* ---------- Full specifications ---------- */
+.md-specs { padding: var(--md-gap-section) 0 0; }
+.md-specs-inner { max-width: var(--md-frame); margin: 0 auto; padding: 0 var(--md-pad); }
+.md-spec-table-wrap, .md-spec-switch, .md-spec-foot { max-width: var(--measure-wide); }
+.md-specs .md-section-head { padding-left: 0; padding-right: 0; max-width: none; }
+
+.md-spec-switch {
+  display: none;
+  gap: 1.75rem;
+  margin-bottom: 2rem;
+}
+.md-spec-switch-btn {
+  border: none;
+  background: none;
+  padding: 0.3rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-mid);
+  border-bottom: 1.5px solid transparent;
+}
+.md-spec-switch-btn.is-active { color: var(--text-dark); border-bottom-color: var(--blue); }
+
+.md-spec-table-wrap { overflow-x: auto; }
+.md-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+.md-spec-table th,
+.md-spec-table td {
+  text-align: left;
+  padding: 1.1rem 1rem 1.1rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.md-spec-table thead th {
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.md-spec-group th {
+  background: none;
+  padding-top: 3rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+  border-bottom-color: rgba(15,11,9,0.28);
+}
+.md-spec-key { color: var(--text-mid); width: 42%; }
+.md-spec-table td.md-spec-col { font-weight: 500; color: var(--text-dark); }
+.md-spec-foot {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: var(--text-mid);
+}
+
+/* ---------- Compare (dark band) + brochure ---------- */
+.md-ctas {
+  margin-top: var(--md-gap-section);
+  background: var(--navy);
+  color: #fff;
+  /* --md-band-pad, the same inset the Layout band carries. These are the page's
+     two coloured bands and they were on different steps — 100px there, the old
+     xl 187px here — which read as two different systems. A band's inset is not
+     the section step: it is the distance from the band's own edge to its
+     contents, and the step is the canvas either side of it. */
+  padding: var(--md-band-pad) 0;
+}
+.md-cta-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+/* the lead already sits inside the padded frame — don’t indent it twice */
+.model-page .md-cta-lead { max-width: none; padding-left: 0; padding-right: 0; }
+.md-cta-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.md-cta-heading.light { color: #fff; }
+.md-cta-body {
+  margin: 1.25rem 0 2.25rem;
+  font-size: 1rem;
+  line-height: 1.78;
+  color: var(--text-mid);
+}
+.md-cta-body.light { color: rgba(245,242,238,0.68); }
+
+/* ---------- Similar models ---------- */
+.md-similar { padding: var(--md-gap-section) 0; }
+/* The FAQ is style.css's component and brings its own 7rem top padding, which
+   would stack on the section step above and put ~260px before the panel. Zeroed
+   here rather than in style.css, which the homepage shares and which carries
+   its own cache-bust token — so the FAQ arrives on the same 150 as everything
+   else. Its bottom padding stays: that one is the page's closing space. */
+.model-page .faq-section { padding-top: 0; }
+.md-similar-grid {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+
+/* The card IS the ground now — a Surface panel holding name, tagline, price,
+   the render, its paint chips and a three-up stat row. The whole panel is the
+   link, so there is no separate call to action inside it. */
+.md-similar-card {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.75rem, 2.6vw, 2.5rem);
+  border: none;
+  /* 32px = DESIGN.md rounded.feature. Written as a literal because only
+     rounded.pill and rounded.card exist as CSS variables; the feature step is
+     a literal everywhere else it is used too (e.g. .newsletter-box). */
+  border-radius: 32px;
+  background: var(--surface);
+  transition: background 0.3s, transform 0.4s var(--ease-out);
+}
+/* Dune #E8E4DE — DESIGN.md's supporting warm neutral, one step down from
+   Surface. Not a token in style.css, hence the literal. */
+.md-similar-card:hover { background: #E8E4DE; transform: none; box-shadow: none; }
+
+.md-similar-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.2vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--text-dark);
+  margin-bottom: 0.7rem;
+}
+/* the rule is the tagline's, not a divider — it marks the line, so it grows
+   with it rather than spanning the card */
+.md-similar-tagline {
+  padding-left: 0.7rem;
+  border-left: 2px solid rgba(15,11,9,0.3);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-dark);
+  margin-bottom: 1.6rem;
+}
+.md-similar-price {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-mid);
+}
+
+/* the render stands on the card, not in a tile of its own — a panel inside a
+   panel is the nesting the design system rules out */
+.md-similar-media {
+  aspect-ratio: 16 / 10;
+  /* the paint chips used to carry part of the gap down to the stat row; with
+     them gone the render owns the whole of it */
+  margin: 0.5rem 0 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.md-similar-media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.7s var(--ease-out);
+}
+.md-similar-card:hover .md-similar-media img { transform: scale(1.03); }
+
+/* three-up, ruled between — the spec row treatment from .md-stat */
+.md-similar-stats {
+  margin-top: auto;              /* pinned to the foot so uneven cards still align */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.md-similar-stat {
+  padding-left: 1rem;
+  border-left: 1px solid var(--hairline);
+}
+.md-similar-stat:first-child { padding-left: 0; border-left: none; }
+.md-similar-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-dark);
+  margin-bottom: 0.3rem;
+}
+.md-similar-stat-label {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--text-mid);
+}
+
+/* ---------- FAQ ----------
+   The accordion is the homepage's component, styled entirely by style.css —
+   the grey panel, the white item cards, the centred header, the plus/minus
+   icon. This page used to restyle it into a flat hairline accordion; those
+   overrides are gone, and the markup renderFaqs() emits already matches the
+   homepage's node for node.
+
+   The one line below hands the heading back too. This page scales
+   .section-heading up a step (4vw rather than 3.8vw) for its wider frame, but
+   the FAQ panel is 680px on both pages — inside it there is no wider frame to
+   answer to, so the upscale only made the two versions disagree. */
+.model-page .faq-header .section-heading {
+  font-size: clamp(2.4rem, 3.8vw, 3.8rem);
+  line-height: 0.98;
+}
+
+/* ===================================================
+   Responsive
+   =================================================== */
+@media (max-width: 1280px) {
+  .md-stats { grid-template-columns: repeat(3, 1fr); row-gap: 2.5rem; }
+  .md-stat:nth-child(3n+1) { border-left: none; padding-left: 0; }
+}
+
+/* the image/text pairs stack before the rest — half of --measure is too narrow */
+@media (max-width: 900px) {
+
+  /* The two containers stack. They keep their own frosted boxes — the gap
+     becomes vertical, which the grid gap already handles. */
+  .md-plan-split { grid-template-columns: 1fr; }
+
+  /* The zones stop being a crossfade deck and become the list. This is the
+     primary phone experience, not a degradation: every zone is readable
+     without hunting for a dot. The glass container simply gets taller and
+     holds the list. */
+  .md-plan-zones { display: block; }
+  .md-plan-zone {
+    display: block;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .md-plan-zone + .md-plan-zone { margin-top: var(--space-md); }
+  .md-plan-photo { aspect-ratio: 3 / 2; margin-bottom: 1.25rem; }
+  /* dots shrink and become passive markers — the numbers index the list below.
+     They keep the prominence bump, but the ping goes: with every zone already
+     on screen there is no "current" one for it to point at, so it would only
+     be noise. */
+  .md-hot { width: 32px; height: 32px; font-size: 0.78rem; }
+  .md-hot.is-on::after { animation: none; }
+  .md-fp-info { grid-template-columns: 1fr; }
+  .md-fp-info .md-fp-specs { grid-column: 1; grid-row: auto; }
+}
+
+@media (max-width: 1024px) {
+  /* two and a bit — the peek is the point, so the count drops but never to a
+     whole number */
+  .md-video-track { --vcard: calc((var(--vframe) - var(--vgap) * 2) / 2.4); }
+  .md-pricing-inner { grid-template-columns: 1fr; }
+  /* Stacked, the lead is its own grid row, so sticky has nothing to travel
+     through — turned off explicitly rather than left to that coincidence, and
+     so it can never pin over the cards it is meant to sit beside. */
+  .md-price-lead { position: static; }
+  /* the two panels stack; each keeps its own ground and centred content */
+  .md-cta-secondary { grid-template-columns: 1fr; }
+  /* the frame takes more of a narrower window, and the caption stacks above
+     the controls once the two no longer fit side by side */
+  .md-scenery-carousel { --frame: min(66vw, 108vh); }
+  .md-scenery-foot { flex-direction: column; gap: 1.5rem; }
+  .md-scenery-caption { max-width: none; }
+}
+
+@media (max-width: 768px) {
+  .model-page { --md-header-h: 70px; --md-subnav-h: 52px; --md-drift: 6%; }
+
+  /* the name sits above its description — 42% of a phone is too narrow to be
+     either a column of names or a column of sentences */
+  .md-featrow { grid-template-columns: 1fr; }
+
+  /* Capped, not proportional. A 3:4 card is a third taller than it is wide, so
+     a full-width one on a tablet would stand 800px high — the cap keeps the
+     card a card and lets the peek grow with the screen instead. */
+  .md-video-track { --vcard: min(calc(var(--vframe) - var(--vgap) - 3rem), 320px); }
+  /* Swipe is the gesture here, and the arrows are the first thing to give up
+     the width when the heading needs it. The rail is still fully reachable —
+     touch drag, and Tab still walks card to card. */
+  .md-video-controls { display: none; }
+  .md-videos-head { display: block; }
+
+  .md-hero { height: 92svh; min-height: 520px; }
+  .md-hero-content { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+  .md-hero-ctas .btn-primary,
+  .md-hero-ctas .btn-secondary { flex: 1 1 auto; text-align: center; }
+
+  .md-subnav-model { display: none; }
+  /* the floating bar narrows to the links and scrolls inside itself */
+  .md-subnav-inner { padding: 0 0.35rem; gap: 0; }
+  .md-subnav-links a { padding: 0.45rem 0.8rem; font-size: 0.78rem; }
+
+  .md-stats { grid-template-columns: repeat(2, 1fr); row-gap: 2.25rem; }
+  .md-stat { padding: 0 1rem; }
+  .md-stat:nth-child(3n+1) { border-left: 1px solid var(--hairline); padding-left: 1rem; }
+  .md-stat:nth-child(odd) { border-left: none; padding-left: 0; }
+
+  /* ---------- Features: tab strip becomes an accordion ----------
+     Four uppercase category names wrap onto three lines at this width, and a
+     wrapped tab row reads as a paragraph of links rather than a control. Each
+     header instead sits directly on top of its own panel.
+
+     No second markup: display:contents drops the two wrapper boxes so the tabs
+     and the panels become flex items of the same column, and --i (written per
+     group by renderFeatures) orders them into header/panel pairs. The DOM order
+     is untouched, so anything that ignores `order` still reads all four
+     headings together followed by all four panels — degraded, not broken.
+
+     Behaviour is unchanged: exactly one group open, the first by default.
+     Tapping the open header does nothing rather than collapsing to an empty
+     section — this is the same single-open control the tabs are, just stacked.
+     model-detail.js swaps the ARIA from tablist to disclosure at this width. */
+  .md-features-inner { display: flex; flex-direction: column; }
+  .md-features-inner > .md-section-head { order: 0; }
+  .md-feat-tabs,
+  .md-feat-panels { display: contents; }
+  .md-feat-tab   { order: calc(var(--i) * 2 + 1); }
+  .md-feat-panel { order: calc(var(--i) * 2 + 2); }
+
+  .md-feat-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.15rem 0;
+    text-align: left;
+    border-top: 1px solid var(--hairline);
+    border-bottom: none;       /* the desktop underline is not this control's rule */
+  }
+  .md-feat-tab.is-active { color: var(--text-dark); }
+  /* Closes the list: the last header carries the bottom rule only while its own
+     panel is shut, otherwise the panel carries it. */
+  .md-feat-tabs .md-feat-tab:last-child:not(.is-active) { border-bottom: 1px solid var(--hairline); }
+  .md-feat-panels .md-feat-panel:last-child { border-bottom: 1px solid var(--hairline); }
+
+  .md-feat-chev {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    color: var(--text-mid);
+    transition: transform 0.3s var(--ease-out), color 0.3s;
+  }
+  .md-feat-tab.is-active .md-feat-chev { transform: rotate(180deg); color: var(--blue); }
+
+  /* Flush under its header — the card treatment belonged to a panel that stood
+     alone under a tab row, not to one row of a list. */
+  .md-feat-panel {
+    padding: 0 0 1.4rem;
+    background: none;
+    border-radius: 0;
+  }
+
+  .md-scenery-band { height: 62svh; min-height: 400px; }
+  .md-scenery-band-heading { max-width: 11ch; }
+  /* the frame takes nearly the whole width, with just enough of its neighbours
+     showing to say the row keeps going. Padding stays symmetric — centre
+     snapping and the k * step position both depend on it. */
+  .md-scenery-carousel { --frame: 84vw; --frame-gap: 0.75rem; }
+  .md-scenery-foot { width: auto; padding: 0 var(--md-pad); }
+  .md-scenery-caption { gap: 1rem; }
+  .md-scenery-btn { width: 42px; height: 42px; }
+  /* 12 ticks plus four buttons will not fit a phone: the rail keeps position,
+     the arrows and the swipe do the moving */
+  .md-scenery-tick { width: 8px; }
+  .md-scenery-tick.is-on { width: 26px; }
+
+
+  /* svh, not vh — collapsing mobile chrome resizes vh mid-scroll, which
+     changes every media window's height and makes the scrubbed drift pop */
+  .md-intro-media:not(.md-intro-media--render) { height: 58svh; }
+  /* the sweep is short on a phone, so the coach takes more of it back */
+  .md-intro-media--render img { width: 78%; }
+
+  .md-spec-switch { display: flex; }
+  .md-spec-table thead { display: none; }
+  .md-spec-table .md-spec-col { display: none; }
+  .md-spec-table.is-col-0 .md-spec-col-0,
+  .md-spec-table.is-col-1 .md-spec-col-1,
+  .md-spec-table.is-col-2 .md-spec-col-2 { display: table-cell; }
+  .md-spec-key { width: 55%; }
+
+  .md-price-options li { flex-direction: column; gap: 0.35rem; }
+  .md-opt-price { align-self: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-page { --md-drift: 0%; }   /* no headroom, no crop, nothing to drift */
+  .md-scenery-band-img,
+  .md-similar-media img,
+  .md-intro-media img { transition: none; transform: none !important; }
+  .md-fp-panel.is-active { animation: none; }
+  .md-subnav-pill { transition: opacity 0.2s linear; }
+  /* the plan stage stays in its finished, open state */
+  .md-plan-stage { clip-path: none; }
+  .md-plan-zone { transition: none; }
+  /* the dot's blue fill and scale already say which zone is open, so stopping
+     the ping costs no information */
+  .md-hot.is-on::after { animation: none; }
+  .md-fp-select-chev { transition: none; }
+  /* the modal still appears and dismisses, it just does not fade */
+  .md-zoom { transition: none; }
+  /* every control on the stage rail, so the tour drops its scale-on-hover with
+     the zoom rather than being the one thing that still moves */
+  .md-plan-tool,
+  .md-zoom-close { transition: background 0.25s; }
+}
+
+/* Deep links land below the fixed header + sub-nav rather than under them.
+   Same two custom properties navOffset() reads, so the two can't disagree. */
+.model-page [id] {
+  scroll-margin-top: calc(var(--md-header-h) + var(--md-subnav-h) + 1.5rem);
+}

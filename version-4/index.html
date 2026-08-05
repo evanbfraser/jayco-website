@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=v4-mob-27" />
+  <link rel="stylesheet" href="css/style.css?v=v4-md-2" />
 </head>
 <body>
 
@@ -152,7 +152,7 @@
           </div>
         </div>
       </a>
-      <a href="#" class="category-card">
+      <a href="type.html?type=fifth-wheels" class="category-card">
         <img src="../assets/jayco-model-class-fifth-wheel.jpg" alt="Fifth Wheels" />
         <div class="card-overlay">
           <div class="card-top">
@@ -176,7 +176,7 @@
           </div>
         </div>
       </a>
-      <a href="#" class="category-card">
+      <a href="model.html?model=swift" class="category-card">
         <img src="../assets/jayco-model-class-b.jpg" alt="Class B" />
         <div class="card-overlay">
           <div class="card-top">
@@ -249,7 +249,7 @@
     <div class="dealer-container">
     <div class="dealer-ui">
       <span class="section-label">Find a Dealer</span>
-      <h2 class="section-heading dark">200+ dealers<br>across North America.</h2>
+      <h2 class="section-heading dark dealer-heading">200+ dealers across United States and Canada.</h2>
       <p class="section-body dark">Find the nearest Jayco dealer and start your journey.</p>
       <div class="dealer-search">
         <input
@@ -422,7 +422,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="model.html?model=swift" class="model-card">
             <img src="../assets/popular%20model-swift.jpg" alt="Swift" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -536,7 +536,7 @@
     <div class="final-cta-content">
       <span class="section-label light centered">Ready When You Are</span>
       <h2 class="cta-heading">Your Next Adventure<br>Starts Here.</h2>
-      <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by industry-leading support — before, during, and long after the sale.</p>
+      <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by a 2-year limited warranty, 3-year structural coverage and 200+ dealers — before, during, and long after the sale.</p>
       <div class="cta-buttons">
         <a href="#" class="btn-primary">Build &amp; Price</a>
         <a href="#" class="btn-secondary">Find a Dealer</a>
@@ -666,7 +666,7 @@
             <li><a href="#">All RVs</a></li>
             <li><a href="#">Travel Trailers</a></li>
             <li><a href="#">Destination Travel Trailers</a></li>
-            <li><a href="#">Fifth Wheels</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
             <li><a href="#">Toy Haulers</a></li>
             <li><a href="#">Class B Motorhomes</a></li>
             <li><a href="#">Class A Motorhomes</a></li>
@@ -756,7 +756,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/models-data.js?v=v4-mob-27"></script>
-  <script src="js/app.js?v=v4-mob-27"></script>
+  <script src="js/models-data.js?v=v4-md-2"></script>
+  <!-- lets the mobile menu know which models have a detail page -->
+  <script src="js/model-data.js?v=v4-md-2"></script>
+  <script src="js/app.js?v=v4-md-2"></script>
 </body>
 </html>
