@@ -1,0 +1,1117 @@
+/* ===================================================
+   Jayco — Build & Price  (configurator-only styles)
+   Relies on tokens + header/footer/cursor/buttons from style.css
+   =================================================== */
+
+.build-page { background: var(--canvas); }
+
+/* Form controls do not inherit font-family — a <button> with no font-family of
+   its own falls back to the UA default, which is Arial here, not Host Grotesk.
+   Nothing in this file set one on the step pills, the category chips, Back /
+   Next or the spec CTAs, so all four were rendering in Arial beside Host
+   Grotesk body copy. The homepage never hit this because style.css names a
+   font on each of its own controls; this file has to do the same, and doing it
+   once at the top is cheaper than remembering it per rule.
+   Family only — every size, weight and letter-spacing below still wins. */
+.build-page button,
+.build-page input,
+.build-page select,
+.build-page textarea {
+  font-family: inherit;
+}
+
+.builder {
+  padding-top: 96px; /* clears the fixed header */
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ---------- Step tracker (sticks 10px below the fixed header, stays on scroll) ---------- */
+.builder-steps {
+  position: sticky;
+  top: 96px; /* 86px header + 10px gap */
+  z-index: 30;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 2.6rem; /* left-aligned with the model cards */
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,0.85);
+  border-radius: var(--radius-btn);
+  box-shadow: 0 12px 44px rgba(15,11,9,0.14), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* Track: pills row over the progress rail */
+.steps-track { position: relative; min-width: 0; }
+.builder-steps-list {
+  display: flex;
+  gap: 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none; /* <ol> markers off — the number lives in .step-num */
+  position: relative;             /* containing block for .steps-marker */
+}
+.builder-steps-list::-webkit-scrollbar { display: none; }
+
+/* The travelling highlight. One box shared by all six pills: build.js animates
+   its x AND its width from the outgoing pill's geometry to the incoming one, so
+   a wide step visibly narrows into a short one rather than a fill blinking off
+   here and on there. Absolutely positioned inside the scroller, so it scrolls
+   with the pills on a phone.
+   transform-origin is the vertical centre because the travel squashes scaleY
+   briefly; anchoring it anywhere else would make the marker climb. */
+.steps-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: var(--radius-btn);
+  background: rgba(0,122,194,0.1);
+  pointer-events: none;
+  opacity: 0;                     /* until build.js has measured a pill */
+  transform-origin: 50% 50%;
+  z-index: 0;
+}
+
+.step-pill {
+  position: relative;             /* sits above the marker */
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  white-space: nowrap;
+  border-radius: var(--radius-btn);
+  color: var(--text-mid);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  opacity: 0.6;
+  transition: opacity 0.25s, color 0.25s, background 0.25s;
+}
+.step-num {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--warm-gray);
+  color: var(--text-mid);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.step-num svg { width: 13px; height: 13px; }
+.step-pill.reachable { opacity: 1; }
+.step-pill.reachable:hover { color: var(--text-dark); background: rgba(0,122,194,0.06); }
+.step-pill.done .step-num { background: var(--blue); color: #fff; }
+/* No background here any more — .steps-marker draws it and carries it across.
+   Leaving it would double up: a static fill appearing instantly on the new
+   pill while the marker is still travelling towards it. */
+.step-pill.active {
+  opacity: 1;
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+.step-pill.active .step-num {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(0,122,194,0.18);
+}
+/* The numeral/tick is its own layer so it can be scaled and spun on completion
+   without dragging the circle's ring with it. */
+.step-num-inner { display: grid; place-items: center; line-height: 1; }
+.step-pill[disabled] { pointer-events: none; }
+
+/* Progress rail beneath the pills — hidden (step states convey progress) */
+.steps-rail {
+  display: none;
+  position: relative;
+  height: 3px;
+  margin: 0.25rem 0.4rem 0;
+  background: var(--warm-gray);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.steps-rail-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--blue-dark), var(--blue-light));
+  transition: width 0.45s var(--ease-out);
+}
+
+/* ---------- Layout ---------- */
+.builder-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2.5rem;
+  align-items: start;
+  padding-bottom: 4rem;
+}
+.builder-main { min-width: 0; }
+
+/* ---------- Step panel & shared heads ---------- */
+.step-panel { min-height: 340px; }
+.step-head { margin-bottom: 1.6rem; }
+.step-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.step-head p {
+  color: var(--text-mid);
+  font-size: 0.98rem;
+  margin-top: 0.5rem;
+  max-width: 560px;
+}
+
+/* Panel enter animation target */
+.panel-anim { opacity: 0; transform: translateY(14px); }
+
+/* ---------- Category chips ---------- */
+.cat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1.6rem;
+}
+.cat-chip {
+  padding: 0.55rem 1.05rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-mid);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.cat-chip:hover { border-color: var(--blue-light); color: var(--text-dark); }
+.cat-chip.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* ---------- Model grid ---------- */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+.model-tile {
+  position: relative;
+  text-align: center;
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.3s var(--ease-out), box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  /* The whole tile starts the build, not just its button, so it has to read as
+     one control. On desktop the site's own cursor replaces this (style.css
+     hides the native pointer and draws its own), but it still matters on
+     anything using the system cursor. */
+  cursor: pointer;
+}
+.model-tile:hover {
+  border-color: var(--blue-light);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 44px rgba(15,11,9,0.14);
+}
+.model-tile.selected {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue);
+}
+.model-tile-media {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--white);
+  /* extra top space so the specs icon sits above the render, not over it */
+  padding: 3.6rem 1rem 0.8rem;
+}
+.model-tile-media img { width: 100%; height: 100%; object-fit: contain; }
+.model-tile-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 1.2rem 1.6rem;
+}
+.model-tile-cat {
+  display: inline-block;
+  font-size: 0.64rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--blue-dark);
+  font-weight: 700;
+  background: rgba(0,122,194,0.1);
+  padding: 0.32rem 0.85rem;
+  border-radius: var(--radius-btn);
+}
+.model-tile-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+  line-height: 1.05;
+}
+.model-tile-price { font-size: 0.9rem; color: var(--text-mid); }
+.model-tile-price b { color: var(--text-dark); font-weight: 700; }
+.model-tile-build {
+  margin-top: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: linear-gradient(to right, var(--blue-dark) 50%, var(--blue) 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  border: none;
+  padding: 0.7rem 1.7rem;
+  border-radius: var(--radius-btn);
+  transition: background-position 0.4s var(--ease-out), transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.model-tile-build:hover {
+  background-position: 0% 0;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,122,194,0.3);
+}
+
+/* Specs button (top-right) — mirrors homepage v2 */
+.model-specs-btn {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 15;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--blue);
+  box-shadow: 0 4px 14px rgba(0,122,194,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.model-specs-btn:hover { background: var(--blue-dark); transform: scale(1.1); }
+.model-specs-icon {
+  width: auto;
+  height: 17px;
+  filter: brightness(0) invert(1);
+  display: block;
+}
+/* when the specs panel is open, the icon becomes an X to close it */
+.model-tile.is-specs .model-specs-icon { display: none; }
+.model-tile.is-specs .model-specs-btn::before,
+.model-tile.is-specs .model-specs-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+.model-tile.is-specs .model-specs-btn::before { transform: translate(-50%, -50%) rotate(45deg); }
+.model-tile.is-specs .model-specs-btn::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* Blue specs overlay — opened by clicking the specs icon */
+.model-specs-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: var(--blue);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  padding: 1.5rem 1.6rem 4.6rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-out);
+}
+.model-tile.is-specs .model-specs-panel { opacity: 1; pointer-events: auto; }
+.model-specs-img {
+  height: 72px;
+  width: auto;
+  max-width: 60%;
+  object-fit: contain;
+  object-position: left center;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 3px 8px rgba(10,8,6,0.28));
+}
+.model-specs-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.model-specs-tagline {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.9;
+  margin: 0.3rem 0 1rem;
+}
+.model-specs-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.model-specs-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.model-specs-list li:last-child { border-bottom: none; }
+.model-specs-list .spec-k { opacity: 0.82; white-space: nowrap; }
+.model-specs-list .spec-v { font-weight: 600; text-align: right; }
+.model-specs-cta {
+  /* pinned to the same spot as .model-tile-build in the normal state: bottom-center */
+  position: absolute;
+  left: 50%;
+  bottom: 1.6rem;
+  transform: translateX(-50%);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: rgba(255,255,255,0.14);
+  border: 1.5px solid rgba(255,255,255,0.6);
+  border-radius: var(--radius-btn);
+  padding: 0.7rem 1.7rem;
+  transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out);
+}
+.model-specs-cta:hover { background: #fff; color: var(--blue); transform: translateX(-50%) translateY(-2px); }
+
+/* ---------- Option cards (floorplan) ---------- */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+.fp-card {
+  text-align: left;
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.3s var(--ease-out), box-shadow 0.3s;
+}
+.fp-card:hover { border-color: var(--blue-light); transform: translateY(-3px); box-shadow: 0 14px 30px rgba(15,11,9,0.1); }
+.fp-card.selected { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+/* .fp-card is a <button> and these two are <span>s, so without an explicit
+   display they are inline boxes. That had two consequences, both inherited
+   from version-1 where the card has always been built this way:
+     • aspect-ratio does not apply to an inline non-replaced box, so the media
+       well was sized by its image rather than by the ratio declared below;
+     • an inline body does not extend the button's height, so with
+       overflow:hidden above the card cropped its own body — the specs row and
+       the price have never actually been visible on a floorplan card.
+   Making both block-level fixes the crop and lets the ratio take effect. */
+.fp-card-media,
+.fp-card-body { display: block; }
+.fp-card-media {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, #fff, var(--surface));
+  position: relative;
+  overflow: hidden;
+}
+.fp-card-media img { width: 100%; height: 100%; object-fit: contain; padding: 0.5rem; }
+.fp-card-plan {
+  position: absolute;
+  left: 0.8rem; bottom: 0.8rem;
+  background: rgba(15,11,9,0.72);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+.fp-card-body { padding: 0.9rem 1.05rem 1.1rem; }
+.fp-specs {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+.fp-spec { font-size: 0.8rem; color: var(--text-mid); }
+.fp-spec b { display: block; color: var(--text-dark); font-size: 0.95rem; font-weight: 700; }
+.fp-card-price { font-size: 0.85rem; color: var(--text-mid); font-weight: 600; }
+.fp-card-price.included { color: var(--blue); }
+
+/* ---------- Floorplan cards carrying a real drawing ----------
+   The generic card was built for a photograph of the coach and stands on a
+   16/9 tinted well. A floorplan drawing is a wide line diagram on a
+   transparent ground: it needs a flat white bed to read against, a wider
+   frame so a 40-foot plan is not shrunk to a smear, and more column width.
+   Scoped to --fp so models still using a photo keep the original card. */
+.option-grid--fp { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+.option-grid--fp .fp-card-media {
+  aspect-ratio: 2 / 1;
+  background: #fff;                 /* the drawings are line art — no gradient under them */
+}
+.fp-card-drawing { padding: 0.75rem 0.9rem; }
+
+/* ---------- Enlarge a floorplan ----------
+   The wrapper exists so the zoom can be a sibling of the card rather than a
+   button inside a button. It carries the grid cell, so the card has to fill
+   it or the cards stop aligning at the foot. */
+.fp-card-wrap { position: relative; display: flex; }
+.fp-card-wrap > .fp-card { flex: 1; min-width: 0; }
+/* Ink on light, like the quiz's, not the model page's glass — the drawing sits
+   on a white bed here. Always visible rather than on hover: there is no hover
+   on a touch screen, and a control half the visitors cannot find is not a
+   control. */
+.fp-zoom {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--warm-gray);
+  background: rgba(255,255,255,0.94);
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.fp-zoom:hover { background: #fff; transform: scale(1.06); }
+.fp-zoom:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* The modal. Structure and both of its awkward details are model.css's
+   .md-zoom, restated: the closed state is [hidden] rather than a transitioned
+   visibility, and it stays displayed through the fade-out, so it must not be
+   hit-testable while it is closing. */
+.bp-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;                    /* over the header (1000), under the loader */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3.5rem);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+.bp-zoom[hidden] { display: none; }
+.bp-zoom.is-open { opacity: 1; }
+.bp-zoom:not(.is-open) { pointer-events: none; }
+.bp-zoom-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--band-navy);     /* opaque fallback where color-mix is absent */
+  background: color-mix(in srgb, var(--band-navy) 94%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.bp-zoom-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.bp-zoom-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* room for the caption and the padding, so the plan is never cropped */
+  max-height: calc(100vh - clamp(1rem, 4vw, 3.5rem) * 2 - 3.5rem);
+  object-fit: contain;
+  border-radius: var(--radius-card);
+  background: #fff;                 /* the drawings are line art on white */
+}
+.bp-zoom-caption {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245,242,238,0.55);
+}
+.bp-zoom-close {
+  position: absolute;
+  z-index: 2;
+  top: clamp(0.75rem, 2vw, 1.5rem);
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.bp-zoom-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.06); }
+.bp-zoom-close:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-zoom { transition: none; }
+  .fp-zoom,
+  .bp-zoom-close { transition: background 0.25s; }
+  .fp-zoom:hover,
+  .bp-zoom-close:hover { transform: none; }
+}
+
+.fp-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+.fp-badge {
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-mid);
+  background: var(--surface);
+  border: 1px solid var(--warm-gray);
+  border-radius: 50px;
+  padding: 0.2rem 0.55rem;
+}
+.fp-badge--new { color: #fff; background: var(--blue); border-color: var(--blue); }
+
+/* Jayco has not released pricing for these plans, so they cannot be built.
+   Shown rather than hidden — the drawing is real and people are looking for
+   it — but visibly inert, and the button carries `disabled` so it is not
+   merely styled that way. */
+.fp-card.is-new { cursor: default; opacity: 0.72; }
+.fp-card.is-new:hover { border-color: var(--warm-gray); transform: none; box-shadow: none; }
+.fp-card-price--tbd { font-size: 0.85rem; font-weight: 600; color: var(--text-mid); font-style: italic; }
+
+.step-note {
+  margin: -0.6rem 0 1.4rem;
+  font-size: 0.88rem;
+  color: var(--text-mid);
+}
+
+/* ---------- Swatches (exterior / interior) ---------- */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+.swatch {
+  text-align: center;
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  padding: 0.8rem;
+  transition: border-color 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.swatch:hover { border-color: var(--blue-light); transform: translateY(-3px); }
+.swatch.selected { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+.swatch-chip {
+  height: 78px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 0.6rem;
+}
+.swatch-name { font-size: 0.86rem; font-weight: 600; color: var(--text-dark); }
+.swatch-price { font-size: 0.78rem; color: var(--text-mid); margin-top: 0.15rem; }
+.swatch-price.included { color: var(--blue); }
+
+/* A décor supplied as a real photograph rather than a flat hex chip. The
+   Jay Flight swatch is a wide strip of the actual fabrics, cabinetry and
+   counter, so it gets a wider card than the 140px colour chips and keeps its
+   own proportions instead of being squared off. */
+.swatch--photo { grid-column: span 2; }
+.swatch-photo {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 0.6rem;
+}
+.swatch-photo img { display: block; width: 100%; height: auto; }
+
+/* ---------- Sole option (exterior / interior with nothing to choose) ----------
+   Deliberately NOT a one-card grid: with nothing to compare against, a lone
+   swatch reads as a grid whose siblings failed to load. This is a statement
+   panel instead — the finish at full width, named, with the reason it is the
+   only one. Nothing here is clickable, because nothing here is a decision. */
+.sole-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  padding: clamp(1.25rem, 2.2vw, 2rem);
+}
+.sole-option-media {
+  background: linear-gradient(180deg, #fff, var(--surface));
+  border-radius: 14px;
+  overflow: hidden;
+}
+.sole-option-media img { display: block; width: 100%; height: auto; }
+.sole-option-eyebrow {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--blue);
+}
+.sole-option-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 0.35rem;
+  line-height: 1.05;
+}
+.sole-option-note {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-mid);
+  max-width: 42ch;
+}
+.sole-option-price {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+@media (max-width: 760px) {
+  .sole-option { grid-template-columns: 1fr; }
+}
+
+/* ---------- Full specifications (below the options on Packages & Options) ----------
+   Reference material, not a control surface, so it sits on the page ground
+   rather than in a card and keeps a quieter weight than the choices above it. */
+.spec-sheet {
+  margin-top: clamp(2.5rem, 4.5vw, 3.75rem);
+  border-top: 1px solid var(--warm-gray);
+  padding-top: clamp(1.5rem, 2.6vw, 2.25rem);
+}
+.spec-sheet-head {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1.9vw, 1.6rem);
+  font-weight: 800;
+  color: var(--text-dark);
+}
+.spec-sheet-sub { margin-top: 0.35rem; font-size: 0.9rem; color: var(--text-mid); }
+.spec-groups {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(1.25rem, 2.4vw, 2.25rem);
+  align-items: start;
+}
+.spec-group-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--blue);
+  padding-bottom: 0.5rem;
+  border-bottom: 1.5px solid var(--warm-gray);
+}
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--warm-gray);
+}
+.spec-row dt { font-size: 0.85rem; color: var(--text-mid); }
+.spec-row dd { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); text-align: right; white-space: nowrap; }
+
+/* ---------- Package cards ---------- */
+.pkg-list { display: flex; flex-direction: column; gap: 0.9rem; }
+.pkg-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: left;
+  width: 100%;
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.2rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.pkg-card:hover { border-color: var(--blue-light); }
+.pkg-card.selected { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+.pkg-check {
+  flex: 0 0 auto;
+  width: 24px; height: 24px;
+  border-radius: 7px;
+  border: 2px solid var(--warm-gray);
+  display: grid;
+  place-items: center;
+  margin-top: 0.15rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.pkg-check svg { opacity: 0; color: #fff; }
+.pkg-card.selected .pkg-check { background: var(--blue); border-color: var(--blue); }
+.pkg-card.selected .pkg-check svg { opacity: 1; }
+.pkg-info { flex: 1; min-width: 0; }
+.pkg-name { font-weight: 700; color: var(--text-dark); font-size: 1rem; }
+.pkg-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--blue);
+  background: rgba(0,122,194,0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  vertical-align: middle;
+}
+.pkg-desc { font-size: 0.86rem; color: var(--text-mid); margin-top: 0.3rem; line-height: 1.5; }
+/* Jayco marks these "(Mandatory)" — they are priced into every build of the
+   plan, so they show ticked and priced but do not respond to a click. Kept at
+   full contrast rather than dimmed: the charge is real and the buyer should be
+   able to read it, it simply is not a decision. */
+.pkg-card.is-locked { cursor: default; background: var(--surface); }
+.pkg-card.is-locked:hover { border-color: var(--warm-gray); }
+.pkg-badge--req { color: var(--text-mid); background: var(--warm-gray); }
+.pkg-price {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.pkg-price.included { color: var(--blue); }
+
+/* ---------- Summary (Step 6 body) ---------- */
+.summary-review { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+.summary-review-media {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  aspect-ratio: 16 / 11;
+  background: linear-gradient(180deg, #fff, var(--surface));
+  border: 1px solid var(--warm-gray);
+}
+.summary-review-media img { width: 100%; height: 100%; object-fit: contain; padding: 0.8rem; }
+.review-lines { border-top: 1px solid var(--warm-gray); margin-top: 0.4rem; }
+.review-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--warm-gray);
+  font-size: 0.92rem;
+}
+.review-line .rl-label { color: var(--text-mid); }
+.review-line .rl-label b { display: block; color: var(--text-dark); font-weight: 600; }
+.review-line .rl-val { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+.review-line .rl-val.included { color: var(--blue); font-weight: 600; }
+.review-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--text-dark);
+}
+.review-total .rt-label { font-size: 0.95rem; color: var(--text-mid); }
+.review-total .rt-val { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; color: var(--text-dark); }
+.review-ctas { display: flex; gap: 0.8rem; margin-top: 1.6rem; flex-wrap: wrap; }
+.review-ctas .btn-print {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  color: var(--text-dark);
+  font-size: 0.82rem; font-weight: 500;
+  transition: border-color 0.2s, background 0.2s;
+}
+.review-ctas .btn-print:hover { border-color: var(--text-mid); background: var(--white); }
+
+/* ---------- Sticky summary sidebar ---------- */
+/* ---------- Summary step: one review, not two ----------
+   Everywhere else the sidebar is the running tally beside the choices you are
+   making. On the Summary step the panel itself lists every line, the total and
+   the CTAs, so keeping the sidebar would print the same figures twice on one
+   screen — and on a phone the fixed price bar would make it three times.
+   Set by render() on <main class="builder">. */
+.builder.is-summary .build-summary,
+.builder.is-summary .mobile-bar { display: none; }
+.builder.is-summary .builder-layout { grid-template-columns: 1fr; }
+
+.build-summary {
+  position: sticky;
+  top: 88px; /* clears the fixed header */
+  background: var(--white);
+  border: 1px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: 0 10px 34px rgba(15,11,9,0.07);
+}
+.summary-model-media { aspect-ratio: 16 / 9; background: linear-gradient(180deg, #fff, var(--surface)); }
+.summary-model-media img { width: 100%; height: 100%; object-fit: contain; padding: 0.4rem; }
+.summary-model-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--warm-gray);
+}
+.summary-model-name { flex: 1; text-align: center; min-width: 0; }
+.summary-model-year { font-size: 0.72rem; color: var(--text-mid); letter-spacing: 0.08em; }
+.summary-model-name h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.05;
+  margin: 0.1rem 0;
+}
+.summary-model-cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); font-weight: 600; }
+/* .summary-model-nav (the prev/next circles) removed — model selection happens
+   on the step-1 cards only. .summary-model-name keeps flex:1 and its centring:
+   as the head's only child it now spans the full width, so the name still sits
+   centred under the render rather than drifting to one side. */
+
+.summary-lines { padding: 0.6rem 1rem; }
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px dashed var(--warm-gray);
+}
+.summary-line:last-child { border-bottom: none; }
+.summary-line .sl-label { color: var(--text-mid); min-width: 0; }
+.summary-line .sl-label small { display: block; color: var(--text-dark); font-weight: 600; font-size: 0.85rem; }
+.summary-line .sl-val { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+.summary-line .sl-val.included { color: var(--blue); font-weight: 600; }
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--warm-gray);
+}
+.summary-total-label { font-size: 0.82rem; color: var(--text-mid); }
+.summary-total-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+.summary-disclaimer { font-size: 0.68rem; color: var(--text-mid); line-height: 1.4; padding: 0 1rem 0.8rem; }
+.summary-cta { display: block; width: calc(100% - 2rem); margin: 0 1rem 0.6rem; text-align: center; }
+.build-summary-dealer {
+  display: block;
+  text-align: center;
+  padding: 0 1rem 1.1rem;
+  font-size: 0.82rem;
+  color: var(--blue);
+  font-weight: 600;
+}
+.build-summary-dealer:hover { text-decoration: underline; }
+
+/* ---------- Back / Next ---------- */
+.builder-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--warm-gray);
+}
+.build-back {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: none; border: none;
+  color: var(--text-mid);
+  font-size: 0.9rem; font-weight: 500;
+  padding: 0.6rem 0.2rem;
+  transition: color 0.2s;
+}
+.build-back:hover { color: var(--text-dark); }
+.build-back[hidden] { visibility: hidden; }
+.build-next { display: inline-flex; align-items: center; gap: 0.45rem; border: none; }
+/* renderNav() sets .hidden on Next at the Summary step — the flow ends there,
+   so there is nowhere to go next. But [hidden] is a UA rule and the author
+   `display: inline-flex` above outranks it, so the button stayed on screen at
+   the end of the build. .build-back already had its own [hidden] rule; this is
+   the matching one. display, not visibility: Next sits at the right end of a
+   space-between row, so hiding it should also give its space back. */
+.build-next[hidden] { display: none; }
+
+/* ---------- Mobile bottom bar ---------- */
+.mobile-bar { display: none; }
+
+/* ---------- Quote modal ---------- */
+.quote-modal {
+  position: fixed; inset: 0; z-index: 5000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.quote-modal.open { display: flex; }
+.quote-backdrop { position: absolute; inset: 0; background: rgba(15,11,9,0.55); backdrop-filter: blur(4px); }
+.quote-dialog {
+  position: relative;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  width: 100%; max-width: 440px;
+  padding: 2.2rem 2rem;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+  animation: quotePop 0.4s var(--ease-out);
+}
+@keyframes quotePop { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+.quote-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; color: var(--text-mid);
+  transition: color 0.2s;
+}
+.quote-close:hover { color: var(--text-dark); }
+.quote-heading { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-top: 0.3rem; }
+.quote-sub { font-size: 0.9rem; color: var(--text-mid); margin: 0.5rem 0 1.4rem; line-height: 1.5; }
+.quote-field { margin-bottom: 0.9rem; }
+.quote-field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-mid); }
+.quote-field input {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--warm-gray);
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background: var(--canvas);
+  transition: border-color 0.2s;
+}
+.quote-field input:focus { outline: none; border-color: var(--blue); }
+.quote-submit { width: 100%; text-align: center; margin-top: 0.4rem; border: none; }
+.quote-success { text-align: center; }
+.quote-check {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: rgba(0,122,194,0.1); color: var(--blue);
+  display: grid; place-items: center; margin: 0 auto 1rem;
+}
+.quote-success .btn-primary { border: none; margin-top: 1rem; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .builder-layout { grid-template-columns: 1fr 300px; gap: 1.6rem; }
+  .model-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .summary-review { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .builder { padding-top: 90px; padding-bottom: 90px; }
+  /* the bottom padding exists to clear the fixed price bar; on Summary there
+     is no bar, so give the space back */
+  .builder.is-summary { padding-bottom: 2rem; }
+  .builder-steps { top: 90px; width: 100%; }
+  .steps-track { flex: 1; }
+  .model-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  /* Labels stay on phones. They used to be hidden here so all six pills would
+     fit, which left six numbered circles and no way to tell what step 4 was.
+     The row is already a horizontal scroller, so it simply scrolls instead —
+     and renderSteps() calls followActiveStep() to keep the current pill
+     centred as the build progresses. */
+  .step-pill { padding: 0.4rem 0.7rem; }
+  .step-label { font-size: 0.82rem; }
+  .builder-steps-list {
+    scroll-snap-type: x proximity;      /* a flick lands on a pill, not between two */
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 0.6rem;
+  }
+  .builder-steps-list > li { scroll-snap-align: center; }
+  /* Soft edges so the row reads as scrollable rather than cut off — otherwise
+     a pill scrolled half out of frame ends on a hard edge mid-word ("…or" for
+     Interior). A mask, not an overlay, so the pills underneath stay tappable.
+     Applied per side and only when there is actually something hidden that
+     way: a permanent left fade would dim the first pill at rest.
+     followActiveStep() and the rail's own scroll handler set these. */
+  .steps-track.fade-l {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px);
+  }
+  .steps-track.fade-r {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  }
+  .steps-track.fade-l.fade-r {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  }
+  .builder-layout { grid-template-columns: 1fr; }
+  /* Sidebar collapses — its model header still shows, but total moves to bottom bar */
+  .build-summary { position: static; top: auto; }
+  .summary-cta, .build-summary-dealer { display: none; }
+  .builder-nav .build-next { display: none; } /* Next lives in the mobile bar */
+
+  .mobile-bar {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 900;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1.1rem;
+    background: var(--white);
+    border-top: 1px solid var(--warm-gray);
+    box-shadow: 0 -6px 20px rgba(15,11,9,0.08);
+  }
+  .mobile-bar-label { font-size: 0.68rem; color: var(--text-mid); display: block; }
+  .mobile-bar-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
+  .mobile-bar-next { border: none; padding: 0.7rem 1.6rem; }
+
+  /* v5 pins a chat button to the bottom-right of every page. It is fixed at
+     z-index 900 — the same layer as this bar — and sits earlier in the DOM, so
+     at this width the bar paints straight over it and the button cannot be
+     tapped. The homepage never hits this because it has no bottom bar.
+     5.75rem = the bar's measured 76px height plus the 0.85rem the button keeps
+     from the edge on phones. */
+  .build-page .hero-chat-btn { bottom: 5.75rem; }
+}
+@media (max-width: 520px) {
+  .model-grid { grid-template-columns: 1fr; }
+  .model-tile-name { font-size: 1.5rem; }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  .site-header, .site-footer, .builder-steps, .builder-nav,
+  .build-summary, .mobile-bar, .quote-modal, #loader, .cursor { display: none !important; }
+  .builder { padding-top: 0; }
+  .builder-layout { display: block; }
+  body { cursor: auto !important; }
+  * { cursor: auto !important; }
+}
