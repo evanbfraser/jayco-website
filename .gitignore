@@ -46,6 +46,14 @@ assets/quiz/*.jpg
 assets/quiz/*.jpeg
 assets/quiz/*.png
 
+# The delivered master of the news section's hookups video: 17 MB at 36 Mbps,
+# where the two cards beside it run 8.5–10.8. The news videos play on hover, so
+# that whole file would have to arrive between the pointer landing and the first
+# frame moving. -v2-web.mp4 beside it is the 1280x720 / 5 Mbps derivative the
+# page actually loads; this stays local so the master is never re-encoded from
+# a compressed copy.
+assets/jayco-news-hookups-v2.mp4
+
 # Local Netlify folder
 .netlify
 
