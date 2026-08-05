@@ -1,0 +1,419 @@
+/* ===================================================
+   Jayco — Find a Dealer
+   ---------------------------------------------------
+   Relies on tokens + header/footer/buttons from style.css.
+   The map owns the stage; every control floats over it.
+   On a phone the same panel becomes a bottom sheet — one
+   markup tree, two behaviours, so there is only ever one
+   result list and one set of handlers.
+   =================================================== */
+
+.dealers-page {
+  background: var(--canvas);
+  --dl-panel-w: min(430px, 33vw);
+  /* NOTE: --dl-top is NOT declared here either, for the same reason as the sheet
+     height below. dealers.js measures the real header and publishes it on
+     documentElement; the map sits flush under it with no padding. A hardcoded
+     96px was both wrong and unfixable — the header measures anywhere from 65px
+     to 114px depending on how the nav wraps, so at some widths the map slid
+     under the bar and at others it left a visible gap.
+     Every use site carries its own fallback instead. */
+  /* NOTE: --dl-sheet-h is deliberately NOT declared here. dealers.js publishes it
+     on documentElement, and a declaration on the body would shadow that for every
+     descendant — the chat button would read this value, not the measured one.
+     Consumers supply their own fallback instead. compare.css does the same with
+     --cmp-tray-h. */
+}
+
+/* Form controls do not inherit font-family — a <button> or <select> with none
+   falls back to the UA default, which is Arial here, not Host Grotesk. */
+.dealers-page button,
+.dealers-page input,
+.dealers-page select,
+.dealers-page textarea { font-family: inherit; }
+
+/* The `hidden` attribute is a UA rule and loses to any author `display`.
+   Several things on this page are toggled with it. */
+.dealers-page [hidden] { display: none !important; }
+
+.dl-visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Stage ---------- */
+/* Fixed rather than tall-and-scrolling: the map is the page, and a full-bleed
+   map that scrolls away is just a picture. The footer still lives below it. */
+.dl {
+  position: relative;
+  height: calc(100dvh - var(--dl-top, 96px));
+  margin-top: var(--dl-top, 96px);
+  overflow: hidden;
+}
+/* z-index: 0 is doing real work — it makes the stage a stacking context so
+   Leaflet's internal panes (z-index 400–700) stay contained inside it. Without
+   it they compete in .dl's context and paint straight over the floating panel,
+   which sits at z-index 2. */
+.dl-stage { position: absolute; inset: 0; z-index: 0; }
+.dl-map { width: 100%; height: 100%; }
+
+/* ---------- Brand cartography (Leaflet path) ----------
+   The tile PANE only, never the map container. Markers, popups and controls sit
+   in sibling panes, so filtering here pushes the basemap to a pale blue-grey
+   while the pins stay true Jayco blue — which matters, because DESIGN.md rations
+   blue to one emphasis and the pins are it. The Google path gets the equivalent
+   from its styles array instead. */
+/* These numbers are measured, not guessed. CARTO's light basemap paints land at
+   rgb(250,250,248) — chroma 2, effectively neutral — and water at rgb(212,218,220),
+   chroma 8 at hue ~195°. Jayco blue sits at hue ~202°, so the water is already
+   almost the right hue and simply has no saturation.
+   saturate() scales chroma around luminance, so it lifts the water and leaves
+   near-neutral land alone: this pushes water to ~#C8DFEB, a light Jayco tint,
+   while land lands on ~#FCFDF4 and roads stay white.
+   (An earlier saturate(0.5) hue-rotate(172deg) did the reverse — it crushed the
+   water's chroma and spun it to ~#E2DFDE, a warm grey.)
+
+   Why 2.8 and not more: CARTO's state borders are faintly pink (rgb 242,232,231),
+   which is the complement of the water's hue, so any global saturate lifts both
+   in lockstep — at 4.2 the water was a confident blue but the borders turned
+   visibly salmon, a warm accent this brand does not have. 2.8 puts water at
+   ~#D2E2EA, the light tint asked for, and leaves the borders at ~#FFECE6, which
+   reads as near-white. A hue-selective version of this needs vector tiles, i.e.
+   the Google path. */
+.dealers-page .leaflet-tile-pane {
+  filter: saturate(2.8) hue-rotate(6deg) brightness(1.03);
+}
+
+/* Leaflet sets its own font on popups; this page has one family. */
+/* The one ground left on --off-white, and deliberately: it sits UNDER the map
+   tiles, whose own palette is warm throughout (land #F5F2EE, roads and borders
+   #E8E4DE). A cool backdrop would show as a cool seam wherever a tile has not
+   loaded. See js/dealers.js for the palette this matches. */
+.dealers-page .leaflet-container { font-family: inherit; background: var(--off-white); }
+
+/* Deliberately no `position` here. Leaflet sets .leaflet-marker-icon to
+   position:absolute and drives each pin with a transform; dealers.css loads
+   after leaflet.css, so declaring position:relative on this class silently wins
+   and drops all 428 pins into normal flow — they stack ~9px apart down the pane
+   while their transforms still shift them sideways, which reads as "the map is
+   projecting wrong" rather than "the CSS is wrong". */
+.dl-pin span {
+  display: block; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--blue); border: 2.5px solid #fff;
+  box-shadow: 0 2px 6px rgba(15,11,9,0.3);
+  transition: transform 0.18s var(--ease-out), background 0.18s;
+}
+.dl-pin:hover span { transform: scale(1.25); }
+.dl-pin.is-selected span {
+  background: var(--blue-dark);
+  transform: scale(1.45);
+  box-shadow: 0 0 0 4px rgba(0,122,194,0.25), 0 2px 8px rgba(15,11,9,0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl-pin span { transition: none; }
+}
+
+.dealers-page .leaflet-popup-content-wrapper {
+  border-radius: 12px; box-shadow: 0 4px 16px rgba(15,11,9,0.18);
+}
+.dealers-page .leaflet-popup-content { margin: 0.6rem 0.85rem; }
+.dl-pop-name {
+  display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-dark);
+}
+.dl-pop-sub { display: block; font-size: 0.78rem; color: var(--text-mid); }
+
+.dl-map-fallback {
+  display: grid; place-items: center;
+  width: 100%; height: 100%;
+  /* --surface, not the map's warm off-white: when this shows there IS no map,
+     so it is a panel on the page rather than a stand-in for the tiles. */
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0,122,194,0.06), transparent 60%),
+    var(--surface);
+}
+.dl-fallback-inner {
+  max-width: 22rem; text-align: center; color: var(--text-mid);
+  padding: 0 1.5rem;
+}
+.dl-fallback-inner svg { color: var(--blue); opacity: 0.6; }
+.dl-fallback-title {
+  margin-top: 0.9rem; font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; color: var(--text-dark);
+}
+.dl-fallback-body { margin-top: 0.4rem; font-size: 0.84rem; line-height: 1.6; }
+/* Weight and a tinted chip rather than a monospace face: DESIGN.md commits to a
+   single family, and a dev-facing placeholder is not a reason to add a second. */
+.dl-fallback-body code {
+  font-weight: 700; color: var(--text-dark);
+  background: var(--warm-gray);
+  padding: 0.1rem 0.3rem; border-radius: 4px;
+}
+
+/* ---------- Floating panel ---------- */
+.dl-panel {
+  position: absolute; z-index: 2;
+  top: 1.25rem; left: var(--page-pad);
+  width: var(--dl-panel-w);
+  max-height: calc(100% - 2.5rem);
+  display: flex; flex-direction: column;
+  /* Lighter fill and a heavier blur so the map reads through the panel. The
+     saturate() lifts colour the blur would otherwise wash out, which is what
+     keeps it looking like frosted glass over a map rather than flat grey. 0.72
+     is about as far as the fill can drop before the 0.78rem address lines stop
+     holding contrast against a busy basemap. */
+  background: rgba(255,255,255,0.72);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  /* the documented floating-control shadow, not a card shadow */
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1), 0 6px 24px rgba(15,11,9,0.08);
+  overflow: hidden;
+}
+.dl-panel-head { flex: none; padding: 1.4rem 1.4rem 0; }
+.dl-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1.9vw, 1.9rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--text-dark); margin-top: 0.5rem;
+}
+
+/* ---------- Search ---------- */
+.dl-search { display: flex; gap: 0.5rem; margin-top: 1.1rem; }
+.dl-field {
+  position: relative; flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center;
+}
+.dl-field-ico {
+  position: absolute; left: 0.85rem; color: var(--text-mid); pointer-events: none;
+}
+.dl-input {
+  width: 100%;
+  padding: 0.7rem 2.2rem 0.7rem 2.4rem;
+  border: 1.5px solid var(--warm-gray); border-radius: 14px;   /* the field radius */
+  background: #fff; color: var(--text-dark); font-size: 0.9rem;
+}
+.dl-input::placeholder { color: var(--text-mid); }
+.dl-input:focus { outline: none; border-color: var(--blue); }
+.dl-input:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.dl-clear {
+  position: absolute; right: 0.55rem;
+  border: none; background: none; cursor: pointer;
+  font-size: 1.15rem; line-height: 1; color: var(--text-mid); padding: 0.15rem 0.3rem;
+}
+.dl-go {
+  flex: none; border: none; cursor: pointer;
+  padding: 0 1.15rem; border-radius: var(--radius-btn);
+  background: var(--blue); color: #fff;
+  font-size: 0.84rem; font-weight: 600;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.dl-go:hover { background: var(--blue-dark); box-shadow: 0 8px 20px rgba(0,122,194,0.3); }
+
+.dl-locate {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  margin-top: 0.7rem; padding: 0;
+  border: none; background: none; cursor: pointer;
+  font-size: 0.82rem; font-weight: 600; color: var(--blue);
+}
+.dl-locate:hover { color: var(--blue-dark); }
+.dl-locate:disabled { opacity: 0.55; cursor: default; }
+
+.dl-note {
+  margin-top: 0.7rem; font-size: 0.78rem; line-height: 1.5; color: var(--text-mid);
+}
+.dl-note.is-warn { color: var(--blue-dark); }
+
+/* ---------- Filters ---------- */
+.dl-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+.dl-seg {
+  display: inline-flex; padding: 3px;
+  background: var(--surface); border-radius: var(--radius-btn);
+}
+.dl-seg-btn {
+  border: none; background: none; cursor: pointer;
+  padding: 0.4rem 0.85rem; border-radius: var(--radius-btn);
+  font-size: 0.78rem; font-weight: 600; color: var(--text-mid);
+  transition: background 0.2s, color 0.2s;
+}
+.dl-seg-btn.is-active { background: #fff; color: var(--text-dark); box-shadow: 0 1px 3px rgba(15,11,9,0.1); }
+/* Disabled because Jayco publishes no service data — see dealer-data.js. It is
+   shown rather than hidden so the capability is legible once data arrives. */
+.dl-seg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dl-model {
+  flex: 1 1 8rem; min-width: 0;
+  padding: 0.4rem 0.6rem; border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray); background: #fff;
+  font-size: 0.78rem; color: var(--text-dark); cursor: pointer;
+}
+
+/* ---------- Count bar ---------- */
+.dl-bar {
+  flex: none; display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.9rem 1.4rem 0.7rem;
+}
+.dl-count { font-size: 0.8rem; font-weight: 700; color: var(--text-dark); }
+.dl-reset {
+  margin-left: auto; border: none; background: none; padding: 0;
+  font-size: 0.78rem; font-weight: 600; color: var(--blue); cursor: pointer;
+}
+
+/* ---------- Results ---------- */
+.dl-results {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  list-style: none; margin: 0; padding: 0 0.6rem 0.6rem;
+  overscroll-behavior: contain;
+}
+.dl-card {
+  border-radius: 14px; padding: 0.15rem 0.2rem 0.4rem;
+  transition: background 0.18s;
+}
+.dl-card:hover { background: var(--surface); }
+.dl-card.is-selected { background: rgba(0,122,194,0.07); }
+.dl-card-hit {
+  display: block; width: 100%; text-align: left;
+  border: none; background: none; cursor: pointer;
+  padding: 0.7rem 0.8rem 0.3rem;
+}
+.dl-card-top { display: flex; align-items: baseline; gap: 0.6rem; }
+.dl-card-name {
+  flex: 1 1 auto; font-size: 0.9rem; font-weight: 700; color: var(--text-dark);
+  line-height: 1.3;
+}
+.dl-dist {
+  flex: none; font-size: 0.76rem; font-weight: 700; color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.dl-card-addr {
+  display: block; margin-top: 0.2rem;
+  font-size: 0.78rem; line-height: 1.5; color: var(--text-mid);
+}
+.dl-card-acts {
+  display: flex; flex-wrap: wrap; gap: 0.9rem;
+  padding: 0 0.8rem 0.2rem;
+}
+.dl-tel, .dl-link {
+  font-size: 0.76rem; font-weight: 600; color: var(--blue);
+  text-decoration: none; border-bottom: 1px solid transparent;
+}
+.dl-tel:hover, .dl-link:hover { border-bottom-color: currentColor; }
+.dl-more { padding: 0.6rem 0.8rem 0.2rem; }
+.dl-more button {
+  width: 100%; padding: 0.6rem; cursor: pointer;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: #fff; font-size: 0.8rem; font-weight: 600; color: var(--text-dark);
+}
+.dl-more button:hover { border-color: var(--blue-light); }
+.dl-empty { padding: 1rem 1.4rem 1.4rem; font-size: 0.85rem; color: var(--text-mid); }
+
+/* The grip is the sheet handle; it has no job on a desktop. */
+.dl-grip { display: none; }
+
+/* ---------- Phone: the panel becomes a bottom sheet ----------
+   Snap heights are stated outright. They are NOT derived with aspect-ratio on a
+   flex item — WebKit resolves that against an indefinite basis and the box
+   explodes, which is invisible in Chrome. */
+@media (max-width: 900px) {
+  .dl { height: calc(100dvh - var(--dl-top, 96px)); }
+
+  /* The sheet is always full height and SLIDES; snapping by animating `height`
+     would re-lay-out the whole result list on every frame of the transition,
+     which is the one thing a phone cannot afford here. translateY composites on
+     the GPU and touches no layout at all. It also means the content never
+     reflows between snaps — only how much of it you can see changes. */
+  .dl-panel {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: none;
+    height: calc(100dvh - var(--dl-top, 96px) - 0.5rem);
+    border: none; border-top: 1px solid var(--warm-gray);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    box-shadow: 0 -10px 34px rgba(15,11,9,0.16);
+    /* A touch more opaque than the desktop panel: the sheet covers the map's
+       bottom half and carries the whole result list, so it has to stay readable
+       one-handed against whatever is behind it. */
+    background: rgba(255,255,255,0.85);
+    transition: transform 0.32s var(--ease-out);
+    will-change: transform;
+  }
+  /* translateY(100%) is the sheet's own height, so each snap subtracts the strip
+     that should stay on screen. */
+  /* 12rem is measured to the bottom of the search field: the peek state has to
+     be useful, and a handle with nothing to type into is not. */
+  .dl-panel.is-peek { transform: translateY(calc(100% - 12rem)); }
+  .dl-panel.is-half { transform: translateY(calc(100% - 52dvh)); }
+  /* The top stop is 80dvh, not the sheet's whole height: a strip of map stays on
+     screen so the pin the user just tapped is never entirely covered by the card
+     it opened. max() clamps it — on a short viewport with a tall wrapped nav the
+     sheet is itself under 80dvh, and a negative translate would slide it up
+     behind the header. */
+  .dl-panel.is-full { transform: translateY(max(0px, 100% - 80dvh)); }
+
+  .dl-grip {
+    display: flex; align-items: center; gap: 0.6rem;
+    flex: none; width: 100%;
+    border: none; background: none;
+    padding: 0.7rem 1.15rem 0.3rem;
+    /* grab, not pointer: this edge is draggable as well as tappable */
+    cursor: grab;
+    /* Without this the browser claims the same vertical gesture as a page
+       scroll and the drag never reaches the pointermove handler. */
+    touch-action: none;
+  }
+  .dl-panel.is-dragging .dl-grip { cursor: grabbing; }
+  /* The sheet follows the finger 1:1 while dragging; the eased transition is for
+     released snaps only, and would otherwise lag behind the gesture. */
+  .dl-panel.is-dragging { transition: none; }
+  .dl-grip-bar {
+    position: absolute; left: 50%; top: 0.45rem; transform: translateX(-50%);
+    width: 38px; height: 4px; border-radius: 3px; background: var(--warm-gray);
+  }
+  .dl-grip-label {
+    margin-top: 0.35rem; font-size: 0.78rem; font-weight: 700; color: var(--text-dark);
+  }
+  /* Points up when collapsed ("open me"), flips down once the sheet is up
+     ("close me"). This is the only affordance telling anyone the map can be
+     reclaimed, so it is a real control rather than decoration. */
+  .dl-grip-chev {
+    margin: 0.35rem 0 0 auto;
+    color: var(--blue);
+    transition: transform 0.32s var(--ease-out);
+  }
+  .dl-panel:not(.is-collapsed) .dl-grip-chev { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .dl-grip-chev { transition: none; }
+  }
+
+  .dl-panel-head { padding: 0.5rem 1.15rem 0; }
+  .dl-title { font-size: 1.4rem; }
+  /* Nothing is hidden per snap any more. The sheet slides rather than resizes,
+     so hiding rows would shift the content under the user's thumb for no gain —
+     the lower rows are simply below the fold until the sheet is pulled up. */
+  .dl-bar { padding: 0.7rem 1.15rem 0.5rem; }
+
+  /* Google's zoom control sits bottom-left, so the sheet is what would cover it;
+     lift the map's usable centre by the measured sheet height instead. */
+  .dl-stage { bottom: var(--dl-sheet-h, 0px); }
+}
+
+/* The chat button is fixed bottom-right at z-index 900. On a phone the sheet
+   runs the full width underneath it, so lift the button clear of the sheet. */
+@media (max-width: 900px) {
+  .dealers-page .hero-chat-btn {
+    bottom: calc(var(--dl-sheet-h, 8.5rem) + 1rem);
+    transition: bottom 0.32s var(--ease-out), opacity 0.2s linear;
+  }
+  /* Fully open sheet: there is no room left above it, so retire the button
+     rather than stack it on the header. opacity, not display — no layout.
+     !important is load-bearing here, not laziness: style.css reveals this button
+     with `animation: scrollFadeIn ... forwards`, and a filled animation outranks
+     any normal declaration. Without it this rule is silently ignored. */
+  .dealers-page.dl-sheet-full .hero-chat-btn {
+    opacity: 0 !important; pointer-events: none;
+  }
+}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .dl-panel, .dealers-page .hero-chat-btn { transition: none; }
+}
