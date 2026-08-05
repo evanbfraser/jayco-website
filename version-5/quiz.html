@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Find Your RV — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
+  <link rel="stylesheet" href="css/quiz.css?v=v5-qz-15" />
+</head>
+<!-- data-header="solid": like the builder, this page opens on canvas rather
+     than a dark hero, so the white logo and nav need the bar filled in from the
+     first paint. app.js reads this in initHeader(). -->
+<body class="quiz-page" data-header="solid">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+        </ul>
+        <div class="nav-right">
+          <ul class="nav-primary">
+            <li><a href="index.html">Resources</a></li>
+            <li><a href="index.html">About</a></li>
+          </ul>
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <!-- ===== COMPARE ===== -->  <!-- ===== RV SELECTOR QUIZ =====
+       One <main> holding three screens — intro, question, result — swapped by
+       quiz.js. Everything inside #qz-stage is rendered from quiz-data.js;
+       nothing here is authored per question.
+
+       No [data-animation] attributes anywhere in this subtree. app.js binds
+       gsap.from(opacity:0) to those at init with immediateRender, and anything
+       it swept up would still be invisible when quiz.js replaced its container.
+       This page runs its own transition instead. -->
+  <main class="qz" id="quiz">
+
+    <!-- Progress. Hidden on the intro and the result; quiz.js toggles it. -->
+    <div class="qz-progress" id="qz-progress" hidden>
+      <div class="qz-rail" role="progressbar" id="qz-rail"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+           aria-label="Quiz progress">
+        <span class="qz-rail-fill" id="qz-rail-fill"></span>
+      </div>
+      <span class="qz-count" id="qz-count" aria-live="polite"></span>
+    </div>
+
+    <!-- The screen itself. position:relative so the outgoing clone can sit
+         over the incoming screen during the commit transition. -->
+    <div class="qz-stage" id="qz-stage"></div>
+
+    <!-- Announcements for screen readers. The visible counter is aria-live too,
+         but this carries the question text, which is the part that matters. -->
+    <p class="qz-visually-hidden" id="qz-say" role="status" aria-live="polite"></p>
+
+    <!-- ===== EMAIL THE RESULTS =====
+         Lives in the static markup, NOT injected by quiz.js, because Netlify's
+         form parser runs over the deployed HTML at build time and never sees a
+         form that JavaScript created. quiz.js only fills the hidden values and
+         un-hides the block on the result screen.
+
+         The copy-the-link control that used to sit under this form is gone;
+         email is the only way to keep a result now. The link itself is still
+         submitted as a hidden field, so whoever reads the submission can
+         reopen the exact match rather than reconstructing it from the answers.
+
+         The class is .qz-email-form, deliberately not .nl-form: app.js's
+         initNewsletter() grabs .nl-form, calls preventDefault() and prints a
+         fake "Thanks for subscribing!" — which would show a success message
+         while Netlify received nothing at all. -->
+    <section class="qz-section" id="qz-save" hidden>
+      <div class="qz-save">
+        <h2 class="qz-h2">Send me these results</h2>
+        <p class="qz-save-body" id="qz-save-body">
+          Enter your email and we will send this match over — the model, the
+          floorplans that fit and what they start at.
+        </p>
+
+        <form class="qz-email-form" id="qz-email-form" name="quiz-results"
+              method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="quiz-results" />
+          <p hidden>
+            <label>Leave this empty <input name="bot-field" /></label>
+          </p>
+          <div class="qz-field">
+            <label class="qz-visually-hidden" for="qz-email">Email address</label>
+            <input id="qz-email" name="email" type="email" required
+                   autocomplete="email" placeholder="you@example.com" />
+          </div>
+          <!-- Filled by quiz.js so a submission is readable without replaying
+               the link by hand. -->
+          <input type="hidden" name="match" id="qz-f-match" />
+          <input type="hidden" name="alternates" id="qz-f-alts" />
+          <input type="hidden" name="answers" id="qz-f-answers" />
+          <input type="hidden" name="results-link" id="qz-f-link" />
+          <button type="submit" class="btn-primary">Send My Results</button>
+        </form>
+        <p class="qz-note" id="qz-form-note" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===== SIMILAR OPTIONS =====
+         Out here rather than inside #qz-stage for one reason: it has to sit
+         BELOW the email ask, and everything in the stage is above it. quiz.js
+         fills and un-hides this on the result, and empties it again on the way
+         back to a question — the same contract #qz-save has. -->
+    <section class="qz-section qz-similar" id="qz-similar" hidden></section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <a href="#" class="footer-app-badge" aria-label="Download on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+          <a href="#" class="footer-app-badge" aria-label="Get it on Google Play">
+            <img src="../assets/google_play_badge-new.svg" alt="Get it on Google Play" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="compare.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="#">RV Finder Quiz</a></li>
+            <li><a href="#">Top-Selling RVs</a></li>
+            <li><a href="#">Buyer's Guide</a></li>
+            <li><a href="#">Tow vs. Drive Guide</a></li>
+            <li><a href="#">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="#">Brochures</a></li>
+            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="#">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="#">Owner Services</a></li>
+            <li><a href="#">Manuals</a></li>
+            <li><a href="#">Warranty Coverage</a></li>
+            <li><a href="#">Recalls</a></li>
+            <li><a href="#">Wingmate App</a></li>
+            <li><a href="#">Ambassador Program</a></li>
+            <li><a href="#">Jayco University</a></li>
+            <li><a href="#">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Video Gallery</a></li>
+            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">The Jayco Difference</a></li>
+            <li><a href="#">100% PDI</a></li>
+            <li><a href="#">R&amp;D &amp; Innovation</a></li>
+            <li><a href="#">Safety &amp; JaySMART</a></li>
+            <li><a href="#">Award-Winning RVs</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Visit Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS =====
+       No Leaflet: initDealerMap() returns early without #dealer-map.
+       ScrollTrigger IS required — app.js registers it unconditionally.
+
+       quiz-data  the flow, the weights and the line -> slug -> dealer join
+       quiz-score  pure scoring, no DOM (sweepable in a console on its own)
+       quiz        the state machine and rendering
+       Page scripts run before app.js, as on every page here. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/build-data.js?v=v5-bp-19"></script>
+  <script src="js/floorplan-features.js?v=v5-cmp-23"></script>
+  <script src="js/quiz-data.js?v=v5-qz-10"></script>
+  <script src="js/quiz-score.js?v=v5-qz-10"></script>
+  <script src="js/quiz.js?v=v5-qz-10"></script>
+  <script src="js/app.js?v=v5-core-3"></script>
+</body>
+</html>

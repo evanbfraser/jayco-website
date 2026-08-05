@@ -1,0 +1,1108 @@
+/* ===================================================
+   Jayco — RV Selector Quiz
+   Tokens, buttons, header, footer and the cursor all
+   come from style.css. This file is only the quiz.
+
+   EVERY CLASS HERE IS .qz-. The name "quiz" is already
+   taken twice: .quiz-cards / .quiz-card is the
+   homepage's typewriter component (style.css), and
+   .quiz-section / .quiz-inner / .quiz-text / .quiz-media
+   is the type page's CTA band (type.css). A third
+   .quiz-* vocabulary would collide with both.
+
+   THE GOVERNING IDEA. A quiz is almost all chrome, and
+   DESIGN.md says chrome should be quiet and photography
+   loud — and forbids building a page out of same-size
+   cards of icon + heading + text. So a question is an
+   editorial spread: a text spine on the left, one large
+   photograph on the right, and the answers as hairline
+   rows rather than a grid of tiles. The rows are the
+   accordion-row vocabulary DESIGN.md already blesses:
+   hairline top and bottom, no fill, no card.
+
+   THE BLUE BUDGET. DESIGN.md: more than one blue
+   emphasis per screen means one of them is decoration.
+   • Question screens: the progress rail, and nothing
+     else. Answer rows are ink; the selected state is
+     weight plus an ink dot. There is deliberately no
+     primary button — choosing advances, which removes
+     a click and the second blue at the same time.
+   • Result screen: the leading action tile, and the
+     confetti — which lasts two seconds and is the point
+     of the screen. Everything that stays on it is ink:
+     the name, the price, the spec values (the model
+     page sets those in blue; here that would be a
+     third blue on a screen that already spends two).
+
+   THE DISPLAY ROLE. Used once, on the result's model
+   name. DESIGN.md reserves it for a page hero, one per
+   page — the reveal IS this page's hero, and it is the
+   only screen that has one. The question screens use
+   `headline` and no page here uses `display` twice.
+   =================================================== */
+
+.quiz-page {
+  background: var(--canvas);
+  --qz-gap: clamp(2.5rem, 5vw, 5rem);
+
+  /* ---- Type, bound to DESIGN.md's five roles ----
+     Named here once rather than restated as literals down the file, so every
+     size on this page is traceable to the documented ramp. The scale is
+     weight-led, not size-led (DESIGN.md:134), which is why an answer row and a
+     paragraph share a size and differ by weight — and why nothing here invents
+     a step between them.
+
+     `display` is used exactly once, on the result's model name — the reveal is
+     this page's hero, and the only one it has. Its size is written at
+     .qz-name rather than tokenised here, because nothing else may reach for
+     it: a second use would make it a style rather than a moment. */
+  --qz-headline: clamp(2.4rem, 3.8vw, 3.8rem);   /* headline */
+  --qz-title:    1.6rem;                         /* title    */
+  --qz-body:     clamp(0.92rem, 1.1vw, 1.05rem); /* body     */
+  --qz-label:    0.68rem;                        /* label    */
+  /* The one size outside the ramp, and it is documented elsewhere in
+     DESIGN.md: "form fields at 14px". Used for form controls and the small
+     print that sits with them. */
+  --qz-ui:       0.875rem;
+}
+
+/* 96px clears the fixed header — the same figure compare.css:42 and
+   build.css:24 use. Without it the progress rail sits behind the bar. */
+.qz {
+  min-height: calc(100vh - 96px);
+  padding: 96px var(--page-pad) clamp(4rem, 8vw, 7rem);
+}
+
+/* ---------- Progress ----------
+   Only the rail and a counter — NOT build.css's labelled .step-pill set.
+   Eight labelled pills is loud, and the labels would leak which branch you
+   are on before you have chosen it. */
+.qz-progress {
+  max-width: 1440px;
+  margin: 0 auto clamp(2rem, 4vw, 3.5rem);
+}
+.qz-rail {
+  position: relative;
+  height: 3px;
+  background: var(--warm-gray);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.qz-rail-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--blue-dark), var(--blue-light));
+  /* Clipped rather than resized. Animating width lays out on every frame;
+     clip-path composites. It is also why this is not scaleX() — scaling would
+     squeeze the whole dark-to-light ramp into the filled portion, so the bar
+     would change colour as it grew. Clipping reveals the true ramp.
+     (build.css's .steps-rail-fill still animates width; this is the corrected
+     version of the same idea.) */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.45s var(--ease-out);
+}
+.qz-count {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: var(--qz-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* ---------- The question spread ---------- */
+.qz-screen {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.qz-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: var(--qz-gap);
+  align-items: start;
+}
+
+.qz-ask {
+  font-size: var(--qz-headline);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.9rem;
+}
+/* Focus is MOVED to the new screen's heading on every paint so a screen reader
+   announces it — but the heading carries tabindex="-1" and is not reachable by
+   keyboard, so drawing a ring on it would mark something nobody navigated to.
+   The intro's h1 is the same target under a different class. */
+.qz-ask:focus,
+.qz-intro-heading:focus { outline: none; }
+.qz-why {
+  font-size: var(--qz-body);
+  line-height: 1.6;
+  color: var(--text-mid);
+  max-width: var(--measure);
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+/* Inset media, so it takes the card radius. */
+.qz-media {
+  position: relative;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--surface);
+  /* Square, so the photograph finishes near where the answers do. A taller
+     portrait crop left a visible void under the last row. */
+  aspect-ratio: 1 / 1;
+}
+/* One photograph per screen. The exports are 4:3 and this window is 1:1, so
+   `cover` trims the sides — every frame was cropped against both that and the
+   16:10 the window becomes on mobile. */
+.qz-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.qz-note--stale {
+  max-width: var(--measure);
+  margin-bottom: 1.25rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--blue);
+}
+/* The quiet control under the answers: the escape hatch on question one, Back
+   on every screen after it. They never appear together — question one has
+   nothing to go back to — so both sit at the same place on the left rather
+   than one of them floating off to the right on its own. */
+.qz-footrow {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  /* The gap under the answers used to belong to .qz-back. It moved here so
+     whichever control the screen has finds the same spacing. */
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+.qz-footrow:empty { display: none; }
+
+/* ---------- Answer rows ----------
+   Hairline top and bottom, no fill, no card. The whole row is the target. */
+.qz-group + .qz-group { margin-top: clamp(1.75rem, 3vw, 2.5rem); }
+.qz-group-label {
+  display: block;
+  font-size: var(--qz-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 0.6rem;
+}
+.qz-choices {
+  border-top: 1px solid var(--hairline);
+  max-width: 620px;
+}
+.qz-choice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.15rem 0.25rem 1.15rem 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  transition: color 0.2s;
+}
+/* The label slides, not the row. Transforming the text composites and leaves
+   the hairline rules exactly where they are; animating the row's padding
+   relaid out the whole list on every hover. Same idiom style.css already uses
+   for .btn-link:hover span. */
+.qz-choice-text { transition: transform 0.25s var(--ease-out); }
+.qz-choice:hover .qz-choice-text { transform: translateX(7px); }
+.qz-choice:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.qz-choice-text { flex: 1 1 auto; min-width: 0; }
+.qz-choice-label {
+  display: block;
+  font-size: var(--qz-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.qz-choice-note {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: var(--qz-ui);
+  line-height: 1.45;
+  color: var(--text-mid);
+}
+/* Ink, not blue — the rail already spends this screen's blue. */
+.qz-choice-mark {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dark);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.2s, transform 0.2s var(--ease-out);
+}
+.qz-choice[aria-checked="true"] .qz-choice-label { font-weight: 800; }
+.qz-choice[aria-checked="true"] .qz-choice-mark { opacity: 1; transform: none; }
+.qz-choice-chev { flex: none; color: var(--text-mid); opacity: 0.5; }
+
+.qz-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--qz-ui);
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.qz-back:hover { color: var(--text-dark); }
+
+/* ---------- Intro ----------
+   The same spread as a question — copy left, one photograph right — so the
+   first click changes the words and not the page. The column centres itself
+   against the photograph beside it, which is the one thing this screen does
+   differently: a question's answers run down from the top because the list
+   sets its own length, but the intro is three short blocks and would otherwise
+   float at the top of a square. */
+.qz-col--intro {
+  align-self: center;
+  padding: clamp(0rem, 2vw, 1.5rem) 0;
+}
+.qz-intro-heading {
+  font-size: var(--qz-headline);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0.9rem 0 1rem;
+}
+.qz-intro-body {
+  font-size: var(--qz-body);
+  line-height: 1.65;
+  color: var(--text-mid);
+  max-width: var(--measure);
+  margin-bottom: 2rem;
+}
+.qz-intro-ctas { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+
+/* ---------- Result ---------- */
+.qz-result { max-width: 1440px; margin: 0 auto; }
+
+/* ---------- The reveal ----------
+   One viewport, and the only screen on this site that gets one. The height is
+   the viewport less the header the page already clears (.qz padding-top) and
+   the section gap beneath, so the spec row lands just above the fold rather
+   than exactly on it — a strip of the next section showing is what tells
+   somebody there is more.
+
+   dvh, not vh: on iOS the address bar makes vh taller than the screen, which
+   would push the specs under the fold on exactly the devices least able to
+   spare the room. */
+.qz-reveal {
+  position: relative;                /* the confetti canvas is absolute in here */
+  /* Declared on the stage, not the hero: the opening line is set at the same
+     size as the name it hands over to, and the coach is sized from it too. One
+     number, so the three can never drift apart. */
+  --name: clamp(5rem, 10vw, 11.5rem);
+  min-height: calc(100dvh - 96px - 4rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+/* Beat one, set at the model name's size so the handover is a swap of words
+   rather than a change of scale. Absolute and centred on the stage, so the
+   hero does not move when it goes; width-capped because at 11.5rem this line
+   would otherwise run wider than the name that replaces it. */
+.qz-beat {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100%, 14ch);
+  transform: translate(-50%, -50%);
+  font-size: var(--name);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  font-weight: 900;
+  color: var(--text-dark);
+  text-wrap: balance;
+  pointer-events: none;
+}
+
+.qz-hero { position: relative; z-index: 1; width: 100%; }
+.qz-eyebrow {
+  display: block;
+  font-size: var(--qz-label);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 0.6rem;
+}
+
+/* The display role, used once on this site — see the header note. These are
+   DESIGN.md's documented display values, not a size invented for this screen:
+   if the reveal is going to claim the role, it should look like the role.
+   Balance stops a three-word name breaking to a lonely last line. */
+.qz-name {
+  font-size: var(--name);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  font-weight: 900;
+  color: var(--text-dark);
+  text-wrap: balance;
+}
+.qz-name:focus { outline: none; }
+
+/* The coach sits ON the name, not beside it. The overlap is a fixed height
+   plus a negative margin rather than a percentage: the 27 renders run from a
+   nearly square van to a 3:1 fifth wheel, and the names from "Swift" to "Jay
+   Flight Bungalow" — percentages of a box that changes size with both would
+   put the coach through the middle of the type on some pairings and nowhere
+   near it on others. A fixed height means the overlap is the same every time.
+   No background and no radius: these are cut-out PNGs and the point is that
+   the coach is standing on the page, not in a panel. */
+.qz-hero-media {
+  /* Sized FROM the name, not from the viewport. Sized from vh, the coach kept
+     its full height on a phone while the name hit its 5rem floor, and a
+     trailer 200px tall landed on 72px of type and swallowed it. At a multiple
+     of the name they scale together, so the picture is the same picture at
+     1440 and at 390.
+     The 50vh ceiling is what stops the doubled coach pushing the spec row off
+     the bottom of a laptop: half the stage is the most it can have and still
+     leave the name, the tagline and the specs above the fold. On a tall
+     window it never reaches the ceiling and you get the full 4.2×. */
+  --rv-h: min(calc(var(--name) * 4.2), 50vh);
+  height: var(--rv-h);
+  /* Measured, not guessed: every render in assets/models is 1000×619 with the
+     coach starting 16–20% down the frame (Jay Feather 18.4%, Precept 20.5%,
+     Seismic 16.0%). A margin in rem would spend itself on that transparent
+     band and never touch the type, which is what a fixed -2.5rem did — it
+     looked like no overlap at all. 28% of the box clears the padding and
+     leaves the roofline crossing the bottom of the letterforms. */
+  margin-top: calc(var(--rv-h) * -0.28);
+}
+.qz-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+/* The line under the coach carries the model's whole pitch in six words, and
+   at body size it was reading as a caption. The `headline` step and 600 — it
+   is the only sentence in the reveal, so it can afford both the size and the
+   weight, and against a name set in `display` it still reads as the second
+   voice rather than a competing one. */
+.qz-tagline {
+  margin-top: 0.9rem;
+  font-size: var(--qz-headline);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+  /* The longest in the set is "America's favorite travel trailer." — capped
+     and balanced so it breaks to two even lines instead of one long one with
+     an orphan. */
+  max-width: 22ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+/* The canvas covers the stage and is never interactive. Behind the hero so
+   pieces pass BEHIND the coach and the name, which is what makes the burst
+   read as coming from behind it rather than being sprayed over the top. */
+.qz-confetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- Spec row ----------
+   .md-stats' vocabulary from the model page: value over label, ruled between.
+   Values in ink, not the model page's blue — see the blue budget up top. */
+.qz-stats {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.qz-stat {
+  padding: 0 clamp(0.75rem, 1.5vw, 1.5rem);
+  border-left: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.qz-stat:first-child { border-left: none; }
+/* The `title` step, flat rather than fluid. model.css's .md-stat-value scales
+   to 2.1rem, which is off the ramp — this is the documented size instead, and
+   at four across a 1440 column it is the right weight of number anyway. */
+.qz-stat-value {
+  font-family: var(--font-display);
+  font-size: var(--qz-title);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.qz-stat-label {
+  font-size: var(--qz-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* ---------- Why this one, and the four actions ----------
+   The page's one dark band, and the only element on it that touches the
+   viewport edge.
+
+   The bleed is `margin-inline: calc(50% - 50vw)`, which is the 100vw trick
+   and carries its usual flaw: vw counts the scrollbar, so the band runs a
+   scrollbar's width wider than the page. That is survivable HERE and nowhere
+   else on this site, because <body> is overflow-x: hidden (style.css:49) and
+   the overhang is symmetrical — it clips, and nothing shifts. model.css's
+   bands do not need this: they are sections in a <main> with no width cap,
+   so width:100% already reaches the edge, which is why its own comment warns
+   against 100vw. */
+.qz-band {
+  margin-inline: calc(50% - 50vw);
+  margin-bottom: var(--space-lg);
+  padding: clamp(3rem, 7vw, 6rem) var(--page-pad);
+  /* The site's dark blue ground, the same one the model page's floorplan band
+     stands on. Two different dark blues across one site is one too many. */
+  background: var(--band-navy);
+}
+.qz-band-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  text-align: center;
+}
+/* The colour has to be stated here. style.css's `.light` modifier is written
+   for .section-heading and .section-label — on .qz-h2 the class is inert, and
+   the heading rendered in near-black on navy. */
+.qz-band .qz-h2 {
+  color: var(--text-light);
+  /* The `headline` step rather than `title` — roughly double, and it is a
+     documented step rather than a doubled number. This heading introduces the
+     whole argument for the match, so it carries more than a section label. */
+  font-size: var(--qz-headline);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+/* One reason per column. Three is the most whyLines() ever returns, so the
+   row is usually exactly full; a relaxation note pushes it to a second row,
+   which is why the rule is on the top of every cell rather than between them. */
+.qz-band .qz-why-list {
+  margin-top: 0;
+  max-width: none;
+  border-top: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+}
+.qz-band .qz-why-item {
+  padding: 1.2rem 0 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,0.18);
+  color: rgba(245,242,238,0.86);
+  text-align: center;
+}
+/* The relaxation notes — "we had to loosen this" — stay quieter than the
+   reasons, the same relationship they have on canvas. */
+.qz-band .qz-why-item--note { color: rgba(245,242,238,0.6); }
+
+/* One row, centred, ordinary buttons. */
+.qz-band-ctas {
+  margin-top: clamp(2.25rem, 4.5vw, 3.5rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+.qz-actions-note {
+  margin: 1.1rem auto 0;
+  max-width: var(--measure);
+  font-size: var(--qz-ui);
+  line-height: 1.55;
+  color: rgba(245,242,238,0.6);
+}
+
+.qz-section { margin-bottom: var(--space-lg); }
+.qz-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+}
+.qz-h2 {
+  font-size: var(--qz-title);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* Why this fits — plain lines, each naming a number. Not a card grid. */
+/* The heading needs air under it before the first rule: the list's own top
+   border sits tight against the descenders otherwise, and reads as an
+   underline on the heading rather than the top of a table. */
+.qz-why-list {
+  margin-top: 1.4rem;
+  border-top: 1px solid var(--hairline);
+  max-width: var(--measure-wide);
+}
+.qz-why-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--qz-body);
+  line-height: 1.55;
+  color: var(--text-dark);
+}
+/* A relaxation is the page admitting it bent an answer — it leads, and it is
+   visually distinct without being an alarm. */
+.qz-why-item--note { color: var(--text-mid); font-style: italic; }
+
+
+/* Floorplans and alternates: two restrained grids, both linking out. */
+.qz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+.qz-card {
+  display: block;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.25s;
+}
+/* Alternates are links and lift on hover. A floorplan card is not a link — it
+   is a drawing with one control on it — so it does not pretend to be clickable
+   by changing colour under the cursor. */
+.qz-card:hover { background: var(--warm-gray); }
+.qz-card--plan:hover { background: var(--surface); }
+.qz-card-media {
+  position: relative;                /* the zoom button anchors to this */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 0.9rem;
+  display: grid;
+  place-items: center;
+}
+.qz-card-media img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.qz-card-role {
+  display: block;
+  font-size: var(--qz-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 0.4rem;
+}
+/* display:block on all three — they are <span>s inside an <a>, and inline they
+   ran together as "GreyhawkGo Further. Live Greater.$172,793". */
+.qz-card-name {
+  display: block;
+  font-size: var(--qz-body); font-weight: 700; line-height: 1.25; margin-bottom: 0.3rem;
+}
+.qz-card-note {
+  display: block;
+  font-size: var(--qz-ui); line-height: 1.45; color: var(--text-mid); margin-bottom: 0.7rem;
+}
+.qz-card-price {
+  display: block;
+  font-size: var(--qz-body); font-weight: 700; color: var(--text-dark);
+}
+/* build.js's honest treatment for a plan Jayco has not priced yet. */
+.qz-card-price--tbd { font-weight: 500; color: var(--text-mid); }
+.qz-card-stats { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.qz-card-stat { font-size: var(--qz-ui); color: var(--text-mid); }
+.qz-card-stat b { display: block; font-size: var(--qz-body); color: var(--text-dark); font-weight: 700; }
+
+/* ---------- Enlarge a floorplan ----------
+   The drawing sits on white inside the card, so this is the ink-on-light
+   counterpart of model.css's glass rail button rather than a copy of it. It
+   stays visible rather than appearing on hover: on a touch screen there is no
+   hover, and a control that only exists for a mouse is a control half the
+   visitors never find. */
+.qz-zoom-btn {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: rgba(255,255,255,0.92);
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.qz-zoom-btn:hover { background: #fff; transform: scale(1.06); }
+.qz-zoom-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* The modal itself. Structure and both of its awkward details are model.css's
+   .md-zoom: the closed state is the [hidden] attribute rather than a
+   transitioned visibility (Chrome flips a discrete visibility transition
+   halfway through the fade, and focus() inside a hidden subtree is a silent
+   no-op), and it stays displayed through the fade-out, so it must not be
+   hit-testable while it is closing. */
+.qz-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;                     /* over the header (1000), under the loader */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3.5rem);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+.qz-zoom[hidden] { display: none; }
+.qz-zoom.is-open { opacity: 1; }
+.qz-zoom:not(.is-open) { pointer-events: none; }
+/* Ink at 94%, bound to the token rather than written as a literal. model.css's
+   scrim is #012638 because that page HAS a navy band and the scrim is its own
+   band dimmed; this page has no navy anywhere, so borrowing it would introduce
+   a colour the quiz never uses. The opaque fallback comes first: a browser
+   without color-mix gets a solid ink scrim, which loses the glimpse of the
+   page behind and nothing else. */
+.qz-zoom-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--navy);
+  background: color-mix(in srgb, var(--navy) 94%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.qz-zoom-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.qz-zoom-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* room for the caption and the padding, so the plan is never cropped */
+  max-height: calc(100vh - clamp(1rem, 4vw, 3.5rem) * 2 - 3.5rem);
+  object-fit: contain;
+  border-radius: var(--radius-card);
+  background: #fff;                  /* the drawings are line art on white */
+}
+.qz-zoom-caption {
+  font-size: var(--qz-label);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245,242,238,0.55);
+}
+.qz-zoom-close {
+  position: absolute;
+  z-index: 2;
+  top: clamp(0.75rem, 2vw, 1.5rem);
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.qz-zoom-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.06); }
+.qz-zoom-close:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+
+/* ---------- Next steps ---------- */
+/* .btn-link is written for anchors; on a <button> the UA fill and border
+   still apply and it renders as a boxed control. */
+button.btn-link { background: none; border: none; border-bottom: 1.5px solid transparent;
+                  cursor: pointer; margin-top: 0; }
+.qz-next { display: flex; align-items: center; gap: 1.25rem 1.75rem; flex-wrap: wrap; }
+.qz-next-note {
+  flex: 1 1 100%;
+  font-size: var(--qz-ui);
+  line-height: 1.55;
+  color: var(--text-mid);
+}
+
+/* ---------- Similar options ----------
+   Two cards, below the email ask — the last thing on the page, for someone
+   the match did not quite land for. Heading at the `headline` step and
+   centred, matching the band above it, so the page ends on the same voice it
+   made its argument in. Two columns at most: the point is a choice, and a
+   third card turns a choice into a list. */
+.qz-similar { max-width: 1440px; margin: 0 auto var(--space-lg); }
+/* One rule for both closing headings — Similar Options and the email ask sit
+   one above the other, and they are the same kind of thing said at the same
+   volume. The email one is in the static markup as .qz-h2, so it is named here
+   rather than given a class it would have to carry. */
+.qz-similar-head,
+.qz-save .qz-h2 {
+  font-size: var(--qz-headline);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+/* The gap below differs because what follows differs: Similar Options opens
+   onto a card grid, the email ask onto its own sentence. Same size, same
+   weight, different breathing room. */
+.qz-similar-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
+.qz-save .qz-h2 { margin-bottom: 0.9rem; }
+/* ---------- The model card, restated ----------
+   This is .tp-model-card from type.css, which is itself .md-similar-card from
+   model.css. type.css states the cost of that decision and it applies here
+   too: the three are deliberately not shared, because loading another page's
+   stylesheet for sixty lines is the worse trade — and a change to one is now a
+   change to three. Every value below is copied, not re-derived, so "the same
+   card" is literally true.
+
+   Two up in the same 1440 frame the type page uses, so a card here is the same
+   width as a card there. */
+.qz-sim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+/* A flipped result can return a single alternate. Same treatment the type page
+   gives Destination Trailers, a lineup of one: centred at the width it would
+   have had, rather than parked in column one looking like a missing card. */
+.qz-sim-grid[data-count="1"] {
+  grid-template-columns: minmax(0, 560px);
+  justify-content: center;
+}
+
+.qz-sim-card {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.75rem, 2.6vw, 2.5rem);
+  border: none;
+  /* 32px = DESIGN.md rounded.feature. A literal because only rounded.pill and
+     rounded.card exist as CSS variables. */
+  border-radius: 32px;
+  /* The panel tone. This card is where the cool grey started, hard-coded
+     because Surface was warm at the time; Surface IS this colour now, so the
+     literal and its justification are both gone. */
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.3s;
+}
+.qz-sim-card:hover { background: var(--surface-hover); }
+
+.qz-sim-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.2vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--text-dark);
+  margin-bottom: 0.7rem;
+}
+/* the rule is the tagline's, not a divider — it marks the line, so it grows
+   with it rather than spanning the card */
+.qz-sim-tagline {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--blue);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-dark);
+  margin-bottom: 1.6rem;
+  /* the reveal's tagline is centred and huge; this one is neither */
+  text-align: left;
+  max-width: none;
+}
+.qz-sim-price {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-mid);
+}
+/* the render stands on the card, not in a tile of its own — a panel inside a
+   panel is the nesting the design system rules out. A cut-out on transparency
+   gets no radius: there is no box to round. */
+.qz-sim-media {
+  aspect-ratio: 16 / 10;
+  margin: 0.5rem 0 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.qz-sim-media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.7s var(--ease-out);
+}
+.qz-sim-card:hover .qz-sim-media img { transform: scale(1.03); }
+
+/* three-up, ruled between */
+.qz-sim-stats {
+  margin-top: auto;              /* pinned to the foot so uneven cards still align */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.qz-sim-stat {
+  padding-left: 1rem;
+  border-left: 1px solid var(--hairline);
+  text-align: left;
+}
+.qz-sim-stat:first-child { padding-left: 0; border-left: none; }
+.qz-sim-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-dark);
+  margin-bottom: 0.3rem;
+}
+.qz-sim-stat-label {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--text-mid);
+}
+
+/* ---------- Email + share ---------- */
+/* Centred in the page and centred within itself — the last thing on the
+   screen is one ask, and a left-aligned block would leave it looking like the
+   start of another section. */
+/* The same 1440 frame the floorplan grid and Similar Options stand in, so the
+   three blocks share one left and right edge down the page. It was capped at
+   --measure-wide (880px) when it was a reading column; it is a panel now, and
+   a panel narrower than everything around it reads as a leftover. */
+.qz-save {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: clamp(1.75rem, 3.5vw, 3rem);
+  max-width: 1440px;
+  margin: 0 auto;
+  text-align: center;
+}
+.qz-save-body {
+  font-size: var(--qz-body);
+  line-height: 1.6;
+  color: var(--text-mid);
+  margin: 0 auto 1.5rem;
+  max-width: var(--measure);
+}
+
+/* NOT .nl-form. app.js's initNewsletter() grabs .nl-form, preventDefault()s it
+   and prints "Thanks for subscribing!" — reusing the class would show a
+   success message while Netlify received nothing. The field styling below is
+   ported from .nl-field (style.css:1183-1214) for exactly that reason. */
+.qz-email-form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  /* The field would otherwise stretch to the panel's full width and leave the
+     centred heading above a form that reads as left-aligned. */
+  max-width: 30rem;
+  margin: 0 auto;
+}
+.qz-field { position: relative; flex: 1 1 240px; }
+.qz-field input {
+  width: 100%;
+  background: #fff;
+  border: none;
+  outline: none;
+  border-radius: 14px;
+  padding: 1.05rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: var(--qz-body);
+  color: var(--text-dark);
+}
+.qz-field input:focus { box-shadow: 0 0 0 2px var(--blue); }
+
+.qz-note { margin-top: 0.9rem; font-size: var(--qz-ui); color: var(--text-mid); }
+
+/* ---------- Dead end ----------
+   Nothing tows behind what they told us they drive. The tow gate is the one
+   filter that is never relaxed, so this is a real state, not an error. */
+.qz-dead { max-width: var(--measure); }
+
+.qz-visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Motion ----------
+   One authored moment, used at every step: the commit. The outgoing screen is
+   a clone that fades and lifts while the real one is already in place beneath
+   it — so if GSAP never loads, or motion is reduced, the swap is instant and
+   nothing is lost. */
+.qz-ghost {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.qz-stage { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qz-rail-fill,
+  .qz-choice,
+  .qz-choice-text,
+  .qz-choice-mark { transition: none; }
+  .qz-choice:hover .qz-choice-text { transform: none; }
+  /* The modal still opens and closes, it just does not fade — and the zoom
+     button keeps its hover tint without the scale. */
+  .qz-zoom { transition: none; }
+  .qz-zoom-btn,
+  .qz-zoom-close { transition: background 0.25s; }
+  .qz-zoom-btn:hover,
+  .qz-zoom-close:hover { transform: none; }
+  /* revealResult() never starts its timeline and never builds the canvas here,
+     so the result simply IS its finished state. These two only cover the
+     hover, which is not part of that sequence. */
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .qz-spread { grid-template-columns: 1fr; }
+  /* Photograph first: it sets the scene before the question asks about it. */
+  .qz-media { order: -1; aspect-ratio: 16 / 10; }
+  .qz-progress { position: sticky; top: 72px; z-index: 5;
+                 background: var(--canvas); padding-bottom: 0.5rem; }
+  /* Three reasons across 900px gives each about 26 characters a line. Two
+     columns, and the odd one out spans both rather than sitting in a half-row
+     on its own. */
+  .qz-band .qz-why-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .qz { padding-top: 90px; }        /* the header is shorter here — build.css:922 */
+  /* 56px minimum. PRODUCT.md notes the audience skews older, so a comfortable
+     target matters more here than a tight rhythm. */
+  .qz-choice { padding: 1.25rem 0.25rem 1.25rem 0; min-height: 56px; }
+  .qz-choice:hover .qz-choice-text { transform: none; }   /* no hover on touch */
+  .qz-grid { grid-template-columns: 1fr; }
+  /* Four spec cells across a phone gives each about 80px, which breaks
+     "13,500 BTU" onto three lines. Two-up, ruled between and above. */
+  .qz-stats { grid-template-columns: repeat(2, 1fr); row-gap: 1.5rem; }
+  .qz-stat:nth-child(3) { border-left: none; }
+  .qz-reveal {
+    /* The header is 90px here and the spec row is two rows tall, so the stage
+       gives back the space rather than pushing the specs off the screen. */
+    min-height: calc(100dvh - 90px - 2rem);
+    gap: 1.5rem;
+  }
+  /* .qz-hero-media needs nothing here — it is sized from the name, which has
+     already reached its floor by this width. */
+  .qz-band .qz-why-list { grid-template-columns: 1fr; }
+  /* Four pills on a phone stack; full width so they read as a list of four
+     equal choices rather than a ragged paragraph of buttons. */
+  .qz-band-ctas { flex-direction: column; align-items: stretch; }
+  .qz-band-ctas a { text-align: center; }
+
+  /* ---- Similar options: a rail, not a two-column grid ----
+     Two cards across a phone left each about 165px, and the card spends 56 of
+     that on its own padding — so "Jay Feather Air SL" and "Starting at
+     $20,618 · 2027" ran straight out of the box. The type page collapses this
+     same card to one column here; the quiz takes the other road, because there
+     are only ever two of them and a rail keeps the second one visible as a
+     peek rather than a scroll away.
+
+     The idiom is the model page's .md-scenery-track: snap, no scrollbar, and
+     a lead inset so the first card rests on the page's spine instead of
+     against the viewport edge. The negative margins let the rail run to both
+     edges while its content stays on the spine. */
+  .qz-sim-grid,
+  .qz-sim-grid[data-count="1"] {
+    display: flex;
+    grid-template-columns: none;         /* the grid rules above no longer apply */
+    gap: 0.9rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* out to both viewport edges, then back in to the spine */
+    margin-inline: calc(-1 * var(--page-pad));
+    padding-inline: var(--page-pad);
+    scroll-padding-inline-start: var(--page-pad);
+    /* a scroll container clips on every side; this is the room a focus ring needs */
+    padding-block: 6px;
+  }
+  .qz-sim-grid::-webkit-scrollbar { display: none; }
+  .qz-sim-card {
+    /* 78vw leaves a strip of the next card showing, which is what says "there
+       is another one" without a control that has to be explained. */
+    flex: 0 0 78vw;
+    max-width: 22rem;
+    scroll-snap-align: start;
+  }
+  /* Three stats across a 304px card gives each about 80px, and "2,515–2,920
+     lbs" breaks into three lines. Two-up, which is the same answer .qz-stats
+     gives on the reveal at this width and for the same reason. This is the one
+     place the card deliberately differs from .tp-model-card, and only below
+     768px — the desktop card the type page is matched against is untouched. */
+  .qz-sim-stats { grid-template-columns: repeat(2, 1fr); row-gap: 0.9rem; }
+  /* The third cell is alone on the second row, so it takes the whole width
+     rather than half of it — "2,515–2,920 lbs" is exactly the kind of value
+     that breaks after the number and leaves "lbs" on a line of its own. */
+  .qz-sim-stat:nth-child(3) {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .qz-next { flex-direction: column; align-items: stretch; }
+  .qz-next .btn-primary,
+  .qz-next .btn-secondary { text-align: center; }
+}
