@@ -31,6 +31,14 @@ assets/model types/*/*.png
 assets/model types/*/*.mp4
 assets/model types/*/*.mov
 
+# …except this one, which is already web-ready at 11 MB and is the video in the
+# type page's "which one is yours" band. It sits beside the originals rather
+# than under web/, so the rule above swallowed it and the band deployed with a
+# 404 where the video should be. Named explicitly rather than moved, because
+# type-data.js builds its path from a prefix const and moving the file would
+# mean the deploy and the local copy disagree until that is edited too.
+!assets/model types/fifth wheel/jayco-fifth-wheel-options.mp4
+
 # The quiz library: 155 originals, four of them 46–70 MB. These sit flat in the
 # folder rather than in per-model subfolders, so the pattern is one level up —
 # and assets/quiz/web/, the eleven exports the quiz actually loads, is untouched.
