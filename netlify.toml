@@ -9,3 +9,59 @@
   to = "/version-5/"
   status = 302
   force = true
+
+# ---------------------------------------------------------------------------
+# Short paths, one per page, for sharing.
+#
+# 302 and NOT a 200 rewrite, deliberately. Every page loads its CSS and JS by
+# relative path (`css/style.css`, `js/app.js`), which the browser resolves
+# against whatever URL is in the address bar. A rewrite would keep /quiz there
+# and the browser would ask for /css/style.css — 404, and the page renders
+# unstyled. A redirect lands on the real path, so the relative paths still
+# resolve, at the cost of the address bar changing after the click.
+#
+# These sit below the root rule, which matches "/" exactly and cannot shadow
+# them. First match wins in Netlify, so order matters: /types/:type is listed
+# before /types so the placeholder is not swallowed by the bare path.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/swift"
+  to = "/version-5/model.html?model=swift"
+  status = 302
+
+[[redirects]]
+  from = "/jay-feather"
+  to = "/version-5/model.html?model=jay-feather"
+  status = 302
+
+# /types/toy-haulers, /types/class-a, and the five others
+[[redirects]]
+  from = "/types/:type"
+  to = "/version-5/type.html?type=:type"
+  status = 302
+
+[[redirects]]
+  from = "/types"
+  to = "/version-5/type.html"
+  status = 302
+
+[[redirects]]
+  from = "/compare"
+  to = "/version-5/compare.html"
+  status = 302
+
+[[redirects]]
+  from = "/dealers"
+  to = "/version-5/dealers.html"
+  status = 302
+
+[[redirects]]
+  from = "/quiz"
+  to = "/version-5/quiz.html"
+  status = 302
+
+[[redirects]]
+  from = "/build"
+  to = "/version-5/build-price.html"
+  status = 302
