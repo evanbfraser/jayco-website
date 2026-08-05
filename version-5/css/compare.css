@@ -1,0 +1,615 @@
+/* ===================================================
+   Jayco — Compare floorplans
+   ---------------------------------------------------
+   This page loads style.css and this file, NOT build.css.
+   The card and table rules below are therefore ported
+   copies of .fp-card (build.css) and .md-spec-table
+   (version-4/css/model.css) rather than references to
+   them. Accepted duplication: the alternative is loading
+   a 1,000-line builder stylesheet whose rules are all
+   scoped to .build-page anyway, or moving the card into
+   the shared style.css and disturbing a working page.
+   Each ported block names its source so the two stay in
+   step.
+   =================================================== */
+
+.compare-page {
+  background: var(--canvas);
+  --cmp-drawer-w: min(380px, 88vw);
+  --cmp-bar-top: 68px;          /* the header once it has shrunk on first scroll */
+  /* The two images stacked in a card have to share one box height or the cards
+     stop lining up. They do not agree on shape: the model renders run 1.62–1.73,
+     the floorplans 1.96 and 2.17, and the 17 Class C / Super C drawings 1.47.
+     16/9 is the compromise that keeps the worst pillarbox near 9% either side;
+     a literal 2/1 pushes the renders to ~19%. */
+  --cmp-media-ar: 16 / 9;
+}
+
+/* Form controls do not inherit font-family — a <button> with none falls back
+   to the UA default, which is Arial here, not Host Grotesk. build.css carries
+   the same rule for the builder; without it every filter chip renders in the
+   wrong face. */
+.compare-page button,
+.compare-page input,
+.compare-page select,
+.compare-page textarea { font-family: inherit; }
+
+/* The `hidden` attribute is a UA rule and loses to any author `display`.
+   Several things on this page are toggled with it. */
+.compare-page [hidden] { display: none !important; }
+
+.cmp {
+  padding-top: 96px;            /* clears the fixed header */
+  padding-bottom: 5rem;
+}
+.cmp-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+}
+
+/* ---------- Head ---------- */
+.cmp-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
+.cmp-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+  margin-top: 0.6rem;
+}
+.cmp-sub { margin-top: 0.9rem; color: var(--text-mid); font-size: 1rem; line-height: 1.6; }
+
+/* ---------- Filter drawer ----------
+   Off-canvas at every width, so it is modal at every width: backdrop, inert
+   background, trapped focus. The panel is fixed to the viewport and lives
+   outside .cmp-inner in the markup, or the 1600px container would clip it. */
+.cmp-drawer-backdrop {
+  position: fixed; inset: 0; z-index: 1099;
+  background: rgba(15, 11, 9, 0.45);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.32s var(--ease-out);
+}
+.cmp-drawer-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+.cmp-drawer {
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 1100;
+  width: var(--cmp-drawer-w);
+  display: flex; flex-direction: column;
+  background: var(--white);
+  border-right: 1px solid var(--warm-gray);
+  box-shadow: 12px 0 40px rgba(15, 11, 9, 0.14);
+  /* transform + visibility rather than [hidden]: the rule at the top of this
+     file makes [hidden] display:none !important, which cancels the transition. */
+  transform: translateX(-100%);
+  visibility: hidden;
+  overscroll-behavior: contain;
+  transition: transform 0.36s var(--ease-out), visibility 0.36s;
+}
+.cmp-drawer.is-open { transform: none; visibility: visible; }
+
+.cmp-drawer-head {
+  flex: none; display: flex; align-items: center; gap: 0.75rem;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid var(--warm-gray);
+}
+.cmp-drawer-title {
+  font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;
+  color: var(--text-dark); margin-right: auto;
+}
+.cmp-drawer-x {
+  border: none; background: none; padding: 0.1rem 0.35rem;
+  font-size: 1.6rem; line-height: 1; color: var(--text-mid); cursor: pointer;
+}
+.cmp-drawer-x:hover { color: var(--text-dark); }
+.cmp-drawer-grip { display: none; }
+
+.cmp-drawer-foot {
+  flex: none; display: flex; align-items: center; gap: 0.9rem;
+  padding: 0.9rem 1.25rem calc(0.9rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--warm-gray);
+  background: var(--white);
+}
+.cmp-drawer-reset {
+  border: none; background: none; padding: 0;
+  font-size: 0.84rem; color: var(--text-mid); cursor: pointer;
+}
+.cmp-drawer-reset:hover { color: var(--text-dark); }
+.cmp-drawer-apply { flex: 1; border: none; }
+
+/* Not media-query scoped, unlike style.css's body.menu-open — this panel is
+   modal on a desktop too. Lenis is stopped alongside it in compare.js. */
+body.cmp-drawer-open { overflow: hidden; }
+
+/* ---------- Filters ---------- */
+/* The form is the scrolling body of the drawer. */
+.cmp-filters {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column;
+  gap: 1.6rem;
+  padding: 1.25rem;
+  scrollbar-width: thin;
+}
+/* Features carries 17 chips; the sub-heads break them into scannable runs. */
+.cmp-facet-sub {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-mid);
+  margin: 0.9rem 0 0.45rem;
+}
+.cmp-facet-sub:first-of-type { margin-top: 0; }
+.cmp-facet-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.7rem;
+}
+.cmp-facet-note {
+  margin-left: 0.4rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 500;
+  color: var(--text-mid);
+}
+/* Says out loud why this facet has a hole in it, rather than leaving the
+   visitor to conclude the filter is broken. */
+.cmp-facet-hint { margin-top: 0.55rem; font-size: 0.76rem; line-height: 1.5; color: var(--text-mid); }
+
+.cmp-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+/* 27 models is a lot of chips, so the list scrolls. The mask fades the last row
+   so it reads as "more below" rather than as a clean cut. Roomier than the
+   8.5rem it used inline: tabbing through 27 chips in a narrow panel scrolls
+   them into view one at a time, and a taller window makes that less jumpy. */
+.cmp-chips--wrap {
+  max-height: 12rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+}
+
+/* ported from build.css .cat-chip */
+.cat-chip {
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-mid);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.cat-chip--sm { padding: 0.35rem 0.7rem; font-size: 0.76rem; }
+.cat-chip:hover { border-color: var(--blue-light); color: var(--text-dark); }
+.cat-chip.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.cmp-n { opacity: 0.55; font-variant-numeric: tabular-nums; }
+.cat-chip.active .cmp-n { opacity: 0.75; }
+
+/* Two thumbs on one track. Both inputs overlay the same
+   strip; pointer-events are handed to the thumbs only, so whichever is
+   grabbed wins without the upper input swallowing every click. */
+.cmp-range-vals {
+  display: flex; justify-content: space-between;
+  font-size: 0.8rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.5rem;
+}
+.cmp-range-track { position: relative; height: 26px; }
+.cmp-range-track::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 4px;
+  background: var(--warm-gray); border-radius: 3px;
+}
+.cmp-range-track input[type=range] {
+  position: absolute; left: 0; top: 0; width: 100%; height: 26px;
+  margin: 0; background: none; -webkit-appearance: none; appearance: none;
+  pointer-events: none;
+}
+.cmp-range-track input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(15,11,9,0.3); cursor: pointer;
+}
+.cmp-range-track input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 2px solid #fff; cursor: pointer;
+}
+.cmp-range-track input[type=range]:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Results bar ----------
+   Sticky, because it is now the only handle on the filters. Hiding them behind
+   a drawer is only fair if the way back is never scrolled off. */
+.cmp-bar {
+  position: sticky; top: var(--cmp-bar-top); z-index: 5;
+  display: flex; align-items: center; gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 0;
+  background: color-mix(in srgb, var(--canvas) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.cmp-filter-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white);
+  font-size: 0.84rem; font-weight: 600; color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cmp-filter-btn:hover { border-color: var(--blue-light); }
+.cmp-filter-btn[aria-expanded="true"] { border-color: var(--blue); }
+.cmp-filter-n {
+  display: grid; place-items: center;
+  min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: var(--radius-btn);
+  background: var(--blue); color: #fff;
+  font-size: 0.68rem; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.cmp-count { margin-left: auto; font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
+.cmp-clear {
+  border: none; background: none; padding: 0;
+  font-size: 0.84rem; color: var(--blue); font-weight: 600; cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+.cmp-clear:hover { border-bottom-color: var(--blue); }
+.cmp-empty { margin-top: 2rem; color: var(--text-mid); font-size: 0.95rem; }
+
+/* ---------- Result grid ---------- */
+/* Fixed tracks, not auto-fill: at the 1600px container a 330px minimum resolves
+   to four columns, and the card now carries two stacked images that need the
+   width. Three across puts a column at ~500px. minmax(0,…) so a wide drawing
+   cannot push its track past its share. */
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 1.8vw, 1.6rem);
+}
+/* Drops to 2-up at 1280 rather than clinging to 3: below that a third column
+   puts the card back under 340px, which is narrower than it was before the two
+   images were stacked — the opposite of the point. */
+@media (max-width: 1280px) { .cmp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px)  { .cmp-grid { grid-template-columns: 1fr; } }
+
+/* ported from build.css .fp-card / .option-grid--fp */
+.fp-card {
+  position: relative;
+  text-align: left;
+  background: var(--white);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, transform 0.3s var(--ease-out), box-shadow 0.3s;
+}
+.fp-card:hover { border-color: var(--blue-light); transform: translateY(-3px); box-shadow: 0 14px 30px rgba(15,11,9,0.1); }
+/* .selected already means "chosen" in the builder; comparing is its own state */
+.fp-card.is-comparing { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+.fp-card.is-full { cursor: default; }
+.fp-card.is-full:hover { border-color: var(--warm-gray); transform: none; box-shadow: none; }
+.fp-card-media,
+.fp-card-body { display: block; }        /* they are spans; inline boxes crop the card */
+.fp-card-media { background: #fff; }      /* line art needs a flat bed, not a gradient */
+
+/* The coach and its floorplan are two separate reads, so they get two separate
+   boxes rather than the render sitting on top of the drawing. Both blocks share
+   --cmp-media-ar so cards in a row stay aligned whatever their source images do. */
+.cmp-media-render {
+  display: block; position: relative;
+  aspect-ratio: var(--cmp-media-ar);
+  /* The panel tone, parting this block from the plan's flat white below it. */
+  background: var(--surface);
+  border-bottom: 1px solid var(--warm-gray);
+  overflow: hidden;
+}
+.cmp-media-render-img {
+  display: block; width: 100%; height: 100%;
+  object-fit: contain; padding: 0.6rem 1rem;
+  filter: drop-shadow(0 6px 14px rgba(10,8,6,0.14));
+}
+.cmp-media-plan {
+  display: block; position: relative;
+  aspect-ratio: var(--cmp-media-ar);
+  background: #fff;
+  overflow: hidden;
+}
+.fp-card-drawing { display: block; width: 100%; height: 100%; object-fit: contain; padding: 0.75rem 0.9rem; }
+.fp-card-plan {
+  position: absolute; left: 0.8rem; bottom: 0.8rem;
+  background: rgba(15,11,9,0.72); color: #fff;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.95rem;
+  letter-spacing: 0.03em; padding: 0.35rem 0.7rem; border-radius: 8px;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.fp-card-body { padding: 1rem 1.15rem 1.2rem; }
+/* The card's headline. Sits under both images so the pictures introduce the
+   coach and the name confirms it, and it is the largest type in the card —
+   everything below is supporting detail. Ranged rather than fixed: the longest
+   names ("Seismic Fifth Wheel Toy Hauler") would otherwise run to three lines
+   in a 2-up card. Top of the range is the documented Title step. */
+.cmp-card-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.4vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text-dark);
+}
+.cmp-card-model {
+  display: block; font-weight: 500; font-size: 0.72rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid);
+  margin: 0.25rem 0 0.6rem;
+}
+.fp-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.6rem; }
+.fp-badge {
+  font-size: 0.62rem; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 700;
+  color: var(--text-mid); background: var(--surface);
+  border: 1px solid var(--warm-gray); border-radius: 50px; padding: 0.2rem 0.55rem;
+}
+.fp-badge--new { color: #fff; background: var(--blue); border-color: var(--blue); }
+.fp-specs { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.fp-spec { font-size: 0.8rem; color: var(--text-mid); }
+.fp-spec b { display: block; color: var(--text-dark); font-size: 0.95rem; font-weight: 700; }
+.fp-card-price { font-size: 1rem; color: var(--text-dark); font-weight: 700; }
+.fp-card-price--tbd { font-size: 0.85rem; font-weight: 600; color: var(--text-mid); font-style: italic; }
+
+.cmp-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.cmp-pick {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  border: 1.5px solid var(--warm-gray); background: var(--white);
+  border-radius: 50px; padding: 0.42rem 0.85rem;
+  font-size: 0.78rem; font-weight: 600; color: var(--text-mid); cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.cmp-pick:hover { border-color: var(--blue-light); color: var(--text-dark); }
+.cmp-pick[disabled] { opacity: 0.4; cursor: default; }
+.cmp-pick-box {
+  display: grid; place-items: center;
+  width: 15px; height: 15px; border-radius: 4px;
+  border: 1.5px solid var(--warm-gray); background: #fff;
+  font-size: 10px; line-height: 1; color: #fff;
+}
+.is-comparing .cmp-pick { border-color: var(--blue); color: var(--blue); }
+.is-comparing .cmp-pick-box { background: var(--blue); border-color: var(--blue); }
+
+/* ---------- Sticky tray ---------- */
+.cmp-tray {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  background: rgba(255,255,255,0.86);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  border-top: 1px solid var(--warm-gray);
+  box-shadow: 0 -8px 30px rgba(15,11,9,0.12);
+}
+.cmp-tray-inner {
+  max-width: 1600px; margin: 0 auto;
+  padding: 0.7rem var(--page-pad);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.25rem;
+}
+.cmp-tray-slots { display: flex; gap: 0.6rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.cmp-slot {
+  position: relative; display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.35rem 2rem 0.35rem 0.35rem;
+  background: var(--white); border: 1px solid var(--warm-gray); border-radius: 12px;
+}
+.cmp-slot img { width: 56px; height: 30px; object-fit: contain; }
+.cmp-slot-name { font-size: 0.8rem; font-weight: 700; color: var(--text-dark); line-height: 1.15; }
+.cmp-slot-name small { display: block; font-weight: 500; font-size: 0.68rem; color: var(--text-mid); }
+.cmp-slot-x {
+  position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%);
+  border: none; background: none; font-size: 1.15rem; line-height: 1;
+  color: var(--text-mid); cursor: pointer; padding: 0.15rem 0.3rem;
+}
+.cmp-slot-x:hover { color: var(--text-dark); }
+.cmp-tray-actions { display: flex; align-items: center; gap: 0.9rem; flex: none; }
+.cmp-tray-count { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.cmp-tray-clear {
+  border: none; background: none; padding: 0;
+  font-size: 0.82rem; color: var(--text-mid); cursor: pointer;
+}
+.cmp-tray-clear:hover { color: var(--text-dark); }
+.cmp-tray-go { border: none; }
+.cmp-tray-go[disabled] { opacity: 0.45; cursor: default; }
+
+/* v5 pins the chat button bottom-right at z-index 900 — the same layer as this
+   tray, and earlier in the DOM, so the tray would paint over it and it could
+   not be tapped. --cmp-tray-h is the tray's measured height, set by
+   compare.js: the tray stacks on a phone, so no single constant clears it at
+   every width. */
+.compare-page.has-tray .hero-chat-btn { bottom: calc(var(--cmp-tray-h, 5rem) + 1rem); }
+.compare-page.has-tray .cmp { padding-bottom: calc(var(--cmp-tray-h, 5rem) + 3rem); }
+
+/* ---------- Compare table ----------
+   Ported from version-4/css/model.css .md-spec-table. Same structure: a label
+   column plus one column per plan and a group row spanning the width. Where v4
+   swapped in a column switcher on small screens, this scrolls sideways with the
+   label column pinned — comparing is the task, so all three plans stay on one
+   surface. */
+.cmp-table-wrap {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
+  border-top: 1px solid var(--warm-gray);
+}
+.cmp-view-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+  font-weight: 800; color: var(--text-dark);
+}
+.cmp-table-scroll { overflow-x: auto; margin-top: 1.5rem; }
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.cmp-table th,
+.cmp-table td {
+  text-align: left; padding: 0.95rem 1rem 0.95rem 0;
+  border-bottom: 1px solid var(--hairline); vertical-align: top;
+}
+.cmp-table thead th { vertical-align: bottom; padding-bottom: 1.2rem; }
+/* Same two-block treatment as the card, so the table header reads as the same
+   object the user picked from the grid. */
+/* Unlike the grid card, the table header is not a card — the column already is
+   the object. So the two images run side by side and small, a pair of
+   thumbnails identifying the column, with the name below carrying the weight.
+   No frame and no ground: at this size a border reads as chrome around chrome. */
+/* Height is stated outright rather than derived from aspect-ratio. These boxes
+   are flex items inside a table cell, and WebKit resolves aspect-ratio against
+   an indefinite flex basis there — the box grows to absurd heights while
+   object-fit quietly keeps the picture small, so the cell looks empty rather
+   than broken. Chrome sized it correctly and hid the bug. A fixed height is
+   deterministic in every engine; the images letterbox inside it either way. */
+.cmp-col-media {
+  display: flex; align-items: center; gap: 0.5rem;
+  height: 4.6rem;
+  margin-bottom: 0.6rem;
+}
+.cmp-col-render-box,
+.cmp-col-plan-box {
+  display: block; flex: 1 1 0; min-width: 0; height: 100%;
+}
+.cmp-col-render,
+.cmp-col-plan { display: block; width: 100%; height: 100%; object-fit: contain; }
+.cmp-col-head { display: block; }
+.cmp-col-text { display: block; }
+.cmp-col-name {
+  display: block; font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; color: var(--text-dark);
+}
+.cmp-col-model { display: block; font-size: 0.78rem; color: var(--text-mid); margin-top: 0.1rem; }
+.cmp-col-price { display: block; margin-top: 0.35rem; font-weight: 700; color: var(--blue); }
+
+.cmp-key { color: var(--text-mid); width: 30%; }
+.cmp-table td.cmp-col { font-weight: 600; color: var(--text-dark); }
+.cmp-group th {
+  padding-top: 2.4rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-dark);
+  border-bottom-color: rgba(15,11,9,0.28);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  /* Three dense columns do not fit a phone, so the table scrolls sideways
+     rather than showing one plan at a time. Comparing is the whole task; a
+     switcher turned it into remembering. */
+  /* The chart becomes its own scroll pane, bounded to what the sticky bar and
+     the tray leave of the screen. That bound is what lets the header row pin:
+     overflow-x already makes this a scroll container in BOTH axes (a `visible`
+     overflow-y is blockified to `auto` beside it), so a sticky `top` resolves
+     against this box rather than the viewport. Without a height it never
+     scrolls vertically, and the header just leaves with the page. */
+  /* The title lives INSIDE the pane so it cannot be separated from the table.
+     Pinned from outside it, the pane slides up underneath and the title ends up
+     floating over the rows. In here it shares the pane's scrollport, so it holds
+     the top-left corner in both axes and the plan header pins directly below it.
+     Its width is the pane's visible width, not the table's, which is what gives
+     the horizontal stick something to travel against. */
+  .cmp-view-head {
+    position: sticky;
+    top: 0; left: 0;
+    z-index: 7;
+    background: var(--canvas);
+    padding-bottom: 0.6rem;
+  }
+
+  .cmp-table-scroll {
+    overflow: auto;
+    margin-top: 0;
+    max-height: calc(100dvh - var(--cmp-chart-top, 8rem) - var(--cmp-tray-h, 5rem) - 1.5rem);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;      /* a swipe past either end must not move the page */
+    scroll-snap-type: x proximity;
+    /* The snapport has to start where the pinned label column ends. Without
+       this, snapping aligns a plan to the container's left edge — which is
+       underneath the sticky cell — and the first column can never be read. */
+    scroll-padding-left: 8.5rem;
+  }
+  .cmp-table-scroll:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .cmp-table { width: auto; min-width: 100%; }
+
+  /* The plan header rides the top of the screen so you never lose track of which
+     column you are reading once the specs get long. */
+  .cmp-table thead th {
+    position: sticky;
+    top: var(--cmp-view-head-h, 3rem); /* directly under the pinned title */
+    z-index: 3;
+    background: var(--canvas);
+    box-shadow: 0 1px 0 var(--hairline);
+  }
+  .cmp-table thead th.cmp-key { z-index: 4; }   /* the corner sits above both */
+
+  /* Pinned so a row never loses its label while the plans slide past it. */
+  .cmp-table th.cmp-key,
+  .cmp-table td.cmp-key {
+    position: sticky; left: 0; z-index: 2;
+    width: 8.5rem; min-width: 8.5rem;
+    background: var(--canvas);
+    box-shadow: 1px 0 0 var(--hairline);
+  }
+  /* The group row spans every column, so the cell cannot be stuck — sticky is
+     clamped to the containing block and a full-width cell has nowhere to go.
+     Stick the label inside it instead, so "At a glance" and "Weights" stay put
+     while the plans scroll past underneath them. */
+  .cmp-group th { background: var(--canvas); }
+  .cmp-group-label {
+    position: sticky; left: 0; z-index: 2;
+    display: inline-block;
+    background: var(--canvas);
+    padding-right: 0.75rem;
+  }
+
+  /* Wider than the 12.5rem it needs, to pay for the left padding below without
+     squeezing the model name back into a second line. */
+  .cmp-table .cmp-col { min-width: 13.5rem; scroll-snap-align: start; }
+  /* The base rule sets padding-left to 0, which puts the first column's values
+     hard against the pinned column's divider. */
+  .cmp-table th.cmp-col,
+  .cmp-table td.cmp-col { padding-left: 0.9rem; padding-right: 1.1rem; }
+
+  /* Images beside the name rather than stacked above it: the header is the one
+     place a phone can least afford vertical spend, and the pair reads as a
+     label for the name it sits next to. */
+  .cmp-col-head { display: flex; align-items: flex-start; gap: 0.6rem; }
+  .cmp-col-media { flex: none; width: 5.4rem; height: 1.9rem; margin-bottom: 0; gap: 0.25rem; }
+  .cmp-col-text { flex: 1 1 auto; min-width: 0; }
+
+  /* The header cell hugs its contents and sits at the top of the chart. The
+     desktop rules pad it for a stacked block with the images on their own line;
+     here everything is on one row, so that padding was dead height. */
+  .cmp-table thead th { vertical-align: top; padding-top: 0.5rem; padding-bottom: 0.6rem; }
+  .cmp-col-name { font-size: 1rem; line-height: 1.2; }
+  .cmp-col-model { margin-top: 0; line-height: 1.25; }
+  .cmp-col-price { margin-top: 0.15rem; }
+  /* Every column is the same model year, so on a phone the year is pure width —
+     and width here is height, because it is what pushes the model name onto a
+     second line and drags the whole header row down with it. */
+  .cmp-col-year { display: none; }
+}
+@media (max-width: 768px) {
+  .cmp { padding-top: 90px; }
+
+  /* A left panel on a phone is just a narrower page. Re-anchor it to the bottom
+     as a sheet, which is where a thumb already is. */
+  .cmp-drawer {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: 86dvh;
+    border-right: none; border-top: 1px solid var(--warm-gray);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    transform: translateY(100%);
+    box-shadow: 0 -12px 40px rgba(15,11,9,0.18);
+  }
+  .cmp-drawer.is-open { transform: none; }
+  .cmp-drawer-head { padding-top: 1.5rem; }
+  .cmp-drawer-grip {
+    display: block; position: absolute; left: 50%; top: 0.5rem;
+    transform: translateX(-50%);
+    width: 38px; height: 4px; border-radius: 3px; background: var(--warm-gray);
+  }
+
+  .cmp-tray-inner { flex-direction: column; align-items: stretch; gap: 0.6rem; padding: 0.6rem var(--page-pad) 0.75rem; }
+  .cmp-tray-slots { justify-content: flex-start; }
+  .cmp-slot img { width: 44px; height: 24px; }
+  .cmp-tray-actions { justify-content: space-between; }
+}

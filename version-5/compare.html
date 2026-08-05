@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Compare Floorplans — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
+  <link rel="stylesheet" href="css/compare.css?v=v5-cmp-24" />
+</head>
+<!-- data-header="solid": like the builder, this page opens on canvas rather
+     than a dark hero, so the white logo and nav need the bar filled in from the
+     first paint. app.js reads this in initHeader(). -->
+<body class="compare-page" data-header="solid">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+        </ul>
+        <div class="nav-right">
+          <ul class="nav-primary">
+            <li><a href="index.html">Resources</a></li>
+            <li><a href="index.html">About</a></li>
+          </ul>
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <!-- ===== COMPARE ===== -->
+  <main class="cmp" id="compare">
+    <div class="cmp-inner">
+
+      <header class="cmp-head">
+        <span class="section-label">Compare</span>
+        <h1 class="cmp-title">Every floorplan, side by side.</h1>
+        <p class="cmp-sub" id="cmp-sub"><!-- count injected --></p>
+      </header>
+
+      <!-- The filters themselves live in the drawer below. This bar is what stays
+           on screen: it sticks, so the trigger and the live count are always in
+           reach while scrolling 181 cards. That is the trade for hiding them. -->
+      <div class="cmp-bar" id="cmp-bar">
+        <button type="button" class="cmp-filter-btn" id="cmp-filter-btn"
+                aria-expanded="false" aria-controls="cmp-drawer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+          Filters <span class="cmp-filter-n" id="cmp-filter-n" hidden></span>
+        </button>
+        <span class="cmp-count" id="cmp-count" role="status" aria-live="polite"></span>
+        <button type="button" class="cmp-clear" id="cmp-clear" hidden>Clear all</button>
+      </div>
+
+      <div class="cmp-grid" id="cmp-grid"><!-- cards injected --></div>
+      <p class="cmp-empty" id="cmp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>
+
+      <!-- The comparison itself. Hidden until three are chosen; not a modal, so
+           a dense spec table gets the full page width. -->
+      <section class="cmp-table-wrap" id="cmp-view" hidden aria-label="Floorplan comparison"></section>
+
+    </div>
+  </main>
+
+  <!-- Filter drawer. A sibling of <main> rather than a child of .cmp-inner, so the
+       1600px container cannot constrain a panel that is pinned to the viewport.
+       Every facet is backed by a published figure, and a plan with no value for a
+       facet is never removed by it — except Features, where coverage is complete
+       and an absent flag is a published "no". See compare.js.
+       Note: no `hidden` attribute here. .compare-page [hidden] is display:none
+       !important, which would kill the transform transition. visibility + inert.
+
+       data-lenis-prevent is load-bearing, not decoration. compare.js calls
+       lenis.stop() while this is open so the page cannot scroll behind it, and a
+       stopped Lenis answers every wheel event with preventDefault() — including
+       events aimed at .cmp-filters, which is the panel's own scroll container.
+       Lenis walks composedPath() looking for this attribute and bails out first,
+       so the form scrolls natively. Remove it and the filter list freezes. -->
+
+  <div class="cmp-drawer-backdrop" id="cmp-drawer-backdrop"></div>
+  <aside class="cmp-drawer" id="cmp-drawer" role="dialog" aria-modal="true"
+         aria-labelledby="cmp-drawer-title" aria-hidden="true" inert
+         data-lenis-prevent>
+    <div class="cmp-drawer-head">
+      <span class="cmp-drawer-grip" aria-hidden="true"></span>
+      <h2 class="cmp-drawer-title" id="cmp-drawer-title">Filters</h2>
+      <button type="button" class="cmp-drawer-x" id="cmp-drawer-x" aria-label="Close filters">&times;</button>
+    </div>
+    <form class="cmp-filters" id="cmp-filters" aria-label="Filter floorplans"><!-- built by compare.js --></form>
+    <div class="cmp-drawer-foot">
+      <button type="button" class="cmp-drawer-reset" id="cmp-drawer-reset">Clear all</button>
+      <button type="button" class="btn-primary cmp-drawer-apply" id="cmp-drawer-apply">
+        Show <span id="cmp-drawer-n"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Sticky tray. Fixed to the bottom like the builder's price bar, and it has
+       to lift the chat button the same way — both are fixed at z-index 900 and
+       the tray would otherwise paint over it. -->
+  <div class="cmp-tray" id="cmp-tray" hidden>
+    <div class="cmp-tray-inner">
+      <ul class="cmp-tray-slots" id="cmp-tray-slots"></ul>
+      <div class="cmp-tray-actions">
+        <span class="cmp-tray-count" id="cmp-tray-count"></span>
+        <button type="button" class="cmp-tray-clear" id="cmp-tray-clear">Clear</button>
+        <button type="button" class="btn-primary cmp-tray-go" id="cmp-tray-go">Compare</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <a href="#" class="footer-app-badge" aria-label="Download on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+          <a href="#" class="footer-app-badge" aria-label="Get it on Google Play">
+            <img src="../assets/google_play_badge-new.svg" alt="Get it on Google Play" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="compare.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="#">Top-Selling RVs</a></li>
+            <li><a href="#">Buyer's Guide</a></li>
+            <li><a href="#">Tow vs. Drive Guide</a></li>
+            <li><a href="#">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="#">Brochures</a></li>
+            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="#">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="#">Owner Services</a></li>
+            <li><a href="#">Manuals</a></li>
+            <li><a href="#">Warranty Coverage</a></li>
+            <li><a href="#">Recalls</a></li>
+            <li><a href="#">Wingmate App</a></li>
+            <li><a href="#">Ambassador Program</a></li>
+            <li><a href="#">Jayco University</a></li>
+            <li><a href="#">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Video Gallery</a></li>
+            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">The Jayco Difference</a></li>
+            <li><a href="#">100% PDI</a></li>
+            <li><a href="#">R&amp;D &amp; Innovation</a></li>
+            <li><a href="#">Safety &amp; JaySMART</a></li>
+            <li><a href="#">Award-Winning RVs</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Visit Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS =====
+       No leaflet: initDealerMap() returns early without #dealer-map.
+       ScrollTrigger IS required — app.js registers it unconditionally.
+       compare.js before app.js so the grid exists before app.js binds. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/build-data.js?v=v5-bp-19"></script>
+  <script src="js/floorplan-features.js?v=v5-cmp-24"></script>
+  <script src="js/compare.js?v=v5-cmp-24"></script>
+  <script src="js/app.js?v=v5-core-3"></script>
+</body>
+</html>
