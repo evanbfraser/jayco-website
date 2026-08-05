@@ -287,8 +287,16 @@ window.JAYCO_QUIZ = (function () {
      One photograph per screen, exported from assets/quiz/ — Jayco's own
      library. Each is chosen to show what its screen is asking about, which is
      the whole test: the fork question opens on a track that forks, the tow
-     question on a rig and the truck that brought it, the toy hauler question
-     on a ramp door lowered into a deck.
+     question on a rig and the truck that brought it.
+
+     `photos` is the exception, and it exists for the four screens both paths
+     share. Someone being matched to a trailer and someone being matched to a
+     motorhome are asked the same question about price — but showing a
+     motorhome interior to the first is showing them a coach they will never be
+     offered. A question may carry `photos: { towable, motorized }`, and
+     quiz.js picks by the family already decided. `photo` remains the fallback:
+     it is what the fork screen itself shows, before there is a family to pick
+     by, and what any family without its own picture falls back to.
 
      Two of them were argued over and are worth recording. `q-mq2` asks whether
      you will tow anything behind the motorhome, and nothing in the library
@@ -476,8 +484,11 @@ window.JAYCO_QUIZ = (function () {
     {
       id: 'tq2',
       when: (a) => a.family === 'towable',
-      photo: PH + 'q-tq2.webp',
-      alt: 'A Seismic toy hauler with its rear ramp lowered into a patio deck',
+      /* This screen only ever runs on the towable side — `when` above says so —
+         so it takes the towable photograph directly rather than through
+         `photos` below. */
+      photo: PH + 'q-tq2-tow.webp',
+      alt: 'The bedroom of a fifth wheel, with a window seat looking out over open country',
       question: 'Bringing anything with a motor?',
       why: 'A toy hauler is a different shape of trailer, not an add-on.',
       options: [
@@ -543,8 +554,19 @@ window.JAYCO_QUIZ = (function () {
 
     {
       id: 's4',
+      /* Shared by both paths, so it carries one photograph per path: a towable
+         interior for someone being matched to a trailer, a motorhome interior
+         for someone being matched to a coach. `photo` stays the fallback for
+         the moment before the fork is decided and for any family without its
+         own picture — see the note over `photos` in the header. */
       photo: PH + 'q-s4.webp',
       alt: 'A fifth wheel galley with an island, a fireplace and a pantry',
+      photos: {
+        towable:   { src: PH + 'q-s4-tow.webp',
+                     alt: 'The living room of a fifth wheel — fireplace, island and a bank of windows' },
+        motorized: { src: PH + 'q-s4.webp',
+                     alt: 'A fifth wheel galley with an island, a fireplace and a pantry' },
+      },
       question: 'Where should we start on price?',
       /* The three option labels are written at runtime from the actual MSRP of
          whatever survived the earlier answers, so the question is asked in real

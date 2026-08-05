@@ -228,6 +228,15 @@
       ? q.groups.map((g) => groupHtml(g.options, g.label, g.key, pickedFor(g.key))).join('')
       : groupHtml(opts, null, null, pickedFor(null));
 
+    /* The screens both paths share can carry one photograph per path — see the
+       note over `photos` in quiz-data.js. `a.family` is null on the fork
+       itself and until the helper resolves it, and a question may name only
+       one family, so `photo`/`alt` remain the answer in every other case. */
+    const perPath = q.photos && a.family && q.photos[a.family];
+    const shot = perPath
+      ? { src: perPath.src, alt: perPath.alt || q.alt || '' }
+      : { src: q.photo, alt: q.alt || '' };
+
     const canBack = state.trail.length > 1;
 
     return '<div class="qz-screen qz-screen--q">' +
@@ -243,9 +252,10 @@
               '<path d="M15 18l-6-6 6-6"/></svg>Back</button>' : '') +
           '</div>' +
         '</div>' +
-        /* One photograph, chosen to show what this screen is asking about. */
+        /* One photograph, chosen to show what this screen is asking about —
+           and on the screens both paths share, chosen for the path as well. */
         '<div class="qz-media">' +
-          '<img class="qz-media-img" src="' + esc(q.photo) + '" alt="' + esc(q.alt || '') + '" />' +
+          '<img class="qz-media-img" src="' + esc(shot.src) + '" alt="' + esc(shot.alt) + '" />' +
         '</div>' +
       '</div></div>';
   }
