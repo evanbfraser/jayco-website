@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
   <title>Jayco — Built for the Road (v5)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=v5-6" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
   <!-- the quiz CTA's parallax image lives in an inline style attribute, which the
        preload scanner cannot see — without this the fetch waits on layout -->
   <link rel="preload" href="../assets/jayco-model-quiz-v2.jpg" as="image" />
@@ -29,7 +33,7 @@
   <!-- ===== HEADER ===== -->
   <header class="site-header" id="site-header">
     <div class="header-inner">
-      <a href="#" class="header-logo">
+      <a href="index.html" class="header-logo">
         <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
       </a>
       <nav class="header-nav" id="main-nav">
@@ -45,8 +49,8 @@
             <li><a href="#">About</a></li>
           </ul>
           <ul class="nav-actions">
-            <li><a href="#" class="btn-nav-filled">Build &amp; Price</a></li>
-            <li><a href="#" class="btn-nav-outline">Find a Dealer</a></li>
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
             <li>
               <button class="nav-search-btn" aria-label="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -73,7 +77,7 @@
           <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="mm-panel" id="mm-rvs">
-          <a href="#" class="mm-viewall">View All RVs</a>
+          <a href="#categories" class="mm-viewall">View All RVs</a>
           <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
         </div>
       </div>
@@ -81,8 +85,8 @@
     </nav>
 
     <div class="mm-actions">
-      <a href="#" class="btn-nav-filled">Build &amp; Price</a>
-      <a href="#" class="btn-nav-outline">Find a Dealer</a>
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
     </div>
   </div>
 
@@ -112,8 +116,8 @@
       </h1>
       <p class="hero-tagline">From weekends to lifetimes — Jayco builds the RV<br>your adventure deserves.</p>
       <div class="hero-ctas">
-        <a href="#" class="btn-primary">Build &amp; Price</a>
-        <a href="#" class="btn-secondary">Find Your RV</a>
+        <a href="build-price.html" class="btn-primary">Build &amp; Price</a>
+        <a href="#feature" class="btn-secondary">Find Your RV</a>
       </div>
     </div>
     <div class="scroll-indicator">
@@ -135,10 +139,10 @@
             <div class="cs-group-detail-inner">
               <p class="cs-group-tagline">From lightweight travel trailers to spacious fifth wheels, find a towable built for wherever the road takes you.</p>
               <div class="cs-buttons">
-                <a href="#" class="cs-vehicle-btn" data-vehicle="travel-trailer"><img class="cs-vehicle-img" src="../assets/jayco-travel-trailer-button.png" alt="" /><span>Travel Trailers</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="destination-trailer"><img class="cs-vehicle-img" src="../assets/jayco-destination-trailer-button.png" alt="" /><span>Destination Trailers</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="fifth-wheel"><img class="cs-vehicle-img" src="../assets/jayco-fifth-wheel-button.png" alt="" /><span>Fifth Wheels</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="toy-hauler"><img class="cs-vehicle-img" src="../assets/jayco-toy-hauler-button.png" alt="" /><span>Toy Haulers</span></a>
+                <a href="type.html?type=travel-trailers" class="cs-vehicle-btn" data-vehicle="travel-trailers"><img class="cs-vehicle-img" src="../assets/jayco-travel-trailer-button.png" alt="" /><span>Travel Trailers</span></a>
+                <a href="type.html?type=destination" class="cs-vehicle-btn" data-vehicle="destination"><img class="cs-vehicle-img" src="../assets/jayco-destination-trailer-button.png" alt="" /><span>Destination Trailers</span></a>
+                <a href="type.html?type=fifth-wheels" class="cs-vehicle-btn" data-vehicle="fifth-wheels"><img class="cs-vehicle-img" src="../assets/jayco-fifth-wheel-button.png" alt="" /><span>Fifth Wheels</span></a>
+                <a href="type.html?type=toy-haulers" class="cs-vehicle-btn" data-vehicle="toy-haulers"><img class="cs-vehicle-img" src="../assets/jayco-toy-hauler-button.png" alt="" /><span>Toy Haulers</span></a>
               </div>
             </div>
           </div>
@@ -150,10 +154,10 @@
             <div class="cs-group-detail-inner">
               <p class="cs-group-tagline">Explore motorhomes designed to make every mile more comfortable, capable, and memorable.</p>
               <div class="cs-buttons">
-                <a href="#" class="cs-vehicle-btn" data-vehicle="class-b"><img class="cs-vehicle-img" src="../assets/jayco-class-b-button.png" alt="" /><span>Class B</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="class-c"><img class="cs-vehicle-img" src="../assets/jayco-class-c-button.png" alt="" /><span>Class C</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="super-c"><img class="cs-vehicle-img" src="../assets/jayco-super-c-button.png" alt="" /><span>Super C</span></a>
-                <a href="#" class="cs-vehicle-btn" data-vehicle="class-a"><img class="cs-vehicle-img" src="../assets/jayco-class-a-button.png" alt="" /><span>Class A</span></a>
+                <a href="type.html?type=class-b" class="cs-vehicle-btn" data-vehicle="class-b"><img class="cs-vehicle-img" src="../assets/jayco-class-b-button.png" alt="" /><span>Class B</span></a>
+                <a href="type.html?type=class-c" class="cs-vehicle-btn" data-vehicle="class-c"><img class="cs-vehicle-img" src="../assets/jayco-class-c-button.png" alt="" /><span>Class C</span></a>
+                <a href="type.html?type=super-c" class="cs-vehicle-btn" data-vehicle="super-c"><img class="cs-vehicle-img" src="../assets/jayco-super-c-button.png" alt="" /><span>Super C</span></a>
+                <a href="type.html?type=class-a" class="cs-vehicle-btn" data-vehicle="class-a"><img class="cs-vehicle-img" src="../assets/jayco-class-a-button.png" alt="" /><span>Class A</span></a>
               </div>
             </div>
           </div>
@@ -176,7 +180,7 @@
       <span class="section-label light">Find Your Match</span>
       <h2 class="section-heading light">Which Jayco<br>is Yours?</h2>
       <p class="section-body light">Not sure where to start? Answer a few quick questions and we'll match you with the model built for the way you travel.</p>
-      <a href="#" class="btn-primary">Start the Quiz</a>
+      <a href="quiz.html" class="btn-primary">Start the Quiz</a>
     </div>
     <div class="quiz-cards" aria-hidden="true">
       <div class="quiz-card"><span class="quiz-card-text"></span><span class="quiz-card-cursor"></span></div>
@@ -261,7 +265,7 @@
       <div class="models-viewport">
         <div class="models-track" id="models-track">
 
-          <a href="#" class="model-card">
+          <a href="type.html?type=fifth-wheels" class="model-card">
             <img src="../assets/popular%20model-northpoint.jpg" alt="North Point" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -281,7 +285,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="type.html?type=class-a" class="model-card">
             <img src="../assets/popular%20model-alante.jpg" alt="Alante" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -301,7 +305,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="type.html?type=fifth-wheels" class="model-card">
             <img src="../assets/popular%20model-pinnacle.jpg" alt="Pinnacle" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -321,7 +325,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="type.html?type=class-c" class="model-card">
             <img src="../assets/popular%20model-greyhawk.jpg" alt="Greyhawk" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -341,7 +345,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="model.html?model=jay-feather" class="model-card">
             <img src="../assets/popular%20model-jay-feather.jpg" alt="Jay Feather" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -361,7 +365,7 @@
             </button>
           </a>
 
-          <a href="#" class="model-card">
+          <a href="model.html?model=swift" class="model-card">
             <img src="../assets/popular%20model-swift.jpg" alt="Swift" />
             <div class="model-card-overlay">
               <div class="card-top">
@@ -477,8 +481,8 @@
       <h2 class="cta-heading">Your Next Adventure<br>Starts Here.</h2>
       <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by a 2-year limited warranty, 3-year structural coverage and 200+ dealers — before, during, and long after the sale.</p>
       <div class="cta-buttons">
-        <a href="#" class="btn-primary">Build &amp; Price</a>
-        <a href="#" class="btn-secondary">Find a Dealer</a>
+        <a href="build-price.html" class="btn-primary">Build &amp; Price</a>
+        <a href="dealers.html" class="btn-secondary">Find a Dealer</a>
       </div>
     </div>
   </section>
@@ -556,8 +560,8 @@
         <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
         <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
         <div class="footer-ctas">
-          <a href="#" class="footer-btn-primary">Build &amp; Price</a>
-          <a href="#" class="footer-btn-outline">Find a Dealer</a>
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
         </div>
 
         <div class="footer-social">
@@ -602,22 +606,26 @@
         <div class="footer-col">
           <h4>RVs</h4>
           <ul>
-            <li><a href="#">All RVs</a></li>
-            <li><a href="#">Travel Trailers</a></li>
-            <li><a href="#">Destination Travel Trailers</a></li>
-            <li><a href="#">Fifth Wheels</a></li>
-            <li><a href="#">Toy Haulers</a></li>
-            <li><a href="#">Class B Motorhomes</a></li>
-            <li><a href="#">Class A Motorhomes</a></li>
-            <li><a href="#">Class C Motorhomes</a></li>
-            <li><a href="#">Compare RVs</a></li>
-            <li><a href="#">All Floorplans</a></li>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="compare.html">All Floorplans</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Find Your RV</h4>
           <ul>
-            <li><a href="#">RV Finder Quiz</a></li>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
             <li><a href="#">Top-Selling RVs</a></li>
             <li><a href="#">Buyer's Guide</a></li>
             <li><a href="#">Tow vs. Drive Guide</a></li>
@@ -627,8 +635,8 @@
         <div class="footer-col">
           <h4>Shop &amp; Tools</h4>
           <ul>
-            <li><a href="#">Find a Dealer</a></li>
-            <li><a href="#">Request a Quote</a></li>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="build-price.html">Request a Quote</a></li>
             <li><a href="#">Build &amp; Price</a></li>
             <li><a href="#">Brochures</a></li>
             <li><a href="#">Reviews &amp; Testimonials</a></li>
@@ -695,9 +703,12 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-1"></script>
-  <!-- no model detail page in this version, so no model-data.js: app.js reads
-       window.JAYCO_MODEL_DETAIL || {} and falls every Explore link back to '#' -->
-  <script src="js/app.js?v=v5-3"></script>
+  <script src="js/models-data.js?v=v5-4"></script>
+  <!-- No model-data.js here on purpose. It is ~70KB to describe two models, and
+       the only page that needs it is model.html. app.js reads
+       window.JAYCO_MODEL_DETAIL || {} and, finding it empty, sends every
+       mobile-menu Explore link to that model's category overview instead —
+       a real page either way, so nothing has to be loaded to avoid a dead link. -->
+  <script src="js/app.js?v=v5-core-3"></script>
 </body>
 </html>

@@ -11,9 +11,18 @@
   --blue:       #007AC2;
   --blue-dark:  #005E96;
   --blue-light: #0F90E0;
+  /* Warm off-white. No longer a panel ground — --surface took that job and went
+     cool. What is left is the dealers map, whose own palette is warm
+     throughout (land, highways, country strokes) and would read wrong with one
+     cool member. Do not reach for this for a new surface. */
   --off-white:  #F5F2EE;
   --white:      #FFFFFF;
   --canvas:     #FBFCFE;   /* sampled from the quiz CTA video's backdrop */
+  /* The site's one dark BLUE ground, as distinct from --navy, which is a warm
+     near-black. It arrived as model.css's local --md-band-bg for the floorplan
+     band; the quiz result's band is the second use, and a value used twice
+     belongs in one place. See DESIGN.md > Colors. */
+  --band-navy:  #012638;
   --warm-gray:  #E8E4DE;
   --text-dark:  #1A1410;
   --text-mid:   #5C5652;
@@ -35,7 +44,13 @@
   --measure:      640px;                   /* centred text column */
   --measure-wide: 880px;
   --hairline: rgba(15,11,9,0.12);
-  --surface:  #F4F2EF;                     /* neutral panel — replaces white cards */
+  /* The panel tone: every content surface that sits ON canvas. Cool, not the
+     warm #F4F2EF it used to be — the renders across this site are cut-outs of
+     white and near-white coaches, and a warm ground let them dissolve into it.
+     Against a cool grey they hold an edge. The model card found this first and
+     hard-coded it; now it is the tone, and the card just uses the token. */
+  --surface:       #E2E4E7;
+  --surface-hover: #D4D6D9;                /* the same panel, pressed */
   /* No separate media radius: on this site radius follows bleed, not size.
      Inset media rounds at --radius-card; anything edge-to-edge stays square. */
 }
@@ -51,6 +66,18 @@ body {
 }
 
 img { display: block; max-width: 100%; }
+/* `hidden` is only `display: none` in the UA stylesheet, so the author rule
+   directly above outranks it and an image the JS hides stays laid out. That is
+   not theoretical: the builder hides its summary render until a model is
+   chosen, and the element held a 338×190 box with Chrome painting its
+   empty-image placeholder inside it — the grey rectangle in the panel.
+
+   Scoped to img, deliberately. A blanket `[hidden] { display: none }` would
+   also beat .build-back[hidden] { visibility: hidden } in build.css, which
+   hides the back button while KEEPING its space so the nav row does not shift.
+   The only global display rule here is the one above, so the only element that
+   needs rescuing is the one it applies to. */
+img[hidden] { display: none !important; }
 a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
 
@@ -404,6 +431,12 @@ ul { list-style: none; }
   background-size: 200% 100%;
   background-position: 100% 0;
   color: #fff;
+  /* On an <a> this class needs no border; on a <button> the UA supplies one,
+     which painted a grey stroke around the blue pill. Three separate rules had
+     already patched it locally (.faq-load-more, .quote-submit, .quote-success
+     .btn-primary) and the two Request a Quote buttons on the builder had been
+     missed. The class never wants a border, so it says so once, here. */
+  border: none;
   padding: 0.9rem 2.2rem;
   border-radius: var(--radius-btn);
   transition: background-position 0.45s var(--ease-out), transform 0.3s var(--ease-out), box-shadow 0.3s;
@@ -434,6 +467,9 @@ ul { list-style: none; }
   background: linear-gradient(to right, rgba(255,255,255,0.12) 50%, transparent 50%);
   background-size: 200% 100%;
   background-position: 100% 0;
+  /* See .btn-secondary-light for why this is here — same recipe, same artifact,
+     just far less visible against a white border on a dark ground. */
+  background-clip: padding-box;
   transition: background-position 0.45s var(--ease-out), border-color 0.25s, transform 0.3s var(--ease-out);
 }
 .btn-secondary:hover {
@@ -457,6 +493,14 @@ ul { list-style: none; }
   background: linear-gradient(to right, var(--navy) 50%, transparent 50%);
   background-size: 200% 100%;
   background-position: 100% 0;
+  /* The sweep fills the padding box, not the border box. Parked off to the left
+     at rest, the gradient's hard stop lands exactly on the border box's left
+     edge, and the border here is translucent — so at the two points where the
+     pill's curve goes vertical, the navy behind it showed through as a dark
+     tick on each end. Clipping to the padding box puts the stop out of the
+     border's reach. The hover state is unaffected: border-color goes to solid
+     --navy at the same moment the fill arrives, so the two still meet. */
+  background-clip: padding-box;
   transition: background-position 0.45s var(--ease-out), border-color 0.25s, color 0.3s, transform 0.3s var(--ease-out);
 }
 .btn-secondary-light:hover {
@@ -1134,7 +1178,7 @@ ul { list-style: none; }
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.01em;
-  color: var(--off-white);
+  color: var(--text-light);
 }
 
 /* ---------- Newsletter Signup ---------- */
@@ -1698,6 +1742,9 @@ ul { list-style: none; }
 .news-card       { cursor: none; }
 .model-specs-btn { cursor: none; }
 .hero-chat-btn   { cursor: none; }
+/* The model page's 3D tour used to hide the OS arrow here too, because it was a
+   44px glass circle driving its own swollen cursor. It is a labelled button in
+   the floorplan CTA row now and keeps the ordinary pointer, like Build. */
 
 /* ---------- Built For — scroll-scrubbed exterior→interior video ---------- */
 .builtfor-section {

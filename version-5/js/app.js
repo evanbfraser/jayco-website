@@ -52,10 +52,23 @@
   /* ---------- Header ---------- */
   function initHeader() {
     const header    = document.getElementById('site-header');
+    if (!header) return;
 
     // Fade-in opacity as user scrolls — fully dark at 320px
     const MAX_OPACITY  = 0.88;
     const FULL_SCROLL  = 320;
+
+    /* Pages that open on a dark hero can let the bar start transparent. Pages
+       that open on a light ground cannot — the logo and nav are white, so at
+       0% they would sit invisible on canvas until the first scroll. Those set
+       data-header="solid" on <body> and get the full state immediately.
+       This has to be a JS opt-out, not CSS: the scroll handler below writes
+       header.style.background inline, which outranks any stylesheet rule. */
+    if (document.body.dataset.header === 'solid') {
+      header.style.background = `rgba(0, 0, 0, ${MAX_OPACITY})`;
+      header.classList.add('scrolled');
+      return;
+    }
 
     function updateHeaderBg() {
       const scrollY   = window.scrollY;
@@ -88,9 +101,17 @@
       const priceFmt = (n) =>
         '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-      // only models with a detail record get a working Explore link
+      /* A model with a real detail record goes to its own page; everything else
+         goes to its category overview, which still shows that model's card with
+         real name, price, render and specs. Never '#'.
+         The !stub test matters: model-data.js carries a deliberately minimal
+         'comet' record marked stub:true as a degradation test, and linking it
+         would render a placeholder as if it were product. renderSimilar() in
+         model-detail.js makes the same check. */
       const detail = window.JAYCO_MODEL_DETAIL || {};
-      const exploreHref = (id) => (detail[id] ? 'model.html?model=' + id : '#');
+      const exploreHref = (id, catId) =>
+        (detail[id] && !detail[id].stub) ? 'model.html?model=' + id
+                                         : 'type.html?type=' + catId;
 
       // group models by category id, preserving data order
       // (each row carries its slug so it can link to the model detail page)
@@ -111,8 +132,8 @@
               <span class="mm-model-name">${m.name}</span>
               <span class="mm-model-price">Starting at ${priceFmt(m.basePrice)}</span>
               <div class="mm-model-ctas">
-                <a href="${exploreHref(m.slug)}" class="mm-model-cta mm-model-discover">Explore</a>
-                <a href="#" class="mm-model-cta mm-model-build">Build Yours</a>
+                <a href="${exploreHref(m.slug, cat.id)}" class="mm-model-cta mm-model-discover">Explore</a>
+                <a href="build-price.html?model=${m.slug}" class="mm-model-cta mm-model-build">Build Yours</a>
               </div>
             </div>
           </div>`).join('');
@@ -633,14 +654,21 @@
       if (!e.relatedTarget) cursor.classList.add('visible');
     });
 
-    // Grow + intensify glow over interactive elements (exclude news cards and specs buttons — they use their own states)
+    // Grow + intensify glow over interactive elements (exclude news cards and
+    // specs buttons — they use their own states). .model-tile is the builder's
+    // clickable model card: a <div>, so none of the element selectors catch it.
+    const HOVERS   = 'a, button, [role="button"], .cs-vehicle-btn, .model-tile';
+    /* The model page's 3D-tour button was listed here while it drove its own
+       .tour state. It is now a labelled button in the floorplan CTA row and
+       takes the same generic hover as the Build button beside it. */
+    const OWN_STATE = '.news-card, .model-specs-btn, .hero-chat-btn';
     document.addEventListener('mouseover', (e) => {
-      if (e.target.closest('a, button, [role="button"], .cs-vehicle-btn') && !e.target.closest('.news-card') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-chat-btn')) {
+      if (e.target.closest(HOVERS) && !e.target.closest(OWN_STATE)) {
         cursor.classList.add('hovering');
       }
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('a, button, [role="button"], .cs-vehicle-btn') && !e.target.closest('.news-card') && !e.target.closest('.model-specs-btn') && !e.target.closest('.hero-chat-btn')) {
+      if (e.target.closest(HOVERS) && !e.target.closest(OWN_STATE)) {
         cursor.classList.remove('hovering');
       }
     });
@@ -1124,9 +1152,12 @@
         list.appendChild(li);
       });
 
+      /* Follow the card's own link rather than hardcoding one. The card already
+         knows where that model goes, and reading it here means the panel can
+         never drift from the card it opened out of. */
       const cta = document.createElement('a');
       cta.className = 'model-specs-cta';
-      cta.href = '#';
+      cta.href = card.getAttribute('href') || '#';
       cta.textContent = 'Learn More';
 
       if (img) panel.append(img);
@@ -1173,7 +1204,9 @@
      iOS Safari throttles multiple inline videos buffering/decoding at once,
      which left the quiz video blank on mobile. Gate playback on visibility. */
   function initVideoVisibility() {
-    const videos = document.querySelectorAll('.hero-bg video, .cs-video');
+    /* .quiz-video is the type page's quiz band — same iOS throttling applies
+       there, and it was the video this guard was originally written for. */
+    const videos = document.querySelectorAll('.hero-bg video, .cs-video, .quiz-video');
     if (!videos.length || !('IntersectionObserver' in window)) return;
 
     const io = new IntersectionObserver((entries) => {

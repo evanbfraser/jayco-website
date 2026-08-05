@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-27T00:00:00.000Z",
+  "title": "Design System: Jayco",
+  "extensions": {
+    "colorMeta": {
+      "jayco-blue": {
+        "role": "primary",
+        "displayName": "Jayco Blue",
+        "canonical": "#007AC2",
+        "tonalRamp": ["#E6F2FA", "#BFDDF1", "#8FC5E7", "#5AA9DA", "#0F90E0", "#007AC2", "#005E96", "#00456D", "#002D47"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Warm Ink",
+        "canonical": "#0F0B09",
+        "tonalRamp": ["#F5F2EE", "#E8E4DE", "#CFC9C1", "#A8A19A", "#7C7570", "#5C5652", "#3A3430", "#1A1410", "#0F0B09"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Cool Canvas",
+        "canonical": "#FBFCFE",
+        "tonalRamp": ["#FFFFFF", "#FBFCFE", "#F2F5F9", "#E7ECF3", "#D8DFE9"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Warm Surface",
+        "canonical": "#F4F2EF",
+        "tonalRamp": ["#FAF9F7", "#F4F2EF", "#E8E4DE", "#D6D0C8", "#B9B2A8"]
+      },
+      "text-strong": { "role": "neutral", "displayName": "Text Strong", "canonical": "#1A1410" },
+      "text-muted": { "role": "neutral", "displayName": "Text Muted", "canonical": "#5C5652" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "rgba(15,11,9,0.12)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page hero only. One per page, weight 900." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings, weight 800." },
+      "title": { "displayName": "Title", "purpose": "Card and sub-section heads, weight 700." },
+      "body": { "displayName": "Body", "purpose": "Prose at 1.78 line-height, 65-75ch measure." },
+      "label": { "displayName": "Eyebrow", "purpose": "Blue uppercase section category, 0.22em tracked. Names a category; never a section separator." }
+    },
+    "shadows": [
+      { "name": "card-rest", "value": "0 4px 24px rgba(15,11,9,0.14)", "purpose": "Resting elevation for an inset media card." },
+      { "name": "control-float", "value": "0 4px 16px rgba(15,11,9,0.1)", "purpose": "Carousel arrows and other floating round controls." },
+      { "name": "bar-float", "value": "0 6px 24px rgba(15,11,9,0.08)", "purpose": "The floating sub-navigation pill." },
+      { "name": "lift-hover", "value": "0 16px 40px rgba(15,11,9,0.2)", "purpose": "Hover lift on a light ground." },
+      { "name": "lift-hover-dark", "value": "0 18px 44px rgba(0,0,0,0.4)", "purpose": "Hover lift on a dark ground." },
+      { "name": "action-hover", "value": "0 8px 20px rgba(0,122,194,0.3)", "purpose": "The only colored shadow, and only beneath a blue primary action." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The signature deceleration. Default for state and entrance." },
+      { "name": "ease-in-out", "value": "cubic-bezier(0.65, 0, 0.35, 1)", "purpose": "Symmetric moves such as a sliding highlight." },
+      { "name": "feedback", "value": "120-150ms", "purpose": "Interactive feedback band: hover, press, focus." },
+      { "name": "state", "value": "300-500ms", "purpose": "Layout, overlay and view transitions." },
+      { "name": "focal", "value": "500-800ms", "purpose": "The single authored entrance a page is allowed." },
+      { "name": "media-scrub", "value": "ease:'none', scrub:true, top bottom -> bottom top", "purpose": "Photography drifts linearly across its pass through the viewport at +/-6%." },
+      { "name": "copy-arrive", "value": "opacity 0->1, y 14px, 0.5s power2.out, once", "purpose": "The shared quiet handoff for text. Never reverses." }
+    ],
+    "breakpoints": [
+      { "name": "wide", "value": "1280px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "pair", "value": "900px" },
+      { "name": "unpin", "value": "860px" },
+      { "name": "phone", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The conversion action: Build & Price, Find a Dealer, Order. Hover wipes from Blue to Blue Deep.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Build &amp; Price</a>",
+      "css": ".ds-btn-primary { display: inline-block; font-family: 'Host Grotesk', system-ui, sans-serif; font-size: 0.82rem; font-weight: 400; letter-spacing: 0.06em; color: #fff; text-decoration: none; padding: 0.9rem 2.2rem; border-radius: 50px; background: linear-gradient(to right, #005E96 50%, #007AC2 50%); background-size: 200% 100%; background-position: 100% 0; transition: background-position 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; } .ds-btn-primary:hover { background-position: 0 0; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,122,194,0.3); }"
+    },
+    {
+      "name": "Secondary Button (light ground)",
+      "kind": "button",
+      "refersTo": "button-secondary-light",
+      "description": "The alternate path next to a primary action, on canvas or surface.",
+      "html": "<a class=\"ds-btn-secondary-light\" href=\"#\">Find a Dealer</a>",
+      "css": ".ds-btn-secondary-light { display: inline-block; font-family: 'Host Grotesk', system-ui, sans-serif; font-size: 0.82rem; letter-spacing: 0.06em; color: #1A1410; text-decoration: none; padding: 0.88rem 2.2rem; border: 1.5px solid rgba(15,11,9,0.22); border-radius: 50px; background: linear-gradient(to right, #0F0B09 50%, transparent 50%); background-size: 200% 100%; background-position: 100% 0; transition: background-position 0.45s cubic-bezier(0.16,1,0.3,1), color 0.3s; } .ds-btn-secondary-light:hover { background-position: 0 0; color: #fff; border-color: #0F0B09; }"
+    },
+    {
+      "name": "Section Eyebrow",
+      "kind": "chip",
+      "refersTo": "typography.label",
+      "description": "Names a section's category. One per section at most, and not on every section.",
+      "html": "<span class=\"ds-eyebrow\">Popular Models</span>",
+      "css": ".ds-eyebrow { display: block; font-family: 'Host Grotesk', system-ui, sans-serif; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #007AC2; margin-bottom: 1rem; }"
+    },
+    {
+      "name": "Media Card",
+      "kind": "card",
+      "refersTo": "card-media",
+      "description": "An inset photograph. Rounds at 20px because it is inset; a full-bleed image would be square and unshadowed.",
+      "html": "<figure class=\"ds-card-media\"><img src=\"coach.jpg\" alt=\"Jayco Swift parked at a creek\" /></figure>",
+      "css": ".ds-card-media { position: relative; margin: 0; aspect-ratio: 16 / 10; border-radius: 20px; overflow: hidden; background: #F4F2EF; box-shadow: 0 4px 24px rgba(15,11,9,0.14); transition: box-shadow 0.35s cubic-bezier(0.16,1,0.3,1); } .ds-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(0.16,1,0.3,1); } .ds-card-media:hover { box-shadow: 0 16px 40px rgba(15,11,9,0.2); } .ds-card-media:hover img { transform: scale(1.03); }"
+    },
+    {
+      "name": "Surface Panel",
+      "kind": "card",
+      "refersTo": "panel-surface",
+      "description": "Holds content that is not photography: spec tables, floorplan info, forms. Inset, therefore rounded.",
+      "html": "<div class=\"ds-panel\"><h3>20E</h3><p>Rear garage layout with the bed lifting over the top.</p></div>",
+      "css": ".ds-panel { background: #F4F2EF; border-radius: 20px; padding: clamp(2.5rem, 4.5vw, 4.5rem) clamp(2rem, 3.4vw, 3.5rem); font-family: 'Host Grotesk', system-ui, sans-serif; color: #1A1410; } .ds-panel h3 { font-size: clamp(2rem, 3vw, 2.8rem); font-weight: 800; letter-spacing: -0.01em; line-height: 1; margin: 0 0 1.1rem; } .ds-panel p { font-size: 0.98rem; line-height: 1.75; color: #5C5652; margin: 0; max-width: 46ch; }"
+    },
+    {
+      "name": "Round Control",
+      "kind": "nav",
+      "refersTo": "control-round",
+      "description": "Carousel navigation. Straddles the gutter edge at -22px. Disabled fades to 0.35, never hides.",
+      "html": "<button class=\"ds-control\" aria-label=\"Next photos\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-control { width: 57px; height: 57px; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(15,11,9,0.14); border-radius: 50%; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); color: #1A1410; box-shadow: 0 4px 16px rgba(15,11,9,0.1); cursor: pointer; transition: background 0.25s, transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s; } .ds-control:hover:not(:disabled) { background: #fff; transform: scale(1.08); box-shadow: 0 8px 24px rgba(15,11,9,0.14); } .ds-control:disabled { opacity: 0.35; cursor: default; }"
+    },
+    {
+      "name": "Floating Nav Bar",
+      "kind": "nav",
+      "refersTo": "rounded.pill",
+      "description": "The in-page section bar. Translucent, blurred, hairline-bordered; the active item is a blue-tinted pill.",
+      "html": "<nav class=\"ds-subnav\"><span class=\"ds-subnav-model\">2027 Swift</span><a href=\"#\">Overview</a><a class=\"is-active\" href=\"#\">Layout</a><a href=\"#\">Specs</a></nav>",
+      "css": ".ds-subnav { display: inline-flex; align-items: center; gap: 0.15rem; height: 60px; padding: 0 0.4rem 0 1.5rem; background: rgba(255,255,255,0.9); backdrop-filter: blur(18px); border: 1px solid rgba(15,11,9,0.12); border-radius: 50px; box-shadow: 0 6px 24px rgba(15,11,9,0.08); font-family: 'Host Grotesk', system-ui, sans-serif; } .ds-subnav-model { font-size: 0.8rem; font-weight: 600; color: #1A1410; margin-right: 1.6rem; white-space: nowrap; } .ds-subnav a { padding: 0.45rem 1rem; font-size: 0.8rem; color: #5C5652; text-decoration: none; border-radius: 50px; transition: color 0.3s, background 0.25s; } .ds-subnav a:hover { color: #1A1410; background: rgba(15,11,9,0.05); } .ds-subnav a.is-active { color: #007AC2; background: rgba(0,122,194,0.1); }"
+    },
+    {
+      "name": "Spec Row",
+      "kind": "custom",
+      "refersTo": "colors.hairline",
+      "description": "The hairline pattern that replaces cards for tabular product truth.",
+      "html": "<ul class=\"ds-specs\"><li><span>Sleeps</span><span>Up to 2</span></li><li><span>Length</span><span>20&prime; 11&Prime;</span></li></ul>",
+      "css": ".ds-specs { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(15,11,9,0.12); font-family: 'Host Grotesk', system-ui, sans-serif; } .ds-specs li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid rgba(15,11,9,0.12); font-size: 0.88rem; } .ds-specs li span:first-child { color: #5C5652; } .ds-specs li span:last-child { font-weight: 500; color: #1A1410; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Newsletter and form input. No resting border; a two-pixel blue ring on focus.",
+      "html": "<input class=\"ds-input\" type=\"email\" placeholder=\"Email address\" />",
+      "css": ".ds-input { width: 100%; background: #fff; border: none; outline: none; border-radius: 14px; padding: 1.05rem 1.1rem; font-family: 'Host Grotesk', system-ui, sans-serif; font-size: 0.95rem; color: #1A1410; } .ds-input::placeholder { color: #5C5652; } .ds-input:focus { box-shadow: 0 0 0 2px #007AC2; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Modern Outfitter",
+    "overview": "Jayco makes equipment for people who go outside. The design language is the same: plain-spoken, sturdy, built for use. Photography does the selling — real coaches in real places, at real scale — and everything else gets out of its way. Type is one family at honest weights. Blue is a signal, not a mood: it marks the way forward and nothing else. Space is generous because the products are large and the decisions are expensive.\n\nThe tone is confident without hype. Copy names the thing — \"20 feet 11 inches\", \"276 hp\", \"fits a standard parking space\" — because specificity is what persuades a buyer spending six figures. Adjectives are what a competitor writes when they have nothing to measure.\n\nThe anti-reference is the RV-industry default: stock lifestyle photography behind a gradient scrim, gold-and-burgundy luxury cues, exclamation marks, and specs dumped as a wall of unexplained numbers.",
+    "keyCharacteristics": [
+      "One typeface, Host Grotesk, weight-led from 900 display to 400 body",
+      "One accent, Jayco Blue #007AC2, rationed to actions, active state and eyebrows",
+      "Three grounds: cool canvas, warm surface, warm ink",
+      "Radius follows bleed: inset media rounds at 20px, full-bleed media is square",
+      "Tonal depth first; shadow only where something genuinely lifts",
+      "One authored motion moment per page, everything else a quiet shared handoff",
+      "Hairlines instead of containers wherever a card would be too much"
+    ],
+    "rules": [
+      { "name": "Radius Follows Bleed", "body": "Media inset inside the gutters rounds at 20px whatever its scale. Media that runs edge-to-edge is square, with no radius and no shadow. The only permitted animated radius is the transition between those two states, and it always settles on a correct static value.", "section": "shapes" },
+      { "name": "One Authored Moment", "body": "A page gets exactly one orchestrated motion sequence. Everything else uses the shared handoff: text arrives once at 0.5s power2.out and never reverses; photography drifts linearly and never fades. Eleven distinct transitions read as less crafted, not more.", "section": "motion" },
+      { "name": "Ration The Blue", "body": "Jayco Blue marks the way forward: primary actions, active navigation, section eyebrows, and one hero figure. It never becomes a background wash, a gradient, or a mood. More than one blue emphasis per screen means one of them is decoration.", "section": "colors" },
+      { "name": "Name The Number, Then Explain It", "body": "A specification without a narrative line is data, not persuasion. Pair every figure with the sentence that says what it means for the owner.", "section": "typography" },
+      { "name": "The Eyebrow Is A System", "body": "The blue uppercase label names a section's category. It is not a separator, and it does not appear over every block simply because a block exists.", "section": "typography" }
+    ],
+    "dos": [
+      "Do let one photograph carry a section: full-bleed, square, drifting slowly",
+      "Do ration the blue to one emphasis per screen",
+      "Do name the number, then explain what it means",
+      "Do give a heading more space above than below it",
+      "Do keep inset media at 20px and full-bleed media square",
+      "Do give a page one authored motion moment and one quiet handoff for everything else",
+      "Do keep controls quiet, consistent, and in the pill vocabulary"
+    ],
+    "donts": [
+      "Don't round a full-bleed image, and don't shadow one",
+      "Don't put a tracked uppercase eyebrow over every section",
+      "Don't build a page out of same-size icon-heading-text cards, and never nest a card inside a card",
+      "Don't set gradient text, or use glass and blur as decoration rather than as a specific effect",
+      "Don't use a colored border-left above 1px on cards, list items or callouts",
+      "Don't animate every section's entrance identically, or reinterpret a scrolled page as a staggered list",
+      "Don't substitute stock photography for a Jayco product",
+      "Don't introduce a second typeface",
+      "Don't state a claim the product cannot prove"
+    ]
+  }
+}

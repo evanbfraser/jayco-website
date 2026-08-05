@@ -1,0 +1,44 @@
+{
+  "$comment": "Jayco 2026 lineup + attributes powering the RV Selector quiz scoring. Verified against jayco.com/rvs. Attribute values are sensible defaults — tune weights/fits without touching quiz logic. towVehicle=null means motorized. sleeps is [min,max]. campStyleFit / cadenceFit list the profiles a line suits.",
+  "vocab": {
+    "type": ["travel_trailer", "destination_trailer", "fifth_wheel", "toy_hauler", "class_a", "class_b", "class_c"],
+    "towVehicle": ["suv", "half_ton", "three_quarter_ton", "one_ton", null],
+    "tier": ["value", "mid", "premium"],
+    "campStyle": ["offgrid", "mixed", "hookups"],
+    "cadence": ["weekend", "extended", "fulltime"]
+  },
+  "models": [
+    { "line": "Comet", "family": "motorized", "type": "class_b", "class": "B", "sleeps": [2, 2], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Swift", "family": "motorized", "type": "class_b", "class": "B", "sleeps": [2, 2], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Solstice", "family": "motorized", "type": "class_b", "class": "B", "sleeps": [2, 4], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Terrain", "family": "motorized", "type": "class_b", "class": "B", "sleeps": [2, 4], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["offgrid", "mixed"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Redhawk SE", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [4, 7], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Redhawk", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [4, 7], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Greyhawk", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [5, 8], "towVehicle": null, "tier": "mid", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Greyhawk XL", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [6, 8], "towVehicle": null, "tier": "mid", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Melbourne", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [2, 4], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Melbourne Prestige", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [2, 4], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended"] },
+    { "line": "Granite Ridge", "family": "motorized", "type": "class_c", "class": "C", "sleeps": [2, 5], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Seneca XT", "family": "motorized", "type": "class_c", "class": "Super C", "sleeps": [4, 8], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Seneca", "family": "motorized", "type": "class_c", "class": "Super C", "sleeps": [4, 8], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Seneca Prestige", "family": "motorized", "type": "class_c", "class": "Super C", "sleeps": [4, 8], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups", "mixed"], "cadenceFit": ["fulltime", "extended"] },
+    { "line": "Alante SE", "family": "motorized", "type": "class_a", "class": "A", "sleeps": [4, 7], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended"] },
+    { "line": "Alante", "family": "motorized", "type": "class_a", "class": "A", "sleeps": [4, 7], "towVehicle": null, "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Precept", "family": "motorized", "type": "class_a", "class": "A", "sleeps": [5, 8], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups", "mixed"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Precept Prestige", "family": "motorized", "type": "class_a", "class": "A", "sleeps": [5, 8], "towVehicle": null, "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups"], "cadenceFit": ["fulltime", "extended"] },
+
+    { "line": "Jay Feather Air SL", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [2, 4], "towVehicle": "suv", "tier": "value", "toyHauler": false, "campStyleFit": ["offgrid", "mixed"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Jay Feather SL", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [2, 4], "towVehicle": "suv", "tier": "value", "toyHauler": false, "campStyleFit": ["offgrid", "mixed"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Jay Feather Air", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [4, 7], "towVehicle": "half_ton", "tier": "mid", "toyHauler": false, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Jay Feather", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [4, 8], "towVehicle": "half_ton", "tier": "mid", "toyHauler": false, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Jay Flight", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [4, 10], "towVehicle": "half_ton", "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Eagle", "family": "towable", "type": "travel_trailer", "class": null, "sleeps": [4, 8], "towVehicle": "half_ton", "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups", "mixed"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Jay Flight Bungalow", "family": "towable", "type": "destination_trailer", "class": null, "sleeps": [4, 8], "towVehicle": "delivered", "tier": "mid", "toyHauler": false, "campStyleFit": ["hookups"], "cadenceFit": ["fulltime"] },
+    { "line": "Eagle SLE", "family": "towable", "type": "fifth_wheel", "class": null, "sleeps": [4, 8], "towVehicle": "three_quarter_ton", "tier": "value", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended"] },
+    { "line": "Eagle Fifth Wheel", "family": "towable", "type": "fifth_wheel", "class": null, "sleeps": [4, 8], "towVehicle": "three_quarter_ton", "tier": "mid", "toyHauler": false, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "North Point", "family": "towable", "type": "fifth_wheel", "class": null, "sleeps": [4, 8], "towVehicle": "one_ton", "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups"], "cadenceFit": ["extended", "fulltime"] },
+    { "line": "Pinnacle", "family": "towable", "type": "fifth_wheel", "class": null, "sleeps": [4, 8], "towVehicle": "one_ton", "tier": "premium", "toyHauler": false, "campStyleFit": ["hookups"], "cadenceFit": ["fulltime"] },
+    { "line": "Seismic Travel Trailer", "family": "towable", "type": "toy_hauler", "class": null, "sleeps": [4, 8], "towVehicle": "half_ton", "tier": "mid", "toyHauler": true, "campStyleFit": ["mixed", "offgrid"], "cadenceFit": ["weekend", "extended"] },
+    { "line": "Seismic Fifth Wheel", "family": "towable", "type": "toy_hauler", "class": null, "sleeps": [4, 8], "towVehicle": "three_quarter_ton", "tier": "premium", "toyHauler": true, "campStyleFit": ["mixed", "hookups"], "cadenceFit": ["extended", "fulltime"] }
+  ]
+}

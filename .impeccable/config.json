@@ -1,0 +1,134 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "0.62rem",
+        "createdAt": "2026-08-03T19:44:14.303Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.72rem",
+        "createdAt": "2026-08-03T19:44:14.376Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.76rem",
+        "createdAt": "2026-08-03T19:44:14.448Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.78rem",
+        "createdAt": "2026-08-03T19:44:14.520Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.8rem",
+        "createdAt": "2026-08-03T19:44:14.593Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.82rem",
+        "createdAt": "2026-08-03T19:44:14.665Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.84rem",
+        "createdAt": "2026-08-03T19:44:14.738Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.85rem",
+        "createdAt": "2026-08-03T19:44:14.809Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.88rem",
+        "createdAt": "2026-08-03T19:44:14.882Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1rem",
+        "createdAt": "2026-08-03T19:44:14.952Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.15rem",
+        "createdAt": "2026-08-03T19:44:15.024Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.4rem",
+        "createdAt": "2026-08-03T19:44:15.094Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2rem",
+        "createdAt": "2026-08-03T19:44:15.166Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "10px",
+        "createdAt": "2026-08-03T19:44:15.250Z",
+        "reason": "Established UI-chrome step in compare.css/build.css; DESIGN.md's ramp covers editorial type only"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "createdAt": "2026-08-03T19:44:23.647Z",
+        "reason": "Alpha stop in a mask-image gradient (.cmp-chips--wrap fade), not a palette color"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "3px",
+        "createdAt": "2026-08-03T19:44:23.718Z",
+        "reason": "Established small-component radius in compare.css/build.css (range track, plan-code chip, table media)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "8px",
+        "createdAt": "2026-08-03T19:44:23.791Z",
+        "reason": "Established small-component radius in compare.css/build.css (range track, plan-code chip, table media)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "12px",
+        "createdAt": "2026-08-03T19:44:23.863Z",
+        "reason": "Established small-component radius in compare.css/build.css (range track, plan-code chip, table media)"
+      },
+      {
+        "rule": "single-font",
+        "value": "*",
+        "files": [
+          "version-5/compare.html"
+        ],
+        "createdAt": "2026-08-03T19:44:23.934Z",
+        "reason": "DESIGN.md:132 mandates one family: Host Grotesk carries display and body; hierarchy is weight-led"
+      },
+      {
+        "rule": "single-font",
+        "value": "*",
+        "files": [
+          "version-5/dealers.html"
+        ],
+        "createdAt": "2026-08-03T23:00:18.586Z",
+        "reason": "DESIGN.md:132 mandates one family: Host Grotesk carries display and body; hierarchy is weight-led"
+      }
+    ]
+  }
+}
