@@ -17,6 +17,13 @@ assets/model details/*/*.png
 assets/model details/*/*.mp4
 assets/model details/*/*.mov
 
+# The patterns above only reach ONE level down, so source material filed in a
+# deeper folder walks straight past them — this one is 72 files and 32 MB that
+# nothing on the site references. The two folders under "model details" that
+# ARE loaded are each model's web/ and builder/ (build-data.js reads its
+# floorplan drawings and decor swatches from there).
+assets/model details/Travel Trailers/
+
 # Same rule, same reason, for the model-type photography: 13 originals up to
 # 65 MB each, of which the site loads none. web/ is one level deeper.
 assets/model types/*/*.jpg
