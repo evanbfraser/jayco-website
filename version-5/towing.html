@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Tow Capability Calculator — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
+  <link rel="stylesheet" href="css/towing.css?v=v5-tc-1" />
+  </head>
+<!-- No data-header="solid" here, unlike compare, the builder and the floorplans
+     catalog. This page opens on a full-bleed photograph, so the header keeps the
+     transparent-to-solid scroll fade app.js binds when the flag is absent —
+     model.html is the precedent. -->
+<body class="towing-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <!-- ===== OWNER STORIES =====
+       EVERY QUOTE ON THIS PAGE IS REAL AND SOURCED. PRODUCT.md lists
+
+  <!-- ===== TOW CAPABILITY CALCULATOR =====
+       THE ONE DECISION THAT MAKES THIS PAGE HONEST: it matches a tow rating
+       against each trailer's GROSS VEHICLE WEIGHT RATING — what it weighs
+       loaded — and not against its dry weight.
+
+       The two answers are not close. At a 5,000 lb rating 25 floorplans fit by
+       GVWR and 39 by dry weight; at 7,500 lbs it is 51 against 73. Matching on
+       the dry number would have told twenty-two people they could tow something
+       that goes over their limit as soon as they put water, gear and a family
+       in it. Dry weight is shown on every result, but it is never what the
+       filter is doing.
+
+       Motorhomes are absent on purpose: 47 of the 181 floorplans are driven,
+       not towed, and a tow rating says nothing about them. -->
+
+  <main class="tc" id="towing">
+
+    <section class="tc-hero">
+      <div class="tc-hero-media">
+        <img class="tc-hero-img"
+             src="../assets/towing/web/hero-1800.webp"
+             srcset="../assets/towing/web/hero-1200.webp 1200w,
+                     ../assets/towing/web/hero-1800.webp 1800w"
+             sizes="100vw" width="1800" height="808"
+             fetchpriority="high" decoding="async"
+             alt="A pickup towing a Jayco North Point fifth wheel along a forest highway" />
+      </div>
+      <div class="tc-hero-overlay" aria-hidden="true"></div>
+      <div class="tc-hero-content">
+        <span class="tc-hero-eyebrow">Tow Capability Calculator</span>
+        <h1 class="tc-hero-heading">What can you pull?</h1>
+        <p class="tc-hero-tagline">One number in, and every Jayco your vehicle can tow —
+          measured loaded, the way a scale would measure it.</p>
+      </div>
+    </section>
+
+    <section class="tc-intro">
+      <div class="tc-inner">
+        <p class="tc-intro-body">Your vehicle's tow rating is in its owner's manual, on the
+          driver's door jamb, or on the manufacturer's website under the exact trim and axle
+          ratio you bought. Put it in below and we will show you every Jayco towable that comes
+          in under it — compared against each trailer's <strong>gross vehicle weight rating</strong>,
+          which is what it is allowed to weigh once you have loaded it, rather than the dry
+          weight it left the factory at.</p>
+      </div>
+    </section>
+
+    <!-- The calculator. One input, because the wireframe asks one question and
+         because a second field people do not have to hand is a field they
+         abandon. Tongue weight and hitch class are named in the results and in
+         the legal note rather than asked for. -->
+    <section class="tc-calc" aria-labelledby="tc-calc-h">
+      <div class="tc-inner">
+        <div class="tc-panel">
+          <h2 class="tc-calc-h" id="tc-calc-h">Put in your towing capacity</h2>
+
+          <div class="tc-field">
+            <label class="tc-label" for="tc-lbs">Maximum towing capacity</label>
+            <div class="tc-input-row">
+              <div class="tc-input-wrap">
+                <input class="tc-input" id="tc-lbs" type="number" inputmode="numeric"
+                       min="1000" max="25000" step="50" value="7500"
+                       aria-describedby="tc-lbs-help" />
+                <span class="tc-unit" aria-hidden="true">lbs</span>
+              </div>
+              <button type="button" class="btn-primary tc-go" id="tc-go">Show what I can tow</button>
+            </div>
+            <input class="tc-range" id="tc-range" type="range" min="1000" max="25000" step="250"
+                   value="7500" aria-label="Towing capacity, slider" />
+            <p class="tc-help" id="tc-lbs-help">Anywhere from 1,000 to 25,000 lbs. Most half-ton
+              pickups sit between 5,000 and 11,000.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tc-results-wrap" aria-labelledby="tc-results-h">
+      <div class="tc-inner">
+        <div class="tc-results-head">
+          <h2 class="section-heading dark" id="tc-results-h">
+            <span id="tc-count" role="status" aria-live="polite" tabindex="-1">&nbsp;</span>
+          </h2>
+          <p class="tc-results-sub" id="tc-sub"></p>
+        </div>
+        <div id="tc-results"><!-- built by towing.js --></div>
+        <p class="tc-empty" id="tc-empty" hidden>Nothing in the towable range comes in under that
+          figure. The lightest Jayco travel trailer is 3,500 lbs loaded — below that, a Class B
+          camper van drives rather than tows.</p>
+      </div>
+    </section>
+
+    <!-- Share. No PDF is generated: nothing in this repo makes one, and a
+         button that says PDF and produces nothing is the kind of claim
+         PRODUCT.md rules out. What IS real: the capacity lives in the URL, so
+         the link restores the exact result; and the page carries print styles,
+         so the browser's own Save as PDF produces a clean sheet. -->
+    <section class="tc-share" aria-labelledby="tc-share-h">
+      <div class="tc-inner">
+        <div class="tc-share-grid">
+          <div class="tc-share-lead">
+            <span class="section-label">Keep it</span>
+            <h2 class="section-heading dark" id="tc-share-h">Take the list<br>with you.</h2>
+            <p class="section-body">Your capacity is in the address of this page, so the link
+              opens on the same list. Print it and your browser will save it as a PDF.</p>
+            <div class="tc-share-actions">
+              <button type="button" class="btn-secondary-light" id="tc-copy">Copy the link</button>
+              <button type="button" class="btn-secondary-light" id="tc-print">Print / Save as PDF</button>
+            </div>
+            <p class="tc-share-note" id="tc-copy-note" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="tc-share-form-wrap">
+            <!-- TWIN of the markup in brochures.html and model.html in shape,
+                 not in name: Netlify detects forms by parsing the literal HTML
+                 in the publish directory, so this block is static and carries
+                 every field it should record. See js/brochure-form.js's header
+                 for the full rule. -->
+            <form class="tc-form" id="tc-form" name="tow-results" method="POST"
+                  data-netlify="true" netlify-honeypot="bot-field">
+              <input type="hidden" name="form-name" value="tow-results" />
+              <p hidden><label>Leave this empty <input name="bot-field" /></label></p>
+              <input type="hidden" name="capacity" id="tc-form-capacity" />
+              <input type="hidden" name="matches" id="tc-form-matches" />
+
+              <label class="tc-label" for="tc-email">Email the list to yourself</label>
+              <div class="tc-input-row">
+                <input class="tc-input tc-input--email" id="tc-email" name="email" type="email"
+                       required autocomplete="email" placeholder="you@example.com" />
+                <button type="submit" class="btn-primary tc-send">Send it</button>
+              </div>
+              <p class="tc-help">We will send this list and nothing else.</p>
+            </form>
+            <p class="tc-share-note" id="tc-form-note" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tc-ctas">
+      <div class="tc-inner">
+        <div class="tc-cta-grid">
+          <div class="tc-cta">
+            <span class="section-label">Go and look</span>
+            <h2 class="tc-cta-h">Hitch it up at a dealer.</h2>
+            <p class="tc-cta-body">Numbers get you a shortlist. A dealer will put your truck and
+              the trailer on the same lot and check the hitch, the pin weight and the wiring
+              before you sign anything.</p>
+            <a class="btn-primary" href="dealers.html">Find a Dealer</a>
+          </div>
+          <div class="tc-cta">
+            <span class="section-label">Get a figure</span>
+            <h2 class="tc-cta-h">Ask what one costs.</h2>
+            <p class="tc-cta-body">Pick a floorplan from your list and build it the way you would
+              order it — packages, axles, options — and a dealer will come back with a real
+              out-the-door price.</p>
+            <a class="btn-secondary-light" href="build-price.html">Request a Quote</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tc-legal" aria-labelledby="tc-legal-h">
+      <div class="tc-inner">
+        <div class="tc-legal-inner">
+          <h2 class="tc-legal-h" id="tc-legal-h">Before you tow anything</h2>
+          <p>This tool compares one number you give us against each trailer's published gross
+            vehicle weight rating. It is a shortlist, not a clearance to tow.</p>
+          <p><strong>It does not account for</strong> your vehicle's tongue or pin weight limit,
+            its gross combined weight rating, payload left after passengers and cargo, hitch
+            class, brake controller, axle ratio, altitude, or the weight of anything already in
+            the truck. Any one of those can rule out a trailer this page shows you.</p>
+          <p><strong>Fifth wheels and toy haulers</strong> need a pickup with a bed and a
+            fifth-wheel or gooseneck hitch. A tow rating alone does not make a vehicle suitable
+            for one.</p>
+          <p>Weights are Jayco's published figures for the model year shown and are subject to
+            change; options add weight. Verify against the trailer's own weight label and your
+            vehicle's manual, and have a dealer confirm the match before purchase.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tc-faq faq-section" id="faq">
+      <div class="faq-inner">
+        <div class="faq-header">
+          <span class="section-label">Frequently Asked Questions</span>
+          <h2 class="section-heading dark">Towing,<br>answered.</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Why match against loaded weight and not dry weight?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Because you never tow a dry trailer. Dry weight is what it left the factory
+                weighing — no water, no propane, no batteries, no gear, no food. Gross vehicle
+                weight rating is the most it is allowed to weigh with all of that in it. Matching
+                on the dry figure at a 7,500 lb rating would show you 73 floorplans instead of 51,
+                and twenty-two of those go over your limit the first time you fill the fresh
+                tank.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Where do I find my vehicle's towing capacity?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>The owner's manual, or the manufacturer's towing guide for your exact year, trim,
+                engine and axle ratio — the same model can differ by thousands of pounds between
+                trims. The sticker on the driver's door jamb gives you weight ratings and tyre
+                pressures, though not always the tow rating itself.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What about tongue weight?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>It is the second limit, and it is a real one. A travel trailer puts roughly
+                10–15% of its weight on the hitch; a fifth wheel puts 15–25% on the pin. Your
+                vehicle and hitch each have a maximum for that, and it is easy to be inside your
+                tow rating and over your tongue-weight rating. Every result here shows its dry
+                hitch weight so you can check.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Why are some floorplans missing?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Nineteen towable floorplans have no published gross vehicle weight rating yet —
+                mostly newly announced ones — and they are left out rather than guessed at. The
+                count under the calculator says how many are in scope. Motorhomes are absent
+                entirely: they are driven, not towed.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Can I tow more with a weight-distributing hitch?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Sometimes. Some vehicles publish a higher rating when a weight-distributing hitch
+                is fitted, and some require one above a certain trailer weight. It changes how
+                load is carried, not how much the vehicle can pull, so use whichever figure your
+                manufacturer states for the setup you actually have.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <a href="#" class="footer-app-badge" aria-label="Download on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+          <a href="#" class="footer-app-badge" aria-label="Get it on Google Play">
+            <img src="../assets/google_play_badge-new.svg" alt="Get it on Google Play" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="#">Top-Selling RVs</a></li>
+            <li><a href="#">Buyer's Guide</a></li>
+            <li><a href="#">Tow vs. Drive Guide</a></li>
+            <li><a href="#">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="#">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="#">Owner Services</a></li>
+            <li><a href="#">Manuals</a></li>
+            <li><a href="#">Warranty Coverage</a></li>
+            <li><a href="#">Recalls</a></li>
+            <li><a href="#">Wingmate App</a></li>
+            <li><a href="#">Ambassador Program</a></li>
+            <li><a href="#">Jayco University</a></li>
+            <li><a href="#">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">The Jayco Difference</a></li>
+            <li><a href="#">100% PDI</a></li>
+            <li><a href="#">R&amp;D &amp; Innovation</a></li>
+            <li><a href="#">Safety &amp; JaySMART</a></li>
+            <li><a href="#">Award-Winning RVs</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Visit Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS =====
+       models-data.js and build-data.js carry the weights this page reads;
+       towing.js computes from them and ships no data of its own. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/models-data.js?v=v5-5"></script>
+  <script src="js/build-data.js?v=v5-bp-19"></script>
+  <script src="js/towing.js?v=v5-tc-1"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
+</body>
+</html>

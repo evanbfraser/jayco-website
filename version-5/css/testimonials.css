@@ -1,0 +1,215 @@
+/* ===================================================
+   Jayco — Owner stories (testimonials.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from brochures.css (which ported it from type.css) —
+   the house rule is port, rename, and name the source,
+   so a reader who greps a class finds one owner.
+
+   The FAQ is not ported: its component lives in the
+   shared style.css and app.js binds it, so this page
+   ships the markup and nothing else.
+   =================================================== */
+
+.testimonials-page {
+  background: var(--canvas);
+  --tm-pad: var(--page-pad);
+  --tm-frame: 1440px;
+  --tm-gap-section: clamp(5rem, 10.4vw, 9.375rem);
+}
+.testimonials-page [hidden] { display: none !important; }
+.testimonials-page button { font-family: inherit; }
+
+.tm-inner { max-width: var(--tm-frame); margin: 0 auto; padding: 0 var(--tm-pad); }
+
+/* ---------- Hero ----------
+   Ported from brochures.css .br-hero. Static, so the media sits flush — there
+   is no drift headroom here because nothing moves it. */
+.tm-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.tm-hero-media { position: absolute; inset: 0; z-index: 0; }
+.tm-hero-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* The family sits centre-left and the trailer fills the right. Holding the
+     frame slightly left keeps the table in shot when a narrow viewport crops
+     hard, rather than centring on sheet metal. */
+  object-position: 42% 50%;
+}
+/* Two layers. VERTICAL is type.css's measured curve, and its comment carries:
+   the stops were set against a different plate, and the EYEBROW is the binding
+   constraint — 0.72rem is small text needing 4.5:1, sitting about 40% up from
+   the bottom edge. A scrim tuned to the heading alone fails the line above it.
+
+   HORIZONTAL is for this photograph. The copy stands bottom-left, where a dark
+   mossy trunk fills the left edge — but the family and the white trailer door
+   are bright and start around a third of the way across, so the left-weighted
+   layer has to carry further than the brochures hero's does. */
+.tm-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(to right,
+      rgba(15,11,9,0.80) 0%,
+      rgba(15,11,9,0.52) 42%,
+      rgba(15,11,9,0.10) 72%,
+      rgba(15,11,9,0) 100%),
+    linear-gradient(to top,
+      rgba(15,11,9,0.74) 0%,
+      rgba(15,11,9,0.42) 34%,
+      rgba(15,11,9,0.14) 62%,
+      rgba(15,11,9,0.30) 100%);
+}
+.tm-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--tm-frame);
+  margin: 0 auto;
+  padding: 0 var(--tm-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.tm-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+  margin-bottom: 1.2rem;
+}
+.tm-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.tm-hero-tagline {
+  margin: 1.35rem 0 0;
+  max-width: 42ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ----------
+   Headline left, prose right on one baseline. Not centred: this is the page
+   explaining itself, and a centred paragraph reads as a statement where this
+   is meant to read as an aside before the owners speak. */
+.tm-intro { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.tm-intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+.tm-intro-lead .section-heading { margin-top: 0.5rem; }
+.tm-intro-body p {
+  margin: 0 0 1.1rem;
+  max-width: 62ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.1rem);
+  line-height: 1.78;
+  color: var(--text-mid);
+}
+.tm-intro-body p:last-child { margin-bottom: 0; }
+
+/* ---------- The wall ----------
+   A masonry-ish column flow rather than a row grid: the quotes run from one
+   line to five, and a row grid would pad every card in a row out to the tallest
+   one, leaving four boxes of white space around the short ones. Columns let
+   each card be its own height. */
+.tm-grid-wrap { padding: clamp(3rem, 6vw, 5rem) 0 0; }
+.tm-grid {
+  list-style: none; margin: 0; padding: 0;
+  column-count: 3;
+  column-gap: clamp(1.25rem, 2.2vw, 2rem);
+}
+.tm-card {
+  break-inside: avoid;
+  margin: 0 0 clamp(1.25rem, 2.2vw, 2rem);
+  /* Chrome will still slice a card across a column break without this pair. */
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+.tm-figure {
+  position: relative;
+  margin: 0;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 2.4vw, 2rem);
+}
+/* An oversized opening quote, set in the display face and kept out of the
+   accessible name with aria-hidden — a screen reader announcing a quotation
+   mark before every card is noise, and <blockquote> already says what it is. */
+.tm-mark {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 3.5rem; font-weight: 900; line-height: 0.6;
+  color: var(--blue);
+  margin-bottom: 0.75rem;
+}
+.tm-quote { margin: 0; }
+.tm-quote p {
+  margin: 0;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+.tm-attrib {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--hairline);
+}
+.tm-name { font-size: 0.92rem; font-weight: 700; color: var(--text-dark); }
+.tm-meta {
+  font-size: 0.78rem; color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.tm-note-line {
+  margin-top: 0.35rem;
+  font-size: 0.78rem; line-height: 1.5; color: var(--text-mid); font-style: italic;
+}
+.tm-src {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  align-self: flex-start;
+  margin-top: 0.7rem;
+  font-size: 0.76rem; font-weight: 600; color: var(--blue-dark);
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.tm-src:hover { border-bottom-color: var(--blue-dark); }
+.tm-src:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
+.tm-src svg { flex: none; }
+
+.tm-note {
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+  font-size: 0.82rem; color: var(--text-mid);
+}
+
+.testimonials-page .faq-section { padding-top: var(--tm-gap-section); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .tm-grid { column-count: 2; }
+  .tm-intro-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+}
+@media (max-width: 768px) {
+  .tm-hero { height: 72svh; min-height: 460px; }
+  .tm-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* A phone crops a 16:9 plate to near portrait, and the copy spans the full
+     width — so the left-weighted layer stops helping and the vertical one does
+     the work, much heavier at the bottom where all of it sits. */
+  .tm-hero-overlay {
+    background: linear-gradient(to top,
+      rgba(15,11,9,0.90) 0%,
+      rgba(15,11,9,0.74) 40%,
+      rgba(15,11,9,0.34) 70%,
+      rgba(15,11,9,0.28) 100%);
+  }
+  .tm-grid { column-count: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm-src { transition: none; }
+}

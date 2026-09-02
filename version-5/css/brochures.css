@@ -1,0 +1,414 @@
+/* ===================================================
+   Jayco — Brochures (brochures.html)
+   ---------------------------------------------------
+   This page loads style.css, this file and
+   brochure-form.css. It does NOT load type.css, so the
+   hero and the quiz band are ported here under br-
+   names — the house rule compare.css sets: port,
+   rename, and name the source, so a reader who greps a
+   class finds one owner.
+
+   The FAQ is not ported. Its component lives in the
+   shared style.css and app.js binds it, so this page
+   ships the markup and nothing else.
+   =================================================== */
+
+.brochures-page {
+  background: var(--canvas);
+  /* Ported tokens the hero and quiz bands depend on. type.css declares these on
+     .type-page; the blocks below would silently collapse without them. */
+  --br-pad: var(--page-pad);
+  --br-frame: 1440px;
+  --br-gap-section: clamp(5rem, 10.4vw, 9.375rem);
+  /* Hidden headroom above and below the drifting photograph, so the parallax
+     can never expose a bare edge. brochures.js reads this number and derives
+     its travel from it, so the two cannot disagree. */
+  --br-drift: 8%;
+}
+.brochures-page [hidden] { display: none !important; }
+.brochures-page button { font-family: inherit; }
+
+.br-inner {
+  max-width: var(--br-frame);
+  margin: 0 auto;
+  padding: 0 var(--br-pad);
+}
+
+/* ---------- Hero ----------
+   Ported from type.css .tp-hero / .tp-hero--still. Full-bleed, therefore square
+   and unshadowed. No parallax: type.css keeps --tp-drift headroom for a
+   scrubbed media element, and this one is static, so the media is flush.
+   The height is the --still variant's: the full 100vh is the reward for an
+   authored motion moment, and this page does not have one. */
+.br-hero {
+  position: relative;
+  height: clamp(560px, 84vh, 900px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+/* Inset by the drift on both edges, so the media overhangs the band and has
+   somewhere to travel. GSAP moves this box, not the <img> — transforming the
+   image itself would fight object-fit's own box. */
+.br-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--br-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.br-hero-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* The plate is cropped to 20:9 for the band, but a phone asks for something
+     near portrait. Holding the frame right of centre keeps the van and the rock
+     ledge in shot instead of centring on empty water. */
+  object-position: 58% 50%;
+}
+/* Two layers, and both are load-bearing.
+
+   VERTICAL is type.css's curve, and its comment is worth repeating: the stops
+   were set by measurement against a different plate, and the EYEBROW is the
+   binding constraint — 0.72rem is small text, so it needs 4.5:1, and it sits
+   about 40% up from the bottom edge. A scrim tuned to the heading alone (900
+   weight, 3.2rem+, only needs 3:1) will fail the line above it.
+
+   HORIZONTAL is new, for this photograph. The copy stands bottom-left over
+   shadowed water, which is the darkest part of the frame — but there is a
+   green lens-flare artifact on that water at roughly 47% across, right where a
+   640px heading ends at 1440px wide, and the bottom-right is pale granite. The
+   left-weighted layer covers the copy's column and lets the photo stay open on
+   the right, where nothing sits. */
+.br-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(to right,
+      rgba(15,11,9,0.70) 0%,
+      rgba(15,11,9,0.40) 46%,
+      rgba(15,11,9,0) 74%),
+    linear-gradient(to top,
+      rgba(15,11,9,0.72) 0%,
+      rgba(15,11,9,0.40) 34%,
+      rgba(15,11,9,0.12) 62%,
+      rgba(15,11,9,0.28) 100%);
+}
+.br-hero-content {
+  position: relative; z-index: 2;
+  width: 100%;
+  max-width: var(--br-frame);
+  margin: 0 auto;
+  padding: 0 var(--br-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+/* inline-block, not block: as a full-width block its box spans the whole frame,
+   which puts the pale granite on the right inside a box that only holds ~90px
+   of type on the left. That is wrong for a contrast measurement and wrong for a
+   focus ring. */
+.br-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+  margin-bottom: 1.2rem;
+}
+/* Wider than --measure so the headline sets in two lines rather than three. It
+   is not a reading measure — it is a display line, and at three lines it filled
+   a 504px band top to bottom and reached down into the lens-flare artifact on
+   the water at 46% across, 68% down. */
+.br-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch;
+  margin: 0;
+}
+.br-hero-tagline {
+  margin: 1.35rem 0 0;
+  max-width: 44ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Filter ----------
+   A Jayco blue panel. Blue is rationed on this site — DESIGN.md calls it a
+   signal, not a mood, and explicitly says it never becomes a background wash —
+   so this is the page's one use of it as a ground, and it earns that by being
+   the one thing on the page you operate rather than read.
+
+   Everything inside goes white or near-white. --blue is a mid-tone: white
+   measures 4.60:1 on it, --text-dark only 3.89 and --text-mid 1.60, so the
+   ordinary type colours are not available here. The fields themselves are solid
+   white with ink type rather than a translucent tint — a white tint over Jayco
+   blue composites LIGHTER, which is the worst possible bed for small text and
+   the same trap the model page's floorplan band hit. */
+.br-filter { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.br-filter-panel {
+  background: var(--blue);
+  border-radius: 32px;
+  padding: clamp(1.75rem, 3vw, 2.5rem) clamp(1.5rem, 2.6vw, 2.25rem);
+}
+.br-filter-h {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+  margin: 0 0 1.25rem;
+}
+.br-facets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.br-facet { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.br-facet-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #fff;
+}
+
+/* The trigger is a white field on the blue — style.css's input recipe, which on
+   this ground is also the only thing with enough contrast to hold small type.
+   The panel below it is the same white and the same radius, pinned to the
+   trigger's own edges with left:0 right:0 so the two are one width by
+   construction rather than by a number kept in step. */
+.br-dd { position: relative; }
+.br-dd-trigger {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem; font-weight: 500; text-align: left;
+  color: var(--text-dark);
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 0.72rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, border-radius 0.2s;
+}
+.br-dd-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-dd-chev {
+  flex: none; width: 8px; height: 8px; margin-top: -3px;
+  border-right: 1.5px solid var(--text-mid);
+  border-bottom: 1.5px solid var(--text-mid);
+  transform: rotate(45deg);
+  transition: transform 0.25s var(--ease-out);
+}
+.br-dd-trigger:hover { border-color: rgba(255,255,255,0.55); }
+.br-dd-trigger:focus-visible {
+  outline: none; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.55);
+}
+/* Open: the trigger squares off its bottom corners and the panel squares off
+   its top ones, so the two read as one piece of white that has grown downward
+   rather than as a field with a card floating under it. */
+.br-dd-trigger[aria-expanded="true"] { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.br-dd-trigger[aria-expanded="true"] .br-dd-chev { transform: rotate(225deg); margin-top: 2px; }
+.br-dd.is-set .br-dd-trigger { font-weight: 700; }
+
+.br-dd-list {
+  position: absolute;
+  top: 100%; left: 0; right: 0;      /* the trigger's width, exactly */
+  z-index: 40;
+  margin: 0; padding: 0.35rem 0 0.5rem;
+  list-style: none;
+  max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+  background: #fff;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.br-dd-list:focus-visible { outline: none; }
+.br-dd-head {
+  padding: 0.6rem 0.9rem 0.3rem;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.br-dd-opt {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem; color: var(--text-dark);
+  cursor: pointer;
+}
+.br-dd-opt:hover,
+.br-dd-opt.is-cursor { background: var(--surface); }
+.br-dd-opt[aria-selected="true"] { font-weight: 700; }
+.br-dd-opt[aria-selected="true"]::after {
+  content: ''; flex: none;
+  width: 5px; height: 9px; margin: 0 0 2px 0;
+  border-right: 2px solid var(--blue); border-bottom: 2px solid var(--blue);
+  transform: rotate(45deg);
+}
+.br-dd-opt-n { font-size: 0.76rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+/* Dimmed rather than removed: dropping it would reshuffle the list under an
+   open panel, moving the row out from under the cursor mid-click. */
+.br-dd-opt.is-dead { opacity: 0.35; cursor: default; }
+.br-dd-opt.is-dead:hover { background: none; }
+
+.br-bar {
+  display: flex; align-items: baseline; gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255,255,255,0.28);
+}
+.br-count {
+  font-size: 0.85rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.br-count:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+.br-clear {
+  border: none; background: none; padding: 0; cursor: pointer; white-space: nowrap;
+  font-size: 0.8rem; font-weight: 600; color: #fff;
+  border-bottom: 1.5px solid rgba(255,255,255,0.5); transition: border-color 0.2s;
+}
+.br-clear:hover { border-bottom-color: #fff; }
+.br-clear:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- Cards ---------- */
+.br-grid-wrap { padding: clamp(2rem, 3.5vw, 3rem) 0 0; }
+.br-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.2vw, 2rem);
+}
+.br-card {
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+  transition: background 0.25s, transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.br-card:hover {
+  background: var(--surface-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(15,11,9,0.14);
+}
+/* Cut-out renders on transparency get no radius and no shadow — there is no box
+   to round. DESIGN.md > Shapes. */
+.br-card-media { display: grid; place-items: center; margin-bottom: 1rem; }
+.br-card-img { width: 100%; height: auto; max-width: 240px; display: block; }
+.br-card-body { flex: 1 1 auto; }
+.br-card-meta {
+  display: block;
+  font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+  margin-bottom: 0.3rem;
+}
+.br-card-name {
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-dark); margin: 0 0 0.4rem;
+}
+.br-card-tagline {
+  margin: 0; font-size: 0.8rem; line-height: 1.55; color: var(--text-mid);
+}
+.br-card-cta {
+  margin-top: 1.1rem; width: 100%;
+  padding: 0.62rem 1rem;
+  border: 1.5px solid rgba(15,11,9,0.22);
+  border-radius: var(--radius-btn);
+  background: none; color: var(--text-dark);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.br-card-cta:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.br-card-cta:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.br-empty {
+  margin: clamp(3rem, 6vw, 5rem) 0; text-align: center;
+  font-size: 1.05rem; color: var(--text-mid);
+}
+
+/* ---------- Quiz band ----------
+   Ported from type.css:687-742, which itself ported it from version-4's
+   style.css after v5 retired .quiz-section and reused the "quiz" name for an
+   unrelated homepage component. Renamed br-quiz-* rather than reused: those
+   class names are declared unscoped in type.css, and two files owning one
+   global name is what the port rule exists to prevent. Safe to rename here
+   because the still version never uses .quiz-video, the one class app.js keys
+   on for its visibility gate. */
+.br-quiz {
+  background: var(--canvas);
+  margin-top: var(--br-gap-section);
+  padding: 0 100px;
+}
+.br-quiz-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;   /* media column larger than text */
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: center;
+}
+.br-quiz-text {
+  position: relative; z-index: 2;     /* text sits in front of the larger media */
+  display: flex; flex-direction: column; align-items: flex-start;
+  max-width: 420px;
+  justify-self: end;
+  margin-right: 100px;
+}
+.br-quiz-text .btn-primary { align-self: flex-start; }
+.br-quiz-media {
+  position: relative; z-index: 1;
+  width: 117%;
+  justify-self: end;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+.br-quiz-still {
+  width: 100%; aspect-ratio: 16 / 9; height: auto;
+  object-fit: cover; display: block;
+}
+
+.brochures-page .faq-section { padding-top: var(--br-gap-section); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .br-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  .br-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .br-facets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* quiz: type.css:794-798, ported with the block above */
+  .br-quiz { padding: 0 var(--page-pad); }
+  .br-quiz-inner { grid-template-columns: 1fr; gap: 2rem; }
+  .br-quiz-text { max-width: 100%; margin-right: 0; justify-self: start; }
+  .br-quiz-media { width: 100%; justify-self: stretch; }
+}
+@media (max-width: 768px) {
+  /* The still hero is not shortened here: a phone viewport is near portrait, so
+     a short band would crop the photograph to a letterbox strip. */
+  .br-hero { height: 78svh; min-height: 460px; }
+  .br-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* A phone crops a 20:9 plate to something near portrait, and at 58% across
+     that puts the pale granite ledge behind the copy. The left-weighted layer
+     is no use here — the copy spans the full width — so the vertical one does
+     the work and is much heavier at the bottom, where all of it sits.
+     Measured, both over the real crop at a 500px viewport: on the desktop scrim
+     the heading lands at 3.26:1 against a 3.0 floor and the tagline at 5.92:1
+     against 4.5 — passing, but with nothing in hand. This takes them to 10.1
+     and 12.4. */
+  .br-hero-overlay {
+    background: linear-gradient(to top,
+      rgba(15,11,9,0.90) 0%,
+      rgba(15,11,9,0.74) 40%,
+      rgba(15,11,9,0.34) 70%,
+      rgba(15,11,9,0.28) 100%);
+  }
+  .br-grid { grid-template-columns: minmax(0, 1fr); }
+  .br-card { flex-direction: row; align-items: center; gap: 1rem; padding: 1rem; }
+  .br-card-media { margin-bottom: 0; flex: 0 0 110px; }
+  .br-card-img { max-width: 110px; }
+  .br-card-cta { margin-top: 0.75rem; }
+  .br-card-body { display: flex; flex-direction: column; }
+}
+@media (max-width: 560px) {
+  .br-card { flex-direction: column; align-items: stretch; }
+  .br-card-media { flex: none; margin-bottom: 0.75rem; }
+  .br-card-img { max-width: 200px; }
+}
+@media (max-width: 620px) {
+  .br-facets { grid-template-columns: minmax(0, 1fr); }
+  .br-filter-panel { border-radius: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .br-card, .br-dd-trigger, .br-dd-chev, .br-card-cta { transition: none; }
+  .br-card:hover { transform: none; }
+  /* Zeroing the headroom is what stops the parallax: brochures.js derives its
+     travel from this value and bails when it is 0, so the image simply sits
+     still rather than being animated to nowhere. */
+  .brochures-page { --br-drift: 0%; }
+}

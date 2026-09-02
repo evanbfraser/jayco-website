@@ -1,0 +1,113 @@
+/* ===================================================
+   Jayco — Brochure request form
+   ---------------------------------------------------
+   A COMPONENT stylesheet, loaded by brochures.html and
+   model.html. Its own file rather than a port into two
+   page stylesheets: compare.css's port-and-rename rule
+   is about not loading a foreign PAGE's stylesheet, and
+   its stated goal — one owner per class — argues for a
+   single file when the thing is identical on both
+   pages by design. model.css is already 91KB, and
+   putting this in style.css would ship a modal to six
+   pages that never open it and bump the shared token
+   across all eight.
+
+   Pairs with js/brochure-form.js. The markup is static
+   in each page (Netlify's form parser only sees literal
+   HTML) — see that file's header.
+   =================================================== */
+
+.brf-modal {
+  position: fixed; inset: 0; z-index: 1100;
+  display: grid; place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+.brf-scrim {
+  position: absolute; inset: 0;
+  background: rgba(15,11,9,0.62); backdrop-filter: blur(3px);
+}
+.brf-panel {
+  position: relative; z-index: 1;
+  width: min(520px, 100%);
+  max-height: min(88vh, 760px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--canvas);
+  border-radius: 24px;
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.brf-x {
+  position: absolute; top: 0.9rem; right: 0.9rem;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--hairline); background: rgba(255,255,255,0.9);
+  color: var(--text-dark); cursor: pointer;
+  transition: background 0.25s;
+}
+.brf-x:hover { background: #fff; }
+.brf-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.brf-title {
+  font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+  color: var(--text-dark);
+  margin: 0.35rem 0 0.5rem;
+  padding-right: 2.5rem;   /* clear of the close button */
+}
+.brf-title:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+.brf-lede {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem; line-height: 1.65; color: var(--text-mid);
+}
+
+.brf-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.brf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.brf-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.brf-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.brf-opt { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
+/* style.css's field recipe: white, 14px radius, no border at rest, blue focus
+   ring. DESIGN.md > Components. */
+.brf-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-dark);
+  background: #fff;
+  border: 1px solid var(--warm-gray);
+  border-radius: 14px;
+  padding: 0.72rem 0.9rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+select.brf-input {
+  appearance: none; -webkit-appearance: none;
+  /* room for the chevron, which is painted rather than loaded */
+  padding-right: 2.4rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-mid) 50%),
+                    linear-gradient(135deg, var(--text-mid) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) 55%, calc(100% - 0.85rem) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+.brf-input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue);
+}
+.brf-go { margin-top: 0.35rem; align-self: flex-start; }
+.brf-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.8rem; line-height: 1.5; color: var(--text-mid);
+}
+.brf-done-x { margin-top: 1.5rem; }
+
+body.brf-on { overflow: hidden; }
+
+@media (max-width: 480px) {
+  .brf-row { grid-template-columns: minmax(0, 1fr); }
+  .brf-panel { border-radius: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brf-x, .brf-input { transition: none; }
+}
