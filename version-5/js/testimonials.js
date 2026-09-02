@@ -143,7 +143,7 @@
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const HOLD = 3800;
+  const HOLD = 3000;
 
   strip.innerHTML = G.items.map((it, i) => `
     <button type="button" class="tm-gal-panel${i === 0 ? ' is-open' : ''}"
@@ -229,6 +229,17 @@
   }));
 
   const btn = document.querySelector('#tm-gal-pause');
+
+  /* The arrows do what clicking a pill does, and they also STOP the auto-run.
+     Someone reaching for a control is steering; having it carry on advancing
+     under them two seconds later is the strip arguing back. */
+  document.querySelectorAll('[data-gal-dir]').forEach((a) => {
+    a.addEventListener('click', () => {
+      show(at + (a.dataset.galDir === 'next' ? 1 : -1));
+      if (!stopped && btn) btn.click();
+    });
+  });
+
   const btnLabel = document.querySelector('#tm-gal-pause-label');
   if (btn) {
     btn.addEventListener('click', () => {

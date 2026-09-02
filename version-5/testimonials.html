@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
-  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-3" />
+  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-4" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -245,14 +245,26 @@
       </div>
 
       <div class="tm-inner">
-        <!-- WCAG 2.2.2: content that moves on its own for more than five
-             seconds needs a way to stop it. Hover and focus already pause the
-             strip, but neither is available to someone who simply wants it
-             still, so the control is real and visible. -->
-        <button type="button" class="tm-gal-pause" id="tm-gal-pause" aria-pressed="false">
-          <span class="tm-gal-pause-glyph" aria-hidden="true"></span>
-          <span id="tm-gal-pause-label">Pause</span>
-        </button>
+        <div class="tm-gal-controls">
+          <button type="button" class="tm-gal-arrow" data-gal-dir="prev"
+                  aria-controls="tm-gal" aria-label="Previous photograph">
+            <svg width="20" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor"
+                 stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M21 6H1m0 0l5-5M1 6l5 5"/></svg>
+          </button>
+          <button type="button" class="tm-gal-arrow" data-gal-dir="next"
+                  aria-controls="tm-gal" aria-label="Next photograph">
+            <svg width="20" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor"
+                 stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M1 6h20m0 0l-5-5m5 5l-5 5"/></svg>
+          </button>
+          <!-- WCAG 2.2.2: content that moves on its own for more than five
+               seconds needs a way to stop it. Hover and focus already pause the
+               strip, but neither is available to someone who simply wants it
+               still, so the control is real and visible. -->
+          <button type="button" class="tm-gal-pause" id="tm-gal-pause" aria-pressed="false">
+            <span class="tm-gal-pause-glyph" aria-hidden="true"></span>
+            <span id="tm-gal-pause-label">Pause</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -265,39 +277,29 @@
         <div class="faq-list">
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>Where do these come from?</span>
+              <span>What can I learn from Jayco owner testimonials?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>Owners left them on Google. Jayco embeds them on its own testimonials page
-                through its reviews partner, and they are copied here from that widget with the
-                name, the rating and the date each reviewer gave.</p>
+              <p>Jayco owner testimonials share real experiences from the road, including how different RVs support family trips, weekend getaways, long-distance travel, and everyday ownership.</p>
             </div>
           </div>
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>Are the quotes edited?</span>
+              <span>What types of Jayco RVs do owners review?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>No. They are reproduced word for word, including the spelling and grammar the
-                reviewers used. Where a quote joins two consecutive
-                sentences from the same answer it runs on unbroken, and nothing has been cut to
-                change what was said.</p>
+              <p>Jayco owner stories may include experiences with travel trailers, fifth wheels, toy haulers, Class C motorhomes, Class A motorhomes, and camper vans.</p>
             </div>
           </div>
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>Why is there no overall rating?</span>
+              <span>Does Jayco offer owner support after purchase?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>Each review carries the rating its author gave it, but there is no average on
-                this page, because Jayco publishes none — and ten reviews is not a sample you can
-                average into one anyway. If you want unfiltered owner reviews with scores, read
-                them somewhere independent — RV Insider, Trustpilot and the Better Business
-                Bureau all carry Jayco listings, and they are a good deal more mixed than this
-                page.</p>
+              <p>Yes. Jayco&rsquo;s site connects owners to resources including support, manuals, FAQs, owner tools, and service-related information.</p>
             </div>
           </div>
           <div class="faq-item">
@@ -313,14 +315,11 @@
           </div>
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>What does the warranty actually cover?</span>
+              <span>Where can I find more Jayco owner stories and RV advice?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>A two-year limited warranty on the coach, against the one year much of the
-                industry offers, plus separate structural coverage. The full terms are with the
-                warranty documents under Owners, and your dealer can walk you through what applies
-                to the model you are looking at.</p>
+              <p>Jayco also publishes owner stories, RV tips, and lifestyle content through the Jayco Journal and related resource sections.</p>
             </div>
           </div>
         </div>
@@ -484,9 +483,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/gallery-data.js?v=v5-tm-3"></script>
-  <script src="js/testimonial-data.js?v=v5-tm-3"></script>
-  <script src="js/testimonials.js?v=v5-tm-3"></script>
+  <script src="js/gallery-data.js?v=v5-tm-4"></script>
+  <script src="js/testimonial-data.js?v=v5-tm-4"></script>
+  <script src="js/testimonials.js?v=v5-tm-4"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

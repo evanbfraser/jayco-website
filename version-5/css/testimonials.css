@@ -351,10 +351,18 @@
    the container is, without a px value to recompute on
    resize.
    =================================================== */
+/* Jayco Blue, which is a LIGHT blue: white on it is 4.60:1, only just over AA,
+   so every foreground in this section is pushed to solid white or near it. The
+   muted greys and half-alpha whites that work on --band-navy (14:1) do not
+   survive here — the eyebrow at 50% white is 2.23:1 on this ground. */
 .tm-gallery {
   padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 6vw, 4.5rem);
-  background: var(--band-navy);
+  background: var(--blue);
 }
+/* 4.60:1. --text-light is 4.12:1 here and would fail AA for anything but the
+   heading, so the section sets pure white rather than the token. */
+.tm-gallery .section-heading,
+.tm-gallery .section-label { color: #fff; opacity: 1; }
 .tm-gal-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem); }
 
 .tm-gal-strip {
@@ -376,7 +384,7 @@
   flex: 0 0 auto;
   width: clamp(46px, 4.4vw, 62px);
   height: 100%;
-  padding: 0; border: none; background: var(--band-navy);
+  padding: 0; border: none; background: var(--blue);
   overflow: hidden;
   cursor: pointer;
   /* Fully rounded while narrow, a card once open. The radius is the tell that
@@ -389,7 +397,7 @@
   width: min(62vw, 760px);
   border-radius: var(--radius-card);
 }
-.tm-gal-panel:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.tm-gal-panel:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 .tm-gal-panel img {
   width: 100%; height: 100%; object-fit: cover; display: block;
@@ -405,18 +413,35 @@
 .tm-gal-panel:hover img { filter: brightness(0.82); }
 .tm-gal-panel.is-open:hover img { filter: none; }
 
-.tm-gal-pause {
+/* Arrows and the pause control on one line. */
+.tm-gal-controls {
   margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.tm-gal-arrow {
+  flex: none; width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border: 1.5px solid rgba(255,255,255,0.75); border-radius: 50%;
+  background: none; color: #fff; cursor: pointer;
+  transition: background 0.25s, border-color 0.25s;
+}
+.tm-gal-arrow:hover { background: rgba(255,255,255,0.16); border-color: #fff; }
+.tm-gal-arrow:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+/* The pause sits a little apart: it governs the strip, the arrows step it. */
+.tm-gal-pause {
+  margin-left: 0.35rem;
   display: inline-flex; align-items: center; gap: 0.55rem;
   padding: 0.6rem 1.1rem;
-  border: 1.5px solid rgba(255,255,255,0.28); border-radius: var(--radius-btn);
-  background: none; color: rgba(255,255,255,0.86);
+  /* 0.75 is 3.03:1, the floor for a control boundary; the 0.28 this carried on
+     the navy band is 1.57:1 here. Label is solid white for the same reason. */
+  border: 1.5px solid rgba(255,255,255,0.75); border-radius: var(--radius-btn);
+  background: none; color: #fff;
   font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
   cursor: pointer;
   transition: border-color 0.25s, color 0.25s;
 }
-.tm-gal-pause:hover { border-color: rgba(255,255,255,0.6); color: #fff; }
-.tm-gal-pause:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.tm-gal-pause:hover { border-color: #fff; background: rgba(255,255,255,0.16); }
+.tm-gal-pause:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 /* Two bars, becoming one triangle when paused. Drawn rather than an icon file:
    it is six lines of CSS against a request and a cache entry. */
 .tm-gal-pause-glyph {
