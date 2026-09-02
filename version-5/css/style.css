@@ -34,6 +34,15 @@
   --font-body:    'Host Grotesk', system-ui, sans-serif;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* For chrome that changes SHAPE, over ~0.55s. Not a new curve — this is the
+     one already driving the header at :160 and :184, named so the filter panel
+     can share it instead of copying the literal a third time. --ease-out stays
+     the signature for interactive feedback and arrival; this one is gentler
+     into the move and holds a longer tail, which is what a large box needs to
+     read as flowing rather than being resized. Those two header rules are NOT
+     repointed at it: they are on every page of the site and the swap would buy
+     nothing. */
+  --ease-morph: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ---- Editorial scale (added for the model detail pages) ----
      Additive only — nothing above is renamed, so existing pages are
@@ -1248,6 +1257,14 @@ ul { list-style: none; }
   transition: opacity 0.15s;
 }
 .nl-req { color: #E0392B; }
+/* .nl-req's opposite number. The asterisk is red because it is a warning; this
+   is not, so it is set in the label's own muted ink at a smaller size and reads
+   as an aside rather than a second kind of flag. */
+.nl-opt {
+  margin-left: 0.3rem;
+  font-size: 0.8em;
+  color: var(--text-mid);
+}
 .nl-field input:focus + label,
 .nl-field input:not(:placeholder-shown) + label { opacity: 0; }
 
@@ -2791,9 +2808,30 @@ ul { list-style: none; }
 /* solid-white on the blue menu (the default blue gradient would vanish) */
 .mm-actions .btn-nav-filled { background: #fff; color: var(--blue); }
 
-@media (max-width: 768px) {
+/* 1279, not 768, and the number is measured rather than chosen.
+   All six nav links sit on the left of a centred, absolutely-positioned logo,
+   with the three action pills on the right. As the bar narrows the left group
+   runs at the logo and reaches it first — the actions still have 73px of
+   clearance at the width where the links have none. Measured on the homepage:
+
+       1300px   34px left clearance      1250px    9px  — optically touching
+       1280px   24px left clearance      1230px    0px  — collision
+       1270px   19px left clearance
+
+   So the handoff is one pixel below 1280: that width is common enough to be
+   worth keeping the full nav for, and it still has 24px of air. Anything
+   narrower gets the hamburger and the full-screen menu, which carries all six
+   links (built from the footer columns) and the same three actions — nothing
+   is lost in the handoff, only re-laid-out.
+   Re-measure this number if a link or a pill is ever added or relabelled; it
+   is a fact about the current contents of the bar, not a general breakpoint.
+   The 768px block above still owns everything else about the phone header; the
+   .header-nav descendant rules in it are dead by this display:none and kept
+   only because they document the drawer this menu replaced. */
+@media (max-width: 1279px) {
   /* retire the old slide-in drawer — the full-screen menu replaces it */
   .header-nav { display: none; }
+  .hamburger { display: flex; }
   .mobile-menu { display: flex; }
   /* lock background scroll while the menu is open */
   body.menu-open { overflow: hidden; }
