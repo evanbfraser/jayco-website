@@ -20,6 +20,10 @@
   'use strict';
 
   const JAYCO = window.JAYCO;
+  /* Off window rather than as a bare global, so a page that somehow loads this
+     without models-data.js renders cards with no 3D control instead of dying
+     on a ReferenceError at the first floorplan. */
+  const TOUR_URL = window.JAYCO_TOUR_URL || (() => null);
   const $  = (sel, ctx) => (ctx || document).querySelector(sel);
 
   /* ============ CONFIGURATOR ============ */
@@ -136,11 +140,24 @@
     const fp = planOf(m) || m.floorplans.find((f) => f.id === state.floorplanId);
     /* A NEW plan has price null. Adding null would make the running total NaN,
        so it contributes 0 and the summary labels it instead. */
-    if (fp) items.push({ label: 'Floorplan', sub: fp.name, price: fp.price || 0, tbd: fp.isNew });
+    /* The picture rides on the line item, so the summary's thumbnail and the
+       row it belongs to can never drift apart — they are one object. The
+       sidebar ignores these fields; only the summary reads them. */
+    if (fp) items.push({ label: 'Floorplan', sub: fp.name, price: fp.price || 0, tbd: fp.isNew,
+      img: fp.img, alt: `${m.name} ${fp.name} floorplan`, art: true,
+      zoom: fp.img, zoomCaption: `${m.name} ${fp.name}` });
     const ex = sets.exterior.find((o) => o.id === state.exteriorId);
-    if (ex) items.push({ label: 'Exterior', sub: ex.name, price: ex.price });
+    /* Nine models sell full-body paint and Jayco publishes no photograph of
+       any of it — the render is the standard finish whatever is chosen. So the
+       exterior row carries a picture only if one ever exists; today none does,
+       and the row is text, which is the truth. */
+    if (ex) items.push({ label: 'Exterior', sub: ex.name, price: ex.price,
+      img: ex.image, alt: `${m.name} in ${ex.name}`,
+      zoom: ex.image, zoomCaption: `${m.name} — ${ex.name}` });
     const inr = sets.interior.find((o) => o.id === state.interiorId);
-    if (inr) items.push({ label: 'Interior', sub: inr.name, price: inr.price });
+    if (inr) items.push({ label: 'Interior', sub: inr.name, price: inr.price,
+      img: inr.image, hex: inr.hex, alt: `${inr.name} décor`,
+      zoom: inr.image || null, zoomCaption: `${m.name} — ${inr.name}` });
     sets.packages.forEach((p) => {
       if (state.packageIds.has(p.id)) items.push({ label: 'Package', sub: p.name, price: p.price });
     });
@@ -362,13 +379,50 @@
       const price = f.isNew
         ? '<span class="fp-card-price fp-card-price--tbd">Pricing to come</span>'
         : `<span class="fp-card-price${f.price === 0 ? ' included' : ''}">${delta(f.price)}</span>`;
-      /* The zoom is a SIBLING of the card, not a child of it. The card is a
+      /* The tools are SIBLINGS of the card, not children of it. The card is a
          <button> — picking the plan is the whole point of this step — and a
          button inside a button is invalid markup that browsers resolve however
-         they like. Wrapping both in a positioned div keeps each control its own
-         element, and means the zoom still works on a plan whose card is
-         disabled because Jayco has not priced it yet. */
-      const zoom = f.img ? `
+         they like. Wrapping all of it in a positioned div keeps each control
+         its own element, and means they still work on a plan whose card is
+         disabled because Jayco has not priced it yet.
+
+         Jayco has scanned some floorplans and not others, but the control is on
+         EVERY card either way: a row where the pair appears and disappears
+         reads as a rendering fault, and a plan with no walkthrough is worth
+         saying out loud rather than leaving the reader to notice an absence.
+         Dimmed and disabled is how this site already says "there is nothing
+         this way" — the same treatment .md-video-nav and .tp-feat-nav use at
+         the end of a rail.
+
+         Which plans have one comes from the shared map in models-data.js — the
+         same one the model page's "View 360° Tour" button reads — so a new scan
+         lights up in both places from one edit. The icon is the model page's,
+         inlined for the same reason it is inlined there.
+
+         It sits LEFT of the zoom because the two are not peers: the zoom is a
+         closer look at what is already on the card, the tour leaves the site.
+         Reading order puts the smaller step first.
+
+         An <a> when there is somewhere to go and a disabled <button> when there
+         is not, rather than one element in two states: a link with no href is
+         not a control any assistive technology can describe, and `disabled` is
+         the attribute that says unavailable without inventing a convention. */
+      const tour = TOUR_URL(state.modelId, f.id);
+      const tourIcon = `
+          <svg width="20" height="20" viewBox="0 0 216 216" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/>
+          </svg>`;
+      /* The label is inside the button, so it is the accessible name unless an
+         aria-label overrides it — and it is overridden on both, because "View
+         3D Tour" on its own does not say WHICH floorplan when a screen reader
+         is walking sixteen of them in a row. */
+      const tourLabel = '<span class="fp-tour-label">View 3D Tour</span>';
+      const tourBtn = tour
+        ? `<a class="fp-tour" href="${tour}" target="_blank" rel="noopener noreferrer"
+             aria-label="View the 3D tour of the ${m.name} ${f.name} floorplan — opens in a new tab">${tourIcon}${tourLabel}</a>`
+        : `<button type="button" class="fp-tour" disabled aria-disabled="true"
+             aria-label="No 3D tour yet for the ${m.name} ${f.name} floorplan">${tourIcon}${tourLabel}</button>`;
+      const zoomBtn = f.img ? `
         <button type="button" class="fp-zoom" data-zoom="${f.img}"
                 data-zoom-caption="${m.name} ${f.name}"
                 aria-label="Enlarge the ${m.name} ${f.name} floorplan">
@@ -377,6 +431,12 @@
             <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
           </svg>
         </button>` : '';
+      /* The tour half is always there now, so the row always is — but the guard
+         stays: an empty absolutely-positioned box over the drawing is a hit
+         target that swallows clicks meant for the card, and this is the only
+         thing standing between that and a future plan with neither control. */
+      const tools = (tourBtn || zoomBtn)
+        ? `<div class="fp-card-tools">${tourBtn}${zoomBtn}</div>` : '';
 
       return `
       <div class="fp-card-wrap">
@@ -392,7 +452,7 @@
           </span>
           ${price}
         </span>
-      </button>${zoom}</div>`;
+      </button>${tools}</div>`;
     }).join('');
 
     const newCount = plans.filter((f) => f.isNew).length;
@@ -520,16 +580,70 @@
     </section>`;
   }
 
+  /* ----- the build, in pictures -----
+     The review used to be the model render and then six lines of type, which
+     meant the two things the visitor actually chose to LOOK at — the floorplan
+     drawing and the décor — were named on this step and shown nowhere.
+
+     Each picture now sits IN ITS OWN ROW, under the label that names it, so a
+     selection and the thing it selected are one block rather than two columns
+     the eye has to pair up. Under rather than beside, because a picture beside
+     the text is capped by the row's height and these two want to be looked at:
+     a floorplan's printed dimensions and a décor strip's six labelled swatches
+     are the reason to look at either. Below the text they take the room.
+
+     Nothing is rendered for a row with no picture. The leading-slot version of
+     this needed an empty box on four of six rows to keep the labels in one
+     column; under the text there is nothing to hold open — every label starts
+     at the row's own left edge whatever follows it.
+
+     Both pictures still open the enlarged view. data-zoom is all it takes: the
+     delegated handler on #step-panel already runs this modal for the floorplan
+     cards, and the aria-label has to open with "Enlarge the" because
+     openZoom() strips exactly that to build the enlarged image's alt. */
+  function renderThumb(i) {
+    if (!i.img && !i.hex) return '';
+    const media = i.img
+      ? `<img src="${i.img}" alt="${i.alt}" loading="lazy" />`
+      : `<span class="rl-chip" style="background:${i.hex}" role="img" aria-label="${i.alt}"></span>`;
+    /* The frame is an inner element, not the button itself: it is what clips
+       the picture to a rounded rectangle, and keeping the clip off the button
+       leaves the badge free to sit wherever it reads best. */
+    const frame = `<span class="rl-thumb-frame${i.art ? ' rl-thumb-frame--art' : ''}">${media}</span>`;
+    /* A <button> only where there is something to open — a thumbnail that
+       looks clickable and is not is worse than one that plainly is not. A flat
+       hex chip has nothing to enlarge. */
+    if (!i.zoom) return `<span class="rl-thumb">${frame}</span>`;
+    return `<button type="button" class="rl-thumb rl-thumb--open"
+              data-zoom="${i.zoom}" data-zoom-caption="${i.zoomCaption}"
+              aria-label="Enlarge the ${i.alt}">${frame}
+        <span class="rl-thumb-zoom" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
+          </svg>
+        </span>
+      </button>`;
+  }
+
   function renderSummaryStep() {
     const m = model();
     const rows = lineItems().map((i) => `
       <div class="review-line">
-        <span class="rl-label">${i.label}<b>${i.sub}</b></span>
-        <span class="rl-val${!i.base && i.price === 0 ? ' included' : ''}">${i.base ? fmt(i.price) : (i.tbd ? 'Pricing to come' : delta(i.price))}</span>
+        <div class="rl-head">
+          <span class="rl-label">${i.label}<b>${i.sub}</b></span>
+          <span class="rl-val${!i.base && i.price === 0 ? ' included' : ''}">${i.base ? fmt(i.price) : (i.tbd ? 'Pricing to come' : delta(i.price))}</span>
+        </div>
+        ${renderThumb(i)}
       </div>`).join('');
     return `<div class="step-head"><h2>Review your build</h2><p>Here's your ${m.year} ${m.name} as configured.</p></div>
       <div class="summary-review">
-        <div class="summary-review-media"><img src="${modelImg(m)}" alt="${m.name}" /></div>
+        <figure class="summary-visual">
+          <figcaption class="sv-cap">
+            <span class="sv-eyebrow">Model</span><span class="sv-name">${m.year} ${m.name}</span>
+          </figcaption>
+          <span class="sv-media"><img src="${modelImg(m)}" alt="${m.year} ${m.name}" /></span>
+        </figure>
         <div>
           <div class="review-lines">${rows}</div>
           <div class="review-total"><span class="rt-label">Total MSRP as built</span><span class="rt-val">${fmt(total())}</span></div>
@@ -848,11 +962,26 @@
 
   /* ----- deep link ?model= ----- */
   function applyDeepLink() {
-    const q = new URLSearchParams(window.location.search).get('model');
-    if (q && JAYCO.models[q]) {
-      selectModel(q);
-      state.catFilter = JAYCO.models[q].category;
-    }
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('model');
+    if (!q || !JAYCO.models[q]) return;
+    selectModel(q);
+    state.catFilter = JAYCO.models[q].category;
+
+    /* ?step= opens further in than the model step. Only meaningful with a
+       model, which is why it sits inside that branch: a step with nothing
+       selected is a panel with nothing in it, and goStep() would bounce it
+       back anyway.
+
+       Named, not numbered — STEPS is reordered from time to time and a link
+       written elsewhere in the site should not have to know that Floorplan is
+       index 1. Unknown names are ignored rather than clamped: a typo landing
+       someone on Summary is worse than a typo doing nothing.
+
+       Added for the model page's "View All Floorplans" button, which wants the
+       floorplan grid and not the model picker. */
+    const step = STEPS.findIndex((st) => st.id === params.get('step'));
+    if (step > 0) { state.step = step; state.maxReached = step; }
   }
 
   /* ============ INIT ============ */

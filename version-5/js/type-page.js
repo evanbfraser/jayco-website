@@ -239,38 +239,83 @@
         </a>`;
     }).join('');
 
+    /* THE CLOSING ASK, and why it is written here rather than in type-data.js.
+       `type` is a SHALLOW merge — Object.assign(synth(cat), DATA[id]) above —
+       so an authored category replaces the whole `lineup` sub-object. Putting
+       the CTA in synth()'s lineup would mean fifth wheels, the one fully
+       authored category, is the single page that loses it, and every category
+       authored after this one would have to remember to retype it. It is the
+       same ask for all eight either way: structural, not copy, exactly like
+       the hero's Build & Price / Find a Dealer pair. */
     set('#tp-lineup', `
       <div class="tp-lineup-inner">
         ${head(l.label, l.heading, l.body)}
         <div class="tp-model-grid" data-count="${slugs.length}">${cards}</div>
+        <div class="tp-lineup-cta">
+          <h3 class="tp-lineup-cta-heading">Ready to walk through one?</h3>
+          <a href="#" class="btn-primary">View Our Dealer Inventory</a>
+        </div>
       </div>`);
+
+    /* PLACEHOLDER HREF. The dealer inventory page is coming; "#" is what every
+       unbuilt destination in this site already uses (the footer's Brochures,
+       Reviews & Testimonials, Value Calculator). Left bare it would send a
+       click to the top of the document — and Lenis would smooth-scroll the
+       whole way, which reads as the button doing something wrong rather than
+       nothing. When the page ships, point the href at it and delete this. */
+    const cta = $('.tp-lineup-cta a');
+    if (cta) cta.addEventListener('click', (e) => e.preventDefault());
   }
 
   /* ---------- What makes it this type ----------
-     Two sections, outside then inside. Each is a headline, one full-bleed
-     photograph carrying the section, then four cards that arrive as the row
-     scrolls up. The band runs edge to edge so it is square and unshadowed; the
-     card images are inset so they round — radius follows bleed.
+     Two sections, outside then inside. Each is one full-bleed photograph with
+     the section's headline standing on it, and then the four detail cards
+     BELOW the photograph as a rail you scroll.
 
-     Both come out of one loop rather than two hand-written blocks: they are
-     the same component with different content, and a category that supplies
-     only one of them renders only one. */
+     The cards used to sit on the photograph, one at a time, revealed by a
+     pinned scrub. Off it they are four cards you can compare, and the section
+     scrolls like the rest of the page. The band runs edge to edge so it is
+     square and unshadowed; the card images are inset so they round — radius
+     follows bleed.
+
+     Both sections come out of one loop rather than two hand-written blocks:
+     they are the same component with different content, and a category that
+     supplies only one of them renders only one.
+
+     The arrows are the model page's rail buttons, markup and all — same glyph,
+     same 46px circle, same disabled-at-the-end behaviour. They sit BELOW the
+     cards, on a rule that closes the section, so they follow the track in the
+     markup as well as on the page: a control that comes after what it controls
+     is the order a keyboard walks it in. aria-controls points at the track,
+     which is why the id is built from the section id. */
   function renderFeatures() {
     const sections = type.featureSections || [];
     if (!sections.length) { drop('#tp-features'); return; }
 
+    const arrow = (id, dir, d) => `
+      <button type="button" class="tp-feat-nav" data-dir="${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} features"
+              aria-controls="tp-feat-${esc(id)}-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+
     set('#tp-features', sections.map((s) => `
       <section class="tp-feat" aria-labelledby="tp-feat-${esc(s.id)}-h">
-        <div class="tp-feat-stage">
-          <img src="${s.band.src}" alt="${esc(s.band.alt)}" loading="lazy" />
-          <div class="tp-feat-scrim" aria-hidden="true"></div>
-        </div>
-        <div class="tp-feat-content">
-          <div class="tp-feat-head">
-            ${s.label ? `<span class="section-label light">${esc(s.label)}</span>` : ''}
-            <h2 class="tp-feat-heading" id="tp-feat-${esc(s.id)}-h">${s.heading}</h2>
+        <div class="tp-feat-band">
+          <div class="tp-feat-stage">
+            <img src="${s.band.src}" alt="${esc(s.band.alt)}" loading="lazy" />
+            <div class="tp-feat-scrim" aria-hidden="true"></div>
           </div>
-          <ul class="tp-feat-cards" role="list">
+          <div class="tp-feat-content">
+            <div class="tp-feat-head">
+              ${s.label ? `<span class="section-label light">${esc(s.label)}</span>` : ''}
+              <h2 class="tp-feat-heading" id="tp-feat-${esc(s.id)}-h">${s.heading}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="tp-feat-rail">
+          <ul class="tp-feat-cards" id="tp-feat-${esc(s.id)}-track" role="list">
             ${(s.cards || []).map((c) => `
               <li class="tp-feat-card">
                 <div class="tp-feat-card-media">
@@ -280,8 +325,73 @@
                 <p class="tp-feat-card-body">${esc(c.body)}</p>
               </li>`).join('')}
           </ul>
+          <div class="tp-feat-controls">
+            <span class="tp-feat-rule" aria-hidden="true"></span>
+            ${arrow(s.id, 'prev', 'M15 5l-7 7 7 7')}
+            ${arrow(s.id, 'next', 'M9 5l7 7-7 7')}
+          </div>
         </div>
       </section>`).join(''));
+  }
+
+  /* ---------- The card rails ----------
+     Native scroll with arrows on top of it — the model page's video rail,
+     restated for this markup and for one rail per feature section.
+
+     Bound at boot rather than from initMotion(), because these buttons are not
+     motion: they have to work with GSAP absent and under prefers-reduced-
+     motion, where the scroll jumps instead of gliding.
+
+     Position is read from scrollLeft, never from a counter, so a swipe, a
+     trackpad flick and an arrow all leave the buttons telling the truth. */
+  function initFeatureRails() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    Array.prototype.forEach.call(document.querySelectorAll('.tp-feat-rail'), (rail) => {
+      const track = rail.querySelector('.tp-feat-cards');
+      const prev  = rail.querySelector('[data-dir="prev"]');
+      const next  = rail.querySelector('[data-dir="next"]');
+      if (!track || !prev || !next) return;
+
+      /* measured, not computed from the CSS card width — the two would
+         otherwise have to be kept in sync by hand across the breakpoints */
+      function step() {
+        const card = track.querySelector('.tp-feat-card');
+        if (!card) return track.clientWidth;
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        return card.getBoundingClientRect().width + gap;
+      }
+      /* a whole card-widths' worth of what is on screen: the partly-visible
+         card at the right edge becomes the first fully-visible one after the
+         click, so nothing is ever scrolled past unseen. The lead padding is
+         subtracted because at rest it holds no card — count from where the row
+         actually starts. */
+      function page() {
+        const s = step();
+        if (!s) return track.clientWidth;
+        const lead = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        return s * Math.max(1, Math.floor((track.clientWidth - lead) / s));
+      }
+      function go(dir) {
+        track.scrollBy({ left: dir * page(), behavior: reduce ? 'auto' : 'smooth' });
+      }
+      function sync() {
+        const max = track.scrollWidth - track.clientWidth;
+        /* a rail with nothing past the right edge has nothing to page through,
+           so the pair goes rather than sitting there greyed out at both ends */
+        rail.classList.toggle('is-static', max < 2);
+        prev.disabled = track.scrollLeft <= 1;
+        next.disabled = track.scrollLeft >= max - 1;
+      }
+
+      prev.addEventListener('click', () => go(-1));
+      next.addEventListener('click', () => go(1));
+      track.addEventListener('scroll', sync, { passive: true });
+      window.addEventListener('resize', sync);
+      /* the cards are sized off the frame, so the first honest measurement is
+         after layout, not during the render pass */
+      requestAnimationFrame(sync);
+    });
   }
 
   /* ---------- Quiz CTA ----------
@@ -353,128 +463,127 @@
       </div>`);
   }
 
-  /* ---------- The feature stages ----------
-     Each section pins and plays one sequence against the scroll wheel:
+  /* ---------- The feature bands ----------
+     The photograph's arrival. No pin: the page scrolls normally past these
+     sections, and the band plays against that scroll rather than holding the
+     page still while it does.
 
-       0.00 → 0.16   the photograph un-rounds and grows to fill the viewport
-       0.18 → 0.30   the headline rises in over it
-       0.32 → 0.92   the four cards arrive, one at a time
-       0.92 → 1.00   a beat with all four up, then the pin releases into the
-                     next section
+     Progress runs from the band's top edge entering at the bottom of the
+     viewport to it settling near the top — about one screen of ordinary
+     scrolling — and inside that:
 
-     This is the page's authored motion moment, and it is the same machinery
-     the homepage's #builtfor block uses: gsap.matchMedia, a pinned ScrollTrigger
-     with scrub, and progress mapped onto a CSS custom property. The expansion
-     is the design system's one permitted animated radius — the bleed hinge —
-     a photograph un-rounding as it reaches full width, settling on a correct
-     static value at both ends.
+       0.00 → 0.92   the photograph un-rounds and grows to full width
+       0.45 → 0.95   the headline rises in over it
+
+     The overlap is the point. The headline starts arriving while the frame is
+     still opening, so the two read as one movement rather than a slab that
+     stops and then a caption that appears.
+
+     Two curves, because the two beats want different shapes. `glide` is a
+     quadratic out and carries the expansion: the frame is a third narrower
+     than the window when it starts, and a power3 spent nearly all of that in
+     the first fifth of the scroll — the growth has to be the thing you watch,
+     not something that has already happened. `ramp` is the page's power3.out
+     arrival curve and carries the headline, which does land rather than
+     travel.
+
+     A SECOND trigger per band runs the parallax, over the whole time the band
+     is on screen rather than only its arrival — that is what a drift is. It is
+     kept separate rather than folded into paint() because the two want
+     different spans, and one trigger cannot have two.
+
+     The expansion is the design system's one permitted animated radius — the
+     bleed hinge — a photograph un-rounding as it reaches full width, settling
+     on a correct static value at both ends.
 
      Progress drives inline styles rather than a timeline of tweens so that
      scrubbing backwards is exact: every frame is computed from `self.progress`
      alone, with no state carried between frames. */
-  function initFeatureStages() {
-    const sections = gsap.utils.toArray('.tp-feat');
-    if (!sections.length) return;
+  function initFeatureBands() {
+    const bands = gsap.utils.toArray('.tp-feat-band');
+    if (!bands.length) return;
 
     const clamp01 = (n) => Math.max(0, Math.min(1, n));
-    /* Two curves, because the two kinds of beat want different shapes.
-
-       `ramp` is power3.out — quick off the mark, settling slowly. That is the
-       page's arrival curve, and it is what the expansion and the headline use:
-       they happen once and should feel like they land.
-
-       `blend` is a cubic in-out, slow at both ends. The cards use it, because a
-       card leaving and a card arriving are the same event seen twice; an
-       out-curve there makes the handoff snap at the start of each fade. Eased
-       at both ends the swap reads as one continuous movement. */
+    /* power3.out — quick off the mark, settling slowly. The page's arrival
+       curve: it happens once and should feel like it lands. */
     const ramp = (p, a, b) => {
       const t = clamp01((p - a) / (b - a));
       return 1 - Math.pow(1 - t, 3);
     };
-    const blend = (p, a, b) => {
+    /* power2.out — the same shape with far less of it front-loaded, so the
+       expansion is spread across the scroll instead of finishing in the first
+       few frames of it. */
+    const glide = (p, a, b) => {
       const t = clamp01((p - a) / (b - a));
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      return 1 - Math.pow(1 - t, 2);
     };
+    /* Half the travel each way, in percent of the image's own height. The
+       image is 124% of the stage with 12% of headroom above and below (see
+       --fp-drift in type.css); 8% of 124 is 9.9 — comfortably inside the 12
+       there is, with room left for the sub-pixel rounding that decides whether
+       a hairline of background shows at the edge. */
+    const DRIFT = 8;
 
     const mm = gsap.matchMedia();
 
-    /* Pinned scrub. Above 860px only — DESIGN.md unpins scroll sections at that
-       width, and a 1.5-viewport pin on a phone is a long time to be held in one
-       place for four short paragraphs. */
+    /* Above 860px only — DESIGN.md unpins scroll sections at that width, and
+       while nothing pins here any more, a band that is already nearly as wide
+       as the screen has no expansion worth watching. Below it the CSS resting
+       state is the whole design. */
     mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
-      sections.forEach((section, i) => {
-        const stage = section.querySelector('.tp-feat-stage');
-        const head  = section.querySelector('.tp-feat-head');
-        const cards = Array.prototype.slice.call(section.querySelectorAll('.tp-feat-card'));
-        if (!stage || !head || !cards.length) return;
+      bands.forEach((band) => {
+        const stage = band.querySelector('.tp-feat-stage');
+        const head  = band.querySelector('.tp-feat-head');
+        const img   = band.querySelector('.tp-feat-stage > img');
+        if (!stage || !head) return;
 
-        /* One card is on screen at a time, in a fixed slot beside the image.
-           Each owns an equal segment: it fades in at the top of its segment,
-           holds, then fades out at the bottom — and the next one does not
-           begin arriving until the previous has fully gone. They occupy the
-           same grid cell, so any overlap would show two cards through each
-           other; a clean handoff with a beat of empty slot is the trade.
-
-           The last card is the exception: it holds from its arrival to the end
-           of the pin, so the section releases on a readable card rather than
-           on an empty frame. */
-        const FIRST = 0.26, LAST = 0.96;
-        const seg = (LAST - FIRST) / cards.length;
-        /* Just over a quarter of the segment at each end, so every card runs
-           fade-in → a hold longer than either fade → fade-out. Against the
-           2.4-viewport pin below that is roughly 380px of scroll per card, of
-           which ~170px is a full-opacity hold. */
-        const fade = seg * 0.28;
-
-        /* Every frame is computed from progress alone, with no state carried
-           between frames, so scrubbing backwards is exact. */
         function paint(p) {
           /* 1 = inset and rounded, 0 = full-bleed and square */
-          stage.style.setProperty('--exp', String(1 - ramp(p, 0, 0.16)));
+          stage.style.setProperty('--exp', String(1 - glide(p, 0, 0.92)));
 
-          const h = ramp(p, 0.18, 0.30);
+          const h = ramp(p, 0.45, 0.95);
           head.style.opacity = String(h);
           head.style.transform = 'translateY(' + ((1 - h) * 26) + 'px)';
-
-          const last = cards.length - 1;
-          cards.forEach((card, n) => {
-            const a = FIRST + n * seg;
-            const inp = blend(p, a, a + fade);
-            const out = n === last ? 0 : blend(p, a + seg - fade, a + seg);
-            const c = Math.max(0, inp - out);
-            card.style.opacity = String(c);
-            /* rises in, and keeps rising on the way out — the slot is fixed, so
-               the travel is what separates one card from the next */
-            card.style.transform = 'translateY(' + ((1 - inp) * 22 - out * 14) + 'px)';
-            /* a card that is not on screen is not a tab stop or a hit target */
-            card.style.pointerEvents = c > 0.9 ? 'auto' : 'none';
-            card.setAttribute('aria-hidden', c < 0.5 ? 'true' : 'false');
-          });
+        }
+        /* 0 = band's top edge at the bottom of the window, 1 = its bottom edge
+           at the top. The photograph runs UP inside its frame as the page runs
+           up, so it travels further than the band does and the crop keeps
+           changing under it — the direction .parallax-bg already uses on the
+           homepage, centred here rather than anchored at the top because this
+           frame is entered from both ends. */
+        function drift(p) {
+          if (img) img.style.transform = 'translate3d(0,' + ((p - 0.5) * -2 * DRIFT).toFixed(3) + '%,0)';
         }
 
         const st = ScrollTrigger.create({
-          trigger: section,
-          start: 'top top',
-          /* 2.4 viewports, not 1.6 — the extra scroll goes to the cards, so
-             each one holds long enough to be read rather than skimmed */
-          end: () => '+=' + Math.round(window.innerHeight * 2.4),
-          pin: true,
-          anticipatePin: 1,
+          trigger: band,
+          start: 'top bottom',
+          /* not 'top top': the band is well short of the viewport, so held to
+             the very top it would still be opening when it is fully on screen.
+             18% leaves the last of the movement above the fold. */
+          end: 'top 18%',
           scrub: true,
-          /* pins refresh in DOM order; #builtfor on the homepage sits above
-             these and uses 2, so these take 1 and 0 */
-          refreshPriority: 1 - i,
           onUpdate(self) { paint(self.progress); },
           /* a resize recomputes start/end; repaint against the new progress
              rather than leaving the last frame from the old geometry */
           onRefresh(self) { paint(self.progress); },
         });
 
+        const dt = ScrollTrigger.create({
+          trigger: band,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+          onUpdate(self) { drift(self.progress); },
+          onRefresh(self) { drift(self.progress); },
+        });
+        drift(dt.progress);
+
         /* onUpdate does not fire while progress is still 0, so without this the
-           first frame would be whatever CSS says — and CSS has to leave the
-           headline and cards visible for the reduced-motion and sub-861px
-           layouts. Painting here closes that gap; it runs while the loader is
-           still covering the page, so nothing flashes. */
+           first frame would be whatever CSS says — and CSS has to rest on the
+           finished state for the reduced-motion and sub-861px layouts.
+           Painting here closes that gap; it runs while the loader is still
+           covering the page, so nothing flashes. */
         paint(st.progress);
       });
 
@@ -483,17 +592,13 @@
       /* matchMedia kills the ScrollTriggers itself; the inline styles they
          wrote are ours to clear, or the static layout inherits opacity 0. */
       return () => {
-        sections.forEach((section) => {
-          const stage = section.querySelector('.tp-feat-stage');
-          const head  = section.querySelector('.tp-feat-head');
+        bands.forEach((band) => {
+          const stage = band.querySelector('.tp-feat-stage');
+          const head  = band.querySelector('.tp-feat-head');
+          const img   = band.querySelector('.tp-feat-stage > img');
           if (stage) stage.style.removeProperty('--exp');
           if (head) { head.style.opacity = ''; head.style.transform = ''; }
-          section.querySelectorAll('.tp-feat-card').forEach((card) => {
-            card.style.opacity = '';
-            card.style.transform = '';
-            card.style.pointerEvents = '';
-            card.removeAttribute('aria-hidden');
-          });
+          if (img) img.style.transform = '';
         });
       };
     });
@@ -507,10 +612,16 @@
     if (!window.gsap || !window.ScrollTrigger) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    /* The feature stages own their own copy — everything else on the page uses
-       the quiet handoff below. */
+    /* The feature bands own their own headline — everything else on the page,
+       the card rails now included, uses the quiet handoff below.
+
+       The RAIL is the target, not the cards inside it: the track is a scroll
+       container on both axes, so a card translating 14px down would push
+       against its own overflow. Fading the block moves nothing inside it, and
+       four cards sharing a top edge would have fired together anyway. */
     const REVEAL = [
       '.tp-section-head', '.tp-intro-head', '.tp-intro-body', '.tp-model-card',
+      '.tp-lineup-cta', '.tp-feat-rail',
     ].join(',');
 
     gsap.utils.toArray(REVEAL).forEach((el) => {
@@ -520,7 +631,7 @@
       });
     });
 
-    initFeatureStages();
+    initFeatureBands();
 
     ScrollTrigger.refresh();
     /* lazy images land after this — one more pass once they have */
@@ -532,6 +643,7 @@
   renderIntro();
   renderLineup();
   renderFeatures();
+  initFeatureRails();
   renderQuiz();
   renderFaqs();
 

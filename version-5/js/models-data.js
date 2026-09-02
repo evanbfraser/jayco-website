@@ -275,3 +275,56 @@ window.JAYCO = (function () {
    duplication cannot go quietly wrong.
    --------------------------------------------------- */
 window.JAYCO_MODEL_PAGES = ['swift', 'jay-feather'];
+
+/* ---------------------------------------------------
+   Which floorplans have a Matterport walkthrough.
+
+   Jayco's own scans, harvested from the "360°" button on each floorplan page
+   at jayco.com. Only the capture id is stored — the host is written once, in
+   JAYCO_TOUR_URL below, so a change of platform is one edit rather than
+   fifteen.
+
+   It lives HERE, in the light library every page loads, for the same reason
+   JAYCO_MODEL_PAGES does: two pages need the answer and only one of them loads
+   model-data.js. The model page renders these as its "View 360° Tour" button
+   and the configurator as the 3D control on the floorplan card; keeping the
+   ids in model-data.js would have meant either a second copy in build-data.js
+   or 64KB of model records loaded into build-price.html to reach a string.
+
+   Keyed model slug first, because plan codes are not unique across the lineup
+   — several models publish a 24FK. Plan ids are lowercased to match
+   build-data.js; JAYCO_TOUR_URL lowercases what it is given, so callers can
+   pass either case.
+   --------------------------------------------------- */
+window.JAYCO_TOURS = {
+  swift: {
+    /* The 20E page carries no tour, which is why only the 20T is listed — the
+       button renders for the plans that actually have a walkthrough. */
+    '20t': 'PgNjsbhY4xw',
+  },
+  'jay-feather': {
+    '18rbf': 'ZXK81dW5BzW',
+    '19mrk': 'dPPsKuKYr2W',
+    '21mbh': '5uijhpVu1ym',
+    '21mml': 'Ujr3WT8Vnxn',
+    '23mbd': 'LPDBt7fkUpn',
+    '24fk':  'LuiPLPmW6Ed',
+    '25bh':  'hC84MC3emEz',
+    '25rb':  'nHT6XTvNyAz',
+    '26fk':  'hGZZv1CeN5P',
+    '27bh':  'nmzZHq3wCT4',
+    '27mk':  'j7i3th8UMmS',
+    '29bhb': 'kuEjvCcL8Tg',
+    '29qbh': 'guqqhXsbD9z',
+    '30rkb': '4GuJB9u464t',
+  },
+};
+
+/* The one place the tour URL is built. Returns null for a plan with no scan,
+   which is what both callers test — a missing tour is the common case, not an
+   error. */
+window.JAYCO_TOUR_URL = function (slug, planId) {
+  const plans = (window.JAYCO_TOURS || {})[slug];
+  const id = plans && planId != null && plans[String(planId).toLowerCase()];
+  return id ? 'https://my.matterport.com/show/?m=' + id : null;
+};

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
   <!-- the quiz CTA's parallax image lives in an inline style attribute, which the
        preload scanner cannot see — without this the fetch waits on layout -->
   <link rel="preload" href="../assets/jayco-model-quiz-v2.jpg" as="image" />
@@ -42,15 +42,21 @@
           <li><a href="#">Find Your RV</a></li>
           <li><a href="#">Shop &amp; Tools</a></li>
           <li><a href="#">Owners</a></li>
+          <li><a href="#">Resources</a></li>
+          <li><a href="#">About</a></li>
         </ul>
         <div class="nav-right">
-          <ul class="nav-primary">
-            <li><a href="#">Resources</a></li>
-            <li><a href="#">About</a></li>
-          </ul>
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
           <ul class="nav-actions">
             <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
             <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
             <li>
               <button class="nav-search-btn" aria-label="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -87,6 +93,7 @@
     <div class="mm-actions">
       <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
       <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
     </div>
   </div>
 
@@ -192,7 +199,7 @@
     <div class="dealer-container">
     <div class="dealer-ui">
       <span class="section-label">Find a Dealer</span>
-      <h2 class="section-heading dark dealer-heading">200+ dealers across United States and Canada.</h2>
+      <h2 class="section-heading dark dealer-heading">300+ dealers across United States and Canada.</h2>
       <p class="section-body dark">Find the nearest Jayco dealer and start your journey.</p>
       <div class="dealer-search">
         <input
@@ -248,8 +255,8 @@
           <p class="diff-stat-body">For more than 55 years, Jayco has helped generations of families make lasting memories on the road.</p>
         </div>
         <div class="diff-stat diff-stat--br">
-          <h3 class="diff-stat-title">200+ Dealers</h3>
-          <p class="diff-stat-body">With more than 200 dealers across North America, trusted Jayco support is never far away.</p>
+          <h3 class="diff-stat-title">300+ Dealers</h3>
+          <p class="diff-stat-body">With more than 300 dealers across North America, trusted Jayco support is never far away.</p>
         </div>
       </div>
     </div>
@@ -466,6 +473,13 @@
           <input type="text" id="nl-zip" placeholder=" " autocomplete="postal-code" inputmode="numeric" />
           <label for="nl-zip">Zip code<span class="nl-req">*</span></label>
         </div>
+        <!-- The only field here that is not marked with the red asterisk, so it
+             says so in words instead — an unmarked field beside three marked
+             ones reads as an oversight rather than as a choice. -->
+        <div class="nl-field">
+          <input type="tel" id="nl-phone" placeholder=" " autocomplete="tel" inputmode="tel" />
+          <label for="nl-phone">Phone number<span class="nl-opt">optional</span></label>
+        </div>
         <button type="submit" class="nl-submit">Subscribe</button>
       </form>
       <p class="nl-note">We ask for your name and ZIP code to personalize content and share relevant updates, events, and offers in your area.</p>
@@ -479,7 +493,7 @@
     <div class="final-cta-content">
       <span class="section-label light centered">Ready When You Are</span>
       <h2 class="cta-heading">Your Next Adventure<br>Starts Here.</h2>
-      <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by a 2-year limited warranty, 3-year structural coverage and 200+ dealers — before, during, and long after the sale.</p>
+      <p class="cta-body">Find your perfect RV and hit the road with confidence. Every Jayco is backed by a 2-year limited warranty, 3-year structural coverage and 300+ dealers — before, during, and long after the sale.</p>
       <div class="cta-buttons">
         <a href="build-price.html" class="btn-primary">Build &amp; Price</a>
         <a href="dealers.html" class="btn-secondary">Find a Dealer</a>
@@ -619,7 +633,7 @@
                  columns, so adding it here adds it in both places. -->
             <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
             <li><a href="compare.html">Compare RVs</a></li>
-            <li><a href="compare.html">All Floorplans</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -638,8 +652,9 @@
             <li><a href="dealers.html">Find a Dealer</a></li>
             <li><a href="build-price.html">Request a Quote</a></li>
             <li><a href="#">Build &amp; Price</a></li>
-            <li><a href="#">Brochures</a></li>
-            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
             <li><a href="#">Value Calculator</a></li>
           </ul>
         </div>
@@ -660,7 +675,7 @@
           <h4>Resources</h4>
           <ul>
             <li><a href="#">Blog</a></li>
-            <li><a href="#">Video Gallery</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
             <li><a href="#">eBooks &amp; Guides</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
@@ -703,12 +718,12 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/models-data.js?v=v5-5"></script>
   <!-- No model-data.js here on purpose. It is ~70KB to describe two models, and
        the only page that needs it is model.html. app.js reads
        window.JAYCO_MODEL_DETAIL || {} and, finding it empty, sends every
        mobile-menu Explore link to that model's category overview instead —
        a real page either way, so nothing has to be loaded to avoid a dead link. -->
-  <script src="js/app.js?v=v5-core-5"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

@@ -47,6 +47,31 @@
   status = 302
 
 [[redirects]]
+  from = "/towing"
+  to = "/version-5/towing.html"
+  status = 302
+
+[[redirects]]
+  from = "/videos"
+  to = "/version-5/videos.html"
+  status = 302
+
+[[redirects]]
+  from = "/testimonials"
+  to = "/version-5/testimonials.html"
+  status = 302
+
+[[redirects]]
+  from = "/brochures"
+  to = "/version-5/brochures.html"
+  status = 302
+
+[[redirects]]
+  from = "/floorplans"
+  to = "/version-5/floorplans.html"
+  status = 302
+
+[[redirects]]
   from = "/compare"
   to = "/version-5/compare.html"
   status = 302

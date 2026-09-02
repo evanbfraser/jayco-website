@@ -320,7 +320,15 @@
   /* Declared on the stage, not the hero: the opening line is set at the same
      size as the name it hands over to, and the coach is sized from it too. One
      number, so the three can never drift apart. */
-  --name: clamp(5rem, 10vw, 11.5rem);
+  /* Stepped down from clamp(5rem, 10vw, 11.5rem). The name is the only thing
+     that was asked to shrink, but this token is deliberately shared: .qz-beat
+     is set at the same size so the handover from "Your Next Adventure" to the
+     model name is a swap of words rather than a change of voice, and --rv-h is
+     a multiple of it so the coach scales with the type instead of the viewport.
+     Moving the three together is what keeps those two relationships true.
+     The room it frees is what pays for the un-overlapped coach and the two
+     buttons now sitting under the spec row. */
+  --name: clamp(4.25rem, 8.4vw, 9.5rem);
   min-height: calc(100dvh - 96px - 4rem);
   display: flex;
   flex-direction: column;
@@ -375,14 +383,12 @@
 }
 .qz-name:focus { outline: none; }
 
-/* The coach sits ON the name, not beside it. The overlap is a fixed height
-   plus a negative margin rather than a percentage: the 27 renders run from a
-   nearly square van to a 3:1 fifth wheel, and the names from "Swift" to "Jay
-   Flight Bungalow" — percentages of a box that changes size with both would
-   put the coach through the middle of the type on some pairings and nowhere
-   near it on others. A fixed height means the overlap is the same every time.
-   No background and no radius: these are cut-out PNGs and the point is that
-   the coach is standing on the page, not in a panel. */
+/* The coach sits UNDER the name now, not on it. It used to overlap by 28% of
+   its own height; that is gone, and with it the risk that a long name and a
+   tall render met in the middle.
+   The height is still a multiple of --name rather than of the viewport, for the
+   reason below. No background and no radius: these are cut-out PNGs and the
+   point is that the coach is standing on the page, not in a panel. */
 .qz-hero-media {
   /* Sized FROM the name, not from the viewport. Sized from vh, the coach kept
      its full height on a phone while the name hit its 5rem floor, and a
@@ -393,7 +399,16 @@
      the bottom of a laptop: half the stage is the most it can have and still
      leave the name, the tagline and the specs above the fold. On a tall
      window it never reaches the ceiling and you get the full 4.2×. */
-  --rv-h: min(calc(var(--name) * 4.2), 50vh);
+  /* Was 4.2 / 50vh. Both came down when the spec row grew a pair of buttons
+     beneath it: at the old size the reveal ran 865px against a 900px window and
+     the buttons finished 61px under the fold, which for the two "go and see it"
+     actions is the worst place on the page to put them.
+     The vh term is what binds at every desktop size, so it is the one that was
+     tuned: 38vh still left the buttons 7px under on a 1440x800 window and 25px
+     under at 1280x720 — short laptop windows, not edge cases. 32vh clears the
+     fold on every size measured, from 1280x720 up to 1920x1080, and on a phone.
+     The coach gives up about a sixth of its height for it. */
+  --rv-h: min(calc(var(--name) * 3.2), 32vh);
   height: var(--rv-h);
   /* Measured, not guessed: every render in assets/models is 1000×619 with the
      coach starting 16–20% down the frame (Jay Feather 18.4%, Precept 20.5%,
@@ -401,7 +416,11 @@
      band and never touch the type, which is what a fixed -2.5rem did — it
      looked like no overlap at all. 28% of the box clears the padding and
      leaves the roofline crossing the bottom of the letterforms. */
-  margin-top: calc(var(--rv-h) * -0.28);
+  /* Zero, not a small negative. Every render carries a 16–20% transparent band
+     at the top of its frame, so the optical gap here is already generous and
+     nothing has to be borrowed back from it — and borrowing would put the 16%
+     renders back on the letterforms, which is the thing being removed. */
+  margin-top: 0;
 }
 .qz-hero-media img {
   width: 100%;
@@ -548,6 +567,27 @@
   gap: 0.85rem;
   flex-wrap: wrap;
 }
+/* Under the spec row, on the light ground. Same geometry as .qz-band-ctas —
+   this is the same kind of row and should not read as a different component
+   halfway up the page. */
+.qz-hero-ctas {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+/* .qz-actions-note's twin for the light ground: that one is set against the
+   dark band and its colour would vanish here. */
+.qz-hero-note {
+  margin: 1.1rem auto 0;
+  max-width: var(--measure);
+  font-size: var(--qz-ui);
+  line-height: 1.55;
+  color: var(--text-mid);
+}
 .qz-actions-note {
   margin: 1.1rem auto 0;
   max-width: var(--measure);
@@ -660,12 +700,25 @@
    stays visible rather than appearing on hover: on a touch screen there is no
    hover, and a control that only exists for a mouse is a control half the
    visitors never find. */
-.qz-zoom-btn {
+/* The pair sits in a row rather than each control positioning itself, so the
+   tour can come and go per plan without the zoom moving. The zoom keeps the
+   corner it has always had; the tour joins on its left, which is the order the
+   configurator's floorplan cards use — the closer look first, then the one
+   that leaves the site. */
+.qz-card-tools {
   position: absolute;
   right: 0.5rem;
   bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.qz-tour-btn,
+.qz-zoom-btn {
+  position: static;
   width: 36px;
   height: 36px;
+  flex: none;
   border-radius: 50%;
   border: 1px solid var(--hairline);
   background: rgba(255,255,255,0.92);
@@ -676,8 +729,19 @@
   cursor: pointer;
   transition: background 0.25s, transform 0.25s var(--ease-out);
 }
+.qz-tour-btn:not([disabled]):hover,
 .qz-zoom-btn:hover { background: #fff; transform: scale(1.06); }
+.qz-tour-btn:focus-visible,
 .qz-zoom-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+/* Blue is what says this one leaves the page, against the zoom's ink for a
+   control that stays — the same split .fp-tour makes on the build page.
+
+   It renders on every card, scanned or not, so a row of results keeps one
+   shape. The unscanned state is not painted: full colour, with `disabled`
+   doing the work — the hover rule above excludes it, it is out of the tab
+   order, and it is announced as unavailable. */
+.qz-tour-btn { color: var(--blue); }
+.qz-tour-btn svg { fill: currentColor; flex: none; }
 
 /* The modal itself. Structure and both of its awkward details are model.css's
    .md-zoom: the closed state is the [hidden] attribute rather than a
@@ -971,6 +1035,33 @@ button.btn-link { background: none; border: none; border-bottom: 1.5px solid tra
 
 .qz-note { margin-top: 0.9rem; font-size: var(--qz-ui); color: var(--text-mid); }
 
+/* ---------- Lead capture ----------
+   The screen borrows .qz-screen/.qz-spread/.qz-col from a question, so it needs
+   no layout of its own — only the form inside it. Fields wrap at 240px, which
+   is .qz-field's own basis, so Name and ZIP sit side by side on a laptop and
+   stack on a phone without a breakpoint. */
+.qz-lead-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+.qz-lead-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: var(--qz-ui);
+  font-weight: 600;
+  color: var(--text-dark);
+}
+/* Said plainly rather than by omission: a field with no marking reads as
+   required to most people, and the whole point of these two is that they are
+   not. Regular weight so it cannot be mistaken for part of the label. */
+.qz-lead-opt {
+  font-weight: 400;
+  color: var(--text-mid);
+}
+.qz-lead-go { margin-top: 1.4rem; }
+
 /* ---------- Dead end ----------
    Nothing tows behind what they told us they drive. The tow gate is the one
    filter that is never relaxed, so this is a real state, not an error. */
@@ -1004,8 +1095,10 @@ button.btn-link { background: none; border: none; border-bottom: 1.5px solid tra
   /* The modal still opens and closes, it just does not fade — and the zoom
      button keeps its hover tint without the scale. */
   .qz-zoom { transition: none; }
+  .qz-tour-btn,
   .qz-zoom-btn,
   .qz-zoom-close { transition: background 0.25s; }
+  .qz-tour-btn:not([disabled]):hover,
   .qz-zoom-btn:hover,
   .qz-zoom-close:hover { transform: none; }
   /* revealResult() never starts its timeline and never builds the canvas here,

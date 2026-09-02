@@ -160,8 +160,50 @@
 .tp-intro-body { max-width: var(--measure); }
 .tp-intro-body .section-body + .section-body { margin-top: 1.35rem; }
 
-/* ---------- The lineup ---------- */
+/* ---------- The lineup ----------
+   Top padding only, like every other section on this page: the gap AFTER this
+   block is .tp-features' own --tp-gap-section. */
 .tp-lineup { padding: var(--tp-gap-section) 0 0; }
+
+/* The headline block, in Jayco Blue and shaped like the cards it introduces:
+   it is a child of .tp-lineup-inner exactly as .tp-model-grid is, so it already
+   spans the same width, and it takes the card's own 32px radius. Read as a
+   third block in the same stack rather than as a section heading above one.
+
+   Which is why the step below it is the GRID'S gap and no longer
+   --tp-gap-head. That 100px is the room a headline needs above the content it
+   introduces when it is bare type on the page; a block sitting on a stack of
+   blocks is spaced by the stack, and 100px of canvas between this and the first
+   card would read as two compositions rather than one.
+
+   Centred, because the heading names two rows of cards rather than a column of
+   prose beside them — and the body has to be re-centred by hand, its --measure
+   cap being a max-width, which still hangs a block off the left edge. */
+.tp-lineup .tp-section-head {
+  margin-bottom: clamp(1rem, 1.6vw, 1.5rem);   /* = .tp-model-grid's own gap */
+  padding: clamp(2.75rem, 4.4vw, 4.25rem) clamp(1.75rem, 2.6vw, 2.5rem);
+  /* 32px = DESIGN.md rounded.feature, the literal .tp-model-card carries for
+     the same reason: only rounded.pill and rounded.card exist as variables. */
+  border-radius: 32px;
+  background: var(--blue);
+  text-align: center;
+}
+.tp-lineup .tp-section-head .section-body { margin-inline: auto; }
+
+/* LIGHT COLOURWAY. #007AC2 is a mid-tone ground, and all three of this head's
+   colours were solved against the canvas: the eyebrow is --blue itself and
+   would vanish outright, --text-mid measures 1.6:1 and --text-dark 3.89 — over
+   the 3:1 large text needs and nowhere near the 4.5 the body needs.
+
+   Solid #fff for all three, not --text-light: the warm white is 4.12:1 here,
+   which passes for the heading and fails for the other two, and one white
+   across the block beats two that disagree. #fff is 4.60:1 — AA for body text,
+   with no margin. Scoped to this block, so .section-label and friends are
+   untouched everywhere else. */
+.tp-lineup .tp-section-head .section-label,
+.tp-lineup .tp-section-head .section-heading,
+.tp-lineup .tp-section-head .section-heading.dark,
+.tp-lineup .tp-section-head .section-body { color: #fff; }
 .tp-lineup-inner {
   max-width: var(--tp-frame);
   margin: 0 auto;
@@ -181,6 +223,39 @@
 .tp-model-grid[data-count="1"] {
   grid-template-columns: minmax(0, 560px);
   justify-content: center;
+}
+
+/* The lineup's closing ask. Inside the section rather than a band of its own:
+   what follows is a photograph that un-rounds to full width as it arrives, and
+   a full-bleed navy band directly above it would be a second loud beat
+   competing with it.
+   The ask is still the loudest thing in the block: an h3 in the display face
+   over a blue .btn-primary. */
+.tp-lineup-cta {
+  /* More room above the rule than below it. .tp-lineup carries top padding
+     only, like every section on this page, so the gap AFTER this block is
+     .tp-features' own --tp-gap-section — nothing is added here. */
+  margin-top: var(--tp-gap-head);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  text-align: center;
+}
+/* An h3, not a paragraph in heading's clothing — it sits between the section's
+   own h2 above the grid (3.8rem) and the h3 on every model card (2.15rem), so
+   the block reads as the lineup's closing beat rather than a fifth card or a
+   second section heading. */
+.tp-lineup-cta-heading {
+  max-width: var(--measure);
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 2.8vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
 }
 
 /* ---------- The model card ----------
@@ -290,32 +365,58 @@
 }
 
 /* ---------- What makes it this type ----------
-   Two sections, outside then inside. Each is a stage that pins and plays one
-   sequence: the photograph grows to fill the viewport, the headline rises over
-   it, then the four cards arrive one at a time. initFeatureStages() in
-   type-page.js scrubs --exp and the inline opacities; every value here is a
-   valid resting state on its own, so the section is legible with the animation
-   layer dead. */
+   Two sections, outside then inside. Each is one photograph that expands to
+   full width as it scrolls in with its headline arriving over it, and then the
+   detail cards BELOW it, on the page's own ground, as a rail you scroll.
+
+   The cards used to stand on the photograph, one at a time, metered out by a
+   pinned scrub. They are off it now. A card is something you read and compare;
+   four of them shown one per screen of scroll is a slideshow of paragraphs,
+   and it cost the reader a pinned page to get through. The band keeps the
+   arrival, the rail keeps the reading, and the section scrolls like the rest
+   of the page.
+
+   initFeatureBands() in type-page.js scrubs --exp and the headline;
+   initFeatureRails() drives the arrows. Every value here is a valid resting
+   state on its own, so the section is legible with the animation layer dead. */
 .tp-features { padding: var(--tp-gap-section) 0 0; }
 
-.tp-feat {
+.tp-feat { position: relative; }
+.tp-feat + .tp-feat { margin-top: var(--tp-gap-section); }
+
+/* The photograph and the headline over it. Nearly a screen tall — the picture
+   is the section's whole argument and it is carrying a parallax now, which
+   needs height to be a drift rather than a twitch. Short of 100vh on purpose:
+   a band the reader can see the bottom of is a band, and one they cannot is a
+   second hero. */
+.tp-feat-band {
   position: relative;
-  height: 100vh;
-  min-height: 640px;
-  overflow: hidden;
-  background: var(--canvas);
+  height: clamp(520px, 82vh, 900px);
 }
 
 /* The bleed hinge — the design system's one permitted animated radius. --exp
-   runs 1 (inset inside the page gutters, rounded at the card step) to 0 (edge
-   to edge and square), and settles on a correct static value at both ends.
-   Defaults to 0 so that with no JS the photograph is simply full-bleed. */
+   runs 1 (inset, rounded at the card step) to 0 (edge to edge and square), and
+   settles on a correct static value at both ends. Defaults to 0, so with no JS
+   the photograph is simply full-bleed — which is also the resting state the
+   scrub ends on.
+
+   The inset is far deeper than the page gutter: at --exp 1 the frame is about
+   a third narrower than the window and a quarter shorter than the band, so the
+   growth is the movement you actually watch. At the gutter's own 6vw there was
+   barely a hundred pixels in it and the hinge read as a rounding of corners.
+
+   --fp-drift is the hidden headroom above and below the photograph, so the
+   parallax can never expose an edge. The JS derives its travel from it: 8% of
+   an image 124% of the stage's height is 9.9% of the stage, inside the 12%
+   there is to give. Same trade --tp-drift makes for the model cards. */
 .tp-feat-stage {
-  --exp: 1;
-  --exp-y: clamp(3rem, 9vh, 6rem);
-  --exp-x: var(--tp-pad);
+  --exp: 0;
+  --exp-y: clamp(3rem, 10vh, 8rem);
+  --exp-x: clamp(2.5rem, 14vw, 13rem);
+  --fp-drift: 12%;
   position: absolute;
   inset: 0;
+  overflow: hidden;
   background: var(--surface);      /* holds the slab while a lazy image decodes */
   clip-path: inset(
     calc(var(--exp) * var(--exp-y))
@@ -325,25 +426,30 @@
   );
   will-change: clip-path;
 }
+/* Taller than the frame it sits in, and centred in it: the overhang top and
+   bottom is what the drift spends. With no JS it simply rests centred, which
+   is a correct crop rather than a broken one. */
 .tp-feat-stage > img {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: calc(-1 * var(--fp-drift));
   width: 100%;
-  height: 100%;
+  height: calc(100% + 2 * var(--fp-drift));
   object-fit: cover;
+  will-change: transform;
 }
 /* Sits inside the stage so it clips with it.
 
    Three gradients, not one, and the shape is set by measurement. The headline
-   stands in the TOP-LEFT over the exterior shot's blown-out overcast sky —
-   a single bottom-weighted scrim left it at 1.49:1, nowhere near the 3:1 large
+   stands on the LEFT over the exterior shot's blown-out overcast sky — a
+   single bottom-weighted scrim left it at 1.49:1, nowhere near the 3:1 large
    text needs, and the eyebrow at 1.85:1. Darkening the whole frame enough to
    fix that would flatten the photograph.
 
-   So the darkening is concentrated where the copy actually is: one gradient
-   from the left, one from the top, one from the bottom for the card row. They
-   compound only in the top-left corner, which is the one place that needs
-   ~0.57 alpha; the right-hand sky keeps most of its light. */
+   So the darkening is concentrated where the copy actually is: the gradient
+   from the left carries the headline, and the two short ones from top and
+   bottom weight the band's edges so a full-bleed photograph does not float.
+   The right-hand sky keeps most of its light. */
 .tp-feat-scrim {
   position: absolute;
   inset: 0;
@@ -353,23 +459,18 @@
     linear-gradient(to top,    rgba(15,11,9,0.40) 0%, rgba(15,11,9,0.12) 32%, rgba(15,11,9,0) 50%);
 }
 
-/* Headline left, one card slot right, both on the page's spine and centred in
-   the frame — so the photograph keeps its middle and the two blocks sit on
-   opposite edges of it rather than stacked down one side. */
+/* The headline alone, on the page's spine, centred in the frame. Outside the
+   stage rather than inside it, so the hinge crops the photograph and never the
+   type. */
 .tp-feat-content {
   position: absolute;
   inset: 0;
   z-index: 2;
+  display: flex;
+  align-items: center;
   max-width: var(--tp-frame);
   margin: 0 auto;
-  padding: clamp(5rem, 10vh, 7rem) var(--tp-pad) clamp(2.5rem, 6vh, 4rem);
-  display: grid;
-  /* the slot scales with the viewport rather than sitting at a fixed 26rem —
-     at 900px a fixed slot left the headline about 300px to wrap a 54px
-     display face into */
-  grid-template-columns: minmax(0, 1fr) minmax(0, clamp(20rem, 34vw, 32rem));
-  align-items: center;
-  gap: clamp(2rem, 5vw, 5rem);
+  padding: clamp(2.5rem, 6vh, 4rem) var(--tp-pad);
 }
 /* .section-label.light is rgba(245,242,238,0.5) — built for a dark flat ground,
    not a photograph. At half alpha over this sky it measured 1.85:1. Solid
@@ -391,54 +492,159 @@
   max-width: 12ch;
 }
 
-/* One slot, four cards stacked in it. All four share a single grid cell, so
-   the slot is as tall as the tallest card and nothing shifts as they swap —
-   and the JS only has to move opacity, never layout. */
+/* ---------- The card rail ----------
+   Closer to the photograph than --tp-gap-head would put it, and deliberately:
+   that step is the room under a headline before the content it introduces, and
+   here the headline is inside the picture. The measured gap is band edge to
+   card top, so the section's two halves have to read as one block. */
+/* The four tokens live on the wrapper, not on the track, because the row of
+   arrows below the cards has to line up with them: the same --flead sets the
+   track's left inset and the controls' right one, so the rule under the cards
+   ends where the cards' own frame does.
+
+   A custom property resolves where it is USED, not where it is written, so
+   hoisting them changes nothing: --flead's 100% is still this wrapper (the
+   window), and --fframe's is still the track's content box, because that is
+   where each is finally consumed. */
+.tp-feat-rail {
+  --fgap: clamp(1rem, 1.6vw, 1.5rem);
+  --fframe: min(100%, calc(var(--tp-frame) - 2 * var(--tp-pad)));
+  --fcard: calc((var(--fframe) - var(--fgap) * 2) / 2.35);
+  --flead: max(var(--tp-pad), calc((100% - var(--tp-frame)) / 2 + var(--tp-pad)));
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Below the cards rather than above them, on a rule that runs in from the left
+   edge of the window. The line is the section's closing edge — it says the rail
+   ends here — and the arrows sit on its right end, where a hand that has just
+   finished reading left to right arrives.
+
+   The line starts at the window's edge, not the spine: the cards run off the
+   right, so a rule inset on both sides would draw a frame the content does not
+   keep. It stops where the arrows begin, and the arrows stop on the same
+   --flead the first card starts on. */
+.tp-feat-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: clamp(2rem, 3.4vw, 2.75rem);
+  padding-right: var(--flead);
+}
+.tp-feat-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  margin-right: 0.75rem;           /* 1.5rem of air between line and first arrow */
+  background: var(--hairline);
+}
+/* Nothing to page through — no reason for the buttons to be there. Set by
+   initFeatureRails() off the measured overflow, so a category with two cards
+   on a wide screen simply has no arrows. */
+.tp-feat-rail.is-static .tp-feat-controls { display: none; }
+/* The model page's rail arrows, restated. Same trade .tp-model-card makes:
+   this page does not load model.css, and two rails on one site pointing at
+   each other with different buttons is how a site stops looking designed. */
+.tp-feat-nav {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(15,11,9,0.14);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.tp-feat-nav:not([disabled]):hover {
+  background: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(15,11,9,0.14);
+}
+/* An end of the rail is worth saying out loud. Dimmed rather than removed, so
+   the pair keeps its shape and the row does not reflow on every scroll. */
+.tp-feat-nav[disabled] {
+  opacity: 0.32;
+  cursor: default;
+}
+
+/* The track spans the section — which is unconstrained, sitting directly in
+   <main> — so cards run off the right of the viewport instead of stopping at a
+   gutter. width:100%, never 100vw, per the full-bleed rule.
+
+   --flead is the distance from the viewport edge to the contained spine, so
+   card one starts under the headline above it and only the right side bleeds.
+   Card width is measured off the contained FRAME, not off the track's own
+   width: that is what makes a wider window show more of the next card at the
+   same size rather than the same cards larger.
+
+   2.35 within the frame, not 3.5 as the video rail takes. That rail holds
+   eight thumbnails and this one holds four paragraphs — at a third of the
+   frame each, all four nearly fit a 1920 window and the arrows would have
+   about 40px of travel to offer. Wider cards keep a page's worth of rail on
+   every screen, and give the body copy a line worth reading.
+
+   Mind the two percentage bases. A custom property resolves where it is USED:
+   --flead is used in padding on the track, so its 100% is the section — the
+   window. --fframe is used in flex-basis on a card, so its 100% is the track's
+   content box, already the window less the lead and the trailing gutter. */
 .tp-feat-cards {
   list-style: none;
-  display: grid;
-  grid-template-areas: 'slot';
-  /* stretch, not end: the four bodies are different lengths, so bottom-aligning
-     them in a shared cell gave each a different top edge and the card visibly
-     jumped on every swap. Stretched, all four are the slot's height — one
-     stable frame that the content sits inside. */
-  align-items: stretch;
-  justify-self: end;
+  display: flex;
+  gap: var(--fgap);
   width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* A scroll container clips on every side; the block inset is the room a
+     focus ring needs. The lead doubles as that room on the inline start. */
+  padding: 7px var(--tp-pad) 7px var(--flead);
+  /* Snap measures from the padding box, so the snapport start has to be moved
+     to the content edge — otherwise the rail rests with card one jammed
+     against the viewport instead of on the spine. */
+  scroll-padding-inline-start: var(--flead);
 }
-.tp-feat-card { grid-area: slot; }
+.tp-feat-cards::-webkit-scrollbar { display: none; }
 
-/* Frosted, because the card has to be legible over a photograph that changes
-   under it — the specific effect the design system permits blur for, not
-   decoration. The fill does the contrast work and the blur only settles the
-   texture behind it; blur alone would leave white text riding on whatever
-   happened to be in frame. */
-/* A lighter fill than the four-up version carried, so more of the photograph
-   comes through the glass, and a heavier blur so what comes through reads as
-   texture rather than clutter.
+/* Off the photograph the frosting has nothing to frost: the cards take the
+   page's own Surface panel, and the type goes back to the page's ink.
 
-   0.46 is not a taste call — it is the floor plus a margin. The fill is what
-   carries contrast here; blur softens a backdrop but never darkens it. Solved
-   against the actual composite (photograph → object-fit: cover → 28px blur →
-   the three scrim gradients → this fill), the lowest fill that keeps the
-   0.92-white body over 4.5:1 is 0.44 on the exterior shot, whose overcast sky
-   is the binding case. 0.34 was tried first and measured 2.64:1. */
+   The wash over it is the brand blue at a tenth alpha, falling away to nothing
+   before the copy starts — enough to tell a card from the Canvas behind it and
+   to tie the row to the .btn-primary further up, not enough to become a
+   coloured panel. It sits ON the Surface fill rather than replacing it, so the
+   contrast the body copy was set against is unchanged. */
 .tp-feat-card {
+  flex: 0 0 var(--fcard);
+  min-width: 0;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  padding: clamp(1.75rem, 2.4vw, 2.5rem);
+  padding: clamp(1.6rem, 2.1vw, 2.15rem);
   border-radius: var(--radius-card);
-  background: rgba(15,11,9,0.40);
-  -webkit-backdrop-filter: blur(28px) saturate(125%);
-  backdrop-filter: blur(28px) saturate(125%);
-  border: 1px solid rgba(255,255,255,0.16);
-  color: #fff;
+  background:
+    linear-gradient(155deg, rgba(0,122,194,0.11) 0%, rgba(0,122,194,0.035) 44%, rgba(0,122,194,0) 76%),
+    var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text-dark);
 }
+/* The card's extra third of height, all of it. Nothing else in the card wants
+   to be 30% bigger — the title is on a type step and the body is already at
+   its measure — so the photograph takes it, and 16:10 landscape becomes very
+   nearly square. 14:13 is the ratio that lands it: at the 1440 frame it puts
+   the media at 427px against 287px, and the card at 606px against 466px.
+
+   Written as a ratio rather than a height because the card's width moves with
+   the viewport, and a fixed height would make the crop change shape on the way
+   down. */
 .tp-feat-card-media {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 14 / 13;
   overflow: hidden;
   border-radius: 12px;             /* one step in from the card's own 20px */
-  background: rgba(255,255,255,0.06);
+  background: rgba(15,11,9,0.06);
   margin-bottom: 1.6rem;
 }
 .tp-feat-card-media img {
@@ -446,23 +652,22 @@
   height: 100%;
   object-fit: cover;
 }
-/* One card at a time and 26rem wide, so it carries the design system's `title`
-   step rather than the compressed size a four-up row needed. */
+/* Between the single-slot card this replaces and the four-up row before it —
+   two and a bit of these are on screen at once, wide enough to carry a real
+   title without shouting over the two beside it. */
 .tp-feat-card-title {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #fff;
-  margin-bottom: 0.9rem;
+  color: var(--text-dark);
+  margin-bottom: 0.8rem;
 }
 .tp-feat-card-body {
   font-size: 0.95rem;
-  line-height: 1.75;
-  /* 0.92, up from 0.88: the fill under it is thinner now, so the type gives
-     back the contrast the ground stopped providing */
-  color: rgba(255,255,255,0.92);
+  line-height: 1.7;
+  color: var(--text-mid);
 }
 
 /* ---------- Quiz + FAQ ----------
@@ -548,57 +753,20 @@
   .tp-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Below 861px the pin is off (see initFeatureStages) and the stage returns to
-   normal flow: photograph, headline, then the four cards under it. Written as
-   its own layout rather than a squeezed version of the pinned one — a 100vh
-   stage holding a headline and four cards does not fit a phone. */
+/* Below 861px there is no hinge to scrub (see initFeatureBands) — the stage
+   is already at its resting full-bleed, so nothing here has to undo it. What
+   changes is shape: 64vh of a landscape photograph on a phone crops the coach
+   out of its own picture, and a 400px card does not fit the screen. */
 @media (max-width: 860px) {
-  .tp-feat {
+  .tp-feat-band {
     height: auto;
-    min-height: 0;
-    overflow: visible;
+    aspect-ratio: 4 / 5;           /* a portrait window is where a tall band pays */
+    min-height: 420px;
+    max-height: 78vh;
   }
-  .tp-feat + .tp-feat { margin-top: var(--tp-gap-section); }
-  .tp-feat-stage {
-    position: relative;
-    inset: auto;
-    aspect-ratio: 3 / 2;           /* 21:9 on a phone is too shallow to read a coach in */
-    clip-path: none;               /* nothing to hinge without the scrub */
-    will-change: auto;
-  }
-  /* the photograph is its own block, so the headline sits a section step below
-     it — more space above the heading than below it, which is the rule */
-  .tp-feat-content {
-    position: static;
-    display: block;
-    padding: var(--tp-gap-section) var(--tp-pad) 0;
-  }
-  .tp-feat-heading { max-width: none; color: var(--text-dark); }
-  .tp-feat-head .section-label { color: var(--blue); }
-  /* All four below the image, stacked one per row. The desktop slot is a
-     single cell holding four cards on top of each other — here they get four
-     rows, because without the scrub there is nothing to reveal them one at a
-     time and a stack of overlapping cards would show only the last. */
-  .tp-feat-cards {
-    grid-template-areas: none;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-    margin-top: var(--tp-gap-head);
-    justify-self: stretch;
-  }
-  .tp-feat-card { grid-area: auto; }
-  /* off the photograph, the frosting has nothing to frost — the cards take the
-     page's own Surface panel instead */
-  .tp-feat-card {
-    background: var(--surface);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    border-color: var(--hairline);
-    color: var(--text-dark);
-  }
-  .tp-feat-card-title { color: var(--text-dark); }
-  .tp-feat-card-body { color: var(--text-mid); }
-  .tp-feat-card-media { background: rgba(15,11,9,0.06); }
+  /* a card and a good look at the next one, rather than a share of a frame
+     that is no longer wide enough to divide */
+  .tp-feat-rail { --fcard: min(calc(var(--fframe) - var(--fgap) - 3rem), 400px); }
 }
 
 @media (max-width: 768px) {
@@ -615,9 +783,11 @@
   /* one card per row — two 320px cards do not fit a phone, and a squeezed
      cut-out render is worse than a scrolled one */
   .tp-model-grid { grid-template-columns: 1fr; }
-  /* the feature cards stay two up: their copy is three lines, not a spec
-     table, and one per row would make each section a full screen of scrolling */
-  .tp-feat-cards { gap: 1.25rem 1rem; }
+  /* a rail you swipe, so the arrows go — they would be a second way to do
+     what the finger already does, and they charge a row of height to say it.
+     Same call .md-video-controls makes at this width. The rule goes with them:
+     it is there to hold the arrows, not to divide anything. */
+  .tp-feat-controls { display: none; }
   /* the two-card grid is already one column here, so a lineup of one needs no
      special case — reset it or the card would be capped at 560px on a phone */
   .tp-model-grid[data-count="1"] { grid-template-columns: 1fr; }
@@ -632,51 +802,10 @@
   .type-page { --tp-drift: 0%; }   /* no headroom, no crop, nothing to drift */
   .tp-model-media img { transition: none; transform: none !important; }
 
-  /* No pin, no scrub, no hinge. The stage keeps its full-bleed photograph and
-     the whole sequence is shown at once — the section has to say the same
-     thing standing still that it says on the wheel. The 100vh stage is
-     released so headline and cards have room to sit under it. */
-  .tp-feat {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-  .tp-feat + .tp-feat { margin-top: var(--tp-gap-section); }
-  .tp-feat-stage {
-    position: relative;
-    inset: auto;
-    aspect-ratio: 21 / 9;
-    clip-path: none;
-    will-change: auto;
-  }
-  /* the photograph is its own block, so the headline sits a section step below
-     it — more space above the heading than below it, which is the rule */
-  .tp-feat-content {
-    position: static;
-    display: block;
-    padding: var(--tp-gap-section) var(--tp-pad) 0;
-  }
-  .tp-feat-heading { max-width: none; color: var(--text-dark); }
-  .tp-feat-head .section-label { color: var(--blue); }
-  /* the same unstacking the sub-861px layout needs, and for the same reason:
-     with no scrub to reveal them in turn, four cards in one cell would show
-     only the last */
-  .tp-feat-cards {
-    grid-template-areas: none;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1rem, 1.6vw, 1.5rem);
-    margin-top: var(--tp-gap-head);
-    justify-self: stretch;
-  }
-  .tp-feat-card { grid-area: auto; }
-  .tp-feat-card {
-    background: var(--surface);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    border-color: var(--hairline);
-    color: var(--text-dark);
-  }
-  .tp-feat-card-title { color: var(--text-dark); }
-  .tp-feat-card-body { color: var(--text-mid); }
-  .tp-feat-card-media { background: rgba(15,11,9,0.06); }
+  /* Nothing to undo for the feature sections. The hinge and the headline's
+     arrival are the only motion there, initFeatureBands() never starts under
+     this query, and both rest at the values written above — full-bleed
+     photograph, headline standing on it. The rail is still a rail; its arrows
+     jump rather than glide, which initFeatureRails() handles in JS because
+     scroll-behavior is not what it uses. */
 }

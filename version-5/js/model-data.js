@@ -33,6 +33,20 @@
 window.JAYCO_MODEL_DETAIL = (function () {
   'use strict';
 
+  /* Which plans have a Matterport walkthrough is a question the configurator
+     asks too, so the ids live in models-data.js — the light library both pages
+     load — rather than in this 64KB file. See JAYCO_TOURS there. The guard is
+     for the console, not for production: this file is never loaded without the
+     library, and a page that managed it would otherwise fail on the first plan
+     rather than say why. */
+  const TOUR = (slug, planId) => {
+    if (!window.JAYCO_TOUR_URL) {
+      console.warn('[jayco] models-data.js has not loaded — no floorplan tours.');
+      return null;
+    }
+    return window.JAYCO_TOUR_URL(slug, planId);
+  };
+
   /* ---------- One image kit per model folder ----------
      IMG and WIDE used to be module-level consts, which held while Swift was
      the only record. A second model has its own folder and its own set of
@@ -255,16 +269,20 @@ window.JAYCO_MODEL_DETAIL = (function () {
       ],
     },
 
-    /* ---- The Layout — the page's signature section ----
-       Each floorplan carries `hotspots`: numbered points on the drawing, each
-       one opening the real photograph of that zone. x/y are percentages of the
-       drawing box, measured off the 1800×920 export — keep the stage padding-
-       free or every dot desyncs from the art. A plan with no `hotspots` falls
-       back to the plain drawing + info panel. */
+    /* ---- The Layout ----
+       `hotspots` IS NO LONGER RENDERED. The section used to put numbered points
+       on the drawing, each opening the real photograph of that zone; it now
+       shows the drawing alone with an enlarge and a 3D tour beside it. See the
+       renderer's note in model-detail.js for why.
+
+       The arrays are left in place rather than deleted: they are authored copy
+       and photography that took a shoot to produce, and x/y are measured
+       percentages of the 1800×920 drawing export that would have to be measured
+       again. Nothing reads them today. */
     plan: {
       label: 'The Layout',
       heading: 'Twenty-one feet, laid out.',
-      body: 'Two ways to arrange the same van. Tap a number to see what that corner actually looks like.',
+      body: 'Two ways to arrange the same van. Open either drawing full size, or walk it in 3D.',
     },
 
     /* filters render only at 4+ plans; the Swift's two are shown side by side. */
@@ -292,7 +310,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
           ['Best for', 'Gear haulers'],
           ['Pop-top', 'Available'],
         ],
-        tour360: null,
+        tour360: TOUR('swift', '20E'),        /* no scan published — resolves to null */
         hotspots: [
           { id: 'cab', x: 80, y: 41, eyebrow: 'Drive',
             title: 'Cab',
@@ -340,13 +358,11 @@ window.JAYCO_MODEL_DETAIL = (function () {
           ['Best for', 'Two travellers'],
           ['Beds', 'Twins or king'],
         ],
-        /* Jayco's own Matterport scan of the 20T, lifted from the "360°" button
-           and the embedded iframe on jayco.com/rvs/class-b-motorhomes/2027-swift/20t/.
-           The 20E page carries no tour, which is why that plan stays null — the
-           button only renders for plans that actually have a walkthrough. The
-           field keeps its 360 name because that is the capture format; the
-           button is labelled "3D Tour" per the client's wording. */
-        tour360: 'https://my.matterport.com/show/?m=PgNjsbhY4xw',
+        /* The capture ids all live in models-data.js now — see JAYCO_TOURS
+           there for why. The field keeps its 360 name because that is the
+           capture format; the button is labelled "3D Tour" per the client's
+           wording. */
+        tour360: TOUR('swift', '20T'),
         hotspots: [
           { id: 'cab', x: 80, y: 41, eyebrow: 'Drive',
             title: 'Cab',
@@ -385,6 +401,10 @@ window.JAYCO_MODEL_DETAIL = (function () {
       heading: 'What it costs.',
       msrp: 150300,
       msrpNote: 'Starting MSRP, 2027 Swift. Excludes freight, dealer prep, taxes and title.',
+      /* Sits under the MSRP figure, tied to the asterisk on it. Says the same
+         thing the disclaimer says at the foot of the section, but at the point
+         someone is actually reading the number. */
+      starNote: 'Check a dealer near you pricing to get a true picture of the actual price you will pay.',
       mandatory: {
         name: 'Customer Value Package',
         price: 11250,
@@ -569,15 +589,26 @@ window.JAYCO_MODEL_DETAIL = (function () {
       label: 'See it in person',
       heading: 'Twenty-one feet is hard to picture.',
       body: 'Photographs flatten a van. Stand in one, swivel the seats, lie on the bed, open the garage — ten minutes at a dealer settles what a week of browsing cannot.',
-      cta: { label: 'Find a Dealer', href: 'dealers.html' },
-      note: 'More than 200 Jayco dealers across North America.',
+      /* Two asks, in the order they happen: find the dealer, then see what is
+         actually standing on their lot. Inventory is "#" until that page is
+         built — renderCtas neutralises the click so it does nothing rather
+         than jumping the page to the top. */
+      ctas: [
+        { label: 'Find a Dealer', href: 'dealers.html', style: 'primary' },
+        { label: 'View Inventory', href: '#', style: 'secondary' },
+      ],
+      note: 'More than 300 Jayco dealers across North America.',
     },
 
     brochure: {
       label: 'Brochure',
       heading: 'Take the Swift with you.',
       body: 'The full 2027 Swift brochure — floorplans, standard equipment, option packages and specifications in one PDF.',
-      cta: { label: 'Download Brochure', href: '#' },
+      /* Opens the shared request form, prefilled with this model — there is
+         still no PDF, so "Download" would be a promise the button cannot keep.
+         The href is real so it degrades to the brochures page with JS off, and
+         so renderCtas()'s a[href="#"] preventDefault net lets it through. */
+      cta: { label: 'Request a Brochure', href: 'brochures.html?model=swift', open: 'swift' },
       /* the CTA's background, not an inset render — a 1600px export of
          jayco-swift-brochure.jpg, whose 8256px original is 74MB */
       image: img('swift-brochure-bg.webp'),
@@ -629,10 +660,11 @@ window.JAYCO_MODEL_DETAIL = (function () {
      providing another minimal record in its place. */
 
   /* ---------- 19MRK zones ----------
-     The only floorplan with its own photography — seven frames, so it is the
-     only one that gets hotspots. The other fifteen fall back to the drawing
-     and its info panel, which is exactly how the template is built to degrade.
-     Coordinates are percentages of the 1800x920 drawing export. */
+     UNRENDERED — see the note on `hotspots` in the Swift record above. Seven
+     frames of the 19MRK, the only floorplan with its own photography, written
+     when the Layout section opened a zone per numbered dot. Kept because the
+     copy and the shoot are real; coordinates are percentages of the 1800x920
+     drawing export. */
   const JF_19MRK_ZONES = [
     { id: 'front', x: 22, y: 34, eyebrow: 'Sleep',
       title: 'Murphy bed, up',
@@ -711,22 +743,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
        anchor rather than by proximity — the two plans with no tour sit between
        plans that have one, so a looser read would have shifted them by one. All
        fourteen were requested and returned 200 (a made-up id returns 400). */
-    const TOURS = {
-      '18rbf': 'ZXK81dW5BzW',
-      '19mrk': 'dPPsKuKYr2W',
-      '21mbh': '5uijhpVu1ym',
-      '21mml': 'Ujr3WT8Vnxn',
-      '23mbd': 'LPDBt7fkUpn',
-      '24fk':  'LuiPLPmW6Ed',
-      '25bh':  'hC84MC3emEz',
-      '25rb':  'nHT6XTvNyAz',
-      '26fk':  'hGZZv1CeN5P',
-      '27bh':  'nmzZHq3wCT4',
-      '27mk':  'j7i3th8UMmS',
-      '29bhb': 'kuEjvCcL8Tg',
-      '29qbh': 'guqqhXsbD9z',
-      '30rkb': '4GuJB9u464t',
-    };
 
     /* Rows the info panel shows beneath sleeps and length. Read from the
        harvested spec sheet; a plan missing a group simply shows fewer rows. */
@@ -764,7 +780,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
          the floorplans page and matches to the dollar; 33BH is unpriced there
          too. */
       price: p.price == null ? null : BASE + p.price,
-      tour360: TOURS[p.id] ? 'https://my.matterport.com/show/?m=' + TOURS[p.id] : null,
+      tour360: TOUR('jay-feather', p.id),
       image: jfImg('floorplan-' + p.id + '.webp'),
       specs: specRows(p),
       tags: FEAT['jay-feather__' + p.id] || [],
@@ -867,7 +883,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
       /* No <br> — only intro.heading is rendered raw; every other heading
          goes through esc(), so a tag here prints as text. */
       heading: 'Sixteen ways to lay it out.',
-      body: 'Pick a floorplan to see its drawing and its real numbers. The 19MRK is photographed corner by corner — tap a number on the drawing.',
+      body: 'Pick a floorplan to see its drawing and its real numbers. Open the drawing full size, or walk the plan in 3D.',
     },
 
     /* First real use of the filter row anywhere: it renders only for a model
@@ -1017,6 +1033,10 @@ window.JAYCO_MODEL_DETAIL = (function () {
       msrp: 37493,
       msrpHigh: 53243,
       msrpNote: 'MSRP spans the 2027 floorplans, from the 18RBF up to the 29QBH — where you land depends on the floorplan you choose. Excludes freight, dealer prep, taxes and title.',
+      /* Sits under the MSRP figure, tied to the asterisk on it. Says the same
+         thing the disclaimer says at the foot of the section, but at the point
+         someone is actually reading the number. */
+      starNote: 'Check a dealer near you pricing to get a true picture of the actual price you will pay.',
       mandatory: {
         name: 'Customer Value Package',
         price: 6000,
@@ -1105,15 +1125,22 @@ window.JAYCO_MODEL_DETAIL = (function () {
       label: 'See it in person',
       heading: 'Sixteen floorplans is a lot to picture.',
       body: 'A drawing tells you where the bed goes. It does not tell you whether you can pass someone in the galley, or how the bunk room feels with the door shut. Twenty minutes at a dealer settles both.',
-      cta: { label: 'Find a Dealer', href: 'dealers.html' },
-      note: 'More than 200 Jayco dealers across North America.',
+      /* Two asks, in the order they happen: find the dealer, then see what is
+         actually standing on their lot. Inventory is "#" until that page is
+         built — renderCtas neutralises the click so it does nothing rather
+         than jumping the page to the top. */
+      ctas: [
+        { label: 'Find a Dealer', href: 'dealers.html', style: 'primary' },
+        { label: 'View Inventory', href: '#', style: 'secondary' },
+      ],
+      note: 'More than 300 Jayco dealers across North America.',
     },
 
     brochure: {
       label: 'Brochure',
       heading: 'Take the Jay Feather with you.',
       body: 'The full 2027 Jay Feather brochure — every floorplan, standard equipment, package contents and specifications in one PDF.',
-      cta: { label: 'Download Brochure', href: '#' },   /* no PDF in the repo yet */
+      cta: { label: 'Request a Brochure', href: 'brochures.html?model=jay-feather', open: 'jay-feather' },
       image: jfImg('jf-kitchen.jpg'),
     },
 

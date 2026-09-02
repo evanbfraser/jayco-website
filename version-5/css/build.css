@@ -471,24 +471,39 @@
 }
 .fp-card-drawing { padding: 0.75rem 0.9rem; }
 
-/* ---------- Enlarge a floorplan ----------
-   The wrapper exists so the zoom can be a sibling of the card rather than a
-   button inside a button. It carries the grid cell, so the card has to fill
+/* ---------- The floorplan card's tools ----------
+   The wrapper exists so the controls can be siblings of the card rather than
+   buttons inside a button. It carries the grid cell, so the card has to fill
    it or the cards stop aligning at the foot. */
 .fp-card-wrap { position: relative; display: flex; }
 .fp-card-wrap > .fp-card { flex: 1; min-width: 0; }
-/* Ink on light, like the quiz's, not the model page's glass — the drawing sits
-   on a white bed here. Always visible rather than on hover: there is no hover
-   on a touch screen, and a control half the visitors cannot find is not a
-   control. */
-.fp-zoom {
+
+/* One row, top-right of the drawing: the 3D tour where a plan has one, then
+   the zoom. A row rather than two independently-placed buttons because the
+   tour comes and goes per plan — positioned by hand, a card without one would
+   leave a hole where the pair should start, and the two would have to agree on
+   each other's width in two files. */
+.fp-card-tools {
   position: absolute;
   top: 0.6rem;
   right: 0.6rem;
   z-index: 2;
-  width: 34px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* Ink on light, like the quiz's, not the model page's glass — the drawing sits
+   on a white bed here. Always visible rather than on hover: there is no hover
+   on a touch screen, and a control half the visitors cannot find is not a
+   control. */
+.fp-tour,
+.fp-zoom {
   height: 34px;
-  border-radius: 50%;
+  flex: none;
+  /* a pill radius, not 50%: the tour carries a label and is no longer square,
+     and 50% of an oblong is an ellipse. At 34px tall this still draws the zoom
+     as the circle it was. */
+  border-radius: 999px;
   border: 1px solid var(--warm-gray);
   background: rgba(255,255,255,0.94);
   color: var(--text-dark);
@@ -498,8 +513,56 @@
   cursor: pointer;
   transition: background 0.25s, transform 0.25s var(--ease-out);
 }
+.fp-zoom { width: 34px; }
+.fp-tour:not([disabled]):hover,
 .fp-zoom:hover { background: #fff; transform: scale(1.06); }
+.fp-tour:focus-visible,
 .fp-zoom:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+/* The icon is a solid-fill glyph where the zoom's is a stroke, so it reads a
+   shade heavier at the same size. The blue is what says this one leaves the
+   page — the site's colour for a link, against the zoom's ink for a control
+   that stays. */
+/* Icon then label, in a pill sized by its contents. Tighter on the icon side
+   than the text side — an optical correction, not a typo: a round glyph reads
+   as further from the edge than a capital V at the same measured distance. */
+.fp-tour {
+  width: auto;
+  gap: 0.42rem;
+  padding: 0 0.75rem 0 0.6rem;
+  color: var(--blue);
+}
+.fp-tour svg { fill: currentColor; flex: none; }
+/* The card's own small-type step — .fp-badge's size, tracking and weight, so
+   the control reads as part of this card rather than as UI dropped on top of
+   it. Not uppercased, though: the badges are labels for a state and this is an
+   instruction, and "VIEW 3D TOUR" in caps outshouts the plan code below it. */
+.fp-tour-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+/* Jayco has not scanned every plan, and the control is on every card anyway —
+   a pair that appears and disappears down the grid reads as a rendering fault.
+
+   It carries FULL COLOUR either way. The dimming this used to have is the
+   treatment .md-video-nav and .tp-feat-nav use at the end of a rail, and it was
+   the wrong borrow: those two grey out a control the reader has just used and
+   run to the end of, where the fade is feedback. Here it would grey out a
+   control the reader has never touched, on a card that is otherwise identical
+   to its neighbours, and read as a card at half strength rather than as a plan
+   without a walkthrough.
+
+   So nothing about the disabled state is painted. What is left carries it: no
+   hover lift (the rule above is :not([disabled])), and the `disabled` attribute
+   itself, which keeps the button out of the tab order and has assistive
+   technology announce it as unavailable. The distinction lives where it costs
+   the grid nothing.
+
+   Note there is no cursor rule here, and none would do anything: style.css:7
+   sets `cursor: none !important` on every element for the custom cursor, so
+   the pointer cannot be part of this or any other answer on this site. */
 
 /* The modal. Structure and both of its awkward details are model.css's
    .md-zoom, restated: the closed state is [hidden] rather than a transitioned
@@ -578,8 +641,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .bp-zoom { transition: none; }
+  .rl-thumb-zoom { transition: color 0.25s; }
+  .rl-thumb--open:hover .rl-thumb-zoom { transform: none; }
+  .fp-tour,
   .fp-zoom,
   .bp-zoom-close { transition: background 0.25s; }
+  .fp-tour:not([disabled]):hover,
   .fp-zoom:hover,
   .bp-zoom-close:hover { transform: none; }
 }
@@ -817,23 +884,117 @@
 
 /* ---------- Summary (Step 6 body) ---------- */
 .summary-review { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
-.summary-review-media {
+/* ---------- The build, in pictures ----------
+   The coach on the left, and each remaining selection's picture in its own
+   row on the right, beside the line that names it.
+
+   The caption sits ABOVE the render rather than below it, so the eyebrow lands
+   level with the first review line and the two columns start together. */
+.summary-visual { margin: 0; }
+.sv-cap {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+/* the eyebrow of .sole-option, reused — this is the same job, naming a choice
+   that has already been made */
+.sv-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--blue);
+}
+.sv-name { font-weight: 700; color: var(--text-dark); }
+/* A fixed frame, because the render is a cut-out on transparency and would
+   otherwise set the tile's height from its own bounding box — not the same
+   for every model in the lineup. */
+.sv-media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 11;
   border-radius: var(--radius-card);
   overflow: hidden;
-  aspect-ratio: 16 / 11;
-  background: linear-gradient(180deg, #fff, var(--surface));
   border: 1px solid var(--warm-gray);
+  background: linear-gradient(180deg, #fff, var(--surface));
 }
-.summary-review-media img { width: 100%; height: 100%; object-fit: contain; padding: 0.8rem; }
+.sv-media img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 0.8rem; }
+
 .review-lines { border-top: 1px solid var(--warm-gray); margin-top: 0.4rem; }
 .review-line {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--warm-gray);
   font-size: 0.92rem;
 }
+/* The label and its price stay a row of their own; the picture goes beneath
+   them. Splitting the head out is what lets the price keep its right edge
+   while the image below spans as wide as it likes. */
+.rl-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+/* Under the text, at a size worth looking at: 300px against the 92px this was
+   when it sat beside the label. Capped rather than full-column — a receipt row
+   whose picture ran the whole 620px would read as a section, not as a line
+   item — and `width: 100%` so the cap simply stops applying on a phone.
+
+   The two images are a floorplan at 2:1 and a décor strip at 4.35:1, and each
+   keeps its own ratio rather than being cropped into a shared box: a décor
+   strip cropped square is one swatch of six, which is not the thing that was
+   chosen. */
+.rl-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 0.7rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.rl-thumb-frame {
+  display: block;
+  border: 1px solid var(--warm-gray);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.rl-thumb-frame img { display: block; width: 100%; height: auto; }
+.rl-chip { display: block; width: 100%; aspect-ratio: 4 / 1; }
+/* line art on a white bed, with the breathing room the drawing's own margins
+   do not give it at this size */
+.rl-thumb-frame--art { background: #fff; }
+.rl-thumb-frame--art img { padding: 0.5rem 0.6rem; }
+
+/* Enlarge. The whole picture is the button, so the affordance is a corner
+   badge — the floorplan card's glyph, sized for this frame. Inside the corner
+   rather than straddling the edge, which is what the 92px version had to do:
+   at 300px the décor strip is 69px tall and has room to carry it. */
+.rl-thumb--open { cursor: pointer; }
+.rl-thumb-zoom {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--warm-gray);
+  background: #fff;
+  color: var(--text-dark);
+  box-shadow: 0 1px 3px rgba(15,11,9,0.12);
+  transition: color 0.25s, transform 0.25s var(--ease-out);
+}
+.rl-thumb--open:hover .rl-thumb-zoom { color: var(--blue); transform: scale(1.1); }
+.rl-thumb--open:hover .rl-thumb-frame { border-color: var(--blue); }
+.rl-thumb--open:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
+
 .review-line .rl-label { color: var(--text-mid); }
 .review-line .rl-label b { display: block; color: var(--text-dark); font-weight: 600; }
 .review-line .rl-val { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
@@ -1001,6 +1162,10 @@
 .quote-sub { font-size: 0.9rem; color: var(--text-mid); margin: 0.5rem 0 1.4rem; line-height: 1.5; }
 .quote-field { margin-bottom: 0.9rem; }
 .quote-field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-mid); }
+/* Said outright: the other three fields here are required and this one is not,
+   and nothing else on the form marks that either way. Regular weight so it
+   cannot be read as part of the field name. */
+.quote-opt { font-weight: 400; opacity: 0.75; }
 .quote-field input {
   width: 100%;
   margin-top: 0.35rem;

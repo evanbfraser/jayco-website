@@ -12,8 +12,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
-  <link rel="stylesheet" href="css/model.css?v=v5-md-11" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
+  <link rel="stylesheet" href="css/model.css?v=v5-md-19" />
+  <!-- The brochure request form is a component shared with brochures.html,
+       so it is its own pair of files rather than a port into two page
+       stylesheets. See css/brochure-form.css for why. -->
+  <link rel="stylesheet" href="css/brochure-form.css?v=v5-brf-1" />
 </head>
 <body class="model-page">
 
@@ -40,15 +44,21 @@
           <li><a href="index.html">Find Your RV</a></li>
           <li><a href="index.html">Shop &amp; Tools</a></li>
           <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
         </ul>
         <div class="nav-right">
-          <ul class="nav-primary">
-            <li><a href="index.html">Resources</a></li>
-            <li><a href="index.html">About</a></li>
-          </ul>
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
           <ul class="nav-actions">
             <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
             <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
             <li>
               <button class="nav-search-btn" aria-label="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -83,6 +93,7 @@
     <div class="mm-actions">
       <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
       <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
     </div>
   </div>
 
@@ -155,6 +166,80 @@
   </main>
 
   <!-- ===== FOOTER ===== -->
+  <!-- ===== BROCHURE REQUEST =====
+       TWIN: an identical copy of this block lives in model.html. It cannot be
+       shared and it cannot be injected — Netlify detects forms by
+       post-processing the literal HTML in the publish directory, so the markup
+       has to exist, statically, in every page that submits it. Submissions route
+       by the form-name VALUE in the body rather than by URL, so one registration
+       serves both pages. Keep the two byte-identical.
+
+       Every field Netlify should record has to be here, including the hidden
+       ones — brochure-form.js only ever writes values into them.
+
+       A sibling of <main>, because a position:fixed panel inside a transformed
+       or overflow:hidden ancestor stops being fixed. -->
+  <div class="brf-modal" id="brf-modal" hidden role="dialog" aria-modal="true"
+       aria-labelledby="brf-title">
+    <div class="brf-scrim" data-brf-close="1"></div>
+    <div class="brf-panel">
+      <button type="button" class="brf-x" id="brf-x" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <div class="brf-ask" id="brf-ask">
+        <span class="section-label">Brochure</span>
+        <h2 class="brf-title" id="brf-title">Request a brochure</h2>
+        <p class="brf-lede" id="brf-lede">Tell us where to send it and which coach you are looking at.</p>
+
+        <form class="brf-form" id="brf-form" name="brochure-request" method="POST"
+              data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="brochure-request" />
+          <p hidden><label>Leave this empty <input name="bot-field" /></label></p>
+          <!-- The readable half of the pair: the select submits a slug, this
+               submits "2027 Jay Feather", so a submission reads on its own.
+               Same shape quiz.html uses for answers / answers-readable. -->
+          <input type="hidden" name="model-name" id="brf-model-name" />
+
+          <div class="brf-field">
+            <label class="brf-label" for="brf-model">Model</label>
+            <select class="brf-input" id="brf-model" name="model" required>
+              <option value="">Choose a model</option>
+            </select>
+          </div>
+          <div class="brf-row">
+            <div class="brf-field">
+              <label class="brf-label" for="brf-name">Name <span class="brf-opt">optional</span></label>
+              <input class="brf-input" id="brf-name" name="name" type="text"
+                     autocomplete="name" placeholder="Your name" />
+            </div>
+            <div class="brf-field">
+              <label class="brf-label" for="brf-zip">ZIP code <span class="brf-opt">optional</span></label>
+              <input class="brf-input" id="brf-zip" name="zip" type="text" inputmode="numeric"
+                     autocomplete="postal-code" placeholder="46526" />
+            </div>
+          </div>
+          <div class="brf-field">
+            <label class="brf-label" for="brf-email">Email</label>
+            <input class="brf-input" id="brf-email" name="email" type="email" required
+                   autocomplete="email" placeholder="you@example.com" />
+          </div>
+
+          <button type="submit" class="btn-primary brf-go">Send it to me</button>
+        </form>
+        <p class="brf-note" id="brf-note" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="brf-done" id="brf-done" hidden>
+        <span class="section-label">Brochure</span>
+        <h2 class="brf-title" id="brf-done-title" tabindex="-1">Request received.</h2>
+        <p class="brf-lede" id="brf-done-body"></p>
+        <button type="button" class="btn-secondary-light brf-done-x" id="brf-done-x">Close</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
@@ -220,7 +305,7 @@
                  columns, so adding it here adds it in both places. -->
             <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
             <li><a href="compare.html">Compare RVs</a></li>
-            <li><a href="compare.html">All Floorplans</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -239,8 +324,9 @@
             <li><a href="dealers.html">Find a Dealer</a></li>
             <li><a href="build-price.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
-            <li><a href="#">Brochures</a></li>
-            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
             <li><a href="#">Value Calculator</a></li>
           </ul>
         </div>
@@ -261,7 +347,7 @@
           <h4>Resources</h4>
           <ul>
             <li><a href="#">Blog</a></li>
-            <li><a href="#">Video Gallery</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
             <li><a href="#">eBooks &amp; Guides</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
@@ -303,7 +389,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/models-data.js?v=v5-5"></script>
   <!-- Both are READ BY model-data.js, so they must load before it. The Jay
        Feather record derives its 16 floorplans from build-data (codes, sleeps,
        lengths, weights, prices) and its filter chips from floorplan-features,
@@ -311,8 +397,9 @@
        compare page can never quote different numbers for the same plan. -->
   <script src="js/build-data.js?v=v5-bp-19"></script>
   <script src="js/floorplan-features.js?v=v5-cmp-24"></script>
-  <script src="js/model-data.js?v=v5-md-10"></script>
-  <script src="js/model-detail.js?v=v5-md-10"></script>
-  <script src="js/app.js?v=v5-core-5"></script>
+  <script src="js/model-data.js?v=v5-md-18"></script>
+  <script src="js/model-detail.js?v=v5-md-19"></script>
+  <script src="js/brochure-form.js?v=v5-brf-1"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

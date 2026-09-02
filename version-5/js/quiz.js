@@ -54,7 +54,13 @@
      the screens actually visited, kept separately because going back has to
      pop the path that was taken, not recompute it: recomputing loses the
      branch at exactly the moment you are editing the answer that caused it. */
-  const state = { picks: [], trail: [], screen: null, result: null };
+  /* The lead screen is shown after this many question screens. Counted in
+     SCREENS, not question ids: the quiz is adaptive, so the fifth screen is s2
+     on a direct path and s1 on one that went through the helper. Position is
+     what "after question five" means to the person answering. */
+  const LEAD_AFTER = 5;
+
+  const state = { picks: [], trail: [], screen: null, result: null, lead: null };
 
   function answersOf(picks) {
     const a = {};
@@ -476,9 +482,30 @@
 
   /* A floorplan is a drawing to read, not a destination. The card used to be a
      link to the builder, which meant the only thing you could do with a
-     floorplan was leave it. Now it is a plain card with one control: enlarge,
-     because the dimensions printed on the drawing are unreadable at card width
-     — the same reason model.html puts a zoom on its own floorplan stage. */
+     floorplan was leave it. Now it is a plain card with the same two controls
+     the drawing carries everywhere else on this site: enlarge, because the
+     dimensions printed on it are unreadable at card width, and the 3D tour.
+     model.html's floorplan stage and the configurator's floorplan cards both
+     pair exactly these two, and a drawing that offers one of them here and both
+     of them there is the same component answering differently on three pages.
+
+     Both are on every card, including the plans Jayco has not scanned: a row of
+     result cards where the pair appears and disappears reads as a rendering
+     fault, not as a fact about the plan. Unscanned, the tour is a disabled
+     <button> rather than the <a> — `disabled` says unavailable, keeps it out of
+     the tab order and is announced, where an <a> with no href is not a control
+     any assistive technology can describe.
+
+     Which plans have a scan comes from JAYCO_TOURS in models-data.js, read
+     through the helper so the Matterport host is still written once. Off
+     window, not as a bare global: quiz.html loads that library, but a page that
+     somehow did not should render a dead tour button rather than throw on the
+     first result. */
+  /* The 3D-tour glyph, as one string rather than inline in the template: this
+     function runs once per result plan and the path is 1.4KB. */
+  const TOUR_PATH = 'M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z';
+  const tourUrl = window.JAYCO_TOUR_URL || function () { return null; };
+
   function planCard(row, entry) {
     const p = entry.plan;
     const price = p.price == null
@@ -491,6 +518,19 @@
     return '<div class="qz-card qz-card--plan">' +
       (p.img ? '<span class="qz-card-media">' +
         '<img src="' + esc(p.img) + '" alt="' + esc(label) + '" loading="lazy" />' +
+        '<span class="qz-card-tools">' +
+        (function () {
+          const glyph = '<svg width="19" height="19" viewBox="0 0 216 216" fill="currentColor" ' +
+            'aria-hidden="true" focusable="false"><path d="' + TOUR_PATH + '"/></svg>';
+          const url = tourUrl(row.slug, p.id);
+          return url
+            ? '<a class="qz-tour-btn" href="' + esc(url) + '"' +
+                ' target="_blank" rel="noopener noreferrer"' +
+                ' aria-label="View the 3D tour of the ' + esc(label) + ' — opens in a new tab">' +
+                glyph + '</a>'
+            : '<button type="button" class="qz-tour-btn" disabled aria-disabled="true"' +
+                ' aria-label="No 3D tour yet for the ' + esc(label) + '">' + glyph + '</button>';
+        }()) +
         '<button type="button" class="qz-zoom-btn" data-zoom-src="' + esc(p.img) + '"' +
           ' data-zoom-caption="' + esc(row.name + ' ' + p.name) + '"' +
           ' aria-label="Enlarge the ' + esc(label) + '">' +
@@ -498,7 +538,7 @@
             'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
             '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>' +
           '</svg>' +
-        '</button></span>' : '') +
+        '</button></span></span>' : '') +
       '<span class="qz-card-name">' + esc(p.name) + '</span>' +
       '<span class="qz-card-stats">' + stats.map((s) =>
         '<span class="qz-card-stat"><b>' + esc(s[1]) + '</b>' + esc(s[0]) + '</span>').join('') + '</span>' +
@@ -559,10 +599,15 @@
       ? r.plans.length + ' of ' + p.planCount + ' ' + p.name + ' floorplans'
       : (r.plans.length === 1 ? 'The ' + p.name + ' floorplan' : p.name + ' floorplans');
 
-    /* ---- The four actions ----
+    /* ---- The three actions ----
        View Details leads and takes the blue, because reading about the model is
        what comes before configuring one. Where it goes when the model has no
        page of its own is detailsHref()'s problem, not this grid's.
+
+       Find It at a Dealer used to be the fourth. It sits under the spec row
+       now, beside View Our Inventory — the two ways to go and see the thing,
+       together and above the fold, rather than one of them buried in a row of
+       four at the end of the argument. dl.note went up with it.
 
        Download Brochure has nothing behind it. There is no PDF in this repo,
        and jayco.com publishes none either — its brochure page is a request
@@ -579,9 +624,7 @@
       btn(detailsHref(p.slug), 'View Details', true) +
       btn('build-price.html?model=' + p.slug, 'Build & Price', false) +
       btn('#', 'Download Brochure', false) +
-      btn(dl.href, 'Find It at a Dealer', false) +
-      '</div>' +
-      (dl.note ? '<p class="qz-actions-note">' + esc(dl.note) + '</p>' : '');
+      '</div>';
 
     /* Offered only when the helper picked the branch for them — of the nine
        helper combinations only three resolve motorized, so someone who
@@ -606,6 +649,17 @@
         '<span class="qz-stat-label">' + esc(s[1]) + '</span>' +
       '</div>').join('') + '</div>';
 
+    /* The two ways to go and stand next to it, directly under the numbers that
+       describe it. Light ground here, so .btn-secondary-light — .btn-secondary
+       is the dark-ground variant and would be white on white.
+       Inventory is "#" until that page exists; wireScreen() neutralises the
+       click so it does nothing rather than jumping the page to the top. */
+    const heroActions = '<div class="qz-hero-ctas">' +
+      '<a class="btn-primary" href="' + esc(dl.href) + '">Find a Dealer</a>' +
+      '<a class="btn-secondary-light" href="#">View Our Inventory</a>' +
+      '</div>' +
+      (dl.note ? '<p class="qz-hero-note">' + esc(dl.note) + '</p>' : '');
+
     /* ---- The reveal ----
        One viewport, and everything in it is in the DOM from the first frame.
        revealResult() only animates opacity and transform on top of a finished
@@ -627,6 +681,7 @@
           '<p class="qz-tagline">' + esc(p.tagline) + '</p>' +
         '</div>' +
         statRow +
+        heroActions +
       '</div>';
 
     return '<div class="qz-result">' +
@@ -792,6 +847,10 @@
     const media = reveal.querySelector('.qz-hero-media');
     const tag   = reveal.querySelector('.qz-tagline');
     const stats = Array.prototype.slice.call(reveal.querySelectorAll('.qz-stat'));
+    /* The row of actions under the specs, and the dealer caveat that belongs to
+       it — they arrive together, after the numbers. */
+    const acts = Array.prototype.slice.call(
+      reveal.querySelectorAll('.qz-hero-ctas a, .qz-hero-note'));
     const first = !beatPlayed;
 
     /* No GSAP, or a reduced-motion preference: the screen is already finished.
@@ -810,6 +869,7 @@
     g.set(name, { y: 14, scale: 0.975 });
     g.set(media, { y: 40 });
     g.set(stats, { opacity: 0, y: 14 });
+    g.set(acts, { opacity: 0, y: 12 });
 
     /* Absolute positions, not relative offsets. Written as '-=0.3' from each
        other these drift: every duration change moves everything after it, and
@@ -825,6 +885,9 @@
          3.1   the coach
          3.5   confetti, as the coach settles
          3.7   the tagline, then the specs
+         4.4   the two actions, once the last spec has landed — they are what
+               to DO about the match, so they arrive after the argument for it
+               rather than alongside it
 
        BEAT is subtracted for every result after the first, so a repeat starts
        on the name rather than waiting out a silence where the line used to be. */
@@ -856,7 +919,11 @@
         });
       }, at(3.5))
       .to(tag,   { opacity: 1, duration: 0.7, ease: 'power2.out' }, at(3.7))
-      .to(stats, { opacity: 1, y: 0, duration: 0.6, stagger: 0.09, ease: 'power2.out' }, at(3.9));
+      .to(stats, { opacity: 1, y: 0, duration: 0.6, stagger: 0.09, ease: 'power2.out' }, at(3.9))
+      /* 4.4, not 4.2: the stats stagger four times at 0.09, so the last one
+         does not begin until 4.17. Starting here puts the buttons after the row
+         has finished arriving rather than under its tail. */
+      .to(acts,  { opacity: 1, y: 0, duration: 0.55, stagger: 0.08, ease: 'power2.out' }, at(4.4));
   }
 
   /* ---------- Screen swap + the one authored motion moment ----------
@@ -936,6 +1003,8 @@
 
   function go(id, announce) {
     state.screen = id;
+    if (id === 'lead') { showSave(false); showLead(true); syncUrl(); return; }
+    showLead(false);
     if (id === 'intro') paint(renderIntro(), null);
     else if (id === 'result') {
       paint(renderResult(), 'Your match is ready.', true);
@@ -950,6 +1019,42 @@
         'Question ' + state.trail.length + (t ? ' of ' + t : '') + '. ' + q.question);
     }
     syncUrl();
+  }
+
+  /* Swaps the stage out rather than painting into it: the form has to be
+     literal markup for Netlify's build-time parser (see quiz.html), so it lives
+     outside #qz-stage and takes the stage's place on screen. The stage keeps
+     the question underneath it, which is exactly what Back needs. */
+  function showLead(on) {
+    const el = $('#qz-lead');
+    if (!el) return;
+    const stage = $('#qz-stage');
+    el.hidden = !on;
+    if (stage) stage.hidden = !!on;
+    if (!on) return;
+
+    /* Carry the previous question's photograph through, so the path's imagery
+       does not drop out for one screen. */
+    const prev = questionById(state.trail[state.trail.length - 1]);
+    const a = answers();
+    const perPath = prev && prev.photos && a.family && prev.photos[a.family];
+    const shot = perPath ? perPath : (prev ? { src: prev.photo, alt: prev.alt } : null);
+    const img = $('#qz-lead-img');
+    if (img && shot && shot.src) { img.src = shot.src; img.alt = shot.alt || ''; }
+
+    $('#qz-lead-answers').value = state.picks.map((p) => p.token).join('.');
+    $('#qz-lead-readable').value = state.picks.map((p) => {
+      const q = questionById(p.qid);
+      return (q ? q.question : p.qid) + ' — ' + p.token;
+    }).join(' | ');
+
+    updateProgress();
+    const h = $('#qz-lead-ask');
+    if (h) h.focus({ preventScroll: true });
+    $('#qz-say').textContent = 'Before the last questions, where should we send your match?';
+    if (window.ScrollTrigger) requestAnimationFrame(() => window.ScrollTrigger.refresh());
+    if (window.__jaycoLenis) window.__jaycoLenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
   }
 
   function showSave(on) {
@@ -1005,6 +1110,10 @@
 
   function advance() {
     const a = answers();
+    /* Once only, and never on the way back through: state.lead is set on a
+       successful submit and survives until a retake, so re-answering an earlier
+       question does not ask again. */
+    if (state.trail.length === LEAD_AFTER && !state.lead) { go('lead'); return; }
     const id = nextId(a, state.trail);
     if (id === 'result') { go('result'); return; }
     state.trail.push(id);
@@ -1033,6 +1142,9 @@
   }
 
   function back() {
+    /* The lead screen never enters the trail, so popping here would skip the
+       question it interrupted. Return to it instead. */
+    if (state.screen === 'lead') { go(state.trail[state.trail.length - 1]); return; }
     if (state.trail.length < 2) { state.trail = []; go('intro'); return; }
     state.trail.pop();
     const id = state.trail[state.trail.length - 1];
@@ -1084,6 +1196,12 @@
     const s = root.querySelector('#qz-start'); if (s) s.addEventListener('click', start);
     const b = root.querySelector('#qz-back'); if (b) b.addEventListener('click', back);
     const rt = root.querySelector('#qz-retake'); if (rt) rt.addEventListener('click', restart);
+    /* Placeholder hrefs on the result: View Our Inventory under the specs, and
+       Download Brochure in the band, which has never had a PDF behind it.
+       Scoped to "#" so pointing either at a real page takes it out of the net. */
+    root.querySelectorAll('a[href="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => e.preventDefault());
+    });
     const fl = root.querySelector('#qz-flip'); if (fl) fl.addEventListener('click', () => {
       state.picks.push({ qid: 'flip', group: null, token: 'flip' });
       go('result');
@@ -1094,7 +1212,7 @@
      the first visit began on, and the button there is the moment someone
      decides to answer rather than a screen they arrive mid-thought. */
   function restart() {
-    state.picks = []; state.trail = []; state.result = null;
+    state.picks = []; state.trail = []; state.result = null; state.lead = null;
     if (window.history && history.replaceState) history.replaceState({}, '', location.pathname);
     go('intro');
   }
@@ -1154,9 +1272,56 @@
     });
   }
 
+  /* ---------- Lead capture ----------
+     Email is required and the quiz does not continue without one. Name and ZIP
+     are optional and labelled so, and an empty one is simply not sent.
+
+     The POST files the submission with Netlify and nothing more — same caveat
+     wireSave() carries: nothing in this repo sends mail, so the copy here
+     promises only that the match will be sent, which stays untrue until a send
+     exists. A failed POST does NOT trap the shopper: the answers are already
+     captured in the URL, and holding someone on a form because a network call
+     failed is worse than losing the record of it. */
+  function wireLead() {
+    const form = $('#qz-lead-form');
+    if (!form) return;
+    const back = $('#qz-lead-back');
+    if (back) back.addEventListener('click', () => go(state.trail[state.trail.length - 1]));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const note = $('#qz-lead-note');
+      const email = $('#qz-lead-email');
+
+      /* checkValidity covers the required + type=email pair, and reportValidity
+         puts the browser's own message on the field rather than inventing a
+         second error style for this one form. */
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+
+      state.lead = {
+        name: ($('#qz-lead-name').value || '').trim(),
+        email: (email.value || '').trim(),
+        zip: ($('#qz-lead-zip').value || '').trim(),
+      };
+
+      const proceed = () => { note.textContent = ''; advance(); };
+
+      /* Netlify's handler only exists on the deployed site. */
+      if (location.protocol === 'file:') { proceed(); return; }
+
+      note.textContent = 'One moment…';
+      fetch(location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString(),
+      }).then(proceed).catch(proceed);
+    });
+  }
+
   /* ---------- Boot ---------- */
   function boot() {
     wireSave();
+    wireLead();
     const d = decode();
     if (d && d.stale) {
       /* A link from an earlier version of the quiz. The questions have moved

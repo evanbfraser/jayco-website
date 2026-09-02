@@ -12,7 +12,7 @@ Three real audiences, all served by the same site. No single one has been ranked
 
 - **New buyers.** People shopping for an RV, spanning the whole journey: from someone who does not yet know a Class B from a fifth wheel and is comparing RV *types*, through to a shopper down to two floorplans of one model who needs specs, pricing and a dealer. They arrive from search and from the Jayco brand, research across several sessions and devices, and convert offline — the purchase happens at a dealership, not on the site.
 - **Owners.** People who already own a Jayco and return for support: manuals, warranty coverage, recalls (US and Canadian), parts, the Wingmate app, the Ambassador program, Jayco University, change-of-ownership. Task-driven, often mid-trip or mid-problem, and unimpressed by marketing.
-- **Dealerships.** The 200+ North American dealer network, using the site as a resource — the Dealer Marketing Hub, brochures, model data and specs they rely on when selling.
+- **Dealerships.** The 300+ North American dealer network, using the site as a resource — the Dealer Marketing Hub, brochures, model data and specs they rely on when selling.
 
 ## Product Purpose
 
@@ -22,7 +22,7 @@ Success is a shopper arriving at a dealer already knowing which Jayco they want,
 
 ## Positioning
 
-Jayco, Inc. — a Thor Industries company, building RVs for more than 55 years. The claim the site is built on is *support around the product, not just the product*: a 2-year limited / 3-year structural warranty, 100% PDI (pre-delivery inspection) on every coach, and 200+ dealers across North America — expressed on the homepage as "Built for the Road. Built for Life." and "Every Jayco is backed by industry-leading support — before, during, and long after the sale."
+Jayco, Inc. — a Thor Industries company, building RVs for more than 55 years. The claim the site is built on is *support around the product, not just the product*: a 2-year limited / 3-year structural warranty, 100% PDI (pre-delivery inspection) on every coach, and 300+ dealers across North America — expressed on the homepage as "Built for the Road. Built for Life." and "Every Jayco is backed by industry-leading support — before, during, and long after the sale."
 
 The lineup spans towables and motorized: travel trailers, destination trailers, fifth wheels, toy haulers, Class A, Class B and Class C. This breadth is itself positioning — the site has to make an unfamiliar category navigable, hence the RV Finder Quiz, Tow vs. Drive guide, and New to RVing content sitting at the same level as the model pages.
 
@@ -51,7 +51,7 @@ This is a commissioned Jayco engagement. The following are supplied facts, not c
 
 - Legal line: "© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company."
 - Warranty: 2-year limited / 3-year structural (asset: `assets/warranty_2+3.svg`).
-- "For more than 55 years" of operation; "more than 200 dealers across North America"; 100% PDI on every unit.
+- "For more than 55 years" of operation; "more than 300 dealers across North America"; 100% PDI on every unit.
 - Registered marks and program names: Jayco®, JRide®, JaySMART, ParkSense®, Wingmate, Jayco University, Ambassador Program, Overlander packages.
 - Model pricing shown on the site is real MSRP (e.g. 2027 Swift from $150,300, 20E and 20T floorplans) and must not be adjusted for design convenience.
 - Logo and all model photography, renders, floorplan drawings and video are licensed client assets under `assets/`. Use them as supplied; do not substitute stock imagery for a Jayco product.
@@ -65,7 +65,7 @@ This is a commissioned Jayco engagement. The following are supplied facts, not c
 - `version-5/js/model-data.js` — real Swift product data: specs, floorplans, standard and optional equipment with prices, feature copy, FAQs.
 - `version-5/js/build-data.js` — all 181 real 2027 floorplans with MSRP, sleeps, length, weights, tanks and per-plan options; `js/floorplan-features.js` adds Jayco's own 17 feature flags for 161 of them.
 - `version-5/js/dealer-data.js` — 428 dealers harvested from jayco.com with addresses, phones and coordinates. `hasService` is null on every record and must stay that way until real data arrives.
-- Real proof points in the copy: warranty, 55+ years, 200+ dealers, 100% PDI, award recognition.
+- Real proof points in the copy: warranty, 55+ years, 300+ dealers, 100% PDI, award recognition.
 
 **Absences future work must not fabricate:** there are no customer testimonials, no review scores, no case studies, no press quotes, no dealer inventory data and no analytics in this repo. The Reviews & Testimonials page in the sitemap has no source content yet. Do not invent any of them to fill a layout — request them.
 

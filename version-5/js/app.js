@@ -54,6 +54,18 @@
     const header    = document.getElementById('site-header');
     if (!header) return;
 
+    /* PLACEHOLDER HREFS in the nav. View Inventory points at a page that is
+       still to be built, and "#" is what the site already uses for a
+       destination that does not exist yet — the footer is full of them. Left
+       bare, though, a click on a header pill scrolls the document to the top,
+       and Lenis smooth-scrolls the whole way, which reads as the button
+       misfiring rather than as nothing happening. The footer's stubs are quiet
+       text links and are deliberately left alone; this is scoped to the two
+       action rows, and to "#" alone, so pointing the href at a real page takes
+       it out of the net. */
+    document.querySelectorAll('.nav-actions a[href="#"], .mm-actions a[href="#"]')
+      .forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+
     // Fade-in opacity as user scrolls — fully dark at 320px
     const MAX_OPACITY  = 0.88;
     const FULL_SCROLL  = 320;

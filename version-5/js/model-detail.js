@@ -429,15 +429,28 @@
     window.addEventListener('resize', () => setActive(indexAt() % setSize, true));
   }
 
-  /* ---------- The Layout — the page's signature section ----------
-     One stage per floorplan: the drawing with numbered hotspots, and the zone
-     each one opens (a photograph plus its copy). Desktop stacks the zones in a
-     single grid cell and crossfades; at ≤900px the same nodes become a
-     numbered vertical list. A plan with no hotspots renders the plain drawing
-     and info panel, which is what every model got before this section existed. */
-  /* ---------- One tablist driver for both diagram components ----------
-     Lifted out of renderPlan so the cutaway reuses the roving tabindex and the
-     stacked-layout scroll rather than carrying a second copy that drifts.
+  /* ---------- The Layout ----------
+     One stage per floorplan: the drawing, full width, with the two things
+     there are to do with a drawing sitting on it — enlarge it, or walk it.
+
+     It used to carry numbered hotspots and a crossfading panel of zone
+     photographs beside it. That was the page's signature component and it is
+     gone: it asked the reader to work through six call-outs to learn what the
+     drawing already says, it halved the width of the drawing to make room for
+     itself, and it only ever ran on two of this site's eighteen plans — Swift's
+     two and Jay Feather's 19MRK — so fifteen plans showed a bare drawing with
+     no controls at all. Every plan now gets the same component, and the
+     photography those zones carried is what the Gallery and the feature bands
+     are for.
+
+     The hotspot DATA is still in model-data.js and nothing reads it. Left
+     rather than deleted: it is authored copy and photography, and its own
+     comment there now says it is unrendered. */
+  /* ---------- The tablist driver ----------
+     Still lifted out of a renderer, though only the cutaway uses it now — the
+     floorplan stage was the second caller. Kept here rather than folded into
+     renderCutaway because the shape is general and this is where it is
+     documented.
 
      The contract, identical in both places: exactly one dot and one panel are
      `.is-on`, nothing ever closes, the DOM is the state, and arrows move
@@ -564,77 +577,74 @@
        Kept as a JS comment rather than an HTML one: this template runs once per
        floorplan, and Jay Feather would ship sixteen copies of it. */
     const panels = plans.map((p, i) => {
-      const hots = p.hotspots || [];
       const first = i === 0;
 
-      const dots = hots.length ? `
-        <div class="md-plan-hots" role="tablist" aria-label="${esc(p.name)} zones">
-          ${hots.map((h, n) => `
-            <button class="md-hot${n === 0 ? ' is-on' : ''}" role="tab"
-                    id="zone-tab-${p.id}-${n}" aria-controls="zone-${p.id}-${n}"
-                    aria-selected="${n === 0 ? 'true' : 'false'}" tabindex="${n === 0 ? '0' : '-1'}"
-                    data-zone="${n}" style="left:${h.x}%;top:${h.y}%">
-              <span aria-hidden="true">${n + 1}</span><span class="sr-only">${esc(h.title)}</span>
-            </button>`).join('')}
-        </div>` : '';
-
-      /* one list of zones — CSS decides whether they stack in a grid cell
-         (desktop crossfade) or run down the page (mobile) */
-      const zones = hots.length ? `
-        <div class="md-plan-zones">
-          ${hots.map((h, n) => `
-            <article class="md-plan-zone${n === 0 ? ' is-on' : ''}" role="tabpanel"
-                     id="zone-${p.id}-${n}" aria-labelledby="zone-tab-${p.id}-${n}" tabindex="0">
-              <figure class="md-plan-photo">
-                <img src="${h.image.mid || h.image.src}" alt="${esc(h.image.alt)}"
-                     ${first && n === 0 ? '' : 'loading="lazy"'} decoding="async" />
-              </figure>
-              <div class="md-plan-copy">
-                <span class="md-plan-num" aria-hidden="true">${n + 1}</span>
-                ${h.eyebrow ? `<span class="md-plan-eyebrow">${esc(h.eyebrow)}</span>` : ''}
-                <h3 class="md-plan-title">${esc(h.title)}</h3>
-                <p class="md-plan-body">${esc(h.body)}</p>
-                ${h.stat ? `<span class="md-plan-stat">${esc(h.stat)}</span>` : ''}
-              </div>
-            </article>`).join('')}
-        </div>` : '';
-
-      const planAlt = esc(model.name + ' ' + p.name + ' floorplan'
-        + (hots.length ? ': ' + hots.map((h) => h.title.toLowerCase()).join(', ') : ''));
+      const planAlt = esc(model.name + ' ' + p.name + ' floorplan');
 
       const stage = `
-        <div class="md-plan-stage${hots.length ? '' : ' md-plan-stage--bare'}">
+        <div class="md-plan-stage">
           <!-- Only the open panel's drawing is eager. Swift has two plans so this
                never mattered; Jay Feather has sixteen, fifteen of them hidden. -->
           <img class="md-plan-drawing" src="${p.image}" alt="${planAlt}"
                ${first ? '' : 'loading="lazy"'} decoding="async" />
-          ${dots}
         </div>`;
 
-      /* The container the drawing sits in, matching the zone panel beside it.
-         The rail in the corner holds the zoom: the printed dimensions on the art
-         are unreadable at column width. The 3D tour used to sit here beside it,
-         and now rides in the CTA row below — see .md-fp-ctas. The rail stays a
-         rail rather than reverting to a self-positioned button, because that is
-         what puts a second control back without moving the first. */
+      /* The container the drawing sits in, and the rail that is now the whole
+         point of it: enlarge the drawing, or walk the plan.
+
+         Labelled, not the bare icons this rail carried when the zone panel was
+         beside it and these were a footnote to it. They are the component's two
+         actions now, and an unlabelled glyph in a corner is not how you say
+         that. Sized and worded like the configurator's floorplan-card pair, so
+         a visitor meets the same two controls in both places.
+
+         The tour is an <a> and the zoom a <button>, because one leaves the site
+         and the other opens a dialog. Which plans have a scan comes from
+         JAYCO_TOURS via model-data.js's tour360; the CTA row below used to carry
+         this button and no longer does, since two of the same control a hundred
+         pixels apart is one too many.
+
+         The BUTTON IS ON EVERY PLAN whether or not Jayco has scanned it. Swift's
+         20E has no tour and its 20T does, and a rail that changes shape between
+         two tabs of the same selector reads as a rendering fault rather than as
+         a fact about the plan. Without a scan it is a disabled <button> instead
+         of the <a>: `disabled` is what says unavailable without inventing a
+         convention, it keeps the control out of the tab order, and assistive
+         technology announces it — where an <a> with no href is not a control any
+         of them can describe. Full colour either way, which is the call already
+         made on the configurator's floorplan cards. */
+      const zoomIcon = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
+              </svg>`;
+      const tourIcon = `
+              <svg width="19" height="19" viewBox="0 0 216 216" fill="currentColor"
+                   aria-hidden="true" focusable="false">
+                <path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/>
+              </svg>`;
       const stageBox = `
         <div class="md-plan-stage-box">
           ${stage}
           <div class="md-plan-tools">
             <button type="button" class="md-plan-tool md-plan-zoom" data-plan="${p.id}"
                     aria-label="Enlarge the ${esc(p.name)} floorplan">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
-              </svg>
+              ${zoomIcon}<span class="md-plan-tool-label">Enlarge</span>
             </button>
+            ${p.tour360 ? `
+            <a class="md-plan-tool md-plan-tool--tour" href="${esc(p.tour360)}"
+               target="_blank" rel="noopener noreferrer"
+               aria-label="View the 3D tour of the ${esc(p.name)} floorplan — opens in a new tab">
+              ${tourIcon}<span class="md-plan-tool-label">View 3D Tour</span>
+            </a>` : `
+            <button type="button" class="md-plan-tool md-plan-tool--tour" disabled aria-disabled="true"
+                    aria-label="No 3D tour yet for the ${esc(p.name)} floorplan">
+              ${tourIcon}<span class="md-plan-tool-label">View 3D Tour</span>
+            </button>`}
           </div>
         </div>`;
 
-      /* Two columns only when there is a second column to fill. A plan with no
-         hotspots has no zones, and the split would leave an empty cell beside
-         the drawing — so that case stays the plain full-width stage. */
-      const body = zones ? `<div class="md-plan-split">${stageBox}${zones}</div>` : stage;
+      const body = stageBox;
 
       return `
       <div class="md-fp-panel${first ? ' is-active' : ''}"
@@ -652,24 +662,24 @@
             <li><span>Starting at</span><span>${
               p.price == null ? 'Pricing to come' : money(p.price)}</span></li>
           </ul>
-          <!-- Build first, tour second: the tour is how you decide, the build is
-               what you do about it, and the primary keeps the leading slot it has
-               on every other band. The tour is an outline button rather than a
-               second solid one so the row still has a single obvious action.
-               The icon is assets/icon-3d-tour.svg inlined rather than referenced
-               as an image tag, because it has to invert to white when the outline
-               button fills on hover — a referenced file paints its own black and
-               ignores the button entirely. -->
+          <!-- Build, then all of them side by side. The primary keeps the
+               leading slot it has on every other band, and the second is an
+               outline button so the row still has a single obvious action.
+
+               "View All Floorplans" goes to the configurator's floorplan step,
+               which is the one view on the site that puts every plan in a model
+               up at once, each with its drawing. It carries &step=floorplan
+               because build-price.html otherwise opens on the model step with
+               the model merely preselected — see applyDeepLink() in build.js,
+               which grew the parameter for this link.
+
+               The 3D tour was the third button here. It has moved onto the
+               drawing itself, where it is one of that component's two actions —
+               see .md-plan-tools above. -->
           <div class="md-fp-ctas">
             <a href="build-price.html?model=${slug}" class="btn-primary">Build This Floorplan</a>
-            ${p.tour360 ? `<a class="btn-secondary-light md-fp-360" href="${esc(p.tour360)}"
-               target="_blank" rel="noopener noreferrer"
-               aria-label="View the 360° tour of the ${esc(p.name)} floorplan — opens in a new tab">
-              <svg width="18" height="18" viewBox="0 0 216 216" aria-hidden="true" focusable="false">
-                <path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/>
-              </svg>
-              <span>View 360° Tour</span>
-            </a>` : ''}
+            <a href="build-price.html?model=${slug}&amp;step=floorplan"
+               class="btn-secondary-light">View All Floorplans</a>
           </div>
         </div>
       </div>`;
@@ -687,12 +697,6 @@
       <div class="md-fp-panels" id="md-fp-panels">${panels}</div>
       <p class="md-fp-empty" id="md-fp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>`);
 
-    /* Keyed by panel so select() below can reopen a plan on its first zone. */
-    const zoneSelect = new WeakMap();
-    document.querySelectorAll('#md-fp-panels .md-fp-panel').forEach((panel) => {
-      zoneSelect.set(panel, bindDiagram(panel, '.md-hot', '.md-plan-zone'));
-    });
-
     /* ---- plan switching ---- */
     const optionEls = Array.from(document.querySelectorAll('.md-fp-option'));
     const panelEls  = Array.from(document.querySelectorAll('.md-fp-panel'));
@@ -709,11 +713,12 @@
       panelEls.forEach((p) => {
         const on = p.dataset.plan === id;
         p.classList.toggle('is-active', on);
+        /* the panel that is opening carries the only image left in it, and it
+           was rendered lazy because it was hidden — promote it so the drawing
+           is not fetched after the panel is already on screen */
         if (!on) return;
-        const toZone = zoneSelect.get(p);
-        if (toZone) toZone(0);            /* a new plan always opens on zone 1 */
-        const first = p.querySelector('.md-plan-zone img');
-        if (first) first.loading = 'eager';
+        const art = p.querySelector('.md-plan-drawing');
+        if (art) art.loading = 'eager';
       });
       /* the panel swap changes document height — the scrubbed parallax below
          it would otherwise keep its stale start/end */
@@ -989,9 +994,16 @@
   /* Ranges set smaller than a single figure. Two prices and a dash is more than
      twice the characters, and at the display size it would wrap mid-range on
      any laptop; the number is still the largest thing in the card. */
+  /* The star is a link to the note beneath, not decoration, so it carries a
+     real reference rather than sitting in the DOM as a bare glyph a screen
+     reader would read as "asterisk" and leave unexplained. On a range it goes
+     on the HIGH end — the last figure the eye lands on, and the one someone is
+     most likely to read as what they will pay. */
+  const STAR = '<sup class="md-price-star" aria-hidden="true">*</sup>';
+
   function priceFigure(p) {
     if (p.msrpHigh == null) {
-      return `<span class="md-price-msrp-value">${money(p.msrp)}</span>`;
+      return `<span class="md-price-msrp-value">${money(p.msrp)}${STAR}</span>`;
     }
     return `<span class="md-price-msrp-value md-price-msrp-value--range">`
       + `<span class="md-price-end">${money(p.msrp)}</span>`
@@ -1000,7 +1012,7 @@
          joining them. Spoken as the word instead. */
       + `<span class="md-price-dash" aria-hidden="true">–</span>`
       + `<span class="sr-only"> to </span>`
-      + `<span class="md-price-end">${money(p.msrpHigh)}</span>`
+      + `<span class="md-price-end">${money(p.msrpHigh)}${STAR}</span>`
       + `</span>`;
   }
 
@@ -1045,7 +1057,16 @@
           <div class="md-section-head md-section-head--left">
             <h2 class="section-heading dark">${esc(p.heading)}</h2>
             <div class="md-price-msrp">
+              <!-- The figure is labelled rather than left to speak for itself:
+                   this is one number on a page that also quotes a price per
+                   floorplan and a price per package, and "MSRP starting at"
+                   says which of them it is. -->
+              <span class="md-price-msrp-label">MSRP starting at</span>
               ${priceFigure(p)}
+              <p class="md-price-star-note">
+                <span class="md-price-star" aria-hidden="true">*</span>
+                ${esc(p.starNote)}
+              </p>
               <span class="md-price-msrp-note">${esc(p.msrpNote)}</span>
             </div>
           </div>
@@ -1448,12 +1469,20 @@
     const c = model.compare;
     if (!v && !b && !c) { drop('#md-ctas'); return; }
 
+    /* An array, the same shape hero.ctas already uses, so a second ask needs
+       data and not a second template. The single-`cta` form is still accepted:
+       a record written before this band took two buttons keeps working, and
+       gets the primary it always had. */
+    const visitCtas = (v && (v.ctas || (v.cta ? [v.cta] : [])))
+      .map((c) => `<a href="${c.href}" class="btn-${
+        c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`).join('');
+
     const visit = v ? `
       <div class="md-cta-lead">
         <span class="section-label light">${esc(v.label)}</span>
         <h2 class="md-cta-heading light">${esc(v.heading)}</h2>
         <p class="md-cta-body light">${esc(v.body)}</p>
-        <a href="${v.cta.href}" class="btn-primary">${esc(v.cta.label)}</a>
+        <div class="md-cta-ctas">${visitCtas}</div>
         ${v.note ? `<span class="md-cta-note">${esc(v.note)}</span>` : ''}
       </div>` : '';
 
@@ -1471,7 +1500,13 @@
           <div class="md-cta-panel-text">
             <h3>${esc(b.heading)}</h3>
             <p>${esc(b.body)}</p>
-            <a href="${b.cta.href}" class="btn-secondary">${esc(b.cta.label)}</a>
+            <!-- data-brochure-open hands this to the shared request form
+                 (js/brochure-form.js), prefilled with this model. The href is a
+                 real page rather than "#", so it still goes somewhere with JS
+                 off — and that is also what takes it out of the preventDefault
+                 net below, exactly as that comment asks. -->
+            <a href="${b.cta.href}" class="btn-secondary"${
+              b.cta.open ? ` data-brochure-open="${esc(b.cta.open)}"` : ''}>${esc(b.cta.label)}</a>
           </div>
         </div>` : ''}
         ${c ? `
@@ -1485,6 +1520,20 @@
       </div>` : '';
 
     set('#md-ctas', `<div class="md-cta-inner">${visit}${secondary}</div>`);
+
+    /* PLACEHOLDER HREFS. Two destinations on this band do not exist yet — the
+       dealer inventory page, and the brochure PDF, which has never been in the
+       repo. "#" is what the site already uses for those (the footer is full of
+       them), but left bare a click scrolls the document to the top and Lenis
+       smooth-scrolls the whole way, which reads as the button misfiring rather
+       than as nothing happening. Scoped to this section and to "#" alone, so
+       pointing either href at a real page takes it out of the net. */
+    const band = $('#md-ctas');
+    if (band) {
+      band.querySelectorAll('a[href="#"]').forEach((a) => {
+        a.addEventListener('click', (e) => e.preventDefault());
+      });
+    }
   }
 
   /* ---------- Similar models (from the shared models-data.js) ---------- */
@@ -1703,11 +1752,17 @@
        which is what the design system asks for. */
 
     /* ---------- The one authored moment: the drawing draws itself ----------
-       The stage opens from an inset rounded panel to full width, the drawing
-       fades up inside it, the zone numbers count in 1…6, then zone one rises.
-       once:true — a focal moment that replays on scroll-back is a party trick. */
+       The stage opens from an inset rounded panel to full width and the drawing
+       fades up inside it. The numerals used to count in 1…6 after that — they
+       were the moment itself, and they went with the hotspots; the expansion
+       carries it alone now.
+       once:true — a focal moment that replays on scroll-back is a party trick.
+
+       It runs for EVERY plan now. The gate used to be `has a hotspot`, which
+       meant the moment fired on three of eighteen plans and the other fifteen
+       opened with a static drawing for no reason the reader could see. */
     const stage = document.querySelector('#md-plan .md-fp-panel.is-active .md-plan-stage');
-    if (stage && stage.querySelector('.md-hot')) {
+    if (stage) {
       /* --exp is scrubbed through a proxy object and written with
          setProperty, the same way the homepage drives its stage
          (app.js initBuiltFor). Tweening the custom property directly is not
@@ -1733,13 +1788,7 @@
         },
       })
         .to(exp, { v: 0, duration: 0.7, ease: 'power4.out', onUpdate: writeExp })
-        .from(stage.querySelector('.md-plan-drawing'), { opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.25)
-        /* the numerals count in 1…6 — the moment itself. The zones are never
-           animated: they carry .is-on state, and an inline opacity left by a
-           tween would outrank the class when a zone is selected later. */
-        .from(stage.querySelectorAll('.md-hot'), {
-          opacity: 0, scale: 0.6, duration: 0.35, stagger: 0.06, clearProps: 'opacity,scale',
-        }, 0.45);
+        .from(stage.querySelector('.md-plan-drawing'), { opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.25);
     }
 
     /* ---------- Full-bleed photography — vertical drift ----------

@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
-  <link rel="stylesheet" href="css/type.css?v=v5-tp-8" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
+  <link rel="stylesheet" href="css/type.css?v=v5-tp-16" />
 </head>
 <body class="type-page">
 
@@ -40,15 +40,21 @@
           <li><a href="index.html">Find Your RV</a></li>
           <li><a href="index.html">Shop &amp; Tools</a></li>
           <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
         </ul>
         <div class="nav-right">
-          <ul class="nav-primary">
-            <li><a href="index.html">Resources</a></li>
-            <li><a href="index.html">About</a></li>
-          </ul>
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
           <ul class="nav-actions">
             <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
             <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
             <li>
               <button class="nav-search-btn" aria-label="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -83,6 +89,7 @@
     <div class="mm-actions">
       <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
       <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
     </div>
   </div>
 
@@ -184,7 +191,7 @@
                  columns, so adding it here adds it in both places. -->
             <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
             <li><a href="compare.html">Compare RVs</a></li>
-            <li><a href="compare.html">All Floorplans</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -203,8 +210,9 @@
             <li><a href="dealers.html">Find a Dealer</a></li>
             <li><a href="build-price.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
-            <li><a href="#">Brochures</a></li>
-            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
             <li><a href="#">Value Calculator</a></li>
           </ul>
         </div>
@@ -225,7 +233,7 @@
           <h4>Resources</h4>
           <ul>
             <li><a href="#">Blog</a></li>
-            <li><a href="#">Video Gallery</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
             <li><a href="#">eBooks &amp; Guides</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
@@ -271,9 +279,9 @@
        page asked it for was which lineup cards have a detail page — app.js and
        type-page.js both fall back to a real destination without it, so only
        model.html pays for it. -->
-  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/models-data.js?v=v5-5"></script>
   <script src="js/type-data.js?v=v5-tp-8"></script>
-  <script src="js/type-page.js?v=v5-tp-8"></script>
-  <script src="js/app.js?v=v5-core-5"></script>
+  <script src="js/type-page.js?v=v5-tp-16"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

@@ -816,6 +816,14 @@
     /* The Search button is type=submit, so the form handler covers both it and
        the Enter key — no separate click listener. */
     $('#dl-search').addEventListener('submit', (e) => { e.preventDefault(); runSearch(); });
+    /* The panel foot's View Inventory points at a page that is still to be
+       built. "#" is the site's convention for that; left bare, a click scrolls
+       the document to the top and Lenis animates the whole way, which reads as
+       the button misfiring rather than as nothing happening. Delete this when
+       the href points somewhere real. */
+    const cta = $('.dl-cta a[href="#"]');
+    if (cta) cta.addEventListener('click', (e) => e.preventDefault());
+
     $('#dl-locate').addEventListener('click', locate);
 
     $('#dl-input').addEventListener('input', () => {

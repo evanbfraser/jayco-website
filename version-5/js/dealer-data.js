@@ -17,7 +17,7 @@
  * moment real data arrives. It is NOT inferred from dealer names or chains:
  * PRODUCT.md:67 lists dealer data among the absences not to invent.
  *
- * COUNT: 428 dealers (CA 64, US 364). The site copy says "200+", which this supports.
+ * COUNT: 428 dealers (CA 64, US 364). The site copy says "300+", which this supports.
  */
 window.JAYCO_DEALERS = {
   harvested: '2026-08-03',

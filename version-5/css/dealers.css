@@ -307,6 +307,38 @@
 .dl-more button:hover { border-color: var(--blue-light); }
 .dl-empty { padding: 1rem 1.4rem 1.4rem; font-size: 0.85rem; color: var(--text-mid); }
 
+/* ---------- The panel's closing ask ----------
+   flex:none, so it never scrolls away with the results and never competes with
+   them for space: .dl-results is the only flexible child, so it absorbs the
+   whole difference and the list is exactly this block shorter. The panel's own
+   height does not change.
+   Slightly more opaque than the panel behind it, and a hairline above — this is
+   a foot, and it has to hold a 0.78rem line against whatever the map is doing
+   underneath. */
+.dl-cta {
+  flex: none;
+  padding: 0.85rem 1.4rem 1.05rem;
+  border-top: 1px solid var(--warm-gray);
+  background: rgba(255,255,255,0.55);
+}
+.dl-cta-text {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-mid);
+  margin-bottom: 0.7rem;
+}
+/* .btn-primary is built for a page, not a 430px panel: block rather than
+   inline-block so it fills the width, and the 2.2rem side padding comes in to
+   match .dl-go, the other filled button in this panel. */
+.dl-cta-btn {
+  display: block;
+  padding: 0.72rem 1.15rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
 /* The grip is the sheet handle; it has no job on a desktop. */
 .dl-grip { display: none; }
 
@@ -325,7 +357,18 @@
   .dl-panel {
     top: auto; left: 0; right: 0; bottom: 0;
     width: auto; max-height: none;
-    height: calc(100dvh - var(--dl-top, 96px) - 0.5rem);
+    /* Capped at the top stop's own 80dvh. The sheet is anchored bottom:0 and
+       then translated DOWN, so any height beyond what the most-open snap
+       reveals hangs below the fold and can never be reached: at 844px the panel
+       ran to 766px against an is-full stop of 675, leaving 83px of itself
+       permanently off screen. That was harmless while nothing lived down there,
+       and stopped being harmless when the panel grew a pinned foot — only 18px
+       of the CTA was on screen at full open.
+       Capping changes nothing about what peek and half reveal: both subtract
+       their visible strip from 100%, so they still show 12rem and 52dvh. It
+       only takes is-full's translate to zero, which is where it was always
+       trying to land. */
+    height: min(calc(100dvh - var(--dl-top, 96px) - 0.5rem), 80dvh);
     border: none; border-top: 1px solid var(--warm-gray);
     border-radius: var(--radius-card) var(--radius-card) 0 0;
     box-shadow: 0 -10px 34px rgba(15,11,9,0.16);

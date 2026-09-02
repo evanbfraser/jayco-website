@@ -14,8 +14,8 @@
   <!-- Leaflet first: style.css carries .leaflet-control-* overrides that have to
        win, and index.html loads it in this same order. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-5" />
-  <link rel="stylesheet" href="css/dealers.css?v=v5-dl-9" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
+  <link rel="stylesheet" href="css/dealers.css?v=v5-dl-10" />
 </head>
 <!-- data-header="solid": like the builder, this page opens on canvas rather
      than a dark hero, so the white logo and nav need the bar filled in from the
@@ -46,15 +46,21 @@
           <li><a href="index.html">Find Your RV</a></li>
           <li><a href="index.html">Shop &amp; Tools</a></li>
           <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
         </ul>
         <div class="nav-right">
-          <ul class="nav-primary">
-            <li><a href="index.html">Resources</a></li>
-            <li><a href="index.html">About</a></li>
-          </ul>
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
           <ul class="nav-actions">
             <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
             <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
             <li>
               <button class="nav-search-btn" aria-label="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -91,6 +97,7 @@
     <div class="mm-actions">
       <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
       <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
     </div>
 
   </div>
@@ -194,6 +201,18 @@
            it the results freeze. Same reason the compare drawer carries it. -->
       <ul class="dl-results" id="dl-results" data-lenis-prevent></ul>
       <p class="dl-empty" id="dl-empty" hidden>No dealer matches those filters.</p>
+
+      <!-- Pinned to the panel foot, outside the scrolling list, so it is on
+           screen whatever the list is scrolled to. flex:none against the list's
+           flex:1 is what shortens the list — the panel's height is unchanged and
+           the results give up exactly this block's height.
+           The dealer inventory page is still to be built; "#" is the site's
+           convention for that, and dealers.js neutralises the click so it does
+           nothing rather than jumping the page to the top. -->
+      <div class="dl-cta">
+        <p class="dl-cta-text">Know what you want? See what is on the lot near you.</p>
+        <a href="#" class="btn-primary dl-cta-btn">View Inventory</a>
+      </div>
     </section>
   </main>
 
@@ -262,7 +281,7 @@
                  columns, so adding it here adds it in both places. -->
             <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
             <li><a href="compare.html">Compare RVs</a></li>
-            <li><a href="compare.html">All Floorplans</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -281,8 +300,9 @@
             <li><a href="dealers.html">Find a Dealer</a></li>
             <li><a href="build-price.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
-            <li><a href="#">Brochures</a></li>
-            <li><a href="#">Reviews &amp; Testimonials</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
             <li><a href="#">Value Calculator</a></li>
           </ul>
         </div>
@@ -303,7 +323,7 @@
           <h4>Resources</h4>
           <ul>
             <li><a href="#">Blog</a></li>
-            <li><a href="#">Video Gallery</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
             <li><a href="#">eBooks &amp; Guides</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
@@ -355,9 +375,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-4"></script>
+  <script src="js/models-data.js?v=v5-5"></script>
   <script src="js/dealer-data.js?v=v5-dl-12"></script>
-  <script src="js/dealers.js?v=v5-dl-12"></script>
-  <script src="js/app.js?v=v5-core-5"></script>
+  <script src="js/dealers.js?v=v5-dl-13"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>
