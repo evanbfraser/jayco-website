@@ -15,8 +15,6 @@
 
 .compare-page {
   background: var(--canvas);
-  --cmp-drawer-w: min(380px, 88vw);
-  --cmp-bar-top: 68px;          /* the header once it has shrunk on first scroll */
   /* The two images stacked in a card have to share one box height or the cards
      stop lining up. They do not agree on shape: the model renders run 1.62–1.73,
      the floorplans 1.96 and 2.17, and the 17 Class C / Super C drawings 1.47.
@@ -38,10 +36,295 @@
    Several things on this page are toggled with it. */
 .compare-page [hidden] { display: none !important; }
 
+/* The filter sheet locks the page below 1024, where it covers the screen. On
+   desktop it stays a disclosure and this class is never set. */
+body.cmp-sheet-on { overflow: hidden; }
+
+.compare-page { --rail-w: 268px; --rail-gap: 20px; --rail-h-closed: 62px; --cmp-top: 68px; }
+
+/* No reserved left column any more — the panel overlays, so the grid runs full
+   width. What IS reserved is the collapsed bar's band, and that value is a
+   CONSTANT: it does not change when the panel opens, which is what keeps the
+   grid from reflowing mid-animation. */
 .cmp {
-  padding-top: 96px;            /* clears the fixed header */
+  padding-top: calc(var(--cmp-top) + var(--rail-gap) + var(--rail-h-closed) + 1.75rem);
   padding-bottom: 5rem;
 }
+
+/* ---------- The filter, collapsed and open ----------
+   Ported from css/floorplans.css — port, rename, and name the source, the rule
+   the header of this file sets. ONE container, two literal boxes, so every
+   animated property has a real from/to. `right: 20px -> auto` cannot transition;
+   width can.
+
+   The open height also subtracts the selection tray. compare.js measures the
+   tray into --cmp-tray-h because it stacks on a phone and no constant survives
+   that; without the subtraction the panel's last accordion would sit under it.
+   The subtraction belongs to the OPEN rule only — the collapsed bar is 62px and
+   nowhere near the tray. */
+.cmp-rail {
+  position: fixed;
+  left: var(--rail-gap);
+  top: calc(var(--cmp-top) + var(--rail-gap));
+  width: calc(100vw - var(--rail-gap) * 2);
+  height: var(--rail-h-closed);
+  z-index: 30;
+  /* Never toggled. Toggling overflow mid-transition forces a scrollbar in and
+     out and reflows exactly the content this design goes to trouble to keep
+     still. It does not clip box-shadow, painted outside the border box. */
+  overflow: hidden;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 1px 2px rgba(15,11,9,0.04),
+    0 4px 14px rgba(15,11,9,0.05),
+    0 12px 36px rgba(15,11,9,0.07);
+  /* THE AXES DO NOT MOVE TOGETHER, and the lead axis swaps by direction. Two
+     axes in lockstep on one curve read as a rectangle being resized; offset by
+     60ms they read as a box flowing into shape. Expanding, WIDTH leads — the
+     bar gathers to the left, then the panel pours down. Collapsing, HEIGHT
+     leads — the panel pulls up, then spreads back out. Both land at 0.55s.
+
+     A class toggle transitions on the TARGET state's declaration, so this rule
+     is what runs on close and the .is-open rule is what runs on open.
+
+     Width and height in ONE declaration, both directions. The tray used to set
+     `transition: height 0.25s` on its own; left separate it would retarget
+     mid-morph the moment a card was picked — so a pick now re-heights the open
+     rail on the morph's timing, which is the trade for having one behaviour. */
+  transition: height 0.44s var(--ease-morph),
+              width  0.50s var(--ease-morph) 0.05s;
+}
+.cmp-rail.is-open {
+  width: var(--rail-w);
+  height: calc(100vh - var(--cmp-top) - var(--rail-gap) * 2 - var(--cmp-tray-h, 0px));
+  transition: width  0.44s var(--ease-morph),
+              height 0.50s var(--ease-morph) 0.05s;
+}
+
+/* Both layers are absolute, so neither is laid out by the animating box. */
+.cmp-bar,
+.cmp-panel { position: absolute; top: 0; left: 0; }
+
+.cmp-bar {
+  right: 0; height: var(--rail-h-closed);
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0 1rem;
+  /* Left-packed, deliberately. Pushed apart, the right-hand item would travel
+     roughly 1100px during the morph. */
+  justify-content: flex-start;
+}
+
+/* THE constant that makes the morph smooth: the panel is 268px wide in BOTH
+   states. Laid out at the bar's width, its chips would rewrap from six rows to
+   one and back on every open — content thrash, not an opening. It is simply
+   clipped while the container is short and wide. */
+.cmp-panel {
+  width: var(--rail-w);
+  height: calc(100vh - var(--cmp-top) - var(--rail-gap) * 2 - var(--cmp-tray-h, 0px));
+  padding: 1.1rem 1.1rem 1.5rem;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.cmp-rail.is-open .cmp-panel { overflow-y: auto; }
+
+/* Asymmetric cross-fade. `visibility` takes a 0s DURATION plus a delay, never a
+   duration — a discrete visibility transition gets flipped halfway through a
+   fade. */
+.cmp-panel {
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.24s var(--ease-out), visibility 0s linear 0.24s;
+}
+.cmp-rail.is-open .cmp-panel {
+  opacity: 1; visibility: visible;
+  transition: opacity 0.24s var(--ease-out) 0.17s, visibility 0s;
+}
+.cmp-bar {
+  opacity: 1; visibility: visible;
+  transition: opacity 0.24s var(--ease-out) 0.17s, visibility 0s;
+}
+.cmp-rail.is-open .cmp-bar {
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.24s var(--ease-out), visibility 0s linear 0.24s;
+}
+
+/* ---------- The contents settle ----------
+   transform and opacity only, so this is compositor work and adds no layout to
+   a morph that is already doing layout every frame.
+
+   Opening, the rows arrive after the box has room to hold them, one after the
+   next. Closing, they all leave together and fast — the contents drain, THEN
+   the vessel shuts.
+
+   The head takes the base delay with NO stagger of its own on purpose:
+   setPanel() focuses #cmp-clear inside it synchronously, so anything added here
+   is time a keyboard user spends focused on something they cannot see. */
+.cmp-panel-head,
+.cmp-filters .cmp-acc {
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.14s var(--ease-out), transform 0.14s var(--ease-out);
+}
+.cmp-rail.is-open .cmp-panel-head,
+.cmp-rail.is-open .cmp-filters .cmp-acc {
+  opacity: 1; transform: none;
+  transition: opacity   0.24s var(--ease-morph) calc(0.17s + var(--i, 0) * 28ms),
+              transform 0.24s var(--ease-morph) calc(0.17s + var(--i, 0) * 28ms);
+}
+/* The head is --i: 0; the rows count from 1. Seven here, five on floorplans. */
+.cmp-filters .cmp-acc:nth-child(1) { --i: 1; }
+.cmp-filters .cmp-acc:nth-child(2) { --i: 2; }
+.cmp-filters .cmp-acc:nth-child(3) { --i: 3; }
+.cmp-filters .cmp-acc:nth-child(4) { --i: 4; }
+.cmp-filters .cmp-acc:nth-child(5) { --i: 5; }
+.cmp-filters .cmp-acc:nth-child(6) { --i: 6; }
+.cmp-filters .cmp-acc:nth-child(7) { --i: 7; }
+
+.cmp-trigger {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  flex: none;
+  padding: 0.55rem 1.05rem;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white);
+  font-size: 0.84rem; font-weight: 600; color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.cmp-trigger:hover { border-color: var(--blue-light); }
+.cmp-trigger:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* Three stacked bars — the filter glyph this site does not otherwise have. */
+.cmp-trigger-icon {
+  flex: none; position: relative;
+  width: 14px; height: 10px;
+  border-top: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+}
+.cmp-trigger-icon::after {
+  content: ''; position: absolute; left: 0; top: 50%; margin-top: -0.75px;
+  width: 9px; height: 1.5px; background: currentColor;
+}
+.cmp-trigger-n {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-btn);
+  background: var(--blue); color: #fff;
+  font-size: 0.66rem; font-weight: 700; line-height: 18px; text-align: center;
+}
+
+.cmp-panel-head {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding-bottom: 0.85rem; margin-bottom: 0.85rem;
+  border-bottom: 1px solid var(--hairline);
+}
+/* Phone only — the bar has room for it everywhere else. */
+.cmp-panel-count { display: none; }
+.cmp-panel-title { flex: 1 1 auto; font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
+.cmp-panel-x {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: none; background: none; color: var(--text-mid); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.cmp-panel-x:hover { background: var(--surface); color: var(--text-dark); }
+.cmp-panel-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.cmp-count {
+  flex: none; white-space: nowrap;
+  font-size: 0.82rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+}
+.cmp-count:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+.cmp-clear {
+  border: none; background: none; padding: 0; cursor: pointer;
+  flex: 0 0 auto; white-space: nowrap;
+  font-size: 0.78rem; font-weight: 500; color: var(--blue-dark);
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.cmp-clear:hover { border-bottom-color: var(--blue-dark); }
+
+/* The tow-or-drive pair, at body size — a different order of question from the
+   chips inside the accordions. In the bar now, so a row rather than a 2-up
+   grid. */
+.cmp-types { display: flex; gap: 0.4rem; flex: none; }
+.cmp-type-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.cmp-type-btn:hover { border-color: var(--blue-light); }
+.cmp-type-btn[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.cmp-type-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.cmp-type-btn[aria-pressed="true"] .cmp-n { opacity: 0.75; }
+
+/* ---------- Accordions ----------
+   Closed on landing. Seven facets open at once is a wall, and the rail's job on
+   arrival is to show what the axes ARE. A closed one hides its own state, so
+   each summary carries a count of what is live inside it. */
+.cmp-acc { border-top: 1px solid var(--hairline); }
+.cmp-acc-sum {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 0;
+  cursor: pointer; list-style: none;
+  font-size: 0.8rem; font-weight: 600; color: var(--text-dark);
+}
+.cmp-acc-sum::-webkit-details-marker { display: none; }
+.cmp-acc-sum:hover { color: var(--blue-dark); }
+.cmp-acc-sum:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+/* 0 1 auto, not 1 1 auto: at 1 1 the title takes the whole row and crushes the
+   summary text and the x beside it. */
+.cmp-acc-title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* What the row is doing while it is shut. Muted, because the title is the
+   heading and this is its footnote. Same node the old count badge used — both
+   files' patch-never-rebuild contract depends on [data-acc-n] existing. */
+.cmp-acc-n {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-align: right;
+  font-size: 0.72rem; font-weight: 500; color: var(--blue-dark);
+  font-variant-numeric: tabular-nums;
+}
+/* 24x24, not the 18px the old count badge used — WCAG 2.2 asks for 24 on a
+   pointer target, and this one sits between two other hit areas. */
+.cmp-acc-x {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: none; background: none; color: var(--text-mid); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.cmp-acc-x:hover { background: var(--surface); color: var(--text-dark); }
+.cmp-acc-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.cmp-acc-body { padding: 0.15rem 0 1.1rem; }
+
+/* Plus when closed, minus when open — the same two bars the catalog's rail and
+   the FAQ rows use, with the vertical one rotating out rather than hiding, so
+   the two states are one movement. --ease-out, not the FAQ's own curve, which
+   overshoots past 1: DESIGN.md rules bounce out of this system. */
+.cmp-acc-icon {
+  flex: none; position: relative;
+  width: 16px; height: 16px;
+  /* margin-left:auto so the glyph sits on the right edge at EVERY row, not just
+     the ones carrying a summary. When [data-acc-n] is showing it already grows
+     into the slack and this resolves to 0; when it is hidden the title alone
+     would otherwise leave the icon stranded beside the text. */
+  margin-left: auto;
+}
+.cmp-acc-icon::before,
+.cmp-acc-icon::after {
+  content: '';
+  position: absolute; left: 50%; top: 50%;
+  background: var(--text-mid);
+  border-radius: var(--radius-btn);
+  transition: transform 0.25s var(--ease-out), opacity 0.2s;
+}
+.cmp-acc-icon::before { width: 12px; height: 1.5px; margin: -0.75px 0 0 -6px; }
+.cmp-acc-icon::after  { width: 1.5px; height: 12px; margin: -6px 0 0 -0.75px; }
+.cmp-acc[open] > .cmp-acc-sum .cmp-acc-icon::after { transform: rotate(90deg); opacity: 0; }
+.cmp-acc-sum:hover .cmp-acc-icon::before,
+.cmp-acc-sum:hover .cmp-acc-icon::after { background: var(--blue-dark); }
 .cmp-inner {
   max-width: 1600px;
   margin: 0 auto;
@@ -65,72 +348,12 @@
    Off-canvas at every width, so it is modal at every width: backdrop, inert
    background, trapped focus. The panel is fixed to the viewport and lives
    outside .cmp-inner in the markup, or the 1600px container would clip it. */
-.cmp-drawer-backdrop {
-  position: fixed; inset: 0; z-index: 1099;
-  background: rgba(15, 11, 9, 0.45);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.32s var(--ease-out);
-}
-.cmp-drawer-backdrop.is-open { opacity: 1; pointer-events: auto; }
-
-.cmp-drawer {
-  position: fixed; top: 0; left: 0; bottom: 0; z-index: 1100;
-  width: var(--cmp-drawer-w);
-  display: flex; flex-direction: column;
-  background: var(--white);
-  border-right: 1px solid var(--warm-gray);
-  box-shadow: 12px 0 40px rgba(15, 11, 9, 0.14);
-  /* transform + visibility rather than [hidden]: the rule at the top of this
-     file makes [hidden] display:none !important, which cancels the transition. */
-  transform: translateX(-100%);
-  visibility: hidden;
-  overscroll-behavior: contain;
-  transition: transform 0.36s var(--ease-out), visibility 0.36s;
-}
-.cmp-drawer.is-open { transform: none; visibility: visible; }
-
-.cmp-drawer-head {
-  flex: none; display: flex; align-items: center; gap: 0.75rem;
-  padding: 1.15rem 1.25rem;
-  border-bottom: 1px solid var(--warm-gray);
-}
-.cmp-drawer-title {
-  font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;
-  color: var(--text-dark); margin-right: auto;
-}
-.cmp-drawer-x {
-  border: none; background: none; padding: 0.1rem 0.35rem;
-  font-size: 1.6rem; line-height: 1; color: var(--text-mid); cursor: pointer;
-}
-.cmp-drawer-x:hover { color: var(--text-dark); }
-.cmp-drawer-grip { display: none; }
-
-.cmp-drawer-foot {
-  flex: none; display: flex; align-items: center; gap: 0.9rem;
-  padding: 0.9rem 1.25rem calc(0.9rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--warm-gray);
-  background: var(--white);
-}
-.cmp-drawer-reset {
-  border: none; background: none; padding: 0;
-  font-size: 0.84rem; color: var(--text-mid); cursor: pointer;
-}
-.cmp-drawer-reset:hover { color: var(--text-dark); }
-.cmp-drawer-apply { flex: 1; border: none; }
-
-/* Not media-query scoped, unlike style.css's body.menu-open — this panel is
-   modal on a desktop too. Lenis is stopped alongside it in compare.js. */
-body.cmp-drawer-open { overflow: hidden; }
-
-/* ---------- Filters ---------- */
-/* The form is the scrolling body of the drawer. */
-.cmp-filters {
-  flex: 1 1 auto; min-height: 0; overflow-y: auto;
-  display: flex; flex-direction: column;
-  gap: 1.6rem;
-  padding: 1.25rem;
-  scrollbar-width: thin;
-}
+/* Nothing. The form used to be the drawer's scrolling body and kept
+   `overflow-y: auto` + its own 1.25rem padding after the drawer went — a live
+   nested scroller inside the already-scrolling rail, and a gutter on top of the
+   rail's own. Dropping `display: flex` drops the 1.6rem gap with it, which is
+   right: the accordions are separated by their own border-top hairline, exactly
+   as the catalog's are. */
 /* Features carries 17 chips; the sub-heads break them into scannable runs. */
 .cmp-facet-sub {
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
@@ -138,21 +361,6 @@ body.cmp-drawer-open { overflow: hidden; }
   margin: 0.9rem 0 0.45rem;
 }
 .cmp-facet-sub:first-of-type { margin-top: 0; }
-.cmp-facet-head {
-  font-size: 0.72rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 0.7rem;
-}
-.cmp-facet-note {
-  margin-left: 0.4rem;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  font-weight: 500;
-  color: var(--text-mid);
-}
 /* Says out loud why this facet has a hole in it, rather than leaving the
    visitor to conclude the filter is broken. */
 .cmp-facet-hint { margin-top: 0.55rem; font-size: 0.76rem; line-height: 1.5; color: var(--text-mid); }
@@ -162,13 +370,6 @@ body.cmp-drawer-open { overflow: hidden; }
    so it reads as "more below" rather than as a clean cut. Roomier than the
    8.5rem it used inline: tabbing through 27 chips in a narrow panel scrolls
    them into view one at a time, and a taller window makes that less jumpy. */
-.cmp-chips--wrap {
-  max-height: 12rem;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
-}
 
 /* ported from build.css .cat-chip */
 .cat-chip {
@@ -185,6 +386,11 @@ body.cmp-drawer-open { overflow: hidden; }
 .cat-chip--sm { padding: 0.35rem 0.7rem; font-size: 0.76rem; }
 .cat-chip:hover { border-color: var(--blue-light); color: var(--text-dark); }
 .cat-chip.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+/* paintFilters() sets `disabled` on a chip that leads nowhere, but nothing here
+   said so — dead chips looked live and simply refused the click. The catalog's
+   .fpc-chip has dimmed at 0.35 since it was written; matched. */
+.cat-chip[disabled] { opacity: 0.35; cursor: default; }
+.cat-chip[disabled]:hover { border-color: var(--warm-gray); color: var(--text-mid); }
 .cmp-n { opacity: 0.55; font-variant-numeric: tabular-nums; }
 .cat-chip.active .cmp-n { opacity: 0.75; }
 
@@ -220,44 +426,7 @@ body.cmp-drawer-open { overflow: hidden; }
 }
 .cmp-range-track input[type=range]:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
-/* ---------- Results bar ----------
-   Sticky, because it is now the only handle on the filters. Hiding them behind
-   a drawer is only fair if the way back is never scrolled off. */
-.cmp-bar {
-  position: sticky; top: var(--cmp-bar-top); z-index: 5;
-  display: flex; align-items: center; gap: 1rem;
-  margin: 0 0 1.25rem;
-  padding: 0.85rem 0;
-  background: color-mix(in srgb, var(--canvas) 88%, transparent);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-}
-.cmp-filter-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
-  background: var(--white);
-  font-size: 0.84rem; font-weight: 600; color: var(--text-dark);
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.cmp-filter-btn:hover { border-color: var(--blue-light); }
-.cmp-filter-btn[aria-expanded="true"] { border-color: var(--blue); }
-.cmp-filter-n {
-  display: grid; place-items: center;
-  min-width: 20px; height: 20px; padding: 0 5px;
-  border-radius: var(--radius-btn);
-  background: var(--blue); color: #fff;
-  font-size: 0.68rem; font-weight: 700; font-variant-numeric: tabular-nums;
-}
-.cmp-count { margin-left: auto; font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
-.cmp-clear {
-  border: none; background: none; padding: 0;
-  font-size: 0.84rem; color: var(--blue); font-weight: 600; cursor: pointer;
-  border-bottom: 1px solid transparent;
-}
-.cmp-clear:hover { border-bottom-color: var(--blue); }
 .cmp-empty { margin-top: 2rem; color: var(--text-mid); font-size: 0.95rem; }
-
 /* ---------- Result grid ---------- */
 /* Fixed tracks, not auto-fill: at the 1600px container a 330px minimum resolves
    to four columns, and the card now carries two stacked images that need the
@@ -309,6 +478,22 @@ body.cmp-drawer-open { overflow: hidden; }
   display: block; width: 100%; height: 100%;
   object-fit: contain; padding: 0.6rem 1rem;
   filter: drop-shadow(0 6px 14px rgba(10,8,6,0.14));
+}
+/* The exterior render is a representative studio shot of the MODEL, not a
+   photograph of the floorplan on the card — trim, paint and options vary by
+   plan and by build. The note sits in the render's own box, bottom right, so it
+   qualifies that image and not the floorplan drawing beneath it.
+   No opacity on top of --text-mid: at this size the pair would fall under the
+   4.5:1 the text needs against Surface. pointer-events:none because the whole
+   card is the control that picks a plan for comparison. */
+.cmp-media-note {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.5rem;
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: var(--text-mid);
+  pointer-events: none;
 }
 .cmp-media-plan {
   display: block; position: relative;
@@ -468,6 +653,26 @@ body.cmp-drawer-open { overflow: hidden; }
 .cmp-col-plan-box {
   display: block; flex: 1 1 0; min-width: 0; height: 100%;
 }
+/* The note is overlaid on the card, where the render box is ~330px wide and has
+   room to spare. Here that box is a 4.6rem-tall thumbnail sharing the column
+   with the floorplan — roughly 130px, narrower than the sentence itself, so an
+   absolutely-positioned note laid across it ran over the coach and out into the
+   drawing beside it. Under the thumbnail instead, right-aligned to it, still
+   qualifying the exterior and nothing else. */
+.cmp-col-render-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.cmp-col-render-box .cmp-col-render { flex: 1 1 auto; min-height: 0; }
+.cmp-col-render-box .cmp-media-note {
+  position: static;
+  flex: none;
+  margin-top: 0.15rem;
+  text-align: right;
+  font-size: 0.56rem;
+  line-height: 1.25;
+}
 .cmp-col-render,
 .cmp-col-plan { display: block; width: 100%; height: 100%; object-fit: contain; }
 .cmp-col-head { display: block; }
@@ -587,29 +792,114 @@ body.cmp-drawer-open { overflow: hidden; }
      second line and drags the whole header row down with it. */
   .cmp-col-year { display: none; }
 }
-@media (max-width: 768px) {
-  .cmp { padding-top: 90px; }
+/* ---------- Under 1024: the same mechanism, a phone's geometry ----------
+   The panel no longer becomes a static block. It stays the collapsing control it
+   is on desktop — pinned under the header, collapsed on landing — because a wall
+   of shut accordions above the grid is the thing the collapse was built to
+   remove, and that is worse on a phone, not better.
 
-  /* A left panel on a phone is just a narrower page. Re-anchor it to the bottom
-     as a sheet, which is where a thumb already is. */
-  .cmp-drawer {
-    top: auto; left: 0; right: 0; bottom: 0;
-    width: auto; max-height: 86dvh;
-    border-right: none; border-top: 1px solid var(--warm-gray);
-    border-radius: var(--radius-card) var(--radius-card) 0 0;
-    transform: translateY(100%);
-    box-shadow: 0 -12px 40px rgba(15,11,9,0.18);
+   What changes is the SHAPE. There is no room to narrow into a 268px column, so
+   the box keeps the full width in both states and only its HEIGHT moves: a 56px
+   bar opening into a full sheet. One axis, so the desktop's axis-lead has
+   nothing to stagger and is replaced by a single height transition.
+
+   Measured, not guessed: the header is a constant 58px here and 73px below 769,
+   and it never hides on scroll. Inset by the page gutter, not the desktop's
+   20px — on a phone the gutter IS the margin. */
+@media (max-width: 1023px) {
+  .compare-page { --rail-gap: 0.75rem; --rail-h-closed: 56px; --cmp-top: 58px; }
+  .cmp { padding-top: calc(var(--cmp-top) + var(--rail-gap) + var(--rail-h-closed) + 1.25rem); }
+
+  .cmp-rail {
+    left: var(--page-pad);
+    right: var(--page-pad);
+    width: auto;
+    /* Height only. Width is identical in both states down here, so the two-axis
+       flow has nothing to flow between. */
+    transition: height 0.5s var(--ease-morph);
   }
-  .cmp-drawer.is-open { transform: none; }
-  .cmp-drawer-head { padding-top: 1.5rem; }
-  .cmp-drawer-grip {
-    display: block; position: absolute; left: 50%; top: 0.5rem;
-    transform: translateX(-50%);
-    width: 38px; height: 4px; border-radius: 3px; background: var(--warm-gray);
+  .cmp-rail.is-open {
+    width: auto;
+    height: calc(100dvh - var(--cmp-top) - var(--rail-gap) * 2 - var(--cmp-tray-h, 0px));
+    transition: height 0.5s var(--ease-morph);
   }
+
+  /* Full width in both states, so nothing rewraps and the sheet fills the box. */
+  .cmp-panel,
+  .cmp-rail.is-open .cmp-panel {
+    width: 100%;
+    height: calc(100dvh - var(--cmp-top) - var(--rail-gap) * 2 - var(--cmp-tray-h, 0px));
+  }
+
+  /* The x keeps its desktop rule and is load-bearing here: on a touch screen
+     there is no Escape key, the page behind is locked, and the trigger is
+     underneath the sheet — so it is the only way out. */
+
+  /* Shown only here: the bar has no room for it. */
+  .cmp-panel-count {
+    display: block; margin: 0 0 0.85rem;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-mid);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The live region is still in the bar and still announcing — it just has
+     nowhere visible to sit, so it is taken out of the layout rather than out of
+     the accessibility tree. Removing it would silence every filter change. */
+  .cmp-count {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+
+  /* Touch targets: the desktop bar is a pointer target at 30-38px; a finger
+     needs 44 (WCAG 2.5.5), and the 56px bar has the room to give it. */
+  .cmp-trigger,
+  .cmp-type-btn { min-height: 44px; }
+  .cmp-panel-x { width: 44px; height: 44px; margin-right: -0.5rem; }
+  .cmp-clear { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* The grid is deliberately NOT set here. It already steps 3 -> 2 at 1280 and
+     2 -> 1 at 620, and a rule in this block would sit later in the file than
+     both and win at every width below 1024 — which is how the phone lost its
+     single column the first time. */
+}
+
+/* Under 560px the word does not fit beside the type pair: icon-only trigger,
+   which keeps its name from the aria-label paintFilters() writes. */
+@media (max-width: 560px) {
+  .cmp-trigger-label { display: none; }
+  /* Square at 44, so the icon stays centred rather than sitting in a wide pill. */
+  .cmp-trigger { padding: 0; width: 44px; justify-content: center; gap: 0; }
+}
+
+@media (max-width: 768px) {
+  .compare-page { --cmp-top: 73px; }
 
   .cmp-tray-inner { flex-direction: column; align-items: stretch; gap: 0.6rem; padding: 0.6rem var(--page-pad) 0.75rem; }
   .cmp-tray-slots { justify-content: flex-start; }
   .cmp-slot img { width: 44px; height: 24px; }
   .cmp-tray-actions { justify-content: space-between; }
+}
+
+/* ---------- Reduced motion ----------
+   This file had no block at all. .fp-card is the page's biggest offender — it
+   lifts 3px on hover across 181 cards — and the accordion icon and the rail's
+   own height change (which the tray triggers) both move too. */
+@media (prefers-reduced-motion: reduce) {
+  .cmp-acc-icon::before,
+  .cmp-acc-icon::after,
+  .cat-chip, .cmp-acc-x,
+  .cmp-type-btn { transition: none; }
+  /* The box jumps between the two geometries; the geometry change is the
+     information and the interpolation is decoration. The cross-fade goes with
+     it — against an instant box, a 200ms fade reads as lag rather than polish. */
+  .cmp-rail, .cmp-rail.is-open,
+  .cmp-bar, .cmp-panel,
+  .cmp-rail.is-open .cmp-bar,
+  .cmp-rail.is-open .cmp-panel,
+  .cmp-panel-head, .cmp-filters .cmp-acc,
+  .cmp-rail.is-open .cmp-panel-head,
+  .cmp-rail.is-open .cmp-filters .cmp-acc { transition: none; }
+  .fp-card { transition: none; }
+  .fp-card:hover { transform: none; }
 }

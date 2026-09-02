@@ -7,17 +7,19 @@
        retina; browsers that predate SVG icon support fall back to
        nothing rather than a blurry raster, which is the better failure. -->
   <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
-  <title>Compare Floorplans — Jayco (v5)</title>
+  <title>Floorplans — Jayco (v5)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
-  <link rel="stylesheet" href="css/compare.css?v=v5-cmp-31" />
+  <link rel="stylesheet" href="css/floorplans.css?v=v5-fpc-7" />
 </head>
-<!-- data-header="solid": like the builder, this page opens on canvas rather
-     than a dark hero, so the white logo and nav need the bar filled in from the
-     first paint. app.js reads this in initHeader(). -->
-<body class="compare-page" data-header="solid">
+<!-- data-header="solid": like compare and the builder, this page opens on
+     canvas rather than a dark hero, so the white logo and nav need the bar
+     filled in from the first paint. app.js reads this in initHeader(), and its
+     early return there is also what makes the header height constant — which is
+     why floorplans.css can hard-code the sticky offset. -->
+<body class="floorplans-page" data-header="solid">
 
   <!-- ===== LOADER ===== -->
   <div id="loader">
@@ -109,112 +111,181 @@
     </svg>
   </button>
 
-  <!-- ===== COMPARE ===== -->
-  <main class="cmp" id="compare">
+  <!-- ===== FLOORPLAN CATALOG =====
+       The catalog, not the comparison. compare.html answers "which of these
+       three is right"; this page answers "what shapes are there", which is a
+       different question and wants a different structure: the 181 drawings
+       grouped under the 27 models that build them, in Jayco's own category
+       order. The drawing is the card here — no exterior render competes with
+       it — and the filters stay on screen instead of hiding in a drawer,
+       because on a browse surface the axes are half the information.
 
-    <!-- The filter rail — the same component the floorplans catalog carries,
-         ported under cmp- names. Collapsed on landing to a bar: a Filters
-         trigger, the type pair, and the live count. Clicking the trigger morphs
-         the one container into the tall left panel, floating OVER the grid — no
-         column is reserved, so nothing reflows when it opens.
+       Every figure comes from window.JAYCO_BUILD, window.JAYCO and
+       window.JAYCO_FEATURES, the same three files compare.html reads. The two
+       pages must never quote different answers from the same data. -->
+
+  <a class="fpc-skip" href="#fpc-catalog">Skip to the catalog</a>
+
+  <main class="fpc" id="floorplans">
+    <div class="fpc-inner">
+
+      <header class="fpc-head">
+        <span class="section-label">Floorplans</span>
+        <h1 class="fpc-title">Every floorplan, by model.</h1>
+        <p class="fpc-sub" id="fpc-sub"><!-- count injected --></p>
+      </header>
+
+    </div>
+
+    <!-- The filter. One container in two states.
+
+         COLLAPSED (on landing) it is a short bar across the top: the trigger,
+         the tow-or-drive pair, and the live count. OPEN it morphs into the tall
+         left panel and floats OVER the cards — the page reserves no column for
+         it, so the catalog runs full width and nothing reflows when it opens.
+
+         A disclosure, not a modal. No scrim, no scroll lock: the page keeps
+         scrolling and the cards stay clickable, which is what lets the Model By
+         Name list inside the panel do its job without closing first.
 
          Both layers are absolutely positioned and the PANEL keeps a constant
          268px width in both states. That is the whole trick — if it laid out at
-         the collapsed bar's width its chips would rewrap from six rows to one
-         and back on every open. It is simply clipped while short and wide.
+         the collapsed bar's width its 60-odd chips would rewrap from six rows to
+         one and back on every open. It is simply clipped while the container is
+         short and wide.
 
          data-lenis-prevent sits on the PANEL, not the container. A running Lenis
          preventDefault()s wheel and drives the window from deltaY, bailing only
          where it finds this attribute — on a 62px full-width bar that would be a
          dead band pinned across the top of the viewport at every scroll
          position. On the panel it is inert while hidden. -->
-    <aside class="cmp-rail" id="cmp-rail">
+    <aside class="fpc-rail" id="fpc-rail">
 
-      <div class="cmp-bar" id="cmp-bar">
-        <button type="button" class="cmp-trigger" id="cmp-trigger"
-                aria-expanded="false" aria-controls="cmp-panel">
-          <span class="cmp-trigger-icon" aria-hidden="true"></span>
+      <div class="fpc-bar" id="fpc-bar">
+        <button type="button" class="fpc-trigger" id="fpc-trigger"
+                aria-expanded="false" aria-controls="fpc-panel">
+          <span class="fpc-trigger-icon" aria-hidden="true"></span>
           <!-- Wrapped so a phone can drop it: at 390px the bar holds an
                icon-only trigger and the type pair, and not much else. The
                button keeps an accessible name either way — paintChips() sets
                aria-label to "Filters, N active". -->
-          <span class="cmp-trigger-label">Filters</span>
+          <span class="fpc-trigger-label">Filters</span>
           <!-- Required, not decoration: collapsed, this is the only thing saying
-               why the grid is narrowed. -->
-          <span class="cmp-trigger-n" id="cmp-trigger-n" hidden></span>
+               why the catalog is narrowed. -->
+          <span class="fpc-trigger-n" id="fpc-trigger-n" hidden></span>
         </button>
 
-        <!-- The coarsest cut there is, and the one people arrive knowing the
-             answer to: do you tow it or drive it. Held out of the accordions
-             because it is the first question, not one of seven. Counts are
-             filled from the same rows the grid renders, so they cannot drift. -->
-        <div class="cmp-types" role="group" aria-label="Filter by RV type" id="cmp-types">
-          <button type="button" class="cmp-type-btn" data-type="motorized" aria-pressed="false">
-            Motorized <span class="cmp-n" data-n="motorized"></span>
-          </button>
-          <button type="button" class="cmp-type-btn" data-type="towable" aria-pressed="false">
-            Towable <span class="cmp-n" data-n="towable"></span>
-          </button>
-        </div>
+        <div class="fpc-types" role="group" aria-label="Filter by RV type" id="fpc-types"><!-- built by floorplans.js --></div>
 
         <!-- The page's ONE live region, and it lives out here on purpose: a
              visibility:hidden live region does not announce, so inside the panel
              a click on Motorized would narrow 181 to 47 in silence. Left-packed
              so it does not travel during the morph. -->
-        <span class="cmp-count" id="cmp-count" role="status" aria-live="polite" tabindex="-1"></span>
+        <span class="fpc-count" id="fpc-count" role="status" aria-live="polite" tabindex="-1"></span>
       </div>
 
-      <div class="cmp-panel" id="cmp-panel" data-lenis-prevent>
-        <div class="cmp-panel-head">
-          <span class="cmp-panel-title">Filters</span>
-          <button type="button" class="cmp-clear" id="cmp-clear" hidden>Clear all</button>
+      <div class="fpc-panel" id="fpc-panel" data-lenis-prevent>
+        <div class="fpc-panel-head">
+          <span class="fpc-panel-title">Filters</span>
+          <button type="button" class="fpc-clear" id="fpc-clear" hidden>Clear all</button>
           <!-- Escape and re-clicking the trigger are not discoverable, and a
                touch user has neither. -->
-          <button type="button" class="cmp-panel-x" id="cmp-panel-x" aria-label="Close filters">
+          <button type="button" class="fpc-panel-x" id="fpc-panel-x" aria-label="Close filters">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
         </div>
         <!-- The bar has no room for the count on a phone, so it shows here
-             instead. aria-hidden because #cmp-count is still in the bar doing
+             instead. aria-hidden because #fpc-count is still in the bar doing
              the announcing — visible or not, it is the one live region, and a
              second copy would be read out twice. -->
-        <p class="cmp-panel-count" id="cmp-panel-count" aria-hidden="true"></p>
-        <form class="cmp-filters" id="cmp-filters" aria-label="Filter floorplans"><!-- built by compare.js --></form>
+        <p class="fpc-panel-count" id="fpc-panel-count" aria-hidden="true"></p>
+        <form class="fpc-facets" id="fpc-facets" aria-label="Filter floorplans"><!-- built by floorplans.js --></form>
       </div>
 
     </aside>
 
-    <div class="cmp-inner">
+    <!-- Outside .fpc-inner deliberately. The card rails have to reach the right
+         edge of the viewport, and a track inside a max-width frame with a 6vw
+         gutter cannot. The catalog carries its own left gutter and no right one;
+         the heads and the arrow rows put the gutter back for themselves. -->
+    <div class="fpc-catalog" id="fpc-catalog" tabindex="-1"><!-- 27 model sections injected --></div>
 
-      <header class="cmp-head">
-        <span class="section-label">Compare</span>
-        <h1 class="cmp-title">Every floorplan, side by side.</h1>
-        <p class="cmp-sub" id="cmp-sub"><!-- count injected --></p>
-      </header>
-
-      <div class="cmp-grid" id="cmp-grid"><!-- cards injected --></div>
-      <p class="cmp-empty" id="cmp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>
-
-      <!-- The comparison itself. Hidden until three are chosen; not a modal, so
-           a dense spec table gets the full page width. -->
-      <section class="cmp-table-wrap" id="cmp-view" hidden aria-label="Floorplan comparison"></section>
-
+    <div class="fpc-inner">
+      <p class="fpc-empty" id="fpc-empty" hidden>No floorplan matches every filter — clear one to see more.</p>
     </div>
   </main>
 
-  <!-- Sticky tray. Fixed to the bottom like the builder's price bar, and it has
-       to lift the chat button the same way — both are fixed at z-index 900 and
-       the tray would otherwise paint over it. -->
-  <div class="cmp-tray" id="cmp-tray" hidden>
-    <div class="cmp-tray-inner">
-      <ul class="cmp-tray-slots" id="cmp-tray-slots"></ul>
-      <div class="cmp-tray-actions">
-        <span class="cmp-tray-count" id="cmp-tray-count"></span>
-        <button type="button" class="cmp-tray-clear" id="cmp-tray-clear">Clear</button>
-        <button type="button" class="btn-primary cmp-tray-go" id="cmp-tray-go">Compare</button>
+  <!-- Floorplan detail. A sibling of <main> so the 1600px container cannot
+       constrain it, built once and patched per plan — a modal rebuilt on every
+       open leaks one per visit (see build.js). Closed state is the `hidden`
+       attribute, not a transitioned visibility: Chrome flips a discrete
+       visibility transition halfway through a fade, and focus() inside a hidden
+       subtree is a silent no-op. -->
+  <div class="fpc-overlay fpc-modal" id="fpc-modal" hidden role="dialog" aria-modal="true"
+       aria-labelledby="fpc-modal-title">
+    <div class="fpc-scrim" data-close="1"></div>
+    <div class="fpc-modal-panel">
+      <button type="button" class="fpc-modal-x" id="fpc-modal-x" aria-label="Close floorplan">&times;</button>
+
+      <div class="fpc-modal-media">
+        <img id="fpc-modal-img" alt="" />
+      </div>
+
+      <div class="fpc-modal-side">
+        <div class="fpc-modal-top">
+          <span class="fpc-modal-eyebrow" id="fpc-modal-model"></span>
+          <h2 class="fpc-modal-title" id="fpc-modal-title"></h2>
+          <p class="fpc-modal-meta" id="fpc-modal-meta"></p>
+          <p class="fpc-modal-price" id="fpc-modal-price"></p>
+          <div class="fpc-modal-flags" id="fpc-modal-flags"></div>
+        </div>
+
+        <!-- Only the spec sheet scrolls, so the actions below can never be
+             pushed under the fold. Lenis is stopped while the modal is open and
+             a stopped Lenis preventDefault()s every wheel event, so this pane
+             needs the same escape hatch the filter rail does. -->
+        <div class="fpc-modal-scroll" data-lenis-prevent>
+          <div class="fpc-modal-specs" id="fpc-modal-specs"></div>
+        </div>
+
+        <div class="fpc-modal-foot">
+        <div class="fpc-modal-actions">
+          <!-- Both tour elements live in the DOM and toggle `hidden`. An <a>
+               cannot be patched into a disabled <button>, and a link with no
+               href is not a control any assistive technology can describe —
+               the rule build.js states and the model page follows. -->
+          <a class="btn-secondary-light fpc-modal-tour" id="fpc-modal-tour"
+             target="_blank" rel="noopener noreferrer" hidden>View 3D Tour</a>
+          <button type="button" class="btn-secondary-light fpc-modal-tour" id="fpc-modal-tour-off"
+                  disabled aria-disabled="true" hidden>View 3D Tour</button>
+          <a class="btn-primary" id="fpc-modal-build">Build This Floorplan</a>
+        </div>
+
+        <!-- The handoff. compare.js reads ?c= at boot, so this lands with the
+             plan already picked — browse here, compare there. -->
+        <a class="fpc-modal-compare" id="fpc-modal-compare">Compare this floorplan &rarr;</a>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- The enlarged drawing. A floorplan at card width is a smear — the printed
+       dimensions on it are the reason to look at a floorplan at all, and they
+       are unreadable at 300px. Distinct from View Details, which is the plan's
+       figures and actions; this is the drawing and nothing else. Same component
+       the builder, the model page and the quiz result ship. -->
+  <div class="fpc-overlay fpc-zoom-overlay" id="fpc-zoom" hidden role="dialog"
+       aria-modal="true" aria-label="Floorplan, enlarged">
+    <div class="fpc-scrim" data-close="1"></div>
+    <button type="button" class="fpc-zoom-x" id="fpc-zoom-x" aria-label="Close the enlarged floorplan">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <figure class="fpc-zoom-inner">
+      <img class="fpc-zoom-img" id="fpc-zoom-img" alt="" />
+      <figcaption class="fpc-zoom-cap" id="fpc-zoom-cap"></figcaption>
+    </figure>
   </div>
 
   <footer class="site-footer">
@@ -365,7 +436,9 @@
   <!-- ===== SCRIPTS =====
        No leaflet: initDealerMap() returns early without #dealer-map.
        ScrollTrigger IS required — app.js registers it unconditionally.
-       compare.js before app.js so the grid exists before app.js binds. -->
+       floorplans.js before app.js so the catalog exists before app.js binds.
+       The three data files keep the tokens of the pages that own them; bumping
+       them here would refetch them on every other page. -->
   <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
@@ -373,7 +446,7 @@
   <script src="js/models-data.js?v=v5-5"></script>
   <script src="js/build-data.js?v=v5-bp-19"></script>
   <script src="js/floorplan-features.js?v=v5-cmp-24"></script>
-  <script src="js/compare.js?v=v5-cmp-31"></script>
+  <script src="js/floorplans.js?v=v5-fpc-7"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

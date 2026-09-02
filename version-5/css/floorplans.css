@@ -1,0 +1,979 @@
+/* ===================================================
+   Jayco — Floorplans (floorplans.html)
+   ---------------------------------------------------
+   This page loads style.css and this file, NOT compare.css or build.css.
+   Chip, range and badge chrome is ported here under fpc- names rather than
+   reused across stylesheets: the house rule compare.css sets is port, rename,
+   and name the source, so a reader who greps a class finds one owner. Each
+   ported block below names where it came from.
+
+   The page is a catalog, not a results grid. Its structure is
+   canvas → hairline-divided model sections → white drawing wells, which is
+   deliberately not compare's Surface cards with shadows: the two pages should
+   not read as the same tool.
+   =================================================== */
+
+.floorplans-page {
+  background: var(--canvas);
+  padding-top: 68px;
+  /* The sticky offset is a constant here, and safe as one: data-header="solid"
+     makes app.js set .scrolled at boot and return early, so the header never
+     re-shrinks and its height cannot move under the rail. */
+  --fpc-top: 68px;
+}
+
+/* Sections carry an author `display`, which beats the UA [hidden] rule — so
+   filtering would hide nothing without this. compare.css:39, same reason. */
+.floorplans-page [hidden] { display: none !important; }
+/* Buttons do not inherit the page font on their own. */
+.floorplans-page button { font-family: inherit; }
+
+.floorplans-page { --rail-w: 268px; --rail-gap: 20px; --rail-h-closed: 62px;
+  /* The row's label column. */ --fpc-lead: clamp(200px, 17vw, 250px); }
+
+/* The rail is a pinned container held 20px off the viewport's left edge, and it
+   is fixed rather than sticky — so the page reserves its column with padding
+   rather than a grid track, because a fixed element is out of flow and a grid
+   column would collapse under it. The reservation is the rail plus BOTH gaps:
+   20px to the viewport on its left, 20px to the catalog on its right. */
+.fpc {
+  /* No reserved left column any more — the panel overlays, so the catalog
+     runs full width. What IS reserved is the collapsed bar's band, and that
+     value is a CONSTANT: it does not change when the panel opens, which is
+     what keeps the grid from reflowing mid-animation and lets ScrollTrigger
+     measure the page once. */
+  padding: calc(var(--rail-gap) + var(--rail-h-closed) + clamp(1.5rem, 3vw, 2.5rem))
+           0 var(--space-xl);
+}
+.fpc-inner { max-width: 1600px; margin: 0 auto; padding: 0 var(--page-pad); }
+
+/* The skip link is the keyboard answer to ~300 tab stops. */
+.fpc-skip {
+  position: absolute; left: -9999px; top: 0; z-index: 1200;
+  padding: 0.75rem 1.25rem; border-radius: 0 0 var(--radius-card) 0;
+  background: var(--blue); color: #fff; font-size: 0.85rem; font-weight: 600;
+}
+.fpc-skip:focus { left: 0; }
+
+/* ---------- Page head ---------- */
+.fpc-head { max-width: var(--measure-wide); margin-bottom: clamp(2rem, 3.5vw, 3rem); }
+.fpc-title {
+  font-size: clamp(2.4rem, 3.8vw, 3.8rem);
+  font-weight: 800; line-height: 0.98; letter-spacing: -0.01em;
+  color: var(--text-dark); margin: 0.5rem 0 0.75rem;
+}
+.fpc-sub {
+  max-width: var(--measure); margin: 0;
+  font-size: clamp(0.92rem, 1.1vw, 1.05rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- The filter, collapsed and open ----------
+   ONE container, two literal boxes, so every animated property has a real
+   from/to. `right: 20px -> auto` cannot transition; width can. */
+.fpc-rail {
+  position: fixed;
+  left: var(--rail-gap);
+  top: calc(var(--fpc-top) + var(--rail-gap));
+  width: calc(100vw - var(--rail-gap) * 2);
+  height: var(--rail-h-closed);
+  z-index: 30;
+  /* Never toggled. Toggling overflow mid-transition forces a scrollbar in and
+     out and reflows exactly the content this design goes to trouble to keep
+     still. It does not clip box-shadow, painted outside the border box. */
+  overflow: hidden;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 1px 2px rgba(15,11,9,0.04),
+    0 4px 14px rgba(15,11,9,0.05),
+    0 12px 36px rgba(15,11,9,0.07);
+  /* THE AXES DO NOT MOVE TOGETHER, and the lead axis swaps by direction. Two
+     axes in lockstep on one curve read as a rectangle being resized; offset by
+     60ms they read as a box flowing into shape. Expanding, WIDTH leads — the
+     bar gathers to the left, then the panel pours down (height first would
+     flash a large square). Collapsing, HEIGHT leads — the panel pulls up, then
+     spreads back out. Both directions still land together, at 0.55s.
+
+     A class toggle transitions on the TARGET state's declaration, so the two
+     directions get their own timing with no JS: the rule below is what runs on
+     close, the .is-open rule is what runs on open.
+
+     Still width and height ONLY. border-radius is fixed at 20px by DESIGN.md's
+     radius rule, and box-shadow — three stacked shadows with a 36px blur over a
+     1400px box — is the largest paint in the morph and must not be animated. */
+  transition: height 0.44s var(--ease-morph),
+              width  0.50s var(--ease-morph) 0.05s;
+}
+.fpc-rail.is-open {
+  width: var(--rail-w);
+  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2);
+  transition: width  0.44s var(--ease-morph),
+              height 0.50s var(--ease-morph) 0.05s;
+}
+
+/* Both layers are absolute, so neither is laid out by the animating box. */
+.fpc-bar,
+.fpc-panel { position: absolute; top: 0; left: 0; }
+
+.fpc-bar {
+  right: 0; height: var(--rail-h-closed);
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0 1rem;
+  /* Left-packed, deliberately. Pushed apart, the right-hand item would travel
+     roughly 1100px during the morph. */
+  justify-content: flex-start;
+}
+
+/* THE constant that makes the morph smooth: the panel is 268px wide in BOTH
+   states. Laid out at the bar's width, its sixty-odd chips would rewrap from six
+   rows to one and back on every open — content thrash, not an opening. It is
+   simply clipped while the container is short and wide. */
+.fpc-panel {
+  width: var(--rail-w);
+  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2);
+  padding: 1.1rem 1.1rem 1.5rem;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.fpc-rail.is-open .fpc-panel { overflow-y: auto; }
+
+/* Asymmetric cross-fade. `visibility` takes a 0s DURATION plus a delay, never a
+   duration — a discrete visibility transition gets flipped halfway through a
+   fade, the hazard the modal code in this file already documents. */
+.fpc-panel {
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.24s var(--ease-out), visibility 0s linear 0.24s;
+}
+.fpc-rail.is-open .fpc-panel {
+  opacity: 1; visibility: visible;
+  transition: opacity 0.24s var(--ease-out) 0.17s, visibility 0s;
+}
+.fpc-bar {
+  opacity: 1; visibility: visible;
+  transition: opacity 0.24s var(--ease-out) 0.17s, visibility 0s;
+}
+.fpc-rail.is-open .fpc-bar {
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.24s var(--ease-out), visibility 0s linear 0.24s;
+}
+
+/* ---------- The contents settle ----------
+   transform and opacity only, so this is compositor work and adds no layout to
+   a morph that is already doing layout every frame.
+
+   Opening, the rows arrive after the box has room to hold them, one after the
+   next. Closing, they all leave together and fast — the contents drain, THEN
+   the vessel shuts. Same target-state trick as the box above: this rule is the
+   close, the .is-open rule is the open.
+
+   The head takes the base delay with NO stagger of its own on purpose:
+   setPanel() focuses #fpc-clear inside it synchronously, so anything added here
+   is time a keyboard user spends focused on something they cannot see. */
+.fpc-panel-head,
+.fpc-facets .fpc-acc {
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.14s var(--ease-out), transform 0.14s var(--ease-out);
+}
+.fpc-rail.is-open .fpc-panel-head,
+.fpc-rail.is-open .fpc-facets .fpc-acc {
+  opacity: 1; transform: none;
+  transition: opacity   0.24s var(--ease-morph) calc(0.17s + var(--i, 0) * 28ms),
+              transform 0.24s var(--ease-morph) calc(0.17s + var(--i, 0) * 28ms);
+}
+/* The head is --i: 0; the rows count from 1. Five here, seven on compare — the
+   list runs to 7 so one file's rule covers both shapes. */
+.fpc-facets .fpc-acc:nth-child(1) { --i: 1; }
+.fpc-facets .fpc-acc:nth-child(2) { --i: 2; }
+.fpc-facets .fpc-acc:nth-child(3) { --i: 3; }
+.fpc-facets .fpc-acc:nth-child(4) { --i: 4; }
+.fpc-facets .fpc-acc:nth-child(5) { --i: 5; }
+.fpc-facets .fpc-acc:nth-child(6) { --i: 6; }
+.fpc-facets .fpc-acc:nth-child(7) { --i: 7; }
+
+.fpc-trigger {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  flex: none;
+  padding: 0.55rem 1.05rem;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white);
+  font-size: 0.84rem; font-weight: 600; color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.fpc-trigger:hover { border-color: var(--blue-light); }
+.fpc-trigger:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* Three stacked bars — the filter glyph this site does not otherwise have. */
+.fpc-trigger-icon {
+  flex: none; position: relative;
+  width: 14px; height: 10px;
+  border-top: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+}
+.fpc-trigger-icon::after {
+  content: ''; position: absolute; left: 0; top: 50%; margin-top: -0.75px;
+  width: 9px; height: 1.5px; background: currentColor;
+}
+.fpc-trigger-n {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-btn);
+  background: var(--blue); color: #fff;
+  font-size: 0.66rem; font-weight: 700; line-height: 18px; text-align: center;
+}
+
+.fpc-panel-head {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding-bottom: 0.85rem; margin-bottom: 0.85rem;
+  border-bottom: 1px solid var(--hairline);
+}
+/* Phone only — the bar has room for it everywhere else. */
+.fpc-panel-count { display: none; }
+.fpc-panel-title { flex: 1 1 auto; font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
+.fpc-panel-x {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: none; background: none; color: var(--text-mid); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.fpc-panel-x:hover { background: var(--surface); color: var(--text-dark); }
+.fpc-panel-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.fpc-count {
+  flex: none; white-space: nowrap;
+  font-size: 0.82rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+}
+.fpc-count:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+.fpc-clear {
+  border: none; background: none; padding: 0; cursor: pointer;
+  flex: 0 0 auto; white-space: nowrap;
+  font-size: 0.78rem; font-weight: 500; color: var(--blue-dark);
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.fpc-clear:hover { border-bottom-color: var(--blue-dark); }
+
+/* ---------- Facets ---------- */
+.fpc-facet { margin-bottom: 1.25rem; }
+
+/* ---------- Accordions ----------
+   Closed on landing. The summary is a full-width row with a hairline above it,
+   not a card — 27 sections of catalog already carry the page's containers, and
+   five nested boxes down the rail would be a box inside a box inside a box. */
+.fpc-acc { border-top: 1px solid var(--hairline); }
+.fpc-acc-sum {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 0;
+  cursor: pointer; list-style: none;
+  font-size: 0.8rem; font-weight: 600; color: var(--text-dark);
+}
+.fpc-acc-sum::-webkit-details-marker { display: none; }
+.fpc-acc-sum:hover { color: var(--blue-dark); }
+.fpc-acc-sum:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+/* 0 1 auto, not 1 1 auto: at `1 1` the title takes the whole row and crushes the
+   summary beside it to nothing. The two share the shrink instead. */
+.fpc-acc-title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* What the row is doing while it is shut. Muted, because the title is the
+   heading and this is its footnote. */
+.fpc-acc-val {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-align: right;
+  font-size: 0.72rem; font-weight: 500; color: var(--blue-dark);
+  font-variant-numeric: tabular-nums;
+}
+/* 24x24, not the 18px the old count badge used — WCAG 2.2 asks for 24 on a
+   pointer target, and this one sits between two other hit areas. The glyph
+   inside is optically smaller. */
+.fpc-acc-x {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: none; background: none; color: var(--text-mid); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.fpc-acc-x:hover { background: var(--surface); color: var(--text-dark); }
+.fpc-acc-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+/* A closed accordion hides its own state, so the count is the only thing saying
+   a filter is live in there. */
+/* Plus when closed, minus when open. Ported from style.css's .faq-icon, which
+   is the plus/minus this site already uses on the FAQ rows — two bars, and the
+   vertical one rotates out of the way rather than simply hiding, so the two
+   states are one movement instead of a swap.
+
+   One thing NOT ported: the FAQ's own easing curve, which overshoots past 1.
+   DESIGN.md says bounce and elastic curves are not part of this system, so this
+   uses --ease-out — the same curve the chevron it replaces was already on. */
+.fpc-acc-icon {
+  flex: none; position: relative;
+  width: 16px; height: 16px;
+  /* margin-left:auto so the glyph sits on the right edge at EVERY row, not just
+     the ones carrying a summary. When [data-acc-n] is showing it already grows
+     into the slack and this resolves to 0; when it is hidden the title alone
+     would otherwise leave the icon stranded beside the text. */
+  margin-left: auto;
+}
+.fpc-acc-icon::before,
+.fpc-acc-icon::after {
+  content: '';
+  position: absolute; left: 50%; top: 50%;
+  background: var(--text-mid);
+  /* The pill token, not a 2px literal: at 1.5px thick every radius at or above
+     0.75px clamps to the same rounded cap, so this renders identically and
+     stays on the documented scale. */
+  border-radius: var(--radius-btn);
+  transition: transform 0.25s var(--ease-out), opacity 0.2s;
+}
+/* Translated off their own half-size rather than centred with a flex parent, so
+   the rotation below turns about the middle of the bar and not a corner. */
+.fpc-acc-icon::before { width: 12px; height: 1.5px; margin: -0.75px 0 0 -6px; }
+.fpc-acc-icon::after  { width: 1.5px; height: 12px; margin: -6px 0 0 -0.75px; }
+.fpc-acc[open] > .fpc-acc-sum .fpc-acc-icon::after { transform: rotate(90deg); opacity: 0; }
+.fpc-acc-sum:hover .fpc-acc-icon::before,
+.fpc-acc-sum:hover .fpc-acc-icon::after { background: var(--blue-dark); }
+.fpc-acc-body { padding: 0.15rem 0 1.1rem; }
+/* --blue-dark, not --blue. The rail's ground moved from canvas to Surface when
+   it became a container, and Jayco blue measures 4.48:1 on canvas but only 3.61
+   on Surface — under the 4.5 this 0.68rem eyebrow needs. The deep step is the
+   same accent and clears it. */
+.fpc-facet-head {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--blue-dark); margin: 0 0 0.7rem;
+}
+.fpc-facet-sub {
+  font-size: 0.72rem; font-weight: 600; color: var(--text-mid);
+  margin: 0.85rem 0 0.5rem;
+}
+.fpc-facet-sub:first-of-type { margin-top: 0; }
+.fpc-facet-hint {
+  margin: 0.7rem 0 0; font-size: 0.72rem; line-height: 1.5; color: var(--text-mid);
+}
+.fpc-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+/* ported from compare.css .cat-chip — same geometry, so the two pages'
+   controls are recognisably one system */
+.fpc-chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-mid);
+  font-size: 0.76rem; font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, opacity 0.2s;
+}
+.fpc-chip:hover:not([disabled]) { border-color: var(--blue-light); color: var(--text-dark); }
+.fpc-chip.is-on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.fpc-chip:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* Dimmed rather than removed: compare drops a dead chip from the DOM, which on
+   a permanent rail would pull a control out from under the cursor mid-click. */
+.fpc-chip[disabled] { opacity: 0.35; cursor: default; }
+.fpc-n { opacity: 0.55; font-variant-numeric: tabular-nums; }
+.fpc-chip.is-on .fpc-n { opacity: 0.75; }
+
+/* The type pair. A pill like every other action on this site, but two-up and
+   at body size rather than chip size — it is the first question, not one of
+   seventeen. */
+/* In the bar now, so a row rather than a 2-up grid. */
+.fpc-types { display: flex; gap: 0.4rem; flex: none; }
+.fpc-type-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, opacity 0.2s;
+}
+.fpc-type-btn:hover:not([disabled]) { border-color: var(--blue-light); }
+.fpc-type-btn.is-on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.fpc-type-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.fpc-type-btn[disabled] { opacity: 0.35; cursor: default; }
+.fpc-type-btn.is-on .fpc-n { opacity: 0.75; }
+
+/* ported from compare.css .cmp-range — two thumbs on one track, pointer-events
+   handed to the thumbs only so whichever is grabbed wins */
+.fpc-range-vals {
+  display: flex; justify-content: space-between;
+  font-size: 0.8rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums; margin-bottom: 0.5rem;
+}
+.fpc-range-track { position: relative; height: 26px; }
+.fpc-range-track::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 4px;
+  background: var(--warm-gray); border-radius: 3px;
+}
+.fpc-range-track input[type=range] {
+  position: absolute; left: 0; top: 0; width: 100%; height: 26px;
+  margin: 0; background: none; -webkit-appearance: none; appearance: none;
+  pointer-events: none;
+}
+.fpc-range-track input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(15,11,9,0.3); cursor: pointer;
+}
+.fpc-range-track input[type=range]::-moz-range-thumb {
+  pointer-events: auto; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 2px solid #fff; cursor: pointer;
+}
+.fpc-range-track input[type=range]:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Jump index ---------- */
+.fpc-jump-cat {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-mid); margin: 1.1rem 0 0.4rem;
+}
+.fpc-jump-cat:first-of-type { margin-top: 0; }
+.fpc-jump-list { list-style: none; margin: 0; padding: 0; }
+.fpc-jump-link {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+  padding: 0.3rem 0.5rem; border-radius: 8px;
+  font-size: 0.82rem; color: var(--text-dark); text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.2s;
+}
+.fpc-jump-link:hover { background: var(--surface-hover); }
+/* --blue-dark, not --blue: this is active navigation, which is one of blue's
+   sanctioned jobs, but at 13px --blue on canvas measures 4.48:1. The deep step
+   is the same accent and clears AA. */
+.fpc-jump-link.is-current { border-left-color: var(--blue); color: var(--blue-dark); font-weight: 600; }
+.fpc-jump-link.is-empty { opacity: 0.3; pointer-events: none; }
+.fpc-jump-n { font-size: 0.72rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+
+/* ---------- Catalog ----------
+   Its own left gutter and NO right one: that missing right gutter is what lets
+   the card tracks below run off the edge of the viewport. The section heads and
+   the arrow rows put the gutter back for themselves. */
+.fpc-catalog { padding-left: var(--page-pad); }
+.fpc-catalog:focus { outline: none; }
+
+/* A hairline between sections, not a card around each one. Depth on this site
+   is tonal; a rule is what separates rows where a container would be too much,
+   and 27 nested cards would be exactly that. */
+/* The divider stops at the gutter even though the track beside it does not: a
+   hairline running off the edge of the screen reads as a clipped box, where a
+   photograph or a card rail running off reads as continuing. */
+.fpc-model { padding: clamp(2.5rem, 4vw, 3.5rem) 0; }
+.fpc-model::before {
+  content: ''; display: block;
+  margin: 0 var(--page-pad) clamp(2.5rem, 4vw, 3.5rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.fpc-model:first-child { padding-top: 0; }
+.fpc-model:first-child::before { display: none; }
+.fpc-model { scroll-margin-top: calc(var(--fpc-top) + 24px); }
+
+/* Two cells: the model on the left, its floorplans to the right. The head is
+   OUTSIDE the scroller, so the name stays put while the rail pages — which is
+   the whole reason it is a cell of the row rather than a band above it.
+   start, not center: a row label belongs at the top of what it labels, and the
+   rail runs 400px taller than the head on a wide screen. */
+.fpc-model-row {
+  display: grid;
+  grid-template-columns: var(--fpc-lead) minmax(0, 1fr);
+  gap: clamp(1.25rem, 2vw, 2rem);
+  align-items: start;
+}
+/* A stack now, not the three-across band it was — it has 250px, not 1350. */
+.fpc-model-head { display: block; }
+/* btn-secondary-light, not btn-secondary: the "-light" in that class names the
+   GROUND it sits on, not its own colour. .btn-secondary is the white-on-dark
+   variant for photography and dark bands; on canvas it paints white text on a
+   white border and disappears. */
+/* Cut-out renders on transparency get no radius and no shadow — there is no
+   box to round. DESIGN.md > Shapes. */
+/* Fills the cell rather than sitting at a fixed 150px: the render is the row's
+   picture now, and the width/height attributes carry the aspect so nothing
+   jumps in while it loads. */
+.fpc-model-render {
+  width: 100%; height: auto; display: block;
+  margin-bottom: 0.85rem;
+}
+.fpc-model-cat {
+  display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--blue); margin-bottom: 0.3rem;
+}
+/* Title, flat — DESIGN.md's ramp step for a card or sub-section head, which is
+   exactly what a row label is. Down from the clamp(1.6rem, 2.1vw, 2rem) it ran
+   at across a full-width band, whose 2rem ceiling takes three lines of a 250px
+   cell; the band keeps that size below 1024, where it still has the width. */
+.fpc-model-name {
+  font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-dark); margin: 0 0 0.3rem;
+}
+.fpc-model-meta { margin: 0; font-size: 0.85rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+/* Stacked and full-width in the cell. Nothing fits side by side in 250px once
+   the Explore label carries the model name. */
+.fpc-model-ctas {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 0.5rem; margin-top: 1rem;
+}
+/* Trimmed from the hero geometry style.css gives these (0.82rem / 2.2rem).
+   Section-head chrome, not a page CTA — and the Explore label carries the model
+   name, which runs to "Explore Seismic Travel Trailer Toy Hauler". At hero
+   padding that pair takes 530px of the head and squeezes the name onto two
+   lines. */
+.fpc-model-ctas .btn-primary,
+.fpc-model-ctas .btn-secondary-light {
+  /* wraps, unlike the band version: "Explore Seismic Travel Trailer Toy Hauler"
+     cannot hold one line at this width, and nowrap here would burst the cell */
+  white-space: normal;
+  text-align: center; line-height: 1.25;
+  font-size: 0.78rem;
+  padding: 0.72rem 1rem;
+}
+
+/* ---------- The card rail ----------
+   Geometry ported from type.css .tp-feat-rail. The difference: those tracks
+   are full-bleed children of <main> and run off the right edge of the VIEWPORT,
+   which cannot work inside a two-column grid. Here the track is contained by
+   the catalog column above 1024, and only bleeds once the filter rail unsticks.
+   Named .fpc-cardrail, not .fpc-rail: the filter aside already owns that name
+   and one selector for two components is how a stylesheet starts lying. */
+/* The track already reaches the viewport's right edge — .fpc-catalog carries a
+   left gutter and no right one — so no negative margin is needed, and one here
+   would push it past the edge into a horizontal scrollbar. The trailing padding
+   is scroll room past the last card, not a gutter: it is inside the scroller,
+   so it travels with the content instead of holding the last card off the edge. */
+.fpc-cards {
+  padding-right: var(--page-pad);
+  --fgap: clamp(0.75rem, 1.2vw, 1.15rem);
+  /* Clamped, not a fixed divisor per breakpoint: 2.6 cards of the catalog
+     column is right at 1440 but only 226px at 1024, below which a drawing with
+     its dimensions printed on it stops being readable. The floor sets the card
+     and lets the count fall to ~2.2 instead, so the width moves smoothly across
+     the range rather than jumping at a breakpoint. */
+  --fcard: clamp(260px, calc((100% - var(--fgap) * 2) / 2.6), 400px);
+  display: flex; gap: var(--fgap);
+  list-style: none; margin: 0; padding: 6px 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline-start: 0;
+  scrollbar-width: none;
+}
+.fpc-cards::-webkit-scrollbar { display: none; }
+/* A column, so View Details lands on the same line across a rail of cards
+   whose spec lines and badge rows are different heights. */
+.fpc-card {
+  flex: 0 0 var(--fcard); scroll-snap-align: start;
+  display: flex; flex-direction: column; align-items: stretch;
+}
+
+/* Flat white, not --surface. DESIGN.md assigns Surface to media wells, but
+   compare.css already carries this exception with its reason: line art needs a
+   flat bed, not a tone that fights the drawing's own white. */
+.fpc-well {
+  position: relative;
+  display: block; background: #fff;
+  border: 1px solid var(--hairline); border-radius: var(--radius-card);
+  aspect-ratio: 4 / 3; overflow: hidden;
+  margin-bottom: 0.6rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.fpc-card:hover .fpc-well {
+  border-color: rgba(0,122,194,0.4);
+  box-shadow: 0 4px 24px rgba(15,11,9,0.14);
+}
+.fpc-drawing { width: 100%; height: 100%; object-fit: contain; display: block; padding: 0.6rem; }
+
+/* ---------- Card tools ----------
+   Ported from build.css .fp-card-tools / .fp-tour / .fp-zoom. Ink on light, not
+   the model page's glass — the drawing sits on a white bed here. Always visible
+   rather than on hover: there is no hover on a touch screen, and a control half
+   the visitors cannot find is not a control. */
+.fpc-card-tools {
+  position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.fpc-tour,
+.fpc-zoom {
+  height: 30px; flex: none;
+  /* a pill radius, not 50%: the tour carries a label and is no longer square,
+     and 50% of an oblong is an ellipse. At 30px this still draws the zoom as
+     the circle it was. */
+  border-radius: 999px;
+  border: 1px solid var(--warm-gray);
+  background: rgba(255,255,255,0.94);
+  color: var(--text-dark);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
+.fpc-zoom { width: 30px; }
+.fpc-tour:not([disabled]):hover,
+.fpc-zoom:hover { background: #fff; transform: scale(1.06); }
+.fpc-tour:focus-visible,
+.fpc-zoom:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+/* Blue is what says this one leaves the page — the site's colour for a link,
+   against the zoom's ink for a control that stays. */
+.fpc-tour {
+  width: auto; gap: 0.35rem;
+  padding: 0 0.65rem 0 0.5rem;
+  color: var(--blue);
+  text-decoration: none;
+}
+.fpc-tour svg { fill: currentColor; flex: none; }
+.fpc-tour-label {
+  font-size: 0.62rem; letter-spacing: 0.06em; font-weight: 700;
+  line-height: 1; white-space: nowrap;
+}
+/* NO dimming on the disabled half, deliberately — the same call the builder's
+   .fp-tour already ships. 166 of the 181 floorplans have no scan yet, so a
+   dimmed control would be the state most of this page is in, and a rail of
+   greyed buttons reads as a page that is broken rather than a library that is
+   still being filled.
+
+   The control is still genuinely disabled, so it cannot be clicked and assistive
+   technology announces it as unavailable — and its aria-label says which
+   floorplan has no tour rather than leaving anyone to infer it. What it loses is
+   the sighted at-a-glance cue, which is the trade being made on purpose. The
+   hover rule above is scoped :not([disabled]), so it still does not lift or
+   brighten under the pointer: the one signal kept.
+
+   No cursor rule: style.css:7 sets `cursor: none !important` on everything, so
+   any cursor declared here would be dead the moment it was written. */
+
+.fpc-code {
+  font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-dark);
+  margin: 0 0 0.15rem;
+}
+.fpc-spec { font-size: 0.76rem; color: var(--text-mid); font-variant-numeric: tabular-nums; margin: 0; }
+
+/* The label rides above the figure rather than inline: "MSRP Starting at
+   $37,493" on one line wraps unpredictably at a 260px card, and the qualifier
+   is the quieter half of the pair.
+   Dark, not blue. compare.css sets .fp-card-price in --text-dark and the two
+   pages must not print the same MSRP in two colours; it also clears AA at this
+   size, which --blue on canvas (4.48:1) does not. */
+.fpc-price { margin: 0.45rem 0 0; font-variant-numeric: tabular-nums; }
+.fpc-price-label {
+  display: block; font-size: 0.66rem; font-weight: 500; color: var(--text-mid);
+  line-height: 1.3;
+}
+.fpc-price-fig { display: block; font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+.fpc-price--tbd {
+  color: var(--text-mid); font-weight: 500; font-style: italic; font-size: 0.9rem;
+}
+
+.fpc-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.45rem; }
+.fpc-badge {
+  padding: 0.15rem 0.45rem; border-radius: 4px;
+  background: var(--surface); color: var(--text-mid);
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em;
+}
+.fpc-badge--new { background: var(--blue); color: #fff; }
+
+/* The body takes the slack, so View Details lands on the same line across a
+   rail whose spec lines and badge rows are different heights — rather than
+   margin-top:auto on the button, which would leave no gap at all on the tallest
+   card in the row. */
+.fpc-card-body { flex: 1 1 auto; }
+/* Sized to its label, not to the card. align-self is what does it: .fpc-card is
+   a flex column with align-items:stretch, so without this the button inherits
+   the full width whatever the padding says. */
+.fpc-details {
+  align-self: flex-start;
+  padding: 0.6rem 1.3rem;
+  margin-top: 0.85rem;
+  border: 1.5px solid rgba(15,11,9,0.22);
+  border-radius: var(--radius-btn);
+  background: none;
+  color: var(--text-dark);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.fpc-details:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.fpc-details:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Rail controls ----------
+   The arrows come AFTER the track in the DOM, which is the order a keyboard
+   walks them in — type-page.js's rule, restated because this page does not
+   load type.css. */
+.fpc-controls {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin-top: 0.9rem;
+  padding-right: var(--page-pad);
+}
+.fpc-rule { flex: 1 1 auto; height: 1px; background: var(--hairline); margin-right: 0.5rem; }
+.fpc-nav {
+  flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--hairline); background: rgba(255,255,255,0.92);
+  color: var(--text-dark); cursor: pointer;
+  transition: transform 0.25s var(--ease-out), border-color 0.25s, opacity 0.25s;
+}
+.fpc-nav:hover:not([disabled]) { transform: scale(1.08); border-color: var(--blue); }
+.fpc-nav:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.fpc-nav[disabled] { opacity: 0.32; cursor: default; }
+/* nothing past the right edge means nothing to page through, so the pair goes
+   rather than sitting there greyed out at both ends */
+.fpc-cardrail.is-static .fpc-controls { display: none; }
+
+.fpc-empty {
+  margin: clamp(3rem, 6vw, 5rem) 0; text-align: center;
+  font-size: 1.05rem; color: var(--text-mid);
+}
+
+/* ---------- Detail modal ---------- */
+.fpc-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  display: grid; place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+.fpc-scrim {
+  position: absolute; inset: 0;
+  background: rgba(15,11,9,0.6); backdrop-filter: blur(3px);
+}
+.fpc-modal-panel, .fpc-zoom-inner, .fpc-zoom-x { position: relative; z-index: 1; }
+.fpc-modal-panel {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  /* minmax(0,1fr), not the implicit auto row: an auto row is sized to its
+     content and simply overflows the max-height, so the side column never
+     shrinks, its spec pane never scrolls, and the pinned actions are pushed out
+     and clipped by the overflow below. Bounding the row is what lets
+     min-height:0 down the chain do its job. */
+  grid-template-rows: minmax(0, 1fr);
+  width: min(1100px, 100%); max-height: min(86vh, 800px);
+  background: var(--canvas); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.fpc-modal-x {
+  position: absolute; top: 0.85rem; right: 0.85rem; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--hairline); background: rgba(255,255,255,0.92);
+  color: var(--text-dark); font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.fpc-modal-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.fpc-modal-media {
+  background: #fff; display: grid; place-items: center;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem); min-height: 0;
+}
+.fpc-modal-media img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+/* A column of three: head, the scrolling spec sheet, then the actions. Only
+   the middle band moves, so Build This Floorplan is on screen the moment the
+   modal opens rather than at the end of forty spec rows. */
+.fpc-modal-side {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  border-left: 1px solid var(--hairline);
+}
+.fpc-modal-top { flex: 0 0 auto; padding: clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.5rem, 2.5vw, 2.25rem) 0; }
+.fpc-modal-scroll {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 0 clamp(1.5rem, 2.5vw, 2.25rem);
+}
+.fpc-modal-foot {
+  flex: 0 0 auto;
+  padding: 0 clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.25rem, 2vw, 1.75rem);
+  border-top: 1px solid var(--hairline);
+}
+.fpc-modal-eyebrow {
+  display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--blue);
+}
+.fpc-modal-title {
+  font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-dark); margin: 0.3rem 0 0.4rem;
+}
+.fpc-modal-meta { margin: 0; font-size: 0.85rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.fpc-modal-price {
+  margin: 0.25rem 0 1rem; font-size: 1.15rem; font-weight: 700; color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.fpc-modal-flags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.25rem; }
+.fpc-flag {
+  padding: 0.25rem 0.6rem; border-radius: var(--radius-btn);
+  background: var(--surface); color: var(--text-mid); font-size: 0.72rem; font-weight: 500;
+}
+.fpc-modal-specgroup {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-mid); margin: 1.1rem 0 0.35rem;
+}
+.fpc-modal-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.fpc-modal-table th,
+.fpc-modal-table td { padding: 0.35rem 0; border-bottom: 1px solid var(--hairline); text-align: left; }
+.fpc-modal-table th { font-weight: 400; color: var(--text-mid); }
+.fpc-modal-table td { font-weight: 600; color: var(--text-dark); text-align: right; font-variant-numeric: tabular-nums; }
+.fpc-modal-nospec { font-size: 0.82rem; color: var(--text-mid); line-height: 1.6; }
+.fpc-modal-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.25rem 0 0.8rem; }
+.fpc-modal-actions .btn-primary,
+.fpc-modal-actions .btn-secondary-light { font-size: 0.78rem; padding: 0.72rem 1.4rem; }
+.fpc-modal-tour[disabled] { opacity: 0.4; }
+.fpc-modal-compare {
+  display: inline-block; font-size: 0.82rem; font-weight: 500; color: var(--blue);
+  text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.fpc-modal-compare:hover { border-bottom-color: var(--blue); }
+body.fpc-modal-on,
+/* The filter sheet locks the page the same way the two overlays do — but only
+   below 1024, where it covers the screen. On desktop it stays a disclosure and
+   this class is never set. */
+body.fpc-sheet-on { overflow: hidden; }
+
+/* ---------- Enlarged drawing ---------- */
+.fpc-zoom-x {
+  position: absolute; top: clamp(0.75rem, 2vw, 1.5rem); right: clamp(0.75rem, 2vw, 1.5rem);
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px); color: #fff; cursor: pointer;
+  transition: background 0.25s;
+}
+.fpc-zoom-x:hover { background: rgba(255,255,255,0.24); }
+.fpc-zoom-x:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.fpc-zoom-inner {
+  margin: 0; display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
+  max-width: min(1280px, 100%); max-height: 100%;
+}
+/* White bed: the drawing's own ground is white, and a transparent PNG over the
+   scrim would render the line art as holes. */
+.fpc-zoom-img {
+  max-width: 100%; max-height: calc(100vh - 9rem);
+  object-fit: contain; background: #fff;
+  border-radius: var(--radius-card); padding: 1rem;
+}
+.fpc-zoom-cap { color: #fff; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; }
+
+/* ---------- 1024–1280: a narrower rail ---------- */
+@media (max-width: 1280px) {
+  .floorplans-page { --rail-w: 240px; }
+}
+
+/* ---------- Under 1024: the same mechanism, a phone's geometry ----------
+   The panel no longer becomes a static block. It stays the collapsing control
+   it is on desktop — pinned under the header, collapsed on landing — because a
+   wall of shut accordions above the catalog is the thing the collapse was built
+   to remove, and that is worse on a phone, not better.
+
+   What changes is the SHAPE. There is no room to narrow into a 268px column, so
+   the box keeps the full width in both states and only its HEIGHT moves: a 56-px
+   bar opening into a full sheet. One axis, so the desktop's axis-lead has
+   nothing to stagger and is replaced by a single height transition.
+
+   The header is a constant 73px here and never hides, so the bar pins below it
+   rather than to the viewport top. Inset by the page gutter, not the desktop's
+   20px: on a phone the gutter IS the margin. */
+@media (max-width: 1023px) {
+  /* Measured, not guessed: the header is a constant 58px here and 73px below
+     769, and it never hides on scroll. */
+  .floorplans-page { --rail-gap: 0.75rem; --rail-h-closed: 56px; --fpc-top: 58px; }
+  .fpc { padding-top: calc(var(--fpc-top) + var(--rail-gap) + var(--rail-h-closed) + 1.25rem); }
+  /* The bar is pinned now, so an anchored jump has to clear it as well as the
+     header — this is the no-JS path; lineY() does the same sum for the spy. */
+  .fpc-model { scroll-margin-top: calc(var(--fpc-top) + var(--rail-gap) + var(--rail-h-closed) + 12px); }
+
+  .fpc-rail {
+    left: var(--page-pad);
+    right: var(--page-pad);
+    width: auto;
+    /* Height only. Width is identical in both states down here, so the two-axis
+       flow has nothing to flow between. */
+    transition: height 0.5s var(--ease-morph);
+  }
+  .fpc-rail.is-open {
+    width: auto;
+    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2);
+    transition: height 0.5s var(--ease-morph);
+  }
+
+  /* Full width in both states, so nothing rewraps and the sheet fills the box. */
+  .fpc-panel,
+  .fpc-rail.is-open .fpc-panel {
+    width: 100%;
+    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2);
+  }
+
+  /* The x keeps its desktop rule and is load-bearing here: on a touch screen
+     there is no Escape key, the page behind is locked, and the trigger is
+     underneath the sheet — so it is the only way out. */
+
+  /* Shown only here: the bar has no room for it. */
+  .fpc-panel-count {
+    display: block; margin: 0 0 0.85rem;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-mid);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The live region is still in the bar and still announcing — it just has
+     nowhere visible to sit, so it is taken out of the layout rather than out of
+     the accessibility tree. Removing it would silence every filter change. */
+  .fpc-count {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+
+  /* The jump list becomes a horizontal strip — the same shape as the card rails,
+     so it reads as one component rather than a second idea. */
+  .fpc-jump {
+    margin-right: calc(-1 * var(--page-pad)); padding-right: var(--page-pad);
+    display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none;
+  }
+  .fpc-jump::-webkit-scrollbar { display: none; }
+  .fpc-jump-cat { display: none; }
+  .fpc-jump-list { display: flex; gap: 0.4rem; }
+  .fpc-jump-link {
+    white-space: nowrap; border: 1.5px solid var(--warm-gray); border-left-width: 1.5px;
+    border-radius: var(--radius-btn); background: var(--white); padding: 0.35rem 0.7rem;
+    font-size: 0.76rem;
+  }
+  .fpc-jump-link.is-current { border-color: var(--blue); background: var(--blue); color: #fff; }
+  .fpc-jump-link.is-current .fpc-jump-n { color: rgba(255,255,255,0.75); }
+
+  .fpc-modal-panel { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .fpc-modal-media { max-height: 40vh; }
+  .fpc-modal-side { border-left: none; border-top: 1px solid var(--hairline); }
+}
+
+/* Touch targets. The desktop bar is a pointer target at 30-38px; a finger needs
+   44 (WCAG 2.5.5, and Apple's HIG says the same), and the 56px bar has the room
+   to give it. */
+@media (max-width: 1023px) {
+  .fpc-trigger,
+  .fpc-type-btn { min-height: 44px; }
+  /* The x most of all: with the page locked, the trigger under the sheet and no
+     Escape key on a touch screen, this is the only way out of the filter. */
+  .fpc-panel-x { width: 44px; height: 44px; margin-right: -0.5rem; }
+  .fpc-clear { min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* Under 560px the word does not fit beside the type pair: icon-only trigger,
+   which keeps its name from the aria-label paintChips() writes. */
+@media (max-width: 560px) {
+  .fpc-trigger-label { display: none; }
+  /* Square at 44, so the icon stays centred rather than sitting in a wide pill. */
+  .fpc-trigger { padding: 0; width: 44px; justify-content: center; gap: 0; }
+}
+/* ---------- Phone ---------- */
+@media (max-width: 768px) {
+  .floorplans-page { --fpc-top: 73px; }
+  /* The arrows are a second way to do what the finger already does, and they
+     charge a row of height to say it. type.css:790, same call. */
+  .fpc-controls { display: none; }
+  .fpc-cards { --fcard: min(calc(100% - 3rem), 320px); }
+  .fpc-model-head { grid-template-columns: 84px minmax(0, 1fr); gap: 0.9rem; }
+  .fpc-model-render { width: 84px; height: 52px; }
+  .fpc-model-ctas .btn-primary,
+  .fpc-model-ctas .btn-secondary-light { padding: 0.7rem 1.15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fpc-nav, .fpc-well, .fpc-chip, .fpc-jump-link, .fpc-acc-x,
+  .fpc-acc-icon::before,
+  .fpc-acc-icon::after { transition: none; }
+  /* The box jumps between the two geometries; the geometry change is the
+     information and the interpolation is decoration. The cross-fade goes with
+     it — against an instant box, a 200ms fade reads as lag rather than polish. */
+  .fpc-rail, .fpc-rail.is-open,
+  .fpc-bar, .fpc-panel,
+  .fpc-rail.is-open .fpc-bar,
+  .fpc-rail.is-open .fpc-panel,
+  .fpc-panel-head, .fpc-facets .fpc-acc,
+  .fpc-rail.is-open .fpc-panel-head,
+  .fpc-rail.is-open .fpc-facets .fpc-acc { transition: none; }
+}

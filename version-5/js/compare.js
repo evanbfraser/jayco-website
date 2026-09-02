@@ -91,6 +91,10 @@
   };
 
   const state = {
+    /* 'towable' / 'motorized' — the bar's two buttons. One level coarser than
+       `cats`, over the same axis: every category is one or the other, and
+       r.catType is read straight off the category record. */
+    types: new Set(),
     cats: new Set(),
     models: new Set(),
     sleeps: new Set(),
@@ -107,6 +111,7 @@
   const within = (v, lo, hi) => v == null || (v >= lo && v <= hi);
 
   function matches(r) {
+    if (state.types.size && !state.types.has(r.catType)) return false;
     if (state.cats.size && !state.cats.has(r.category)) return false;
     if (state.models.size && !state.models.has(r.modelId)) return false;
     if (state.sleeps.size) {
@@ -132,126 +137,261 @@
   /* ---------- Filters ---------- */
   const SLEEPS = [2, 4, 6, 8, 10];
 
-  function renderFilters() {
-    const cats = JAYCO.categories.map((c) => {
-      const n = ROWS.filter((r) => r.category === c.id).length;
-      if (!n) return '';
-      return `<button type="button" class="cat-chip${state.cats.has(c.id) ? ' active' : ''}"
-        data-facet="cat" data-id="${esc(c.id)}">${esc(c.name)} <span class="cmp-n">${n}</span></button>`;
-    }).join('');
+  /* ---------- The rail ----------
+     The filter component from floorplans.css / floorplans.js, ported here under
+     cmp- names — port, rename, and name the source, which is the rule the top
+     of compare.css sets. Same pinned white container, same accordions closed on
+     landing, same plus/minus, same tow-or-drive pair held out of them.
 
-    /* Models narrow to whatever categories are selected, so the list stays
-       usable instead of showing 27 at once — and they run in CATEGORY order,
-       matching the Type chips directly above. Alphabetical put Alante next to
-       Comet and buried Swift, which reads as a random list when the control
-       above it is grouped by type. */
-    const modelIds = JAYCO.categories
-      .flatMap((c) => Object.keys(BUILD).filter((id) => JAYCO.models[id].category === c.id))
-      .filter((id) => !state.cats.size || state.cats.has(JAYCO.models[id].category));
-    const models = modelIds.map((id) => {
-      const n = ROWS.filter((r) => r.modelId === id).length;
-      return `<button type="button" class="cat-chip cat-chip--sm${state.models.has(id) ? ' active' : ''}"
-        data-facet="model" data-id="${esc(id)}">${esc(JAYCO.models[id].name)} <span class="cmp-n">${n}</span></button>`;
-    }).join('');
+     The facets are this page's own, not the catalog's: compare filters by MODEL
+     where the catalog navigates to one, and it keeps the dry-weight range the
+     catalog drops. The chrome is shared; the taxonomy is not.
 
-    const sleeps = SLEEPS.map((s) => `<button type="button" class="cat-chip cat-chip--sm${state.sleeps.has(s) ? ' active' : ''}"
-      data-facet="sleeps" data-id="${s}">${s === 10 ? '10+' : s}</button>`).join('');
+     BUILT ONCE, THEN PATCHED. The drawer this replaces called renderFilters()
+     on every chip click and re-innerHTML'd the whole block. In a drawer that
+     only cost you the focus ring. In a rail of accordions it would slam every
+     open one shut on every click, so nothing below ever destroys a node — see
+     paintFilters(). */
+  const ICON = '<span class="cmp-acc-icon" aria-hidden="true"></span>';
 
-    $('#cmp-filters').innerHTML = `
-      <div class="cmp-facet">
-        <h2 class="cmp-facet-head">Type of RV</h2>
-        <div class="cmp-chips">${cats}</div>
-      </div>
-      <div class="cmp-facet">
-        <h2 class="cmp-facet-head">Model</h2>
-        <div class="cmp-chips cmp-chips--wrap">${models}</div>
-      </div>
-      <div class="cmp-facet">
-        <h2 class="cmp-facet-head">Sleeps</h2>
-        <div class="cmp-chips">${sleeps}</div>
-      </div>
-      ${featureFacet()}
-      <div class="cmp-facet">
-        <h2 class="cmp-facet-head">Price</h2>
-        ${rangeCtl('price', RANGE.price, state.price, money)}
-      </div>
-      <div class="cmp-facet">
-        <h2 class="cmp-facet-head">Length</h2>
-        ${rangeCtl('length', RANGE.length, state.length, (v) => feet(v) + ' ft')}
-      </div>
-      <div class="cmp-facet">
-        <!-- "towables only" carries what the removed paragraph explained: Jayco
-             publishes no dry weight for any motorhome, so this range never hides
-             one. The behaviour is unchanged — see matches(). -->
-        <h2 class="cmp-facet-head">Dry weight <span class="cmp-facet-note">towables only</span></h2>
-        ${rangeCtl('weight', RANGE.weight, state.weight, (v) => v.toLocaleString('en-US') + ' lb')}
-      </div>`;
-  }
+  const chip = (facet, id, label, sm) =>
+    `<button type="button" class="cat-chip${sm ? ' cat-chip--sm' : ''}"
+      data-facet="${esc(facet)}" data-id="${esc(id)}" aria-pressed="false">${esc(label)}
+      <span class="cmp-n"></span></button>`;
 
-  /* Jayco publishes 28 feature keys but only ships data for 17 of them; the
-     other 11 are empty columns in their own database, so floorplan-features.js
-     omits them rather than offering chips that can never match.
+  /* [data-acc-n] is REPURPOSED, not replaced — paintFilters() patches this node
+     and never rebuilds the form, so the node has to survive. It was a count
+     badge; it is now the row's summary text, with a x beside it that clears
+     that one facet. A <button> inside <summary> is conforming. */
+  const acc = (group, title, body) =>
+    `<details class="cmp-acc" data-group="${group}">
+      <summary class="cmp-acc-sum">
+        <span class="cmp-acc-title">${esc(title)}</span>
+        <span class="cmp-acc-n" data-acc-n="${group}" hidden></span>
+        <button type="button" class="cmp-acc-x" data-facet-clear="${group}" hidden
+                aria-label="Clear ${esc(title)}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        ${ICON}
+      </summary>
+      <div class="cmp-acc-body">${body}</div>
+    </details>`;
 
-     Counts are contextual — how many results survive if you add THIS chip —
-     which means measuring against a base set with the features facet itself
-     neutralised. Counting against the current results would show every chip as
-     its own intersection and read as nonsense the moment two are active. */
-  function featureFacet() {
-    /* Each chip's count neutralises only ITSELF, so both bases are needed:
-       one with the feature keys cleared, one with slide cleared. */
-    const heldFeat = state.features, heldSlide = state.slide;
-    state.features = new Set();
-    const base = ROWS.filter(matches);
-    state.features = heldFeat;
-    state.slide = false;
-    const baseSlide = ROWS.filter(matches);
-    state.slide = heldSlide;
-
-    /* Slide-out is ours, from Jayco's spec sheets, not one of their 28 filter
-       keys — but it answers the same question as the Layout chips, so it leads
-       that group instead of sitting in a one-chip facet of its own. */
-    const slideN = baseSlide.filter((r) => r.slide).length;
-    const slide = (!slideN && !heldSlide) ? '' :
-      `<button type="button" class="cat-chip cat-chip--sm${heldSlide ? ' active' : ''}"
-        data-facet="slide" data-id="1">Slide-out <span class="cmp-n">${slideN}</span></button>`;
-
-    const groups = FEAT.groups.map((g, i) => {
-      let chips = g.keys.map((k) => {
-        const n = base.filter((r) => r.features.indexOf(k) > -1).length;
-        const on = heldFeat.has(k);
-        if (!n && !on) return '';            // never offer a dead end
-        return `<button type="button" class="cat-chip cat-chip--sm${on ? ' active' : ''}"
-          data-facet="feature" data-id="${esc(k)}">${esc(FEAT.labels[k] || k)} <span class="cmp-n">${n}</span></button>`;
-      }).join('');
-      if (i === 0) chips = slide + chips;    // Layout leads, and Slide-out leads it
-      return chips
-        ? `<h3 class="cmp-facet-sub">${esc(g.name)}</h3><div class="cmp-chips">${chips}</div>`
-        : '';
-    }).join('');
-
-    /* Should the harvested feature data ever go missing, Slide-out still needs
-       somewhere to live — it is our own field and does not depend on it. */
-    const body = groups || (slide ? `<h3 class="cmp-facet-sub">Layout</h3><div class="cmp-chips">${slide}</div>` : '');
-    if (!body) return '';
-
-    return `<div class="cmp-facet">
-      <h2 class="cmp-facet-head">Features</h2>
-      ${body}
-      <p class="cmp-facet-hint">Jayco's own floorplan data. Chips combine — a plan has to have all of them.</p>
-    </div>`;
-  }
-
-  /* Two range inputs sharing a track. The pair is clamped so the low thumb can
-     never cross the high one. */
-  function rangeCtl(id, full, cur, fmt) {
+  function rangeCtl(id, full, fmt) {
     const [lo, hi] = full;
     return `<div class="cmp-range" data-range="${id}">
-      <div class="cmp-range-vals"><span id="cmp-${id}-lo">${fmt(cur[0])}</span><span id="cmp-${id}-hi">${fmt(cur[1])}</span></div>
+      <div class="cmp-range-vals"><span id="cmp-${id}-lo">${esc(fmt(lo))}</span><span id="cmp-${id}-hi">${esc(fmt(hi))}</span></div>
       <div class="cmp-range-track">
-        <input type="range" min="${lo}" max="${hi}" value="${cur[0]}" data-edge="0" aria-label="Minimum" />
-        <input type="range" min="${lo}" max="${hi}" value="${cur[1]}" data-edge="1" aria-label="Maximum" />
+        <input type="range" min="${lo}" max="${hi}" value="${lo}" data-edge="0" aria-label="Minimum" />
+        <input type="range" min="${lo}" max="${hi}" value="${hi}" data-edge="1" aria-label="Maximum" />
       </div>
     </div>`;
+  }
+
+  /* Every chip that the data can back is rendered, once. Which of them are
+     reachable right now is a paint, not a re-render — see paintFilters(). */
+  function renderFilters() {
+    const cats = JAYCO.categories
+      .filter((c) => ROWS.some((r) => r.category === c.id))
+      .map((c) => chip('cat', c.id, c.name)).join('');
+
+    /* Models run in CATEGORY order, matching the Type of RV chips above.
+       Alphabetical put Alante next to Comet and buried Swift, which reads as a
+       random list when the control above it is grouped by type. */
+    const models = JAYCO.categories
+      .flatMap((c) => Object.keys(BUILD).filter((id) => JAYCO.models[id] && JAYCO.models[id].category === c.id))
+      .map((id) => chip('model', id, JAYCO.models[id].name, true)).join('');
+
+    const sleeps = SLEEPS.map((n) => chip('sleeps', n, n === 10 ? '10+' : String(n), true)).join('');
+
+    /* Jayco publishes 28 feature keys but ships data for 17; floorplan-features.js
+       omits the empty columns rather than offering chips that can never match.
+       Slide-out is ours, from the spec sheets rather than one of their keys, but
+       it answers the same question as the Layout group, so it leads it. */
+    const groups = (FEAT.groups || []).map((g, i) => {
+      let c = g.keys.map((k) => chip('feature', k, FEAT.labels[k] || k, true)).join('');
+      if (i === 0) c = chip('slide', '1', 'Slide-out', true) + c;
+      return `<h3 class="cmp-facet-sub">${esc(g.name)}</h3><div class="cmp-chips">${c}</div>`;
+    }).join('');
+    const featureBody = (groups || `<div class="cmp-chips">${chip('slide', '1', 'Slide-out', true)}</div>`) +
+      `<p class="cmp-facet-hint">Jayco's own floorplan data. Chips combine — a plan has to have all of them.</p>`;
+
+    $('#cmp-filters').innerHTML =
+      acc('cat', 'Type of RV', `<div class="cmp-chips">${cats}</div>`) +
+      acc('model', 'Model', `<div class="cmp-chips">${models}</div>`) +
+      acc('sleeps', 'Sleeps', `<div class="cmp-chips">${sleeps}</div>`) +
+      acc('feature', 'Features', featureBody) +
+      acc('price', 'Price', rangeCtl('price', RANGE.price, money)) +
+      acc('length', 'Length', rangeCtl('length', RANGE.length, (v) => feet(v) + ' ft')) +
+      acc('weight', 'Dry weight',
+        `${rangeCtl('weight', RANGE.weight, (v) => v.toLocaleString('en-US') + ' lb')}
+         <p class="cmp-facet-hint">Towables only. Jayco publishes no dry weight for any
+         motorhome, so this range never hides one — see the note in this file's header.</p>`);
+  }
+
+  /* ---------- Contextual counts ----------
+     Each chip's count is "how many survive if you ADD this one", measured
+     against a base with that chip's own facet neutralised. Counting against the
+     current results would show every chip as its own intersection and read as
+     nonsense the moment two are on. */
+  function baseWithout(facet) {
+    const held = {
+      cat: state.cats, model: state.models, sleeps: state.sleeps,
+      feature: state.features, slide: state.slide,
+    };
+    if (facet === 'cat') state.cats = new Set();
+    if (facet === 'model') state.models = new Set();
+    if (facet === 'sleeps') state.sleeps = new Set();
+    if (facet === 'feature') state.features = new Set();
+    if (facet === 'slide') state.slide = false;
+    const rows = ROWS.filter(matches);
+    state.cats = held.cat; state.models = held.model; state.sleeps = held.sleeps;
+    state.features = held.feature; state.slide = held.slide;
+    return rows;
+  }
+
+  function chipCount(facet, id, base) {
+    if (facet === 'cat') return base.filter((r) => r.category === id).length;
+    if (facet === 'model') return base.filter((r) => r.modelId === id).length;
+    if (facet === 'slide') return base.filter((r) => r.slide).length;
+    if (facet === 'feature') return base.filter((r) => r.features.indexOf(id) > -1).length;
+    if (facet === 'sleeps') {
+      const n = +id;
+      return base.filter((r) => (n === 10 ? r.sleeps >= 10 : r.sleeps === n)).length;
+    }
+    return 0;
+  }
+
+  const isOn = (facet, id) =>
+    facet === 'cat' ? state.cats.has(id)
+    : facet === 'model' ? state.models.has(id)
+    : facet === 'sleeps' ? state.sleeps.has(+id)
+    : facet === 'slide' ? state.slide
+    : state.features.has(id);
+
+  /* ---------- What a closed accordion says it is doing ----------
+     Names values when there are few, counts them when there are many, and never
+     repeats the facet's own name — the title is right beside it. En dash,
+     because the middle dot is already this repo's list separator.
+
+     Type of RV and Model count from two, not three: their names run to eight
+     words ("Class C Motorhomes & Super C Motorhomes") and will not fit beside a
+     title and an x inside 268px. */
+  function names(list) {
+    if (!list.length) return '';
+    return list.length === 1 ? list[0] : list.length + ' selected';
+  }
+
+  function rangeSummary(g, fmt) {
+    const [lo, hi] = state[g], [LO, HI] = RANGE[g];
+    if (lo === LO && hi === HI) return '';
+    if (lo === LO) return 'Under ' + fmt(hi);
+    if (hi === HI) return 'From ' + fmt(lo);
+    return fmt(lo) + ' – ' + fmt(hi);
+  }
+
+  function facetSummary(g) {
+    if (g === 'cat') return names(Array.from(state.cats).map((id) => {
+      const c = JAYCO.categories.find((x) => x.id === id); return c ? c.name : id;
+    }));
+    if (g === 'model') return names(Array.from(state.models)
+      .map((id) => (JAYCO.models[id] ? JAYCO.models[id].name : id)));
+    if (g === 'sleeps') {
+      const v = Array.from(state.sleeps).sort((a, b) => a - b)
+        .map((n) => (n === 10 ? '10+' : String(n)));
+      return v.length <= 2 ? v.join(', ') : v.length + ' selected';
+    }
+    if (g === 'feature') {
+      const v = (state.slide ? ['Slide-out'] : [])
+        .concat(Array.from(state.features).map((k) => (FEAT.labels && FEAT.labels[k]) || k));
+      return v.length <= 2 ? v.join(', ') : v.length + ' selected';
+    }
+    if (g === 'price')  return rangeSummary('price', money);
+    if (g === 'length') return rangeSummary('length', (v) => feet(v) + ' ft');
+    if (g === 'weight') return rangeSummary('weight', (v) => v.toLocaleString('en-US') + ' lb');
+    return '';
+  }
+
+  /* Resets one facet without opening it. Note the asymmetry with the type pair
+     and the cat chips, which both wipe model picks when they change: clearing is
+     SUBTRACTIVE, and throwing away picks the user made in another facet because
+     they tidied this one is a surprise. So cat clears cats only. */
+  function clearFacet(g) {
+    if (g === 'cat') state.cats.clear();
+    else if (g === 'model') state.models.clear();
+    else if (g === 'sleeps') state.sleeps.clear();
+    else if (g === 'feature') { state.features.clear(); state.slide = false; }
+    else state[g] = RANGE[g].slice();   /* paintFilters() repaints the thumbs inline */
+    /* The x is about to be hidden, which would drop focus to <body> and send a
+       keyboard user to the top of the page. Park it on the row it belongs to. */
+    const sum = document.querySelector('.cmp-acc[data-group="' + g + '"] .cmp-acc-sum');
+    if (sum) sum.focus();
+    paintFilters(); renderGrid(); refresh();
+  }
+
+  /* How many filters are live inside each closed accordion — without it a
+     narrowed page has no visible explanation, which reads as a bug. */
+  function groupActive(g) {
+    if (g === 'cat') return state.cats.size;
+    if (g === 'model') return state.models.size;
+    if (g === 'sleeps') return state.sleeps.size;
+    if (g === 'feature') return state.features.size + (state.slide ? 1 : 0);
+    return (state[g][0] !== RANGE[g][0] || state[g][1] !== RANGE[g][1]) ? 1 : 0;
+  }
+
+  /* Patch, never rebuild. Nothing here creates or destroys a node, so an open
+     accordion stays open and the chip you just pressed keeps focus. */
+  function paintFilters() {
+    const bases = {};
+    ['cat', 'model', 'sleeps', 'feature', 'slide'].forEach((f) => { bases[f] = baseWithout(f); });
+
+    Array.from(document.querySelectorAll('#cmp-filters [data-facet]')).forEach((b) => {
+      const f = b.dataset.facet, id = b.dataset.id;
+      const on = isOn(f, id);
+      const n = chipCount(f, id, bases[f]);
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      /* Dimmed rather than dropped. The drawer removed a dead chip from the DOM
+         ("never offer a dead end"), which it could afford because it rebuilt
+         every time. A rail that rebuilt would close its accordions, and a rail
+         that removed chips would reshuffle the list under the cursor. */
+      b.disabled = !n && !on;
+      const nEl = b.querySelector('.cmp-n');
+      if (nEl) nEl.textContent = n;
+    });
+
+    Array.from(document.querySelectorAll('#cmp-filters .cmp-acc')).forEach((d) => {
+      const g = d.dataset.group;
+      const n = groupActive(g);
+      const text = facetSummary(g);
+      const val = d.querySelector('[data-acc-n]');
+      if (val) { val.hidden = !text; val.textContent = text; }
+      const x = d.querySelector('[data-facet-clear]');
+      if (x) x.hidden = !n;
+      d.classList.toggle('has-active', !!n);
+    });
+
+    ['price', 'length', 'weight'].forEach((id) => {
+      const wrap = $('.cmp-range[data-range="' + id + '"]');
+      if (!wrap) return;
+      const inputs = Array.from(wrap.querySelectorAll('input[type=range]'));
+      inputs[0].value = state[id][0];
+      inputs[1].value = state[id][1];
+      const fmt = id === 'price' ? money : id === 'length' ? (v) => feet(v) + ' ft'
+        : (v) => v.toLocaleString('en-US') + ' lb';
+      $('#cmp-' + id + '-lo').textContent = fmt(state[id][0]);
+      $('#cmp-' + id + '-hi').textContent = fmt(state[id][1]);
+    });
+
+    /* The trigger's count is required, not decoration: collapsed, it is the only
+       thing on screen saying why the grid is narrowed. */
+    const n = activeCount();
+    $('#cmp-clear').hidden = !n;
+    const badge = $('#cmp-trigger-n');
+    badge.hidden = !n;
+    badge.textContent = n;
+    $('#cmp-trigger').setAttribute('aria-label', n ? 'Filters, ' + n + ' active' : 'Filters');
   }
 
   /* ---------- Grid ---------- */
@@ -281,6 +421,7 @@
       <span class="fp-card-media">
         <span class="cmp-media-render">
           <img class="cmp-media-render-img" src="${esc(r.modelImg)}" alt="" loading="lazy" />
+          <span class="cmp-media-note">Exterior images may differ.</span>
         </span>
         <span class="cmp-media-plan">
           <img class="fp-card-drawing" src="${esc(r.img)}" alt="${esc(r.model + ' ' + r.name)} floorplan" loading="lazy" />
@@ -308,23 +449,32 @@
     const rows = results();
     $('#cmp-grid').innerHTML = rows.map(card).join('');
     $('#cmp-empty').hidden = rows.length > 0;
-    $('#cmp-count').textContent = rows.length === ROWS.length
+    const countText = rows.length === ROWS.length
       ? `All ${ROWS.length} floorplans`
       : `${rows.length} of ${ROWS.length} floorplans`;
+    $('#cmp-count').textContent = countText;
+    /* The phone's visible copy. Same string, no live region. */
+    $('#cmp-panel-count').textContent = countText;
 
-    /* With the filters behind a drawer, the badge is the only thing telling
-       anyone the results are narrowed. It has to be exact. */
-    const n = activeCount();
-    const badge = $('#cmp-filter-n');
-    badge.hidden = !n;
-    badge.textContent = n;
-    $('#cmp-filter-btn').setAttribute('aria-label', n ? `Filters, ${n} active` : 'Filters');
-    $('#cmp-clear').hidden = !n;
-    $('#cmp-drawer-n').textContent = rows.length === 1 ? '1 floorplan' : rows.length + ' floorplans';
+    /* The per-accordion badges say which facet is narrowing things now; the
+       count above says by how much. paintFilters() owns both. */
+    renderTypeBar();
+  }
+
+  /* Counts are of the whole library, not of the current results — they say how
+     many floorplans the button would show, which is what a filter control is
+     asked. Computed from ROWS so they cannot drift from the grid. */
+  function renderTypeBar() {
+    document.querySelectorAll('.cmp-type-btn').forEach((b) => {
+      const t = b.dataset.type;
+      b.setAttribute('aria-pressed', state.types.has(t) ? 'true' : 'false');
+      const n = b.querySelector('.cmp-n');
+      if (n && !n.textContent) n.textContent = ROWS.filter((r) => r.catType === t).length;
+    });
   }
 
   function activeCount() {
-    let n = state.cats.size + state.models.size + state.sleeps.size + state.features.size;
+    let n = state.types.size + state.cats.size + state.models.size + state.sleeps.size + state.features.size;
     if (state.slide) n++;
     ['price', 'length', 'weight'].forEach((k) => {
       if (state[k][0] !== RANGE[k][0] || state[k][1] !== RANGE[k][1]) n++;
@@ -347,16 +497,13 @@
 
   /* On a phone the chart is its own scroll pane so its header row can pin.
      That only works if the pane has a bounded height, and the bound is whatever
-     the sticky results bar leaves behind — measured rather than assumed, because
-     the bar's height moves with the header shrink and the wrapping of its own
-     contents. Same reasoning as measureTray above. */
+     sits above it. That used to be the sticky results bar; with the filters in
+     the rail there is no bar, so the site header is the whole obstruction —
+     still measured rather than assumed, because it shrinks on first scroll. */
   function measureChart() {
-    const bar = $('#cmp-bar');
-    if (bar) {
-      const top = parseFloat(getComputedStyle(bar).top) || 0;
-      const h = bar.getBoundingClientRect().height;
-      document.documentElement.style.setProperty('--cmp-chart-top', Math.round(top + h) + 'px');
-    }
+    const hdr = $('#site-header');
+    document.documentElement.style.setProperty('--cmp-chart-top',
+      Math.round(hdr ? hdr.getBoundingClientRect().height : 68) + 'px');
     /* "Side by side" pins under the bar, so it costs the pane its height too.
        Zero when the comparison has not been opened. */
     const head = $('.cmp-view-head');
@@ -429,7 +576,7 @@
       <th class="cmp-col cmp-col-${i}">
         <span class="cmp-col-head">
           <span class="cmp-col-media">
-            <span class="cmp-col-render-box"><img class="cmp-col-render" src="${esc(r.modelImg)}" alt="" /></span>
+            <span class="cmp-col-render-box"><img class="cmp-col-render" src="${esc(r.modelImg)}" alt="" /><span class="cmp-media-note">Exterior images may differ.</span></span>
             <span class="cmp-col-plan-box"><img class="cmp-col-plan" src="${esc(r.img)}" alt="${esc(r.model + ' ' + r.name)} floorplan" /></span>
           </span>
           <span class="cmp-col-text">
@@ -529,47 +676,59 @@
     window.scrollTo(0, 0);
   }
 
-  /* ---------- Filter drawer ----------
-     Modal at every width, so it takes the usual four: focus in, focus trapped,
-     focus back out, and the page behind it held still. */
-  const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])';
-  let lastFocus = null;
+  /* ---------- Accordions ---------- */
+  /* <details> does the open/close itself. All this adds is the plus/minus,
+     which is CSS, and keeping the rail's own scroll from reaching the page —
+     that is what data-lenis-prevent on the rail is for. */
 
-  const drawerOpen = () => $('#cmp-drawer').classList.contains('is-open');
-
-  function setDrawer(open) {
-    const d = $('#cmp-drawer'), b = $('#cmp-drawer-backdrop'), t = $('#cmp-filter-btn');
-    if (open === drawerOpen()) return;
-    if (open) lastFocus = document.activeElement;
-    d.classList.toggle('is-open', open);
-    b.classList.toggle('is-open', open);
-    d.setAttribute('aria-hidden', open ? 'false' : 'true');
-    if (open) d.removeAttribute('inert'); else d.setAttribute('inert', '');
-    t.setAttribute('aria-expanded', open ? 'true' : 'false');
-    document.body.classList.toggle('cmp-drawer-open', open);
-
-    /* Lenis drives the scroll on this site from its own rAF loop, so
-       body{overflow:hidden} alone does not stop the page moving under the panel. */
-    const lenis = window.__jaycoLenis;
-    if (lenis && lenis.stop) { if (open) lenis.stop(); else lenis.start(); }
-
-    if (open) {
-      $('#cmp-drawer-x').focus();
-    } else {
-      if (lastFocus && lastFocus.focus) lastFocus.focus();
-      lastFocus = null;
-      /* The grid re-rendered behind the backdrop while this was open; every
-         ScrollTrigger below it is still measured against the old height. */
-      refresh();
-    }
+  function clearAll() {
+    state.types.clear();
+    state.cats.clear(); state.models.clear(); state.sleeps.clear();
+    state.features.clear(); state.slide = false;
+    state.price = RANGE.price.slice(); state.length = RANGE.length.slice(); state.weight = RANGE.weight.slice();
+    paintFilters(); renderGrid(); refresh();
   }
 
-  /* inert takes the background out of the tab order on its own in current
-     browsers, but Safari below 15.5 ignores it outright — so the cycle is
-     also held manually rather than trusted to it. */
+  /* ---------- Open / close ----------
+     A disclosure: the page behind stays scrollable and clickable, so there is no
+     scroll lock, no inert, and no focus trap to maintain. */
+  const panelOpen = () => $('#cmp-rail').classList.contains('is-open');
+
+  /* Below 1024 the same control is a SHEET, not a disclosure: it covers the
+     screen, so a page still scrolling behind it is content moving unseen under
+     the reader's thumb. Live, not cached — a phone rotating from 820 to 1180
+     crosses this line, and setPanel() has to be told the truth on the way out
+     as well as the way in. */
+  const SHEET = window.matchMedia('(max-width: 1023px)');
+  const sheetMode = () => SHEET.matches;
+
+  const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])';
+
+  /* Lenis keeps scrolling the window under a fixed overlay whatever overflow
+     says, so it is stopped rather than trusted. */
+  function lockPage(on) {
+    document.body.classList.toggle('cmp-sheet-on', on);
+    const l = window.__jaycoLenis;
+    if (l) { if (on && l.stop) l.stop(); else if (!on && l.start) l.start(); }
+    /* inert covers the tab order in current browsers; trapTab() is the manual
+       belt for Safari under 15.5, which ignores it outright.
+
+       Every child of <main> EXCEPT the rail. The rail lives inside <main>, so
+       inert on <main> itself would take the sheet down with the page — every
+       control in it dead to a finger and gone from the accessibility tree. That
+       fails silently in a test, because el.click() fires on an inert element
+       just fine; only real input is blocked. */
+    const rail = $('#cmp-rail'), main = rail && rail.closest('main');
+    if (main) Array.from(main.children).forEach((el) => {
+      if (el === rail) return;
+      if (on) el.setAttribute('inert', ''); else el.removeAttribute('inert');
+    });
+  }
+
+  /* The sheet covers the page, so the tab cycle has to stay inside it. */
   function trapTab(e) {
-    if (e.key !== 'Tab' || !drawerOpen()) return;
-    const d = $('#cmp-drawer');
+    if (e.key !== 'Tab' || !panelOpen() || !sheetMode()) return;
+    const d = $('#cmp-panel');
     const f = Array.from(d.querySelectorAll(FOCUSABLE)).filter((el) => el.offsetParent !== null);
     if (!f.length) return;
     const first = f[0], last = f[f.length - 1];
@@ -578,18 +737,47 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
-  function clearAll() {
-    state.cats.clear(); state.models.clear(); state.sleeps.clear();
-    state.features.clear(); state.slide = false;
-    state.price = RANGE.price.slice(); state.length = RANGE.length.slice(); state.weight = RANGE.weight.slice();
-    renderFilters(); renderGrid(); refresh();
+  /* Crossing the breakpoint with the sheet open would otherwise strand a locked,
+     inert page behind a panel that is no longer covering it. */
+  SHEET.addEventListener('change', () => lockPage(panelOpen() && sheetMode()));
+
+  function setPanel(open) {
+    if (open === panelOpen()) return;
+    $('#cmp-rail').classList.toggle('is-open', open);
+    $('#cmp-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
+    lockPage(open && sheetMode());
+    if (open) {
+      /* Not the trigger — it is about to cross-fade to visibility:hidden, and
+         focus on an invisible element is the worst outcome. */
+      const first = $('#cmp-clear').hidden ? $('.cmp-acc-sum') : $('#cmp-clear');
+      if (first) first.focus();
+    } else {
+      /* rAF, never transitionend: under prefers-reduced-motion the transition is
+         `none` and transitionend never fires, which would kill the focus restore
+         silently. And focus() into a still-hidden subtree is a no-op, so the
+         class has to land first. */
+      requestAnimationFrame(() => $('#cmp-trigger').focus());
+    }
   }
 
   /* ---------- Wiring ---------- */
   function wire() {
+    document.addEventListener('keydown', trapTab, true);
+    $('#cmp-trigger').addEventListener('click', () => setPanel(!panelOpen()));
+    $('#cmp-panel-x').addEventListener('click', () => setPanel(false));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panelOpen()) setPanel(false);
+    });
+
     $('#cmp-filters').addEventListener('click', (e) => {
+      /* FIRST, and preventDefault rather than stopPropagation: the toggle is
+         <summary>'s DEFAULT ACTION, which fires after propagation finishes, so
+         stopping the bubble alone would still open the accordion. Before the
+         [data-facet] lookup too, or that would match as well and act twice. */
+      const x = e.target.closest('[data-facet-clear]');
+      if (x) { e.preventDefault(); e.stopPropagation(); clearFacet(x.dataset.facetClear); return; }
       const b = e.target.closest('[data-facet]');
-      if (!b) return;
+      if (!b || b.disabled) return;
       e.preventDefault();
       const id = b.dataset.id, f = b.dataset.facet;
       if (f === 'cat')    { toggle(state.cats, id); state.models.clear(); }
@@ -597,7 +785,7 @@
       if (f === 'sleeps') { toggle(state.sleeps, +id); }
       if (f === 'feature'){ toggle(state.features, id); }
       if (f === 'slide')  { state.slide = !state.slide; }
-      renderFilters(); renderGrid(); refresh();
+      paintFilters(); renderGrid(); refresh();
     });
 
     $('#cmp-filters').addEventListener('input', (e) => {
@@ -611,23 +799,31 @@
       const fmt = id === 'price' ? money : id === 'length' ? (v) => feet(v) + ' ft' : (v) => v.toLocaleString('en-US') + ' lb';
       $('#cmp-' + id + '-lo').textContent = fmt(lo);
       $('#cmp-' + id + '-hi').textContent = fmt(hi);
-      renderGrid(); refresh();
+      paintFilters(); renderGrid(); refresh();
+    });
+
+    /* Two independent toggles rather than a segmented control: neither pressed
+       and both pressed both mean "everything", which is what someone poking at
+       a pair of buttons expects, and it costs no extra state to allow.
+       Picking one drops any category already chosen in the drawer that the type
+       excludes — otherwise Motorized + Fifth Wheels would sit there as an
+       active pair that can only ever return an empty grid. Models go with them,
+       exactly as they do when a category is toggled. */
+    $('#cmp-types').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-type]');
+      if (!b) return;
+      toggle(state.types, b.dataset.type);
+      if (state.types.size) {
+        Array.from(state.cats).forEach((id) => {
+          const c = JAYCO.categories.find((x) => x.id === id);
+          if (!c || !state.types.has(c.type)) state.cats.delete(id);
+        });
+        state.models.clear();
+      }
+      paintFilters(); renderGrid(); refresh();
     });
 
     $('#cmp-clear').addEventListener('click', clearAll);
-    $('#cmp-drawer-reset').addEventListener('click', clearAll);
-
-    $('#cmp-filter-btn').addEventListener('click', () => setDrawer(true));
-    $('#cmp-drawer-x').addEventListener('click', () => setDrawer(false));
-    $('#cmp-drawer-apply').addEventListener('click', () => setDrawer(false));
-    $('#cmp-drawer-backdrop').addEventListener('click', () => setDrawer(false));
-
-    /* Safe at document level: app.js's own Escape handler is guarded on
-       .mobile-menu.open, so the two never both fire. */
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && drawerOpen()) { setDrawer(false); return; }
-      trapTab(e);
-    });
 
     $('#cmp-grid').addEventListener('click', (e) => {
       const b = e.target.closest('.cmp-pick');
@@ -670,6 +866,7 @@
     `${ROWS.length} floorplans across ${Object.keys(BUILD).length} models, with Jayco's own drawings and published specifications.`;
   readURL();
   renderFilters();
+  paintFilters();
   renderGrid();
   renderTray();
   if (state.picked.length >= 2) renderCompare();
