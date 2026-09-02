@@ -46,6 +46,11 @@ assets/quiz/*.jpg
 assets/quiz/*.jpeg
 assets/quiz/*.png
 
+# The brochures hero: one 6.4 MB, 2400x1598 plate, of which the page loads a
+# cropped pair of webps at 1200 and 1800. Same rule as every block above — the
+# original stays local, assets/brochures/web/ is one level deeper and untouched.
+assets/brochures/*.jpg
+
 # The delivered master of the news section's hookups video: 17 MB at 36 Mbps,
 # where the two cards beside it run 8.5–10.8. The news videos play on hover, so
 # that whole file would have to arrive between the pointer landing and the first
