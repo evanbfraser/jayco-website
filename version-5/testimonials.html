@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
-  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-2" />
+  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-3" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -143,7 +143,7 @@
              here: a number in the markup goes stale the moment a story is added
              or dropped, which it already did once. -->
         <p class="tm-hero-tagline"><span id="tm-hero-count">Owners</span> on the coaches they
-          bought and the years they have spent in them — in the words they used to Jayco.</p>
+          bought — in the words they used themselves.</p>
       </div>
     </section>
 
@@ -160,9 +160,9 @@
               where much of the industry offers one. More than three hundred dealers and service
               centres across North America. Owners groups, rallies and an Ambassador programme
               that exists for no reason other than that people who buy one tend to stay.</p>
-            <p>The stories below are not ours. They are owners', published by Jayco in its own
-              journal over nine years, and quoted here exactly as they were written — names,
-              coaches, dates and all.</p>
+            <p>The reviews above are not ours. Owners left them on Google, Jayco publishes
+              them on its own testimonials page, and they are quoted here exactly as they were
+              written — spelling, grumbles and all.</p>
           </div>
         </div>
       </div>
@@ -221,27 +221,38 @@
     </section>
 
     <!-- ===== Owner gallery =====
-         Full-bleed on purpose: the track has to reach both edges, which it
-         cannot do inside .tm-inner's max-width frame. Columns drift at
-         different rates on scroll — see initGallery() in testimonials.js. -->
+         An expanding strip: one photograph open, the rest held as narrow pills
+         beside it, advancing on its own. No icons and no captions on the tiles —
+         these are photographs of owners, and a badge over someone's face is
+         chrome competing with the picture.
+
+         On a dark band because the reference is, and because a row of lit
+         photographs wants a ground that recedes. --band-navy is this system's
+         dark, not a new one. -->
     <section class="tm-gallery" aria-labelledby="tm-gal-h">
       <div class="tm-inner">
         <header class="tm-gal-head">
-          <span class="section-label">On the road</span>
-          <h2 class="section-heading dark" id="tm-gal-h">Where they have<br>been taking them.</h2>
+          <span class="section-label light">On the road</span>
+          <h2 class="section-heading light" id="tm-gal-h">Where they have<br>been taking them.</h2>
         </header>
       </div>
-      <div class="tm-gal-mosaic" id="tm-gal"><!-- built by testimonials.js --></div>
-    </section>
 
-    <!-- No data-animation on this section: app.js runs one staggered gsap.from()
-         over every .section-* inside such a section, and nine cards would be a
-         multi-second stagger. -->
-    <section class="tm-grid-wrap" aria-label="Owner stories">
+      <!-- role=group, not tablist: there is no panel to switch to. Each tile is
+           the content, and expanding one only changes how much of it you can
+           see — so the honest control is a pressed button, not a tab. -->
+      <div class="tm-gal-strip" id="tm-gal" role="group" aria-label="Owner photographs">
+        <!-- built by testimonials.js -->
+      </div>
+
       <div class="tm-inner">
-        <ul class="tm-grid" id="tm-grid" role="list"><!-- built by testimonials.js --></ul>
-        <p class="tm-note">Every quote is reproduced as Jayco published it. Follow any card's
-          link to read the full story.</p>
+        <!-- WCAG 2.2.2: content that moves on its own for more than five
+             seconds needs a way to stop it. Hover and focus already pause the
+             strip, but neither is available to someone who simply wants it
+             still, so the control is real and visible. -->
+        <button type="button" class="tm-gal-pause" id="tm-gal-pause" aria-pressed="false">
+          <span class="tm-gal-pause-glyph" aria-hidden="true"></span>
+          <span id="tm-gal-pause-label">Pause</span>
+        </button>
       </div>
     </section>
 
@@ -258,9 +269,9 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>All of them are owner stories Jayco has published itself, in its journal and on
-                its testimonials page, between 2017 and 2021. Each card links to the story it was
-                taken from, with the owner's name, their coach and the year.</p>
+              <p>Owners left them on Google. Jayco embeds them on its own testimonials page
+                through its reviews partner, and they are copied here from that widget with the
+                name, the rating and the date each reviewer gave.</p>
             </div>
           </div>
           <div class="faq-item">
@@ -269,19 +280,21 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>No. They are reproduced word for word. Where a quote joins two consecutive
+              <p>No. They are reproduced word for word, including the spelling and grammar the
+                reviewers used. Where a quote joins two consecutive
                 sentences from the same answer it runs on unbroken, and nothing has been cut to
                 change what was said.</p>
             </div>
           </div>
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>Why is there no star rating?</span>
+              <span>Why is there no overall rating?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>Because Jayco does not publish one, and a page of hand-picked stories is not a
-                sample you can average. If you want unfiltered owner reviews with scores, read
+              <p>Each review carries the rating its author gave it, but there is no average on
+                this page, because Jayco publishes none — and ten reviews is not a sample you can
+                average into one anyway. If you want unfiltered owner reviews with scores, read
                 them somewhere independent — RV Insider, Trustpilot and the Better Business
                 Bureau all carry Jayco listings, and they are a good deal more mixed than this
                 page.</p>
@@ -471,9 +484,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/gallery-data.js?v=v5-tm-2"></script>
-  <script src="js/testimonial-data.js?v=v5-tm-2"></script>
-  <script src="js/testimonials.js?v=v5-tm-2"></script>
+  <script src="js/gallery-data.js?v=v5-tm-3"></script>
+  <script src="js/testimonial-data.js?v=v5-tm-3"></script>
+  <script src="js/testimonials.js?v=v5-tm-3"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

@@ -344,37 +344,92 @@
 .tm-rev-when { font-size: 0.78rem; color: var(--text-mid); }
 
 /* ===================================================
-   Owner gallery — the drifting mosaic
+   Owner gallery — the expanding strip
+   ---------------------------------------------------
+   One photograph open, the rest as narrow pills. Width
+   is carried by flex-grow so the panels share whatever
+   the container is, without a px value to recompute on
+   resize.
    =================================================== */
-.tm-gallery { padding: clamp(3rem, 6vw, 5rem) 0 clamp(3.5rem, 7vw, 6rem); }
-.tm-gal-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
+.tm-gallery {
+  padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 6vw, 4.5rem);
+  background: var(--band-navy);
+}
+.tm-gal-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem); }
 
-/* Four columns of uneven tiles. dense packing is what lets a tall tile sit
-   beside two short ones without leaving a hole where the flow could not
-   backtrack. */
-.tm-gal-mosaic {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: clamp(90px, 9vw, 130px);
-  grid-auto-flow: dense;
-  gap: clamp(0.5rem, 1vw, 0.9rem);
-  padding: 0 var(--page-pad);
+.tm-gal-strip {
+  display: flex;
+  gap: clamp(0.5rem, 0.9vw, 0.85rem);
+  height: clamp(300px, 44vw, 500px);
+  /* Trailing room so the LAST panel can still reach the left gutter. Without
+     it the scroll clamps early and the final few open wherever they happen to
+     land, which reads as the strip giving up. */
+  padding: 0 max(var(--page-pad), calc(100vw - min(62vw, 760px) - var(--page-pad))) 0 var(--page-pad);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* The strip scrolls itself; the page must not scroll sideways with it. */
+  overscroll-behavior-x: contain;
 }
-.tm-gal-tile {
-  margin: 0; overflow: hidden; border-radius: var(--radius-card);
-  background: var(--surface);
-  grid-row: span 2;
+.tm-gal-strip::-webkit-scrollbar { display: none; }
+
+.tm-gal-panel {
+  flex: 0 0 auto;
+  width: clamp(46px, 4.4vw, 62px);
+  height: 100%;
+  padding: 0; border: none; background: var(--band-navy);
+  overflow: hidden;
+  cursor: pointer;
+  /* Fully rounded while narrow, a card once open. The radius is the tell that
+     a pill IS the same object as the open panel, so it is animated with the
+     width rather than swapped at the end. */
+  border-radius: 999px;
+  transition: width 0.62s var(--ease-morph), border-radius 0.62s var(--ease-morph);
 }
-.tm-gal-tile.is-tall { grid-row: span 3; }
-.tm-gal-tile.is-wide { grid-column: span 2; grid-row: span 2; }
-.tm-gal-tile img {
+.tm-gal-panel.is-open {
+  width: min(62vw, 760px);
+  border-radius: var(--radius-card);
+}
+.tm-gal-panel:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+
+.tm-gal-panel img {
   width: 100%; height: 100%; object-fit: cover; display: block;
-  transition: transform 0.7s var(--ease-out);
+  /* Cropping to a 50px pill from the CENTRE of a 3:2 frame lands on nothing.
+     Biased right, where these photographs mostly carry their subject. */
+  object-position: 62% 50%;
+  /* Dimmed while closed so the open one is unmistakably the subject; it is a
+     brightness change, not an overlay, so nothing sits on top of a face. */
+  filter: brightness(0.62);
+  transition: filter 0.62s var(--ease-morph), object-position 0.62s var(--ease-morph);
 }
-.tm-gal-tile:hover img { transform: scale(1.04); }
+.tm-gal-panel.is-open img { object-position: 50% 50%; filter: none; }
+.tm-gal-panel:hover img { filter: brightness(0.82); }
+.tm-gal-panel.is-open:hover img { filter: none; }
+
+.tm-gal-pause {
+  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.6rem 1.1rem;
+  border: 1.5px solid rgba(255,255,255,0.28); border-radius: var(--radius-btn);
+  background: none; color: rgba(255,255,255,0.86);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+.tm-gal-pause:hover { border-color: rgba(255,255,255,0.6); color: #fff; }
+.tm-gal-pause:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+/* Two bars, becoming one triangle when paused. Drawn rather than an icon file:
+   it is six lines of CSS against a request and a cache entry. */
+.tm-gal-pause-glyph {
+  width: 9px; height: 11px; flex: none;
+  border-left: 3px solid currentColor; border-right: 3px solid currentColor;
+}
+.tm-gal-pause.is-paused .tm-gal-pause-glyph {
+  border-left: 9px solid currentColor; border-right: none;
+  border-top: 5.5px solid transparent; border-bottom: 5.5px solid transparent;
+  height: 0; width: 0;
+}
 
 @media (max-width: 1100px) {
-  .tm-gal-mosaic { grid-template-columns: repeat(3, 1fr); }
   .tm-rev-body { grid-template-columns: minmax(0, 1fr); }
   .tm-rev-side { display: grid; grid-template-columns: 1fr auto; align-items: end; }
   .tm-rev-mark { display: none; }
@@ -382,15 +437,21 @@
   .tm-rev-controls { width: 190px; }
 }
 @media (max-width: 700px) {
-  .tm-gal-mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 28vw; }
-  .tm-gal-tile.is-wide { grid-column: span 2; }
+  /* A pill narrower than a thumb is not a target. Fewer, wider ones, and the
+     open panel takes most of the screen. */
+  .tm-gal-panel { width: 44px; }
+  .tm-gal-panel.is-open { width: 78vw; }
+  .tm-gal-strip { height: 62vw; }
   .tm-rev-card { flex-basis: min(78vw, 300px); }
   .tm-rev-side { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
   .tm-rev-controls { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tm-gal-tile img, .tm-rev-bar-fill, .tm-rev-nav { transition: none; }
-  .tm-gal-tile:hover img { transform: none; }
+  /* The strip does not auto-advance under reduced motion (testimonials.js
+     checks the same query), so what is left is the width change on a click —
+     which is the information, not decoration. It goes too. */
+  .tm-gal-panel, .tm-gal-panel img,
+  .tm-rev-bar-fill, .tm-rev-nav { transition: none; }
   .tm-rev-track { scroll-behavior: auto; }
 }
