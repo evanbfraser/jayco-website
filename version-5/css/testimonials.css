@@ -244,7 +244,7 @@
 
 .tm-rev-body {
   display: grid;
-  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
   gap: clamp(1.5rem, 3vw, 3rem);
   align-items: start;
 }
@@ -253,9 +253,14 @@
   display: block; font-size: 5.5rem; line-height: 0.7; font-weight: 800;
   color: var(--surface); margin-bottom: 1.25rem;
 }
+/* Sits between DESIGN.md's Title (1.6rem) and Headline (2.4rem). The ramp has
+   no step here, and both neighbours are wrong for it: at Title it is the size it
+   already was, and at Headline it out-shouts "Reviews from real people", which
+   is the section's actual heading. Flagged rather than quietly invented — if
+   this size stays, it wants adding to the ramp. */
 .tm-rev-kicker {
-  margin: 0 0 2rem; font-size: clamp(1.2rem, 1.7vw, 1.6rem); font-weight: 700;
-  line-height: 1.25; letter-spacing: -0.01em; color: var(--text-dark);
+  margin: 0 0 2rem; font-size: clamp(1.7rem, 2.3vw, 2.15rem); font-weight: 700;
+  line-height: 1.18; letter-spacing: -0.02em; color: var(--text-dark);
 }
 .tm-rev-controls { display: flex; align-items: center; gap: 0.9rem; }
 .tm-rev-nav {
@@ -297,22 +302,25 @@
 }
 
 .tm-rev-bubble {
-  position: relative; margin: 0 0 0.9rem;
+  position: relative; margin: 0 0 0.75rem;
   background: var(--white); border-radius: var(--radius-card);
   padding: 1.5rem 1.4rem 1.3rem;
   box-shadow: 0 1px 2px rgba(15,11,9,0.04), 0 6px 20px rgba(15,11,9,0.06);
   display: flex; flex-direction: column; gap: 1rem;
   flex: 1 1 auto; min-height: 210px;
 }
-/* The tail. A rotated square rather than a border triangle, so it inherits the
-   bubble's own background and shadow instead of needing a second colour kept in
-   step with it. */
+/* The tail, as the reference draws it: a right triangle whose LEFT edge runs
+   straight down off the bubble and whose hypotenuse cuts back up to the right.
+   A rotated square was the first attempt and gives a symmetric diamond — a
+   point, but not this point.
+
+   clip-path rather than the border trick, because a border triangle cannot
+   carry a background and would need the bubble's white restating as a border
+   colour, which is one more place for the two to drift apart. */
 .tm-rev-bubble::after {
-  content: ''; position: absolute; left: 26px; bottom: -7px;
-  width: 18px; height: 18px; background: var(--white);
-  transform: rotate(45deg);
-  border-bottom-right-radius: 3px;
-  box-shadow: 3px 3px 6px rgba(15,11,9,0.04);
+  content: ''; position: absolute; left: 24px; bottom: -15px;
+  width: 22px; height: 16px; background: var(--white);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
 }
 .tm-rev-quote {
   margin: 0; flex: 1 1 auto;
@@ -325,7 +333,13 @@
 }
 .tm-rev-stars { display: inline-flex; gap: 2px; color: #2FA37C; flex: none; }
 
-.tm-rev-who { display: flex; align-items: center; gap: 0.7rem; padding-left: 0.35rem; }
+/* Indented so the avatar sits under the tail rather than out at the card's
+   edge — that alignment is what makes the tail read as pointing AT the speaker.
+   The extra top margin is the tail's own height, which overhangs the bubble. */
+.tm-rev-who {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding-left: 14px; margin-top: 0.35rem;
+}
 .tm-rev-avatar {
   flex: none; width: 40px; height: 40px; border-radius: 50%;
   display: grid; place-items: center;
