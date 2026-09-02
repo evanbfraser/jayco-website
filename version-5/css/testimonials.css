@@ -213,3 +213,184 @@
 @media (prefers-reduced-motion: reduce) {
   .tm-src { transition: none; }
 }
+
+/* ===================================================
+   Recent reviews — the carousel
+   ---------------------------------------------------
+   Card shape from the supplied reference: a white
+   speech bubble with a tail at the bottom left, the
+   attribution sitting OUTSIDE it and below, so the
+   avatar reads as the speaker rather than part of the
+   quote.
+   =================================================== */
+.tm-reviews { padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3rem); }
+
+.tm-rev-head { text-align: center; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+/* Regular weight with a bold second half, as the reference sets it — the
+   emphasis is the point of the line, not decoration. */
+.tm-rev-title {
+  font-size: clamp(2rem, 4.2vw, 3.4rem); font-weight: 400; letter-spacing: -0.02em;
+  color: var(--text-dark); margin: 0 0 0.85rem; line-height: 1.05;
+}
+.tm-rev-title strong { font-weight: 800; }
+.tm-rev-source {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  margin: 0; font-size: 0.9rem; color: var(--text-mid);
+}
+.tm-g { display: inline-flex; flex: none; }
+/* No aggregate score sits here on purpose. Jayco publishes none, so there is
+   nothing to average — see js/testimonial-data.js. The reference's rating row
+   is the one part of it this page cannot honestly copy. */
+
+.tm-rev-body {
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+}
+.tm-rev-side { padding-top: 0.5rem; }
+.tm-rev-mark {
+  display: block; font-size: 5.5rem; line-height: 0.7; font-weight: 800;
+  color: var(--surface); margin-bottom: 1.25rem;
+}
+.tm-rev-kicker {
+  margin: 0 0 2rem; font-size: clamp(1.2rem, 1.7vw, 1.6rem); font-weight: 700;
+  line-height: 1.25; letter-spacing: -0.01em; color: var(--text-dark);
+}
+.tm-rev-controls { display: flex; align-items: center; gap: 0.9rem; }
+.tm-rev-nav {
+  flex: none; width: 34px; height: 34px; display: grid; place-items: center;
+  border: none; background: none; color: var(--text-dark); cursor: pointer;
+  transition: color 0.2s, opacity 0.2s;
+}
+.tm-rev-nav:hover:not([disabled]) { color: var(--blue); }
+.tm-rev-nav:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.tm-rev-nav[disabled] { opacity: 0.3; cursor: default; }
+.tm-rev-bar {
+  flex: 1 1 auto; height: 2px; background: var(--surface); border-radius: 2px;
+  overflow: hidden; position: relative;
+}
+.tm-rev-bar-fill {
+  display: block; height: 100%; background: var(--text-dark);
+  transform-origin: left center; transform: scaleX(0.12);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.tm-rev-track {
+  display: flex; gap: clamp(1rem, 1.8vw, 1.6rem);
+  list-style: none; margin: 0; padding: 0.5rem 0 0.5rem;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* Reaches the right edge of the viewport rather than stopping at the frame:
+     a rail that ends flush reads as a list, one that runs off reads as
+     continuing. The padding is scroll room INSIDE the scroller. */
+  margin-right: calc(-1 * var(--page-pad)); padding-right: var(--page-pad);
+}
+.tm-rev-track::-webkit-scrollbar { display: none; }
+.tm-rev-track:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+/* A column so the bubble can take the slack: without it every bubble sizes to
+   its own quote and the tails, avatars and names sit at four different heights
+   across the rail. The reference has them flush, and it is right to. */
+.tm-rev-card {
+  flex: 0 0 clamp(255px, 30%, 330px); scroll-snap-align: start;
+  display: flex; flex-direction: column;
+}
+
+.tm-rev-bubble {
+  position: relative; margin: 0 0 0.9rem;
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 1.5rem 1.4rem 1.3rem;
+  box-shadow: 0 1px 2px rgba(15,11,9,0.04), 0 6px 20px rgba(15,11,9,0.06);
+  display: flex; flex-direction: column; gap: 1rem;
+  flex: 1 1 auto; min-height: 210px;
+}
+/* The tail. A rotated square rather than a border triangle, so it inherits the
+   bubble's own background and shadow instead of needing a second colour kept in
+   step with it. */
+.tm-rev-bubble::after {
+  content: ''; position: absolute; left: 26px; bottom: -7px;
+  width: 18px; height: 18px; background: var(--white);
+  transform: rotate(45deg);
+  border-bottom-right-radius: 3px;
+  box-shadow: 3px 3px 6px rgba(15,11,9,0.04);
+}
+.tm-rev-quote {
+  margin: 0; flex: 1 1 auto;
+  font-size: 0.92rem; line-height: 1.6; color: var(--text-dark);
+  /* Six lines, then ellipsis. The long ones run 100+ words and would make one
+     card four times the height of its neighbours; the full text stays in the
+     DOM for anyone reading it another way. */
+  display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tm-rev-stars { display: inline-flex; gap: 2px; color: #2FA37C; flex: none; }
+
+.tm-rev-who { display: flex; align-items: center; gap: 0.7rem; padding-left: 0.35rem; }
+.tm-rev-avatar {
+  flex: none; width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.95rem; font-weight: 700; color: #fff;
+  background: var(--blue);
+}
+/* Six grounds cycled by index, so a rail of monograms is not one flat colour.
+   All six clear 4.5:1 against white text. */
+.tm-rev-avatar[data-i="1"] { background: #6B4E9B; }
+.tm-rev-avatar[data-i="2"] { background: #1F7A5C; }
+.tm-rev-avatar[data-i="3"] { background: #B14A2E; }
+.tm-rev-avatar[data-i="4"] { background: #2F5D8C; }
+.tm-rev-avatar[data-i="5"] { background: #8A5A1F; }
+.tm-rev-meta { display: flex; flex-direction: column; min-width: 0; }
+.tm-rev-name { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); }
+.tm-rev-when { font-size: 0.78rem; color: var(--text-mid); }
+
+/* ===================================================
+   Owner gallery — the drifting mosaic
+   =================================================== */
+.tm-gallery { padding: clamp(3rem, 6vw, 5rem) 0 clamp(3.5rem, 7vw, 6rem); }
+.tm-gal-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
+
+/* Four columns of uneven tiles. dense packing is what lets a tall tile sit
+   beside two short ones without leaving a hole where the flow could not
+   backtrack. */
+.tm-gal-mosaic {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: clamp(90px, 9vw, 130px);
+  grid-auto-flow: dense;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+  padding: 0 var(--page-pad);
+}
+.tm-gal-tile {
+  margin: 0; overflow: hidden; border-radius: var(--radius-card);
+  background: var(--surface);
+  grid-row: span 2;
+}
+.tm-gal-tile.is-tall { grid-row: span 3; }
+.tm-gal-tile.is-wide { grid-column: span 2; grid-row: span 2; }
+.tm-gal-tile img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.7s var(--ease-out);
+}
+.tm-gal-tile:hover img { transform: scale(1.04); }
+
+@media (max-width: 1100px) {
+  .tm-gal-mosaic { grid-template-columns: repeat(3, 1fr); }
+  .tm-rev-body { grid-template-columns: minmax(0, 1fr); }
+  .tm-rev-side { display: grid; grid-template-columns: 1fr auto; align-items: end; }
+  .tm-rev-mark { display: none; }
+  .tm-rev-kicker { margin-bottom: 0; }
+  .tm-rev-controls { width: 190px; }
+}
+@media (max-width: 700px) {
+  .tm-gal-mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 28vw; }
+  .tm-gal-tile.is-wide { grid-column: span 2; }
+  .tm-rev-card { flex-basis: min(78vw, 300px); }
+  .tm-rev-side { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .tm-rev-controls { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-gal-tile img, .tm-rev-bar-fill, .tm-rev-nav { transition: none; }
+  .tm-gal-tile:hover img { transform: none; }
+  .tm-rev-track { scroll-behavior: auto; }
+}

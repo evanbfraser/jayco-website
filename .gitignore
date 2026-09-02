@@ -64,3 +64,9 @@ assets/jayco-news-hookups-v2.mp4
 
 # Tooling, not the site: a vendored copy of a skill plus machine-local settings.
 .claude/
+
+# The owner-gallery originals: 28 plates from 3.7 to 70 MB, ~900 MB for the set,
+# of which the page loads a 900w/1500w webp pair each (5.2 MB total). Same rule
+# as every block above — the originals stay local, assets/testimonials/web/ is a
+# level deeper and untouched.
+assets/testimonials/*.jpg
