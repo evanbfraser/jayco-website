@@ -199,10 +199,21 @@
       });
     });
 
-    /* ?model=<slug> opens it prefilled — after the loader, not behind it:
-       #loader is z-index 9999 and this panel is 1100, so opening on
-       DOMContentLoaded would put the dialog under the splash for its duration. */
-    const want = new URLSearchParams(location.search).get('model');
+    /* ?model=<slug> opens it prefilled — but ONLY on the brochures page, where
+       that parameter means "open the request form for this brochure".
+
+       The gate is the whole point. model.html ROUTES on the same parameter —
+       every model detail page is model.html?model=<slug> — so an unscoped read
+       popped this dialog over all 27 of them the moment they finished loading.
+       Positive test rather than a model-page exclusion, so any page that adopts
+       this component later cannot inherit the deep link by accident.
+
+       Still on animations-ready rather than DOMContentLoaded: #loader is
+       z-index 9999 and this panel is 1100, so opening earlier would put the
+       dialog under the splash for its duration. */
+    const want = document.body.classList.contains('brochures-page')
+      ? new URLSearchParams(location.search).get('model')
+      : null;
     if (want && JAYCO.models[want]) {
       document.addEventListener('jayco:animations-ready', () => open(want, null), { once: true });
     }
