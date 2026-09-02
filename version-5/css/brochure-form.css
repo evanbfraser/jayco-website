@@ -22,6 +22,19 @@
   display: grid; place-items: center;
   padding: clamp(1rem, 3vw, 2.5rem);
 }
+/* The closed state, and it has to live HERE rather than rely on the host page.
+   `display: grid` above is an author rule; `[hidden] { display: none }` is only
+   a UA rule, so the modal wins and renders whether or not the attribute is set.
+   Most pages happen to carry a blanket `.<page> [hidden] { display: none
+   !important }` that covered for this — model.css does not, so the request form
+   sat open over every model detail page, towable and motorized alike, with the
+   attribute still reading hidden="".
+
+   A component owns its own closed state. Scoped to .brf-modal rather than
+   another blanket rule, because a blanket [hidden] would also beat
+   build.css's .build-back[hidden] { visibility: hidden } — the reason
+   style.css:89 scopes its own to img. */
+.brf-modal[hidden] { display: none !important; }
 .brf-scrim {
   position: absolute; inset: 0;
   background: rgba(15,11,9,0.62); backdrop-filter: blur(3px);
