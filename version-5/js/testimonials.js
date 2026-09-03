@@ -71,16 +71,6 @@
 
   track.innerHTML = DATA.items.map(card).join('');
 
-  /* The hero tagline's count. Written from the data rather than typed into the
-     markup, where it went stale once already — and it had to move here when the
-     owner-story grid that used to own it was removed. */
-  const WORDS = ['no', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
-    'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
-  const label = $('#tm-hero-count');
-  if (label) {
-    const n = DATA.items.length;
-    label.textContent = (WORDS[n] || String(n)) + (n === 1 ? ' owner' : ' owners');
-  }
 
   const bar = $('#tm-rev-bar');
   const navs = Array.from(document.querySelectorAll('[data-rev-dir]'));
