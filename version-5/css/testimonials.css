@@ -238,7 +238,12 @@
    avatar reads as the speaker rather than part of the
    quote.
    =================================================== */
-.tm-reviews { padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3rem); }
+/* The bottom is 168px, not 150, on purpose. The attribution row hangs 18px
+   below the track's own box — the caption clears the tail with a percentage
+   margin and the scroller does not grow for it — so 168 measures as a true
+   150px of clear space between the last card and the top of the blue band.
+   Fixed rather than clamped: 150 was asked for as a number, not a range. */
+.tm-reviews { padding: clamp(3.5rem, 7vw, 6rem) 0 168px; }
 
 .tm-rev-head { text-align: center; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
 /* Regular weight with a bold second half, as the reference sets it — the
