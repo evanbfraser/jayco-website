@@ -264,3 +264,80 @@
 
   show(0, false);
 }());
+
+/* ===================================================
+   Page motion — hero parallax and the card reveal
+   ---------------------------------------------------
+   The section-level arrivals are NOT here: those come
+   from app.js's data-animation handler, which the four
+   sections below the hero now carry. One mechanism for
+   the whole site rather than a second one on this page.
+
+   Everything is gsap.from()/fromTo() with the resting
+   state visible, so a GSAP that fails to load leaves a
+   static page rather than an empty one.
+   =================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, c) => (c || document).querySelector(s);
+
+  /* ---------- Hero parallax ----------
+     Ported from brochures.js. Small and linear, the way the rest of the site
+     drifts its media: ease 'none' and scrub true, so it tracks the scrollbar
+     rather than performing. The travel is read from --tm-drift, so the CSS owns
+     the headroom and the JS cannot drift further than the media overhangs —
+     which is what stops a bare edge appearing at the top or bottom of the band.
+
+     Under prefers-reduced-motion the CSS sets --tm-drift to 0 and this bails,
+     leaving the image where it sits. */
+  function initParallax() {
+    const media = $('.tm-hero-media'), hero = $('.tm-hero');
+    if (!media || !hero) return;
+    const drift = parseFloat(getComputedStyle(document.querySelector('.testimonials-page'))
+      .getPropertyValue('--tm-drift')) || 0;
+    if (!drift) return;
+
+    window.gsap.fromTo(media,
+      { yPercent: -drift / 2 },
+      {
+        yPercent: drift / 2,
+        ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+      });
+  }
+
+  /* ---------- The quote cards, one at a time ----------
+     A stagger on the section entering, not a trigger per card: the cards sit in
+     a HORIZONTAL scroller, so all ten cross the viewport's vertical threshold at
+     the same moment and a per-card ScrollTrigger would fire them together.
+     Sequencing them is the stagger's job here.
+
+     Only the cards actually on screen are staggered. Running 0.12s across all
+     ten would still be arriving nine seconds after the fourth card — and cards
+     five onward are off to the right where nobody has seen them anyway. They
+     are left alone rather than animated behind the edge. */
+  function initCards() {
+    const track = $('#tm-rev-track');
+    if (!track) return;
+    const cards = Array.from(track.querySelectorAll('.tm-rev-card'));
+    if (!cards.length) return;
+
+    const visible = cards.filter((c) => c.getBoundingClientRect().left < window.innerWidth);
+    window.gsap.from(visible.length ? visible : cards.slice(0, 4), {
+      opacity: 0, y: 26,
+      duration: 0.66, ease: 'power2.out',
+      stagger: 0.12,
+      scrollTrigger: { trigger: track, start: 'top 88%', once: true },
+    });
+  }
+
+  function boot() {
+    if (typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') return;
+    initParallax();
+    initCards();
+  }
+
+  if (window.gsap && window.ScrollTrigger) boot();
+  else document.addEventListener('jayco:animations-ready', boot, { once: true });
+}());

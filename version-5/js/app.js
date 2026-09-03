@@ -395,6 +395,15 @@
   };
 
   function initSectionAnimations() {
+    /* DESIGN.md is explicit that prefers-reduced-motion "disables all of it, and
+       every section must be legible with the animation layer dead" — and this
+       handler was the one place that carried on regardless, fading and sliding
+       every [data-animation] section on every page.
+
+       Skipping is the safe direction: the resting state of a gsap.from() is the
+       visible one, so a section that is never animated is simply already there. */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     document.querySelectorAll('[data-animation]').forEach((section) => {
       const type = section.dataset.animation;
       const cfg  = animConfig[type];

@@ -15,6 +15,11 @@
   background: var(--canvas);
   --tm-pad: var(--page-pad);
   --tm-frame: 1440px;
+  /* The hero's parallax headroom. .tm-hero-media is inset by this on the top and
+     bottom, so the image overhangs the band and the drift can never expose a
+     bare edge. testimonials.js reads this number and derives its travel from it,
+     so the two cannot disagree. */
+  --tm-drift: 8%;
   --tm-gap-section: clamp(5rem, 10.4vw, 9.375rem);
 }
 .testimonials-page [hidden] { display: none !important; }
@@ -32,7 +37,14 @@
   align-items: flex-end;
   overflow: hidden;
 }
-.tm-hero-media { position: absolute; inset: 0; z-index: 0; }
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through. */
+.tm-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--tm-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
 .tm-hero-img {
   width: 100%; height: 100%;
   object-fit: cover;
@@ -211,6 +223,9 @@
   .tm-grid { column-count: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
+  /* testimonials.js derives its travel from this and bails when it is 0, so the
+     hero simply sits still rather than being animated to nowhere. */
+  .testimonials-page { --tm-drift: 0%; }
   .tm-src { transition: none; }
 }
 
@@ -512,6 +527,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* testimonials.js derives its travel from this and bails when it is 0, so the
+     hero simply sits still rather than being animated to nowhere. */
+  .testimonials-page { --tm-drift: 0%; }
   /* The strip does not auto-advance under reduced motion (testimonials.js
      checks the same query), so what is left is the width change on a click —
      which is the information, not decoration. It goes too. */
