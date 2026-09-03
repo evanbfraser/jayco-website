@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-8" />
-  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-7" />
+  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-8" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -192,8 +192,13 @@
             <span id="tm-rev-source-text">Reviews owners left on Google</span>
           </p>
         </header>
+      </div>
 
-        <div class="tm-rev-body">
+      <!-- OUTSIDE .tm-inner deliberately. The rail has to reach the right edge
+           of the viewport, and .tm-inner caps at 1440px — above that the cards
+           stopped 240px short of the edge and the rail read as a list that had
+           ended rather than one that carries on. -->
+      <div class="tm-rev-body">
           <div class="tm-rev-side">
             <span class="tm-rev-mark" aria-hidden="true">&ldquo;</span>
             <p class="tm-rev-kicker">What our<br>customers are<br>saying</p>
@@ -216,7 +221,6 @@
 
           <ul class="tm-rev-track" id="tm-rev-track" role="list"
               tabindex="0" aria-label="Owner reviews, scrollable"><!-- built by testimonials.js --></ul>
-        </div>
       </div>
     </section>
 
@@ -483,9 +487,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/gallery-data.js?v=v5-tm-7"></script>
-  <script src="js/testimonial-data.js?v=v5-tm-7"></script>
-  <script src="js/testimonials.js?v=v5-tm-7"></script>
+  <script src="js/gallery-data.js?v=v5-tm-8"></script>
+  <script src="js/testimonial-data.js?v=v5-tm-8"></script>
+  <script src="js/testimonials.js?v=v5-tm-8"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

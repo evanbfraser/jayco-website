@@ -242,7 +242,15 @@
    nothing to average — see js/testimonial-data.js. The reference's rating row
    is the one part of it this page cannot honestly copy. */
 
+/* Outside the 1440px frame, so the rail runs to the viewport edge. The LEFT
+   padding still lines the side column up with the framed header above it —
+   max() so it never drops below the page gutter on a narrow screen.
+
+   100vw is safe in a padding but not in a negative margin: Chrome counts the
+   scrollbar in it, so negating it would push the rail past the edge and put a
+   horizontal scrollbar on the page. Hence padding here and no bleed margin. */
 .tm-rev-body {
+  padding-left: max(var(--tm-pad), calc((100vw - var(--tm-frame)) / 2 + var(--tm-pad)));
   display: grid;
   grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
   gap: clamp(1.5rem, 3vw, 3rem);
@@ -286,10 +294,11 @@
   list-style: none; margin: 0; padding: 0.5rem 0 0.5rem;
   overflow-x: auto; scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  /* Reaches the right edge of the viewport rather than stopping at the frame:
-     a rail that ends flush reads as a list, one that runs off reads as
-     continuing. The padding is scroll room INSIDE the scroller. */
-  margin-right: calc(-1 * var(--page-pad)); padding-right: var(--page-pad);
+  /* No bleed margin needed any more — .tm-rev-body sits outside the frame and
+     has no right padding, so the rail already ends at the viewport edge. This
+     is scroll room INSIDE the scroller, so the last card can clear the edge
+     when you reach the end. */
+  padding-right: var(--page-pad);
 }
 .tm-rev-track::-webkit-scrollbar { display: none; }
 .tm-rev-track:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
@@ -342,7 +351,9 @@
   display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.tm-rev-stars { display: inline-flex; gap: 2px; color: #2FA37C; flex: none; }
+/* Jayco Blue. 4.60:1 on the card's white, well past the 3:1 a non-text mark
+   needs. The green it replaces was the reference's colour, not this site's. */
+.tm-rev-stars { display: inline-flex; gap: 2px; color: var(--blue); flex: none; }
 
 /* To the RIGHT of the tab, starting where it ends — not underneath it. The top
    margin is a little less than the tab's height so the avatar rises alongside
