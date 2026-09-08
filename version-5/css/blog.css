@@ -1,0 +1,496 @@
+/* ===================================================
+   Jayco — Blog (blog.html, blog-category.html,
+   blog-post.html)
+   ---------------------------------------------------
+   Three pages, one stylesheet: they share the card, the
+   grid and the chrome, and splitting them would be
+   three files owning one class each.
+
+   The hero is ported from videos.css (which ported it
+   from testimonials.css, which ported it from
+   brochures.css, which ported it from type.css) — the
+   house rule is port, rename, and name the source, so a
+   reader who greps a class finds one owner.
+
+   THE ARTICLE PAGE IS THE ODD ONE. Everything else on
+   this site is a full-bleed band; a post is a column of
+   text at a reading measure, because that is what makes
+   1,200 words readable. It is the one page here that
+   opens on canvas rather than a photograph.
+   =================================================== */
+
+.blog-page {
+  background: var(--canvas);
+  --bl-pad: var(--page-pad);
+  --bl-frame: 1440px;
+  /* The article column. Wider than --measure's 640 because these posts carry
+     images and subheads, narrower than --measure-wide's 880 because 880 of
+     0.98rem text is past the 75-character line where the eye starts losing
+     its place on the return sweep. */
+  --bl-read: 720px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs — one
+     number sets both the negative inset below and the distance moved in
+     blog.js, and they cannot fall out of step. The reduced-motion block at the
+     foot sets it to 0, which is how the parallax is switched off without a
+     second code path. Ported from --ntr-drift in new-to-rving.css; the house
+     rule is port, rename, and name the source. */
+  --bl-drift: 12%;
+}
+.blog-page [hidden] { display: none !important; }
+.blog-page button { font-family: inherit; }
+
+.bl-inner { max-width: var(--bl-frame); margin: 0 auto; padding: 0 var(--bl-pad); }
+.bl-measure { max-width: calc(var(--bl-read) + var(--bl-pad) * 2); }
+
+/* ---------- Hero (blog.html) ---------- */
+.bl-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view at either end
+   of the pass. */
+.bl-hero-media { position: absolute; inset: calc(-1 * var(--bl-drift)) 0; z-index: 0; will-change: transform; }
+.bl-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The desk, the laptop and the person are right of centre and the sofa runs
+     down the left, so the frame is held a little right of middle: a phone crop
+     that takes a narrow slice still gets her and the desk rather than an empty
+     sofa. Vertically centred — the plate is 2:1 and the band is close to that,
+     so there is very little height to give away at desktop. */
+  object-position: 58% 50%;
+}
+/* Vertical stops from videos.css, whose comment carries: the EYEBROW is the
+   binding constraint at 0.72rem, and a scrim tuned to the 900-weight heading
+   alone fails the line above it. The horizontal layer is for this plate — the
+   copy stands bottom-left over dark water and darker bank, so it can be
+   lighter than the video library's, which sits over mid-grey asphalt. */
+.bl-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-image);
+}
+.bl-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--bl-frame); margin: 0 auto;
+  padding: 0 var(--bl-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.bl-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.bl-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.bl-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+
+/* ---------- Section headings ---------- */
+.bl-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+  margin: 0;
+}
+.bl-shelf-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: clamp(1.1rem, 1.8vw, 1.5rem);
+}
+.bl-shelf-all {
+  font-size: 0.8rem; font-weight: 600; color: var(--blue-dark); text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.bl-shelf-all:hover { border-bottom-color: var(--blue-dark); }
+
+/* ---------- Topic tiles (blog.html) ----------
+   The whole of the overview. Big photograph, name set large over it, count
+   above — the hero's own vocabulary at tile size, which is the site's dominant
+   idiom and the reason this page needs no other section to feel finished.
+
+   Full-bleed rather than inside .bl-inner: these are photographs, and DESIGN.md
+   is explicit that a photograph runs to the edge. The gutter comes back inside
+   each tile's copy, so the type still lines up with the heading above it. */
+.bl-topics { padding: clamp(3rem, 6vw, 5rem) 0 var(--space-xl); }
+/* Inside the frame, not bled to the edge: the tiles are rounded and set apart
+   now, so they read as objects on the page rather than as one photographic
+   band cut into pieces — and an object needs the gutter on both sides of it. */
+.bl-tiles {
+  list-style: none; margin: clamp(1.25rem, 2vw, 1.75rem) 0 0;
+  padding: 0 var(--bl-pad);
+  max-width: var(--bl-frame); margin-inline: auto;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.2vw, 2rem);
+}
+/* One and then five pairs. Eleven tiles in a two-column grid would otherwise
+   leave the last one alone in a half-empty row. */
+.bl-tile.is-feature { grid-column: 1 / -1; }
+
+.bl-tile-link {
+  position: relative; display: block; height: 100%;
+  /* The ground the type is guaranteed to read against: if a picture fails to
+     arrive, the tile is still a dark panel rather than white-on-white. */
+  background: var(--navy);
+  text-decoration: none; color: #fff;
+  border-radius: var(--radius-card);
+  /* Clips the picture, the film and the scrim to the corner at once — which is
+     also why the radius sits here and not on the media inside. */
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+}
+.bl-tile.is-feature .bl-tile-link { aspect-ratio: 21 / 9; }
+.bl-tile-link:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+
+.bl-tile-media { position: absolute; inset: 0; }
+.bl-tile-img,
+.bl-tile-video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.7s var(--ease-out);
+}
+.bl-tile-link:hover .bl-tile-img { transform: scale(1.04); }
+/* The film does NOT lift on hover: it is already moving with the scroll, and
+   two motions on one tile is one too many. */
+
+/* Two stops, not three: the copy sits in the bottom third and nothing else is
+   over the picture, so the scrim only has to carry that band. */
+.bl-tile-scrim {
+  position: absolute; inset: 0;
+  background: var(--scrim-card);
+}
+.bl-tile-body {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: block;
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+}
+
+.bl-tile-n {
+  display: block; margin-bottom: 0.6rem;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.82); font-variant-numeric: tabular-nums;
+}
+.bl-tile-name {
+  margin: 0;
+  font-family: var(--font-display);
+  /* Floor is DESIGN.md's Title step: at the small end of the clamp a tile name
+     IS a card head, and 1.75 was a step this site does not otherwise set. */
+  font-size: clamp(1.6rem, 3.2vw, 3rem);
+  font-weight: 900; line-height: 0.98; letter-spacing: -0.02em;
+  color: #fff;
+}
+.bl-tile.is-feature .bl-tile-name { font-size: clamp(2.1rem, 4.4vw, 4rem); }
+.bl-tile-blurb {
+  display: block; margin-top: 0.7rem; max-width: 42ch;
+  font-size: 0.9rem; line-height: 1.6; color: rgba(255,255,255,0.86);
+}
+.bl-tile.is-feature .bl-tile-blurb { font-size: 0.98rem; max-width: 52ch; }
+
+/* ---------- Post cards ----------
+   Used by the topic page and by the related rail at the foot of an article.
+   The overview has none: it is topics only. */
+.bl-grid-wrap { padding: clamp(2rem, 3.5vw, 3rem) 0 var(--space-xl); }
+.bl-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 2.6vw, 2.25rem) clamp(1.25rem, 2.2vw, 2rem);
+}
+/* Picture, title, standfirst, and a Learn More that closes the card over a
+   hairline. The rule is the reason the cards read as a set: with a three-line
+   clamp on the standfirst the text blocks are near enough the same height, and
+   a line under each one turns "near enough" into an actual shared baseline
+   across the row.
+
+   TWIN: .ts-read in top-selling.css is this card, restated rather than shared —
+   the house rule is port, rename, and name the source, so a change to one is a
+   deliberate change to both. */
+.bl-card { display: flex; flex-direction: column; }
+.bl-card-link {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  height: 100%;
+  text-decoration: none; color: inherit;
+}
+.bl-card-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+.bl-card-media {
+  aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  margin-bottom: 0.35rem;
+}
+.bl-card-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.bl-card-link:hover .bl-card-img { transform: scale(1.04); }
+.bl-card-meta {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.bl-card-title {
+  margin: 0;
+  font-size: 1.25rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.bl-card-excerpt {
+  margin: 0; font-size: 0.85rem; line-height: 1.65; color: var(--text-mid);
+  /* Jayco's standfirsts run from one line to six. Three keeps a row of cards
+     from setting one card twice the height of its neighbour. */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+/* auto on the top margin so the rule sits at the foot of the tallest card in
+   the row rather than wherever that card's own text happened to stop. */
+.bl-card-more {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; font-weight: 600; color: var(--text-dark);
+}
+.bl-card-more svg { flex: none; transition: transform 0.25s var(--ease-out); }
+.bl-card-link:hover .bl-card-more svg { transform: translate(2px, -2px); }
+
+.bl-more-wrap { display: flex; justify-content: center; margin-top: clamp(2rem, 3.5vw, 3rem); }
+
+/* ---------- Topic band (blog-category.html) ----------
+   Carries the same picture the overview tile does, at a height that lets it be
+   a photograph rather than a strip of one — the plates are 3:2 and 16:9, and a
+   320px band of a 1600px-wide picture is a letterbox cut through the middle of
+   it. Still shorter than the overview's hero: this one names where you are,
+   where that one opens the section. */
+.bl-band {
+  position: relative;
+  height: clamp(420px, 58vh, 620px);
+  display: flex; align-items: flex-end; overflow: hidden;
+  background: var(--navy);
+}
+.bl-band-media { position: absolute; inset: 0; z-index: 0; }
+.bl-band-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.bl-band-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-image);
+}
+.bl-band-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--bl-frame); margin: 0 auto;
+  padding: 0 var(--bl-pad) clamp(2.25rem, 4vh, 3.25rem);
+  color: #fff;
+}
+.bl-band-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.4vw, 3.5rem);
+  font-weight: 900; line-height: 1; letter-spacing: -0.02em;
+  margin: 0.75rem 0 0;
+}
+.bl-band-meta { margin: 0.7rem 0 0; font-size: 0.9rem; color: rgba(255,255,255,0.86); max-width: 52ch; }
+
+.bl-back {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+}
+/* The underline is on the WORDS, not on the whole control: a rule running under
+   an arrow as well reads as a box with a corner missing. */
+.bl-back span {
+  border-bottom: 1.5px solid rgba(255,255,255,0.4); padding-bottom: 2px;
+  transition: border-color 0.2s;
+}
+.bl-back:hover span { border-bottom-color: #fff; }
+.bl-back-arrow { flex: none; transition: transform 0.25s var(--ease-out); }
+.bl-back:hover .bl-back-arrow { transform: translateX(-3px); }
+.bl-back:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+
+/* ---------- Topic chips ---------- */
+.bl-chips-wrap { padding: clamp(2rem, 3.5vw, 3rem) 0 0; }
+.bl-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.bl-chip {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  font-size: 0.82rem; font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.bl-chip:hover { border-color: var(--blue-light); }
+.bl-chip.is-on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.bl-chip:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.bl-chip-n { opacity: 0.55; font-variant-numeric: tabular-nums; }
+.bl-chip.is-on .bl-chip-n { opacity: 0.75; }
+
+/* ---------- The article (blog-post.html) ---------- */
+.bl-post-page { padding-top: clamp(6rem, 9vw, 8rem); }
+.bl-post-page .bl-back { color: var(--blue-dark); }
+.bl-post-page .bl-back span { border-bottom-color: rgba(0,90,150,0.35); }
+.bl-post-page .bl-back:hover span { border-bottom-color: var(--blue-dark); }
+
+/* Pills, the same shape the topic chips wear on the topic page — one control
+   vocabulary for one act, which is "take me to this topic". Smaller here: these
+   sit under a headline rather than acting as the page's filter row. */
+.bl-post-topics { margin: 1.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.bl-post-topic {
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--blue-dark); text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.bl-post-topic:hover { border-color: var(--blue); background: var(--blue); color: #fff; }
+.bl-post-topic:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.bl-post-h {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 900; line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text-dark);
+  margin: 0.7rem 0 0;
+}
+.bl-post-date { margin: 0.9rem 0 0; font-size: 0.85rem; color: var(--text-mid); }
+.bl-post-figure { margin: clamp(2rem, 3.5vw, 3rem) 0 0; }
+/* The frame holds the shape and the corner; the picture inside it is what
+   moves. A fixed ratio rather than the file's own, because the picture grows
+   to 120% and a box that sized itself to the image would grow with it and
+   shove the page down as you read. */
+.bl-post-frame {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  aspect-ratio: 3 / 2;
+}
+.bl-post-img {
+  width: 100%; height: 100%; display: block;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* ---------- The standfirst ---------- */
+.bl-summary {
+  display: block;
+  margin: clamp(2rem, 3.5vw, 2.75rem) 0 0;
+  padding: clamp(1.25rem, 2.4vw, 1.9rem) clamp(1.35rem, 2.6vw, 2.1rem);
+  background: var(--surface);
+  border-radius: var(--radius-card);
+}
+.bl-summary-label {
+  display: block; margin-bottom: 0.6rem;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.bl-summary-text {
+  margin: 0;
+  font-size: 1.08rem; line-height: 1.65; color: var(--text-dark);
+}
+
+/* The body is Jayco's own markup, reduced to these tags. Everything below is
+   set on the container rather than on classes, because the article HTML
+   carries no classes of its own — see js/blog-data.js. */
+.bl-body {
+  margin: clamp(2rem, 3.5vw, 3rem) 0 0;
+  font-size: 1.02rem; line-height: 1.8; color: var(--text-dark);
+}
+.bl-body > *:first-child { margin-top: 0; }
+.bl-body p { margin: 0 0 1.35em; }
+.bl-body h2, .bl-body h3, .bl-body h4, .bl-body h5 {
+  font-family: var(--font-display); color: var(--text-dark);
+  letter-spacing: -0.015em; line-height: 1.2;
+  margin: 2.2em 0 0.7em;
+}
+.bl-body h2 { font-size: 1.5rem; font-weight: 800; }
+.bl-body h3 { font-size: 1.25rem; font-weight: 700; }
+.bl-body h4, .bl-body h5 { font-size: 1.08rem; font-weight: 700; }
+.bl-body a { color: var(--blue-dark); text-decoration: none; border-bottom: 1.5px solid rgba(0,90,150,0.3); }
+.bl-body a:hover { border-bottom-color: var(--blue-dark); }
+.bl-body ul, .bl-body ol { margin: 0 0 1.35em; padding-left: 1.3em; }
+.bl-body li { margin-bottom: 0.5em; }
+.bl-body img {
+  max-width: 100%; height: auto; display: block;
+  margin: 1.8em auto; border-radius: var(--radius-card);
+}
+/* 2px, matching .qz-note--stale in quiz.css — the site's one existing blue
+   left rule. At 3 it stopped reading as a margin mark and started reading as
+   an accent tab stuck on the side of a panel. */
+.bl-body blockquote {
+  margin: 1.8em 0; padding: 0.2em 0 0.2em 1.2em;
+  border-left: 2px solid var(--blue);
+  color: var(--text-mid); font-style: italic;
+}
+.bl-body hr { border: none; border-top: 1px solid var(--hairline); margin: 2.4em 0; }
+.bl-body table { width: 100%; border-collapse: collapse; margin: 0 0 1.35em; font-size: 0.92rem; }
+.bl-body td, .bl-body th { border: 1px solid var(--hairline); padding: 0.5rem 0.7rem; text-align: left; }
+.bl-body strong { font-weight: 700; }
+
+.bl-loading { margin: 2rem 0; font-size: 0.9rem; color: var(--text-mid); }
+.bl-missing { margin: clamp(2rem, 4vw, 3.5rem) 0; }
+.bl-missing p { margin: 0.8rem 0 1.6rem; color: var(--text-mid); }
+
+.bl-more-posts { padding: clamp(3.5rem, 7vw, 6rem) 0 var(--space-xl); }
+.bl-post-page .bl-more-posts { border-top: 1px solid var(--hairline); margin-top: var(--space-xl); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .bl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .bl-hero { height: 72svh; min-height: 460px; }
+  .bl-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone, so the left-weighted layer stops
+     helping and the vertical one does the work. */
+  .bl-hero-overlay {
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
+  }
+  /* One tile per row on a phone, and the feature stops being a band — at 390px
+     a 21:9 crop of a photograph is a letterbox slit. */
+  .bl-tiles { grid-template-columns: minmax(0, 1fr); }
+  /* The feature tile — the film — carries 100px more than its ratio asks for.
+     box-sizing is the mechanism rather than a taller ratio or a calc() against
+     the viewport: under content-box, aspect-ratio sizes the CONTENT box, so a
+     padding-bottom adds exactly 100px beneath it whatever width the column
+     turns out to be. No page-padding arithmetic that can fall out of step with
+     .bl-tiles, and no ratio to re-derive if the padding ever changes.
+
+     Nothing inside needs touching: the picture, the scrim and the copy are all
+     positioned against the padding box, so they follow the taller box down of
+     their own accord. */
+  .bl-tile.is-feature .bl-tile-link {
+    aspect-ratio: 3 / 2;
+    box-sizing: content-box;
+    /* height:100% is inherited from the base rule, and under content-box it
+       makes the CONTENT height definite — at which point aspect-ratio runs
+       backwards and derives the WIDTH from it, throwing the tile 150px past
+       the right edge. Releasing the height lets width stay the definite axis
+       and the ratio resolve downward, which is the only direction wanted. */
+    height: auto;
+    padding-bottom: 100px;
+  }
+  .bl-tile-link { aspect-ratio: 4 / 3; }
+  .bl-grid { grid-template-columns: minmax(0, 1fr); }
+  .bl-band { height: clamp(340px, 46vh, 420px); }
+  .bl-post-page { padding-top: clamp(5rem, 16vw, 6.5rem); }
+  .bl-body { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Setting the drift to 0 is what switches the hero parallax off: blog.js
+     reads the same number and returns before binding anything, so there is no
+     second code path and no way for the two to disagree. */
+  .blog-page { --bl-drift: 0%; }
+  .bl-tile-img, .bl-card-img, .bl-card-more svg { transition: none; }
+  .bl-card-link:hover .bl-card-more svg { transform: none; }
+  /* The film is not bound to the scroll under reduced motion — blog.js returns
+     before creating the trigger — so what shows is its poster, a frame of the
+     film itself. Nothing here needs to hide it. */
+  .bl-tile-link:hover .bl-tile-img, .bl-card-link:hover .bl-card-img { transform: none; }
+}

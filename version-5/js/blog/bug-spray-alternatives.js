@@ -1,0 +1,6 @@
+/* Bug Spray Alternatives — July 16, 2017. Body read from jayco.com/blog/bug-spray-alternatives/ on 2026-09-05 and reduced to
+   the tags this site renders; see js/blog-data.js for the rules. */
+window.JAYCO_BLOG_ARTICLE = {
+  slug: "bug-spray-alternatives",
+  html: "<p>For many of us, reaching for a can or two of chemically-based bug spray has become a habit when insects come out to play at night. However, there are several environmentally-friendly and cost-effective methods to help keep bugs at bay. Below are a few suggestions.</p>\n<ul>\n<li>Create your own homemade bug spray by mixing equal parts distilled water and witch hazel into a spray bottle. Add 30-50 drops of an essential oil in any desired scent (eucalyptus, lavender, mint and cinnamon are great choices).</li>\n<li>Rub lavender flowers or lavender oil on your skin to repel insects.</li>\n<li>Add sage to your campfire or firepit to keep mosquitoes and bugs away.</li>\n<li>Make your own citronella candles and place them around your campsite. We love this&nbsp;<a href=\"http://gardentherapy.ca/diy-citronella-candles/\" target=\"_blank\" rel=\"noopener noreferrer\">tutorial&nbsp;</a>that doubles as a great recycling project using old cans.</li>\n</ul>",
+};

@@ -1,39 +1,46 @@
 /* ===================================================
    Jayco — Brochures
    ---------------------------------------------------
-   One card per model, from window.JAYCO — the same 27
-   records every other page reads. Nothing is harvested
-   or invented here, and there is no brochure data file:
-   a brochure IS a model, so the model list is the list.
+   The whole library, from brochures-library.js: 595
+   entries across eleven model years and three
+   languages, harvested from jayco.com/brochures/.
+   See that file's header for how it was taken.
 
-   THE FACETS ARE DERIVED, NOT WRITTEN
-   jayco.com/brochures/ filters by Model Year, Product
-   Type, Literature Type and Language. All four are
-   reproduced here, but their options are computed from
-   the data rather than typed in, so the page can never
-   offer a filter the library cannot honour.
+   IT USED TO BE THE MODEL LIST. The page was built on
+   window.JAYCO — 27 records, every one a 2027 English
+   brochure — on the reasoning that a brochure IS a
+   model. That is true of the current lineup and false
+   of the library, which keeps a decade of back years
+   and carries French and Spanish editions the model
+   list has no room for.
 
-   Today that resolves to one facet that narrows
-   anything — Product Type — and three that list a
-   single value: every model in models-data.js is a
-   2027, there is one kind of literature, and one
-   language. They are still rendered, as dropdowns with
-   an "All" option and whatever the data holds, which is
-   what jayco.com does and what keeps them honest: the
-   options are the library, so a year that does not
-   exist can never be offered. They fill in on their own
-   the day a second value lands.
+   THE FACETS ARE STILL DERIVED, NOT WRITTEN, and that
+   is why the change cost so little: Model Year,
+   Product Type, Literature Type and Language all read
+   their options out of the data. When the data grew
+   from 27 rows to 595 the controls grew with it. Three
+   facets that used to list a single value and narrow
+   nothing now narrow properly.
 
-   Product Type carries the tow-or-drive split as
-   optgroups rather than a second control, so one
-   dropdown holds both levels of the question.
+   PRODUCT TYPE KEEPS THE TOW-OR-DRIVE SPLIT as
+   optgroups, so one dropdown still holds both levels
+   of the question. The eight types are Jayco's own,
+   harvested from the filter rather than mapped onto
+   this site's categories.
+
+   THE DOWNLOAD GOES TO JAYCO. Each card links to the
+   PDF on jayco.com, which is what jayco.com's own
+   cards do. The lead-capture modal is not wired to
+   these cards: it is built around JAYCO.models and can
+   only name one of 27 current coaches, so it cannot
+   speak for a 2018 flyer.
    =================================================== */
 
 (function () {
   'use strict';
 
-  const JAYCO = window.JAYCO;
-  if (!JAYCO || !JAYCO.models) return;
+  const LIB = window.JAYCO_BROCHURE_LIBRARY;
+  if (!LIB || !LIB.items || !LIB.items.length) return;
 
   const $ = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => Array.prototype.slice.call((c || document).querySelectorAll(s));
@@ -41,32 +48,23 @@
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ---------- Index ----------
-     In category order, so the grid reads the way the lineup does everywhere
-     else on the site rather than in object-key order. */
-  const ROWS = [];
-  JAYCO.categories.forEach((cat) => {
-    Object.keys(JAYCO.models).forEach((slug) => {
-      const m = JAYCO.models[slug];
-      if (!m || m.category !== cat.id) return;
-      ROWS.push({
-        slug: slug,
-        name: m.name,
-        year: m.year,
-        tagline: m.tagline || '',
-        catId: cat.id,
-        catName: cat.name,
-        catType: cat.type,          // towable | motorized
-        /* The 400x248 derivative, not the 1.4MB print PNG in m.img. Same path
-           the floorplans catalog uses; all 27 keys are covered. */
-        img: '../assets/models/web/' + slug + '.webp',
-        fallbackImg: m.img,
-        lang: 'English',
-        kind: 'Brochure',
-        pass: true,
-        el: null,
-      });
-    });
-  });
+     Newest year first, then by model, which is the order the library itself
+     lists them in and the order a reader looking for "the 2024 one" wants. */
+  const ROWS = LIB.items.map((it) => ({
+    id: it.id,
+    name: it.model,
+    year: it.year,
+    type: it.type,              // Jayco's own product type
+    kind: it.lit,               // Brochure | Flyer
+    lang: it.langName,          // English | French | Spanish
+    langCode: it.lang,
+    pdf: it.pdf,
+    img: it.cover,
+    coverW: it.coverW,
+    coverH: it.coverH,
+    pass: true,
+    el: null,
+  }));
 
   /* One value per facet, not a set: these are dropdowns, and a <select> picks
      one thing. '' means "All". */
@@ -74,7 +72,7 @@
 
   function matches(r) {
     if (state.year && String(r.year) !== state.year) return false;
-    if (state.type && r.catId !== state.type) return false;
+    if (state.type && r.type !== state.type) return false;
     if (state.kind && r.kind !== state.kind) return false;
     if (state.lang && r.lang !== state.lang) return false;
     return true;
@@ -87,7 +85,7 @@
      fact. Nothing below hard-codes 2027, English or Brochure. */
   const FACETS = [
     { id: 'year', label: 'Model Year', all: 'All Model Years', get: (r) => String(r.year) },
-    { id: 'type', label: 'Product Type', all: 'All Product Types', get: (r) => r.catId },
+    { id: 'type', label: 'Product Type', all: 'All Product Types', get: (r) => r.type },
     { id: 'kind', label: 'Literature Type', all: 'All Literature', get: (r) => r.kind },
     { id: 'lang', label: 'Language', all: 'All Languages', get: (r) => r.lang },
   ];
@@ -140,13 +138,23 @@
   /* Towable and Motorized as headings inside the one list rather than a control
      of their own: it is the same question one level up, and nesting it keeps
      four dropdowns from becoming five. */
+  /* Jayco's eight product types, split the way the rest of this site splits a
+     lineup. The membership is spelled out rather than inferred from the word
+     "Motorhome", because Camping Trailers and Destination Travel Trailers are
+     towables whose names say neither. Any type the harvest adds later that is
+     not listed here still appears — it falls through to Towable's tail rather
+     than vanishing from the control. */
+  const MOTORIZED = ['Class A Motorhomes', 'Class B Motorhomes', 'Class C Motorhomes'];
+
   function typeOptions() {
+    const present = distinct((r) => r.type);
     const out = [];
-    ['towable', 'motorized'].forEach((t) => {
-      const cats = JAYCO.categories.filter((c) => c.type === t && ROWS.some((r) => r.catId === c.id));
-      if (!cats.length) return;
-      out.push({ head: t === 'towable' ? 'Towable' : 'Motorized' });
-      cats.forEach((c) => out.push({ value: c.id, label: c.name }));
+    [['Towable', (t) => MOTORIZED.indexOf(t) < 0],
+     ['Motorized', (t) => MOTORIZED.indexOf(t) >= 0]].forEach((pair) => {
+      const list = present.filter(pair[1]).sort();
+      if (!list.length) return;
+      out.push({ head: pair[0] });
+      list.forEach((t) => out.push({ value: t, label: t }));
     });
     return out;
   }
@@ -187,31 +195,34 @@
     $('#br-clear').hidden = !activeCount();
   }
 
-  /* ---------- Cards ---------- */
+  /* ---------- Cards ----------
+     The cover is Jayco's own, stored locally at 300px wide; the download is
+     Jayco's PDF, linked rather than copied so it cannot go stale. An <a> and
+     not a <button>: it navigates, and a keyboard user is owed the difference.
+
+     Language is printed only when it is not English, so 378 of 595 cards do
+     not carry a badge saying the obvious. */
   function card(r, i) {
-    return `<li class="br-card" data-slug="${esc(r.slug)}">
+    return `<li class="br-card" data-id="${esc(r.id)}">
       <div class="br-card-media">
-        <img class="br-card-img" src="${esc(r.img)}" alt="" width="400" height="248"
-          decoding="async"${i < 6 ? '' : ' loading="lazy"'} />
+        <img class="br-card-img" src="${esc(r.img)}" alt=""
+          width="${r.coverW}" height="${r.coverH}"
+          decoding="async"${i < 8 ? '' : ' loading="lazy"'} />
       </div>
       <div class="br-card-body">
-        <span class="br-card-meta">${esc(r.year)} · ${esc(r.catName)}</span>
+        <span class="br-card-meta">${esc(r.year)} · ${esc(r.type)}</span>
         <h3 class="br-card-name">${esc(r.name)}</h3>
-        ${r.tagline ? `<p class="br-card-tagline">${esc(r.tagline)}</p>` : ''}
+        <p class="br-card-tagline">${esc(r.kind)}${r.langCode !== 'en' ? ' · ' + esc(r.lang) : ''}</p>
       </div>
-      <button type="button" class="br-card-cta" data-brochure-open="${esc(r.slug)}"
-        aria-label="Request the ${esc(r.year + ' ' + r.name)} brochure">Request Brochure</button>
+      <a class="br-card-cta" href="${esc(r.pdf)}" target="_blank" rel="noopener"
+        aria-label="Download the ${esc(r.year + ' ' + r.name + ' ' + r.kind)} — PDF on jayco.com"
+        >Download ${esc(r.kind)}</a>
     </li>`;
   }
 
   function renderGrid() {
     $('#br-grid').innerHTML = ROWS.map(card).join('');
-    ROWS.forEach((r) => {
-      r.el = $('.br-card[data-slug="' + r.slug + '"]');
-      /* The print PNG is the fallback if a derivative is ever missing. */
-      const img = r.el && $('.br-card-img', r.el);
-      if (img) img.addEventListener('error', function () { this.src = r.fallbackImg; }, { once: true });
-    });
+    ROWS.forEach((r) => { r.el = $('.br-card[data-id="' + r.id + '"]'); });
   }
 
   function applyFilters() {
@@ -392,6 +403,63 @@
       });
   }
 
+  /* ---------- The cards arriving ----------
+     The page has no data-animation on the grid section for the reason stated in
+     brochures.html: app.js runs ONE staggered gsap.from() over everything inside
+     such a section, and 27 cards would be a stagger minutes long with every
+     button invisible until its turn came. This is that arrival, done per row
+     instead of per page.
+
+     An IntersectionObserver rather than a ScrollTrigger per card, because the
+     grid REFLOWS: a filter hides cards and every card below moves up, and a
+     ScrollTrigger caches its start against the layout it was built in. A card
+     that is display:none never intersects, so a filtered-out card simply waits,
+     and arrives properly the first time a filter lets it back on screen —
+     whereas a stale trigger can fire while the card is hidden and spend the
+     animation on nothing.
+
+     The stagger comes free from the observer: cards crossing the line together
+     are one row, and one row is one callback, so the entries of a single call
+     ARE the group to sweep across. Nothing has to know how many columns there
+     are or recompute it on resize.
+
+     clearProps: 'all' at the end, not just a resting state: gsap leaves its
+     transform inline, and an inline transform beats .br-card:hover { transform:
+     translateY(-3px) } for good — 'all' because gsap also writes translate /
+     rotate / scale of its own, and clearing the transform alone would leave
+     those behind. The transition is suppressed for the duration for the same
+     reason in reverse: .br-card transitions transform over 0.3s, which would
+     sit between gsap and the screen and smear every frame. */
+  function initCardReveal() {
+    if (typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cards = ROWS.map((r) => r.el).filter(Boolean);
+    if (!cards.length || !('IntersectionObserver' in window)) return;
+
+    const io = new IntersectionObserver((entries, obs) => {
+      const arriving = entries.filter((e) => e.isIntersecting).map((e) => e.target);
+      if (!arriving.length) return;
+      arriving.forEach((el) => obs.unobserve(el));
+      /* Entries are not promised in document order, and the sweep has to run
+         left to right. */
+      arriving.sort((a, b) =>
+        (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+
+      gsap.to(arriving, {
+        opacity: 1, y: 0,
+        duration: 0.55, ease: 'power2.out',
+        stagger: 0.07,
+        clearProps: 'all',
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+
+    /* Hidden here rather than in the stylesheet: the resting state a reader
+       gets with this script dead, or with reduced motion on, is the visible
+       one. */
+    gsap.set(cards, { opacity: 0, y: 24, transition: 'none' });
+    cards.forEach((el) => io.observe(el));
+  }
+
   /* ---------- Boot ---------- */
   if (!ROWS.length) return;
   renderFacets();
@@ -399,5 +467,8 @@
   wire();
   applyFilters();
   window.addEventListener('load', refresh, { once: true });
-  document.addEventListener('jayco:animations-ready', initParallax, { once: true });
+  document.addEventListener('jayco:animations-ready', () => {
+    initParallax();
+    initCardReveal();
+  }, { once: true });
 }());

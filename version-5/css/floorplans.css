@@ -119,8 +119,6 @@
   right: 0; height: var(--rail-h-closed);
   display: flex; align-items: center; gap: 0.6rem;
   padding: 0 1rem;
-  /* Left-packed, deliberately. Pushed apart, the right-hand item would travel
-     roughly 1100px during the morph. */
   justify-content: flex-start;
 }
 
@@ -237,11 +235,23 @@
 .fpc-panel-x:hover { background: var(--surface); color: var(--text-dark); }
 .fpc-panel-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+/* Held at the far end of the bar, opposite the trigger and the type pair, so the
+   controls read as one group on the left and the result of using them sits by
+   itself on the right.
+
+   It is the one thing in the bar that moves during the morph — the rail shrinks
+   from full width to 268px and the right edge comes with it — so it is faded on
+   its own, faster than the bar around it, and is gone before the box has closed
+   much of that distance. The bar's own fade is what the panel's arrival is
+   timed against and is left alone. */
 .fpc-count {
   flex: none; white-space: nowrap;
+  margin-left: auto;
   font-size: 0.82rem; font-weight: 700; color: var(--text-dark);
   font-variant-numeric: tabular-nums;
+  transition: opacity 0.24s var(--ease-out) 0.17s;
 }
+.fpc-rail.is-open .fpc-count { opacity: 0; transition: opacity 0.1s var(--ease-out); }
 .fpc-count:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
 .fpc-clear {
   border: none; background: none; padding: 0; cursor: pointer;
@@ -955,8 +965,48 @@ body.fpc-sheet-on { overflow: hidden; }
   /* The arrows are a second way to do what the finger already does, and they
      charge a row of height to say it. type.css:790, same call. */
   .fpc-controls { display: none; }
-  .fpc-cards { --fcard: min(calc(100% - 3rem), 320px); }
-  .fpc-model-head { grid-template-columns: 84px minmax(0, 1fr); gap: 0.9rem; }
+
+  /* THE HEAD RIDES IN THE RAIL DOWN HERE.
+     The row is two cells on a desktop — the model on the left, its plans to the
+     right — and that column does not survive the trip: --fpc-lead is 200px at
+     its floor, which on a 390px screen is half the width spent on a label and
+     150px left for the drawings the page exists to show. So the row itself
+     becomes the scroller and the head becomes its first cell: the model's
+     picture and name lead the rail, scroll away with it, and the whole width is
+     the catalog again.
+
+     The scroller MOVES, from .fpc-cards up to .fpc-model-row. It cannot be both
+     — a scroll container inside a scroll container would trap the head in one
+     and the cards in the other, which is the split this is undoing — so the
+     track goes overflow: visible and hands the snapping up with it. The cards
+     keep scroll-snap-align, since snap positions come from any descendant of
+     the container, not just its children. */
+  .fpc-model-row {
+    display: flex;
+    align-items: start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* The catalog carries the left gutter and no right one, so the rail bleeds
+       off the right edge; this is what lets the last card rest inside the
+       gutter rather than against the glass. */
+    padding-right: var(--page-pad);
+  }
+  .fpc-model-row::-webkit-scrollbar { display: none; }
+  /* Wide enough for the two CTAs to sit on one line each, narrow enough that
+     the first drawing is already showing when the row arrives — that overhang
+     is the only thing saying the row scrolls, now that the arrows are gone. */
+  .fpc-model-head { flex: 0 0 min(72vw, 272px); scroll-snap-align: start; }
+  .fpc-cardrail { flex: 0 0 auto; }
+  .fpc-cards {
+    overflow: visible;
+    scroll-snap-type: none;
+    padding-right: 0;
+    /* Off the viewport, not off the track: the track is shrink-to-fit now, so a
+       percentage here would be measured against a width that its own cards
+       decide. */
+    --fcard: min(calc(100vw - 5.5rem), 320px);
+  }
   .fpc-model-render { width: 84px; height: 52px; }
   .fpc-model-ctas .btn-primary,
   .fpc-model-ctas .btn-secondary-light { padding: 0.7rem 1.15rem; }

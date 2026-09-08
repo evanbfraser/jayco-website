@@ -1,0 +1,305 @@
+/* ===================================================
+   Jayco — Tow vs. Drive Guide (tow-vs-drive.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from jayco-difference.css (which ported it from
+   towing.css, from request-quote.css, from
+   buyers-guide.css, and back through top-selling,
+   videos, testimonials, brochures to type.css) — the
+   house rule is port, rename, and name the source, so a
+   reader who greps a class finds one owner.
+
+   The hero scrim is not restated: it reads
+   --scrim-image, the sitewide rule in style.css.
+
+   THE TABLE IS THE PAGE. Everything else leads into it
+   or out of it, so it gets the width and the weight —
+   and it is built by tow-vs-drive.js from the real
+   lineup rather than typed, which is why nothing here
+   styles a number.
+   =================================================== */
+
+.tvd-page {
+  background: var(--canvas);
+  --tvd-pad: var(--page-pad);
+  --tvd-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in tow-vs-drive.js. */
+  --tvd-drift: 12%;
+}
+.tvd-page [hidden] { display: none !important; }
+.tvd-page button { font-family: inherit; }
+
+.tvd-inner { max-width: var(--tvd-frame); margin: 0 auto; padding: 0 var(--tvd-pad); }
+
+/* ---------- Hero ---------- */
+.tvd-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.tvd-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--tvd-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.tvd-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The rig sits right of centre with the road running out of the bottom-left;
+     holding the frame right keeps the trailer in shot when a phone crops hard
+     and leaves the empty asphalt under the copy. */
+  object-position: 62% 50%;
+}
+.tvd-hero-overlay { position: absolute; inset: 0; z-index: 1; background: var(--scrim-image); }
+.tvd-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--tvd-frame); margin: 0 auto;
+  padding: 0 var(--tvd-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.tvd-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.tvd-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.tvd-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.tvd-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.tvd-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- The comparison ----------
+   A grid, not a <table>. The content is two answers to one question rather than
+   a matrix of data, and on a phone it has to become two stacked columns under
+   one label — which a table row cannot do without ripping the semantics up.
+   Every row is labelled in its own cells for that reason. */
+.tvd-figures { padding: clamp(3rem, 6vw, 5rem) 0 0; }
+.tvd-figures-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.tvd-figures-head .section-heading { margin: 0.5rem 0 0; }
+.tvd-figures-sub {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+.tvd-table {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--surface);
+}
+.tvd-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(0.75rem, 2vw, 2rem);
+  padding: clamp(1rem, 2vw, 1.35rem) clamp(1.1rem, 2.4vw, 2rem);
+  border-top: 1px solid var(--hairline);
+}
+.tvd-row:first-child { border-top: none; }
+.tvd-cell {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+}
+/* The three structural rows are sentences, not figures, so they drop the
+   display face and the tabular numbers that suit a measurement. */
+.tvd-row.is-plain .tvd-cell--tow,
+.tvd-row.is-plain .tvd-cell--mot {
+  font-family: var(--font-body);
+  font-size: 0.95rem; font-weight: 500; color: var(--text-mid);
+}
+.tvd-cell--label { font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; }
+.tvd-label { display: block; color: var(--text-dark); }
+.tvd-note {
+  display: block; margin-top: 0.3rem;
+  font-size: 0.8rem; font-weight: 400; line-height: 1.5; color: var(--text-mid);
+}
+/* The column heading, repeated invisibly into every cell. On a wide screen the
+   header row above carries it; stacked, each cell needs its own or the two
+   answers are a pair of unlabelled numbers. */
+.tvd-head { display: none; }
+/* THE SEPARATION LIVES ABOVE THE STRIP, NOT BELOW IT. The gap that used to sit
+   between the pills and the table has moved up here, so the strip now stands off
+   the copy above and the pills sit down on the table they label — which is what
+   makes them read as its headings rather than as two loose chips. */
+.tvd-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(0.75rem, 2vw, 2rem);
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  padding: 0 clamp(1.1rem, 2.4vw, 2rem) 0.6rem;
+}
+/* The table keeps its own margin for the phone, where the strip is hidden and
+   nothing else holds it off the copy. Here the strip has already done that. */
+.tvd-cols + .tvd-table { margin-top: 0; }
+/* PILLS, PORTED FROM .tc-jump-link IN towing.css — the site's pill shape:
+   --radius-btn, a 1.5px hairline border, a white ground and a small bold label.
+   That one is a link, so its hover, focus and transition come off here; these
+   are column headings and there is nothing to click.
+
+   justify-self keeps the pill the width of its own text. Without it the span is
+   a grid item and stretches the full column, which would draw a pill the width
+   of the table rather than the width of the word. */
+.tvd-col {
+  justify-self: start;
+  display: inline-flex; align-items: center; white-space: nowrap;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white); padding: 0.45rem 0.9rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+/* The strip's first cell is the empty spacer above the row labels. Left alone
+   it draws a bordered pill around nothing — but it must NOT be display:none.
+   These are grid items placed in source order, so removing the spacer pulls
+   both pills back a column and stands Towable over the row labels instead of
+   over its own figures. visibility keeps the cell and draws nothing. */
+.tvd-col:empty { visibility: hidden; }
+
+/* ---------- When it is the right call ---------- */
+.tvd-case { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.tvd-case-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.tvd-case-head .section-heading { margin: 0.5rem 0 0; }
+.tvd-case-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+.tvd-cards {
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.tvd-card {
+  display: flex; flex-direction: column;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 2.6vw, 2rem);
+}
+.tvd-card-icon {
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem; margin-bottom: 1.1rem;
+  border-radius: 50%; background: var(--white); color: var(--blue-dark);
+}
+/* A FITTED BOX, NOT A FIXED SHAPE. The six icons are Illustrator exports and
+   no two share a viewBox — one is square, the rest run from 1.4:1 to nearly
+   2:1. SVG's default preserveAspectRatio letterboxes each one inside this box
+   rather than stretching it, so nothing is squashed.
+
+   THE BOX IS WIDER THAN IT IS TALL ON PURPOSE. Five of the six are wide, so the
+   width sets their scale; the height cap is what stops the one square icon
+   rendering at full box size and sitting twice the visual weight of the truck
+   beside it. Fitted into 28x24 the square lands at 24x24 and the widest at
+   28x15, which reads as one set. They are filled paths taking currentColor from
+   .tvd-card-icon, where the line art they replaced was stroked. */
+.tvd-card-icon svg { width: 28px; height: 24px; }
+.tvd-card-h {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.tvd-card-body { margin: 0; font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
+
+/* ---------- CTAs ----------
+   Image-led, the pair ported from towing.css's .tc-cta — same plate, same
+   scrim, same inverted secondary. */
+.tvd-ctas { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.tvd-cta-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.tvd-cta {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(340px, 32vw, 440px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+.tvd-cta-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.tvd-cta:hover .tvd-cta-img { transform: scale(1.04); }
+/* THE SITEWIDE RULE, not a scrim of its own: darken the bottom enough to carry
+   the type standing on it and leave the rest of the photograph alone.
+
+   These bands used to carry two layers — a left-weighted wash on top of a
+   vertical one that stopped at 0.14 rather than 0, so it never fully cleared —
+   and between them the whole plate was tinted, top corner included. Both are
+   gone. --scrim-card is transparent through its top fifth, which is what lets
+   the sky and the river read at full colour. */
+.tvd-cta-scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-card);
+}
+.tvd-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
+.tvd-cta .section-label { color: #fff; }
+.tvd-cta-h {
+  margin: 0.5rem 0 1.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+}
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for, not the ink. On a scrimmed
+   photograph it disappears, so it is inverted here, as towing.css does. */
+.tvd-cta .btn-secondary-light { border-color: rgba(255,255,255,0.55); color: #fff; }
+.tvd-cta .btn-secondary-light:hover { border-color: #fff; background: #fff; color: var(--text-dark); }
+
+.tvd-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .tvd-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tvd-cta-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+  .tvd-hero { height: 72svh; min-height: 460px; }
+  .tvd-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone and a shorter hero gives it a
+     bigger share of the frame, so the ramp starts sooner. */
+  .tvd-hero-overlay { background: var(--scrim-card); }
+  .tvd-cards { grid-template-columns: minmax(0, 1fr); }
+
+  /* The table becomes a stack: the label, then the two answers side by side
+     under their own headings. The column strip above it goes, because each cell
+     now carries the heading it needs. */
+  .tvd-cols { display: none; }
+  .tvd-cols + .tvd-table { margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+  .tvd-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.75rem 1rem; }
+  .tvd-cell--label { grid-column: 1 / -1; }
+  /* The same pill, stacked. It stays a BLOCK so the figure below it starts on
+     its own line, and takes width: fit-content so the block hugs the word
+     instead of ruling a pill across the cell. */
+  .tvd-head {
+    display: block; width: fit-content; margin-bottom: 0.45rem;
+    border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+    background: var(--white); padding: 0.3rem 0.7rem;
+    font-family: var(--font-body);
+    font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-mid);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tvd-cta-img { transition: none; }
+  .tvd-cta:hover .tvd-cta-img { transform: none; }
+  /* Zero travel, so the parallax returns before it binds anything. */
+  .tvd-page { --tvd-drift: 0%; }
+}

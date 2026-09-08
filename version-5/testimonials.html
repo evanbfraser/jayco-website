@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-9" />
-  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-11" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
+  <link rel="stylesheet" href="css/testimonials.css?v=v5-tm-12" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -131,9 +131,9 @@
              src="../assets/testimonials/web/hero-1800.webp"
              srcset="../assets/testimonials/web/hero-1200.webp 1200w,
                      ../assets/testimonials/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="1013"
+             sizes="100vw" width="1800" height="1044"
              fetchpriority="high" decoding="async"
-             alt="A family eating together at a picnic table beside their Jayco travel trailer" />
+             alt="A couple at their Jayco Swift camper van, parked on a rock ledge beside a creek" />
       </div>
       <div class="tm-hero-overlay" aria-hidden="true"></div>
       <div class="tm-hero-content">
@@ -145,7 +145,12 @@
       </div>
     </section>
 
-    <section class="tm-intro" aria-labelledby="tm-intro-h" data-animation="fade-up">
+    <!-- No data-animation here: app.js's shared fade-up sets opacity 0 at load and
+         waits for the section top to reach 70% of the viewport, which this section
+         never does on arrival — it starts just below the hero and is already
+         peeking into the frame. The headline was therefore blank on landing.
+         testimonials.js reveals it on arrival instead. -->
+    <section class="tm-intro" aria-labelledby="tm-intro-h">
       <div class="tm-inner">
         <div class="tm-intro-grid">
           <div class="tm-intro-lead">
@@ -402,29 +407,29 @@
           <h4>Find Your RV</h4>
           <ul>
             <li><a href="quiz.html">RV Finder Quiz</a></li>
-            <li><a href="#">Top-Selling RVs</a></li>
-            <li><a href="#">Buyer's Guide</a></li>
-            <li><a href="#">Tow vs. Drive Guide</a></li>
-            <li><a href="#">New to RVing?</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Shop &amp; Tools</h4>
           <ul>
             <li><a href="dealers.html">Find a Dealer</a></li>
-            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
             <li><a href="brochures.html">Brochures</a></li>
             <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
             <li><a href="towing.html">Towing Calculator</a></li>
-            <li><a href="#">Value Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Owners</h4>
           <ul>
             <li><a href="#">Owner Services</a></li>
-            <li><a href="#">Manuals</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
             <li><a href="#">Warranty Coverage</a></li>
             <li><a href="#">Recalls</a></li>
             <li><a href="#">Wingmate App</a></li>
@@ -436,9 +441,9 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <ul>
-            <li><a href="#">Blog</a></li>
+            <li><a href="blog.html">Blog</a></li>
             <li><a href="videos.html">Video Gallery</a></li>
-            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
             <li><a href="#">Dealer Marketing Hub</a></li>
@@ -447,14 +452,14 @@
         <div class="footer-col">
           <h4>About</h4>
           <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">The Jayco Difference</a></li>
-            <li><a href="#">100% PDI</a></li>
-            <li><a href="#">R&amp;D &amp; Innovation</a></li>
-            <li><a href="#">Safety &amp; JaySMART</a></li>
-            <li><a href="#">Award-Winning RVs</a></li>
-            <li><a href="#">Sustainability</a></li>
-            <li><a href="#">Visit Us</a></li>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
             <li><a href="#">Careers</a></li>
             <li><a href="#">Newsroom</a></li>
           </ul>
@@ -487,7 +492,7 @@
   <script src="js/models-data.js?v=v5-5"></script>
   <script src="js/gallery-data.js?v=v5-tm-11"></script>
   <script src="js/testimonial-data.js?v=v5-tm-11"></script>
-  <script src="js/testimonials.js?v=v5-tm-11"></script>
+  <script src="js/testimonials.js?v=v5-tm-13"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

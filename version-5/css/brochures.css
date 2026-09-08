@@ -59,10 +59,14 @@
 .br-hero-img {
   width: 100%; height: 100%;
   object-fit: cover;
-  /* The plate is cropped to 20:9 for the band, but a phone asks for something
-     near portrait. Holding the frame right of centre keeps the van and the rock
-     ledge in shot instead of centring on empty water. */
-  object-position: 58% 50%;
+  /* The plate is the full 3:2 frame rather than a crop of it: the band asks for
+     a wide strip and a phone asks for something near portrait, and cover cannot
+     invent height. Cropping to the band first left the phone with one man's
+     chest filling the screen, so the height stays in the file and the band
+     spends it. Holding the frame just left of centre keeps the fire pit and the
+     man standing over it in shot with the coach behind them — dead centre
+     pushes the far chair in and the coach out. */
+  object-position: 46% 50%;
 }
 /* Two layers, and both are load-bearing.
 
@@ -80,16 +84,7 @@
    the right, where nothing sits. */
 .br-hero-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background:
-    linear-gradient(to right,
-      rgba(15,11,9,0.70) 0%,
-      rgba(15,11,9,0.40) 46%,
-      rgba(15,11,9,0) 74%),
-    linear-gradient(to top,
-      rgba(15,11,9,0.72) 0%,
-      rgba(15,11,9,0.40) 34%,
-      rgba(15,11,9,0.12) 62%,
-      rgba(15,11,9,0.28) 100%);
+  background: var(--scrim-image);
 }
 .br-hero-content {
   position: relative; z-index: 2;
@@ -111,8 +106,8 @@
 }
 /* Wider than --measure so the headline sets in two lines rather than three. It
    is not a reading measure — it is a display line, and at three lines it filled
-   a 504px band top to bottom and reached down into the lens-flare artifact on
-   the water at 46% across, 68% down. */
+   a 504px band top to bottom and climbed off the grass into the busy half of
+   the frame, where the chairs and the fire are. */
 .br-hero-heading {
   font-family: var(--font-display);
   font-size: clamp(2.6rem, 6vw, 5.25rem);
@@ -140,7 +135,13 @@
    white with ink type rather than a translucent tint — a white tint over Jayco
    blue composites LIGHTER, which is the worst possible bed for small text and
    the same trap the model page's floorplan band hit. */
-.br-filter { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+/* ---------- Intro ----------
+   Restated from buyers-guide.css and request-quote.css, which state it the same
+   way: one paragraph at reading measure between the photograph and the first
+   control. It carries the section's top padding, which is why .br-filter below
+   gives its own back — the two are one block, not two. */
+
+.br-filter { padding: clamp(3rem, 6vw, 5rem) 0 0; }
 .br-filter-panel {
   background: var(--blue);
   border-radius: 32px;
@@ -381,11 +382,10 @@
      against 4.5 — passing, but with nothing in hand. This takes them to 10.1
      and 12.4. */
   .br-hero-overlay {
-    background: linear-gradient(to top,
-      rgba(15,11,9,0.90) 0%,
-      rgba(15,11,9,0.74) 40%,
-      rgba(15,11,9,0.34) 70%,
-      rgba(15,11,9,0.28) 100%);
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
   }
   .br-grid { grid-template-columns: minmax(0, 1fr); }
   .br-card { flex-direction: row; align-items: center; gap: 1rem; padding: 1rem; }

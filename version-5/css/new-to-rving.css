@@ -1,0 +1,556 @@
+/* ===================================================
+   Jayco — New to RVing? (new-to-rving.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from tow-vs-drive.css (which ported it from
+   jayco-difference.css, from towing.css, and back
+   through request-quote, buyers-guide, top-selling,
+   videos, testimonials and brochures to type.css) —
+   the house rule is port, rename, and name the source,
+   so a reader who greps a class finds one owner.
+
+   The hero scrim is not restated: it reads
+   --scrim-image, the sitewide rule in style.css.
+
+   THE POST CARDS ARE NOT STYLED HERE. They are
+   blog-ui.js's own .bl-card, drawn by blog.css, so the
+   three articles on this page look like every other
+   post card on the site and stay that way when that
+   card changes. Only the grid around them is set below.
+   =================================================== */
+
+.ntr-page {
+  background: var(--canvas);
+  --ntr-pad: var(--page-pad);
+  --ntr-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in new-to-rving.js. */
+  --ntr-drift: 12%;
+}
+.ntr-page [hidden] { display: none !important; }
+.ntr-page button { font-family: inherit; }
+
+.ntr-inner { max-width: var(--ntr-frame); margin: 0 auto; padding: 0 var(--ntr-pad); }
+
+/* ---------- Hero ---------- */
+.ntr-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.ntr-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--ntr-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.ntr-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The plate is 3:2 and the band is wider than that, so on a desktop the whole
+     WIDTH shows and only the height is cropped — this value does nothing there.
+     It earns its keep on a phone, where the crop turns sideways: the van sits
+     right of centre and the runner well left of it, and 52% is what keeps the
+     van whole while leaving a little of him in frame. */
+  object-position: 52% 50%;
+}
+.ntr-hero-overlay { position: absolute; inset: 0; z-index: 1; background: var(--scrim-image); }
+.ntr-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--ntr-frame); margin: 0 auto;
+  padding: 0 var(--ntr-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.ntr-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.ntr-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.ntr-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+
+/* ---------- Where people start ---------- */
+.ntr-types { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ntr-sec-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.ntr-sec-head .section-heading { margin: 0.5rem 0 0; }
+.ntr-sec-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+/* ---------- The type rail ----------
+   Eight portrait plates, scrolled sideways rather than stacked. Three-up in a
+   grid this section would run three rows deep and push the next question off
+   the screen; scrolled, it is one band tall whatever the lineup does.
+
+   THE CARD WIDTH IS DELIBERATELY NOT A CLEAN FRACTION of the container. At 28%
+   the fourth card is cut by the right edge, and that sliver is the only thing
+   telling a reader there is more to the right — a rail that happens to fit its
+   viewport exactly looks like a grid that ends.
+
+   snap proximity, not mandatory: mandatory fights a reader who is flicking
+   through eight of these and wants to stop between two. */
+/* THE RAIL SITS OUTSIDE THE FRAME so it runs to the viewport edge, and pays
+   its own left padding to line the first card up with the heading above it.
+   max() so that on a screen narrower than the frame it never drops below the
+   page gutter.
+
+   PADDING, NOT A NEGATIVE MARGIN. Chrome counts the scrollbar inside 100vw, so
+   a -100vw margin overshoots the edge and puts a horizontal scrollbar on the
+   whole page. testimonials.css hit this with .tm-rev-body and its note is the
+   source of this one — ported, per the house rule, not shared.
+
+   scroll-padding-left matches the padding so a snapped card stops in line with
+   the heading rather than jammed against the viewport edge. */
+.ntr-rail {
+  --ntr-rail-inset: max(var(--ntr-pad), calc((100vw - var(--ntr-frame)) / 2 + var(--ntr-pad)));
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+  padding: 0 var(--ntr-pad) 0 var(--ntr-rail-inset);
+  scroll-padding-left: var(--ntr-rail-inset);
+  display: flex; gap: clamp(1rem, 2vw, 1.5rem);
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  /* THE BAR IS HIDDEN, THE SCROLLING IS NOT. Wheel, trackpad, touch, and a
+     keyboard tabbing onto a card three along all still move the rail; only the
+     grey track under the cards is gone. That is only honest because the arrows
+     above carry the affordance the bar used to — without them this would hide
+     the one clue that the row continues, which is why the cut card at the right
+     edge and the arrows both matter more now than they did.
+
+     Three properties for three engines, and none of them is a shorthand for the
+     others: Firefox reads scrollbar-width, old Edge reads -ms-overflow-style,
+     WebKit and Blink only take the pseudo-element. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ntr-rail::-webkit-scrollbar { display: none; }
+
+/* ---------- The rail's head and arrows ----------
+   The arrows sit with the heading, inside the frame, rather than floating over
+   the cards: the plates carry their name in the bottom corner and a disc parked
+   on top of one would cover it.
+
+   Ported from .models-arrow in style.css — same disc, same border, same blur —
+   with one deliberate difference: these take the real disabled attribute at the
+   ends, where the sitewide pair only add a faded class and stay clickable. */
+.ntr-types-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: clamp(1rem, 3vw, 2.5rem); flex-wrap: wrap;
+}
+.ntr-types-head .ntr-sec-head { flex: 1 1 min(100%, 34rem); }
+.ntr-rail-nav { display: flex; gap: 0.6rem; flex: none; padding-bottom: 0.35rem; }
+.ntr-rail-nav[hidden] { display: none; }
+.ntr-rail-arrow {
+  width: 52px; height: 52px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid rgba(15,11,9,0.14);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--text-dark); cursor: pointer;
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1);
+  transition: background 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s, opacity 0.25s;
+}
+.ntr-rail-arrow:hover:not(:disabled) {
+  background: #fff; transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(15,11,9,0.14);
+}
+.ntr-rail-arrow:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.ntr-rail-arrow:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+.ntr-rail > .ntr-type {
+  flex: 0 0 clamp(240px, 28%, 360px);
+  scroll-snap-align: start;
+}
+/* ---------- Type cards ----------
+   The type's own portrait plate carrying ONE thing — its name — with the count,
+   the reason and the price set below it on the page ground. Portrait because
+   that is the shape the photographs were cut to, and because three tall cards
+   in a row read as a set of doorways where three wide ones read as a filmstrip.
+
+   3:4 IS THE PHOTOGRAPHS' OWN RATIO, not a crop of it. All three are 1200x1600
+   and in every one the coach runs very nearly the full width of the frame, so
+   the 2:3 this started on took roughly 5% off each side and clipped the ends
+   off all three. Match the source and nothing is lost.
+
+   The part below the plate is .bl-card in blog.css: no card chrome, no panel,
+   the text standing straight on the page. Ported rather than shared — the house
+   rule is port, rename, and name the source.
+
+   THE SCRIM IS THE SITEWIDE RULE, --scrim-card: darken the bottom enough to
+   carry the name and leave the rest of the photograph alone. Same token the CTA
+   bands on this page use, and it has less to do here than it did — one line
+   instead of a stack of four. */
+.ntr-type { display: flex; }
+.ntr-type-link {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  width: 100%; height: 100%;
+  text-decoration: none; color: inherit;
+}
+.ntr-type-link:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 4px;
+  border-radius: var(--radius-card);
+}
+.ntr-type-plate {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  aspect-ratio: 3 / 4; overflow: hidden;
+  border-radius: var(--radius-card);
+  margin-bottom: 0.35rem;
+}
+.ntr-type-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.ntr-type-link:hover .ntr-type-img { transform: scale(1.04); }
+.ntr-type-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.ntr-type-name {
+  position: relative; z-index: 2;
+  margin: 0; padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+  color: #fff;
+}
+/* auto on the price's top margin so it sits at the foot of the TALLEST card in
+   the row rather than wherever its own reason happened to stop — .bl-card-more
+   does the same thing for the same reason. */
+.ntr-type-body { display: flex; flex-direction: column; flex: 1; }
+.ntr-type-meta {
+  display: block; margin-bottom: 0.4rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--blue-dark);
+}
+.ntr-type-why { margin: 0 0 1rem; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+.ntr-type-from {
+  display: block; margin-top: auto;
+  font-family: var(--font-display);
+  font-size: 1.02rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+}
+.ntr-types-more { margin: clamp(1.25rem, 2.4vw, 1.75rem) 0 0; font-size: 0.95rem; color: var(--text-mid); }
+
+/* ---------- How do you want to RV? ----------
+   A three-step walk-through: the question and its options on the left, the
+   classes that answer matches on the right, Next to move on. Everything in it
+   is written by new-to-rving.js: the styles and their matches are authored
+   content held there, the floorplan counts are read from build-data.js.
+
+   TWO PANELS ON ONE SURFACE rather than two cards. The left asks and the right
+   answers; boxing them separately would read as two unrelated components
+   sitting next to each other, which is exactly what they are not. */
+.ntr-style-sec { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+/* The three picker sections — space, tow rating, budget — had NO rule of their
+   own, so they were the only bands on the page opening on zero. That is the
+   whole of the crowding between the types and the space section, and again
+   between space and tow, and again between tow and budget. This is the same
+   step every other section here opens on; it is the page's rhythm, not a
+   special case for these three. */
+.ntr-scale { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+
+/* ---------- Scrubbed film band ----------
+   Full width, square corners, no rounding: DESIGN.md is explicit that a
+   photograph runs to the edge, and this is a photograph that moves. It is the
+   only element on the page that is not inside the frame, which is the point —
+   it breaks the column of sections in two, right where the page stops asking
+   about space and starts asking about weight.
+
+   HEIGHT IS A CLAMP AND THE FILM IS COVERED INTO IT rather than being left at
+   its own 16:9. At 1440 a 16:9 band would stand 810px tall and push the towing
+   question a full screen further down; at 390 it would be 219px, a letterbox
+   slot. The clamp keeps it substantial on a phone and in proportion on a
+   desktop, and the subject sits centre-frame so the crop takes only meadow. */
+.ntr-film {
+  margin-top: clamp(3.5rem, 7vw, 6rem);
+  width: 100%; overflow: hidden;
+  background: var(--text-dark);   /* the ground under the poster while it loads */
+}
+.ntr-film-video {
+  display: block; width: 100%;
+  height: clamp(420px, 46vw, 660px);
+  object-fit: cover;
+  /* Seeking a paused video repaints on the compositor if it is promoted; without
+     this Chrome re-rasterises the whole band on every scroll frame. */
+  will-change: transform;
+}
+.ntr-ask {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--surface); border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.ntr-ask-q { padding: clamp(1.75rem, 3.2vw, 2.75rem); display: flex; flex-direction: column; }
+.ntr-ask-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.12;
+  color: var(--text-dark);
+}
+.ntr-ask-why { margin: 0 0 1.5rem; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+.ntr-ask-why:empty { display: none; }
+
+.ntr-ask-opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.ntr-ask-opt {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  background: var(--white); border: 2px solid transparent;
+  border-radius: 14px; padding: 0.9rem 1.1rem;
+  transition: border-color 0.2s, box-shadow 0.25s var(--ease-out);
+}
+.ntr-ask-opt:hover { box-shadow: 0 8px 20px rgba(15,11,9,0.08); }
+.ntr-ask-opt:focus-visible { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,122,194,0.28); }
+.ntr-ask-opt.is-on { border-color: var(--blue); box-shadow: 0 8px 20px rgba(0,122,194,0.16); }
+.ntr-ask-opt-label {
+  display: block;
+  font-size: 1rem; font-weight: 700; line-height: 1.3; color: var(--text-dark);
+}
+.ntr-ask-opt-sub { display: block; margin-top: 0.2rem; font-size: 0.85rem; line-height: 1.45; color: var(--text-mid); }
+
+/* auto on the top margin, so Back and Next sit at the foot however many
+   options the question happens to carry. */
+.ntr-ask-nav { margin-top: auto; padding-top: clamp(1.25rem, 2.4vw, 1.75rem); }
+.ntr-ask-next { padding: 0.8rem 1.6rem; font-size: 0.78rem; }
+
+/* The answer panel. Canvas rather than Surface, so the two halves read as ask
+   and answer rather than as one flat block. */
+.ntr-ask-r {
+  background: var(--canvas);
+  padding: clamp(1.75rem, 3.2vw, 2.75rem);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.ntr-ask-wait { margin: 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-mid); }
+.ntr-ask-rhead {
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem; font-weight: 600; line-height: 1.5; color: var(--text-dark);
+}
+.ntr-ask-rpick { color: var(--blue-dark); }
+.ntr-ask-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+/* One line each, in the order they were written — these are ranked
+   recommendations, so nothing re-sorts them. A hairline between rather than a
+   bullet, which reads as a list of places to look rather than as a ballot. */
+.ntr-ask-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  padding-bottom: 0.75rem; border-bottom: 1px solid var(--hairline);
+}
+.ntr-ask-row:last-child { padding-bottom: 0; border-bottom: none; }
+.ntr-ask-cat {
+  font-family: var(--font-display);
+  font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--text-dark); text-decoration: none;
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.ntr-ask-cat:hover { border-bottom-color: var(--blue); }
+.ntr-ask-count { font-size: 0.8rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.ntr-ask-why-r { margin: 1.25rem 0 0; font-size: 0.9rem; line-height: 1.7; color: var(--text-mid); }
+.ntr-ask-why-k { font-weight: 700; color: var(--text-dark); }
+
+/* ---------- The tow slider ----------
+   The range is towing.css's .tc-range, ported and renamed — the house rule is
+   port, rename, and name the source. Two differences, both because of the
+   ground: that one sits on a Jayco blue panel so its track is white and its
+   thumb deep blue, where this sits on Surface and needs the reverse. And the
+   filled portion is drawn here, from --ntr-slider-pos, which new-to-rving.js
+   sets on every input — a plain range gives no way to colour the travelled part
+   consistently across browsers. */
+.ntr-slider-wrap { display: block; --ntr-slider-pos: 0%; }
+.ntr-slider {
+  width: 100%; margin: 0; -webkit-appearance: none; appearance: none;
+  background: none; height: 26px; cursor: pointer;
+}
+.ntr-slider::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(to right, var(--blue) 0 var(--ntr-slider-pos),
+                              rgba(15,11,9,0.14) var(--ntr-slider-pos) 100%);
+}
+.ntr-slider::-moz-range-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(to right, var(--blue) 0 var(--ntr-slider-pos),
+                              rgba(15,11,9,0.14) var(--ntr-slider-pos) 100%);
+}
+.ntr-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; margin-top: -9px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--blue);
+  box-shadow: 0 1px 5px rgba(15,11,9,0.28); cursor: pointer;
+}
+.ntr-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--blue); cursor: pointer;
+}
+.ntr-slider:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+
+/* The four stops, under the track. aria-hidden in the markup: the range already
+   announces its own value through aria-valuetext, and a screen reader reading
+   four loose numbers after it would only repeat itself. */
+.ntr-slider-ticks {
+  list-style: none; margin: 0.35rem 0 0; padding: 0;
+  display: flex; justify-content: space-between;
+}
+.ntr-slider-ticks li {
+  font-size: 0.72rem; font-weight: 600; color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+/* The end labels would otherwise hang past the track; nudged back in so the row
+   reads as the ends of the scale rather than as overflow. */
+.ntr-slider-ticks li:first-child { margin-left: -2px; }
+.ntr-slider-ticks li:last-child { margin-right: -2px; }
+
+.ntr-slider-read { margin: 1.35rem 0 0; }
+.ntr-slider-val {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.ntr-slider-sub { display: block; margin-top: 0.3rem; font-size: 0.92rem; color: var(--text-mid); }
+
+/* The caption under the two sliders: what was counted, and what was left out.
+   The denominators genuinely differ between sections, and a count with no
+   denominator is the part of a page like this people misread. */
+.ntr-band-note {
+  margin: clamp(1rem, 2vw, 1.5rem) 0 0; max-width: var(--measure-wide);
+  font-size: 0.85rem; line-height: 1.65; color: var(--text-mid);
+}
+
+/* ---------- RVing 101 ---------- */
+.ntr-basics { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ntr-basics-grid {
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.ntr-basic {
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 2.6vw, 2rem);
+}
+.ntr-basic-h {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+  color: var(--text-dark);
+}
+.ntr-basic p { margin: 0; font-size: 0.95rem; line-height: 1.75; color: var(--text-mid); }
+.ntr-basic p + p { margin-top: 0.8rem; }
+
+/* ---------- Reading ----------
+   The grid only. The cards inside it are blog-ui.js's, styled by blog.css. */
+.ntr-reading { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ntr-posts {
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* ---------- CTAs ----------
+   Image-led, ported from tow-vs-drive.css's pair, which ported them from
+   towing.css. Three of them here rather than two, so they run one across on
+   every width below the widest — three scrimmed photographs in a row at 1440
+   is a wall, and each of these is a different next step rather than a set. */
+.ntr-cta { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ntr-cta-band {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  /* A third off the doubled height: 640/60vw/840 taken back to two thirds.
+     Still well above the strips they started as, without the copy sitting at
+     the foot of half a screen of empty photograph. */
+  min-height: clamp(425px, 40vw, 560px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom — the same construction the
+   hero uses, and for the same reason: that overhang is what the parallax
+   travels through, so neither edge of the photograph can come into view at
+   either end of the pass. The wrapper is what GSAP moves and the image is what
+   hover scales, so the two transforms never write to the same element. */
+.ntr-cta-media {
+  position: absolute; inset: calc(-1 * var(--ntr-drift)) 0; z-index: 0;
+  will-change: transform;
+}
+/* NO HOVER ZOOM HERE, and the transition is gone with it — deliberate, not an
+   omission. These bands are already moving: --ntr-drift parallaxes
+   .ntr-cta-media as the band crosses the viewport, and a scale on the picture
+   underneath it is a second motion on the same photograph. The type cards do
+   still lift, because a card plate is still while you point at it.
+
+   The <img> has no transform of its own now. The parallax moves the media
+   wrapper around it, which is why removing this costs the band nothing. */
+.ntr-cta-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* THE SITEWIDE RULE, not a scrim of its own: darken the bottom enough to carry
+   the type standing on it and leave the rest of the photograph alone.
+
+   These bands used to carry two layers — a left-weighted wash on top of a
+   vertical one that never reached zero — which tinted the whole plate. Both are
+   gone. --scrim-card is the tighter of the two steps in style.css, which is the
+   right one here: the copy is a heading and a paragraph rather than a single
+   line, so it reaches further up the frame than a hero title does. */
+.ntr-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.ntr-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
+.ntr-cta .section-label { color: #fff; }
+.ntr-cta-h {
+  margin: 0.5rem 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+}
+.ntr-cta-body p {
+  margin: 0 0 1.5rem; max-width: 46ch;
+  font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.88);
+}
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for, not the ink. On a scrimmed
+   photograph it disappears, so it is inverted here, as towing.css does. */
+.ntr-cta .btn-secondary-light { border-color: rgba(255,255,255,0.55); color: #fff; }
+.ntr-cta .btn-secondary-light:hover { border-color: #fff; background: #fff; color: var(--text-dark); }
+
+.ntr-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+
+/* ---------- Responsive ---------- */
+/* Stacked well before the panels get narrow: an option list and a result list
+   side by side both want their own measure, and 500px each is not it. */
+@media (max-width: 900px) {
+  .ntr-ask { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1023px) {
+  .ntr-posts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ntr-rail > .ntr-type { flex-basis: 44%; }
+}
+@media (max-width: 768px) {
+  .ntr-hero { height: 72svh; min-height: 460px; }
+  .ntr-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone and a shorter hero gives it a
+     bigger share of the frame, so the ramp starts sooner. */
+  .ntr-hero-overlay { background: var(--scrim-card); }
+  .ntr-posts, .ntr-basics-grid { grid-template-columns: minmax(0, 1fr); }
+  /* On a phone the rail shows one card and the edge of the next, which is
+     both the readable size for a portrait plate and the clearest possible hint
+     that the row keeps going. */
+  .ntr-rail > .ntr-type { flex-basis: 78%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ntr-rail-arrow { transition: none; }
+  .ntr-rail-arrow:hover:not(:disabled) { transform: none; }
+
+  .ntr-type-img { transition: none; }
+  /* The film is not scrubbed under reduced motion — new-to-rving.js returns
+     before binding — so it rests on its first frame and the band reads as a
+     still photograph, which is what it should degrade to. */
+  .ntr-type-link:hover .ntr-type-img { transform: none; }
+  /* Zero travel, so the parallax returns before it binds anything. */
+  .ntr-page { --ntr-drift: 0%; }
+}

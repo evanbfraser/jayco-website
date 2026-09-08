@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-9" />
-  <link rel="stylesheet" href="css/videos.css?v=v5-vd-1" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
+  <link rel="stylesheet" href="css/videos.css?v=v5-vd-8" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -130,12 +130,12 @@
     <section class="vd-hero">
       <div class="vd-hero-media">
         <img class="vd-hero-img"
-             src="../assets/videos/web/hero-1800.webp"
-             srcset="../assets/videos/web/hero-1200.webp 1200w,
-                     ../assets/videos/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="855"
+             src="../assets/videos/web/hero-v2-1800.webp"
+             srcset="../assets/videos/web/hero-v2-1200.webp 1200w,
+                     ../assets/videos/web/hero-v2-1800.webp 1800w"
+             sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A pickup towing a Jayco North Point fifth wheel along a forest highway" />
+             alt="A Jayco Class C motorhome driving toward the camera across a suspension bridge under heavy cloud, the road blurred with speed" />
       </div>
       <div class="vd-hero-overlay" aria-hidden="true"></div>
       <div class="vd-hero-content">
@@ -148,10 +148,11 @@
 
     <section class="vd-intro">
       <div class="vd-inner">
-        <p class="vd-intro-body">Every film here is Jayco's own, shot on the real coach with the
+        <p class="vd-intro-body">Most of these are Jayco's own, shot on the real coach with the
           product director who developed it. Start with a walkthrough of the model you are
           considering, then look at what is underneath — the smart-RV system, the solar packages,
-          the parts you only notice once you own one.</p>
+          the parts you only notice once you own one — and finish with the reviews and tours
+          filmed out on the lot.</p>
       </div>
     </section>
 
@@ -168,15 +169,34 @@
     </section>
 
     <!-- No data-animation on this section: app.js runs one staggered gsap.from()
-         over every .section-* inside such a section, and eleven cards would be a
-         multi-second stagger. -->
+         over every .section-* inside such a section, and seventy cards would be
+         a stagger minutes long. -->
     <section class="vd-grid-wrap" aria-label="Videos">
+      <!-- OUTSIDE .vd-inner on purpose: each shelf's rail runs to the viewport
+           edge, and the head and the rail each pay their own frame padding so
+           the first card still lines up under the shelf title. -->
+      <div class="vd-shelves" id="vd-shelves"><!-- built by videos.js --></div>
       <div class="vd-inner">
-        <ul class="vd-grid" id="vd-grid" role="list"><!-- built by videos.js --></ul>
+        <!-- TWO VIEWS OF ONE LIBRARY, and only ever one of them in the DOM.
+             Unfiltered, the seventy videos are shelved by topic, each topic a
+             rail you scroll — seventy cards down a three-wide grid is a page you
+             scroll for a minute without ever being told what you are looking at.
+             Pick a topic and it becomes the grid again, which is the right shape
+             once the answer is "these ten".
+
+             videos.js empties whichever one is not showing rather than hiding a
+             built copy: the cards carry thumbnails, and two sets of seventy is
+             two sets of requests to i.ytimg.com for the ones the browser has not
+             cached yet. -->
+        <ul class="vd-grid" id="vd-grid" role="list" hidden><!-- built by videos.js --></ul>
         <p class="vd-empty" id="vd-empty" hidden>No videos in that category yet.</p>
-        <p class="vd-note">All films are Jayco's own, on
-          <a href="https://www.youtube.com/@jayco" target="_blank" rel="noopener noreferrer">the Jayco RV channel</a>.
-          Playing one loads it from YouTube.</p>
+        <!-- The footnote that stood here is gone at the owner's request. It had
+             said "All films are Jayco's own", then, once the Reviews &amp; Tours
+             band came over from jayco.com, which categories are Jayco's and
+             which are filmed by reviewers and dealers. So the page now names no
+             channel anywhere: the cards carry no byline either, which is what
+             jayco.com does. Whose film each one is is recorded in
+             js/video-data.js, over the top of that block. -->
       </div>
     </section>
 
@@ -186,9 +206,9 @@
        transformed or overflow:hidden ancestor stops being fixed.
 
        The <iframe> is created on open and destroyed on close rather than kept:
-       an iframe left in the DOM keeps a YouTube player alive, and eleven of them
-       rendered up front would load eleven third-party players before anyone has
-       pressed anything. Nothing is requested from YouTube until a card is
+       an iframe left in the DOM keeps a YouTube player alive, and seventy of
+       them rendered up front would load seventy third-party players before
+       anyone has pressed anything. Nothing is requested from YouTube until a card is
        clicked — the thumbnails come from i.ytimg.com, the player does not exist
        until it is asked for. -->
   <div class="vd-player" id="vd-player" hidden role="dialog" aria-modal="true"
@@ -284,29 +304,29 @@
           <h4>Find Your RV</h4>
           <ul>
             <li><a href="quiz.html">RV Finder Quiz</a></li>
-            <li><a href="#">Top-Selling RVs</a></li>
-            <li><a href="#">Buyer's Guide</a></li>
-            <li><a href="#">Tow vs. Drive Guide</a></li>
-            <li><a href="#">New to RVing?</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Shop &amp; Tools</h4>
           <ul>
             <li><a href="dealers.html">Find a Dealer</a></li>
-            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
             <li><a href="brochures.html">Brochures</a></li>
             <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
             <li><a href="towing.html">Towing Calculator</a></li>
-            <li><a href="#">Value Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Owners</h4>
           <ul>
             <li><a href="#">Owner Services</a></li>
-            <li><a href="#">Manuals</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
             <li><a href="#">Warranty Coverage</a></li>
             <li><a href="#">Recalls</a></li>
             <li><a href="#">Wingmate App</a></li>
@@ -318,9 +338,9 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <ul>
-            <li><a href="#">Blog</a></li>
+            <li><a href="blog.html">Blog</a></li>
             <li><a href="videos.html">Video Gallery</a></li>
-            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
             <li><a href="#">Dealer Marketing Hub</a></li>
@@ -329,14 +349,14 @@
         <div class="footer-col">
           <h4>About</h4>
           <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">The Jayco Difference</a></li>
-            <li><a href="#">100% PDI</a></li>
-            <li><a href="#">R&amp;D &amp; Innovation</a></li>
-            <li><a href="#">Safety &amp; JaySMART</a></li>
-            <li><a href="#">Award-Winning RVs</a></li>
-            <li><a href="#">Sustainability</a></li>
-            <li><a href="#">Visit Us</a></li>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
             <li><a href="#">Careers</a></li>
             <li><a href="#">Newsroom</a></li>
           </ul>
@@ -365,8 +385,8 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/video-data.js?v=v5-vd-1"></script>
-  <script src="js/videos.js?v=v5-vd-1"></script>
+  <script src="js/video-data.js?v=v5-vd-3"></script>
+  <script src="js/videos.js?v=v5-vd-7"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

@@ -46,9 +46,11 @@ assets/quiz/*.jpg
 assets/quiz/*.jpeg
 assets/quiz/*.png
 
-# The brochures hero: one 6.4 MB, 2400x1598 plate, of which the page loads a
-# cropped pair of webps at 1200 and 1800. Same rule as every block above — the
-# original stays local, assets/brochures/web/ is one level deeper and untouched.
+# The brochures hero plates, of which the page loads a webp pair at 1200 and
+# 1800 exported from the current one. Same rule as every block above — the
+# originals stay local, assets/brochures/web/ is one level deeper and untouched.
+# -creek.jpg is the retired first hero, kept because the export is the only
+# other copy of it and that one is 20:9.
 assets/brochures/*.jpg
 
 # The delivered master of the news section's hookups video: 17 MB at 36 Mbps,
@@ -70,3 +72,29 @@ assets/jayco-news-hookups-v2.mp4
 # as every block above — the originals stay local, assets/testimonials/web/ is a
 # level deeper and untouched.
 assets/testimonials/*.jpg
+
+# The blog art: ten supplied plates (the overview hero alone is 19 MB at
+# 5272x3948) and a 974 MB, 3-minute 4K master for the Travel Ideas tile, of
+# which the page loads a 12-second, 1440-wide cut at 5 MB. Same rule as every
+# block above — the originals stay local, assets/blog/web/ is one level deeper
+# and holds everything the site actually serves.
+assets/blog/*.jpg
+assets/blog/*.mov
+assets/blog/*.mp4
+
+# The top-selling hero plate is already committed as assets/36-bg-top-selling.png
+# (3 MB, and the site's own file), so nothing new is ignored here — the sales
+# sheets and renders under assets/top-selling/ ARE the deliverable of that page
+# and are committed: a Download Sales Sheet button that 404s is worse than none.
+
+# The buyer's guide plates: the dealership hero is assets/jayco-dealerships.jpg
+# and the form panel is assets/jayco-buyers-guide-form-issue.jpg, both already
+# in the repo as the site's own files. Nothing new to ignore — the exports the
+# page loads are in assets/buyers-guide/web/.
+
+# The layered master for the RV-type silhouettes: 83.6 MB, and nothing on the
+# site loads a .psd. Same rule as every block above, one level up — the flat
+# exports beside it are what the pages actually serve. Named by extension rather
+# than by file so the next master dropped in the folder does not have to be
+# noticed by hand.
+assets/*.psd

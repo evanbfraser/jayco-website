@@ -190,8 +190,15 @@
   }
 
   function tick() { show(at + 1); }
+
+  /* inView is a THIRD condition on play(), alongside the pause button and
+     reduced motion, and it has to live inside play() rather than at the one
+     call site: play() is reached from five places — the button, mouseleave,
+     focusout, visibilitychange and the observer itself — and any of them could
+     otherwise start the strip running while it is nowhere near the screen. */
+  let inView = false;
   function play() {
-    if (stopped || reduced.matches) return;
+    if (stopped || reduced.matches || !inView) return;
     clearInterval(timer); timer = setInterval(tick, HOLD);
   }
   function pause() { clearInterval(timer); timer = null; }
@@ -245,7 +252,30 @@
      control would be a button that pauses nothing. */
   if (reduced.matches) {
     if (btn) btn.hidden = true;
+  }
+
+  /* IT STARTS WHEN IT IS LOOKED AT, not when the page loads. The gallery is
+     most of a page below the fold, so a strip that began cycling at load had
+     already run through several photographs by the time anyone scrolled down
+     to it — they arrived in the middle of a sequence that had been playing to
+     nobody, and the first thing they saw was whichever frame it happened to be
+     on. Starting on arrival means the first photograph they see is the first
+     one, and the strip is not burning a timer against an empty screen.
+
+     It stops again on the way out for the same reason.
+
+     A quarter of the strip is the threshold: enough of it on screen to be
+     worth watching, and low enough that it is already running by the time the
+     band has properly settled. */
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        inView = e.isIntersecting;
+        if (inView) play(); else pause();
+      });
+    }, { threshold: 0.25 }).observe(strip);
   } else {
+    inView = true;
     play();
   }
   document.addEventListener('visibilitychange', () => {
@@ -322,9 +352,64 @@
     });
   }
 
+  /* ---------- The intro headline arriving ----------
+     ON ARRIVAL, NOT ON SCROLL, which is the whole point of it living here
+     rather than in app.js's data-animation set. That handler fires when the
+     section top reaches 70% of the viewport; .tm-intro opens immediately below
+     the hero and is already peeking into the frame on landing, so the trigger
+     had not fired while the from() had already set opacity 0 — the headline was
+     blank for anyone who arrived and did not scroll.
+
+     An IntersectionObserver fires for an element that is ALREADY intersecting
+     the moment it is observed, which is exactly the case this needs and exactly
+     what a scroll-start threshold cannot do.
+
+     TWO SPANS PER LINE: the outer clips, the inner travels, so each line rises
+     out of its own edge instead of the block fading. The <br> in the markup is
+     the split, so the line break the writer chose is the line break that
+     animates.
+
+     NOTHING IS HIDDEN UNLESS THE REVEAL IS CERTAIN TO RUN. This is reached only
+     from boot(), which returns unless GSAP is up, and it returns again without
+     touching anything if there is no IntersectionObserver or if the reader asked
+     for reduced motion. In every one of those cases the headline is simply
+     already there — the resting state is the visible one. */
+  function initHeadline() {
+    const h = document.getElementById('tm-intro-h');
+    if (!h) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+
+    const label = $('.tm-intro .section-label');
+    const lines = h.innerHTML.split(/<br\s*\/?>/i);
+    h.innerHTML = lines
+      .map((t) => '<span class="tm-h-line"><span class="tm-h-inner">' + t + '</span></span>')
+      .join('');
+    const inners = h.querySelectorAll('.tm-h-inner');
+    if (!inners.length) return;
+
+    window.gsap.set(inners, { yPercent: 110 });
+    if (label) window.gsap.set(label, { opacity: 0, y: 14 });
+
+    new IntersectionObserver((entries, obs) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      obs.disconnect();
+      if (label) {
+        window.gsap.to(label, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+      }
+      window.gsap.to(inners, {
+        yPercent: 0,
+        duration: 0.9, ease: 'power3.out',
+        stagger: 0.12,
+        delay: label ? 0.12 : 0,
+      });
+    }, { threshold: 0.2 }).observe(h);
+  }
+
   function boot() {
     if (typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') return;
     initParallax();
+    initHeadline();
     initCards();
   }
 

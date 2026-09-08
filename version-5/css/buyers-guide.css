@@ -1,0 +1,365 @@
+/* ===================================================
+   Jayco — Buyer's Guide (buyers-guide.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from top-selling.css (which ported it from
+   videos.css, from testimonials.css, from
+   brochures.css, from type.css) — the house rule is
+   port, rename, and name the source, so a reader who
+   greps a class finds one owner.
+
+   The FIELDS are brochure-form.css's, restated the same
+   way: white, 14px radius, no border at rest, blue
+   focus ring. DESIGN.md > Components.
+   =================================================== */
+
+.bg-page {
+  background: var(--canvas);
+  --bg-pad: var(--page-pad);
+  --bg-frame: 1440px;
+  /* How far each plate travels, as a percentage of its own height. The CSS owns
+     both so the JS cannot drift further than the media overhangs; the
+     reduced-motion block below sets them to 0, which is how the parallax is
+     switched off without a second code path in buyers-guide.js.
+
+     The panel's is the smaller of the two: it is a 690px box rather than a
+     820px band, and the same percentage there would read as the picture sliding
+     inside its frame rather than as depth. */
+  --bg-drift: 12%;
+  --bg-panel-drift: 7%;
+}
+.bg-page [hidden] { display: none !important; }
+.bg-page button { font-family: inherit; }
+
+.bg-inner { max-width: var(--bg-frame); margin: 0 auto; padding: 0 var(--bg-pad); }
+
+/* ---------- Hero ---------- */
+.bg-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.bg-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--bg-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.bg-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The lot runs across the bottom of the frame and the sky is empty; holding
+     the frame low keeps coaches in shot when the band crops. */
+  object-position: 50% 62%;
+}
+/* Vertical stops from videos.css, whose comment carries: the EYEBROW is the
+   binding constraint at 0.72rem, and a scrim tuned to the 900-weight heading
+   alone fails the line above it. The left layer works hard here — this plate is
+   low sun on pale aluminium, the brightest ground of any hero on this site. */
+.bg-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-image);
+}
+.bg-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--bg-frame); margin: 0 auto;
+  padding: 0 var(--bg-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.bg-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.bg-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.bg-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.bg-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.bg-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- Get the guide ----------
+   ONE BAND ON A WIDE SCREEN. The photograph runs the full width of the
+   viewport, the questions sit over its left half, and the form is a pane of
+   glass on its right — the picture is the section rather than an illustration
+   beside it.
+
+   The band is FULL WIDTH, not a bleed margin. type.css's rule applies: width
+   100%, never 100vw, and no negative margin holding a viewport unit — Chrome
+   counts the scrollbar in it and the page gains a horizontal scroll. This
+   section sits directly in <main>, unconstrained, and .bg-get-inner puts the
+   frame back for the content on top. */
+.bg-get { padding: clamp(3rem, 6vw, 5rem) 0 var(--space-md); }
+/* Full screen, both ways: the width of the viewport and the height of it. It is
+   a MIN height rather than a height — on a short window the panel is taller than
+   the screen, and a fixed height would crop the form rather than the
+   photograph. svh, not vh: on a phone-shaped window vh is the tallest the
+   viewport ever gets, which leaves the band running under the browser's own
+   chrome until the address bar retracts. */
+.bg-get-band {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+.bg-get-media { position: absolute; inset: 0; }
+/* Taller than the box it sits in and pulled up by half the difference, so the
+   parallax has somewhere to travel. The questions are a SIBLING of this, not a
+   child, so they stay put while the photograph moves under them. */
+.bg-get-img {
+  position: absolute; left: 0; right: 0;
+  top: calc(-1 * var(--bg-panel-drift));
+  height: calc(100% + var(--bg-panel-drift) * 2);
+  width: 100%; display: block;
+  object-fit: cover; object-position: 50% 55%;
+  will-change: transform;
+}
+/* The one wash on this site that is still horizontal, and it has to be: type
+   sits on BOTH halves of this plate — the questions on the left, the glass form
+   on the right — so the sitewide bottom scrim would leave both of them
+   unprotected. It does NOT follow --scrim-image for that reason.
+
+   HALVED, though, in the same pass that lightened everything else. Both the
+   questions and the form stand on their own tinted glass already, so this layer
+   was doing the job twice and the river underneath paid for it. */
+.bg-get-media::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to right,
+    rgba(15,11,9,0.22) 0%, rgba(15,11,9,0.10) 45%, rgba(15,11,9,0.18) 100%);
+}
+.bg-get-inner { position: relative; z-index: 2; width: 100%; }
+.bg-get-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: center;
+}
+
+/* ---------- The form panel ----------
+   Glass on a wide screen: tinted, not filled, so the river still reads through
+   it. The tint is what carries the contrast — backdrop-filter is unsupported
+   often enough that the blur can never be the only thing making white type
+   legible. */
+.bg-get-panel {
+  border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  background: rgba(15, 11, 9, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  color: #fff;
+}
+.bg-get-panel .section-label { color: #fff; }
+.bg-get-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+  margin: 0.5rem 0 1.1rem;
+}
+/* What is inside, before the form asks for anything: a field asking for an
+   email above a list of what the email buys reads as a toll booth. */
+.bg-list {
+  list-style: none; margin: 0 0 1.75rem; padding: 0;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.bg-list li {
+  position: relative; padding-left: 1.35rem;
+  font-size: 0.92rem; line-height: 1.6; color: rgba(255,255,255,0.92);
+}
+.bg-list li::before {
+  content: ''; position: absolute; left: 0; top: 0.62em;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--blue-light, #4FB3E8);
+}
+
+/* ---------- The questions ----------
+   Five of them, each its own small pane of glass and each in a different part
+   of the picture — one panel in one place with the words swapping inside it
+   reads as a ticker, where five that arrive in five places read as questions
+   coming to mind.
+
+   EACH BOX IS THE SIZE OF ITS OWN SENTENCE. width: max-content, capped so a
+   long one wraps rather than running off the plate. */
+.bg-asks { position: absolute; inset: 0; pointer-events: none; }
+/* THE FORM'S OWN GLASS, at question size. Same tint, same hairline, same blur,
+   same corner as .bg-get-panel — the two things standing on this photograph are
+   made of one material, so the band reads as one surface with two kinds of
+   content on it rather than as a form beside some labels.
+
+   The tint is what carries the contrast, not the blur: backdrop-filter is
+   unsupported often enough that white type can never depend on it alone. Kept
+   in step with .bg-get-panel by hand — a change to one is a change to both.
+
+   They stay glass in the stacked layout even though the form does not: these
+   still sit on the photograph down there, and glass needs a photograph. */
+.bg-ask {
+  position: absolute;
+  margin: 0;
+  width: max-content;
+  max-width: min(38%, 30ch);
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-card);
+  background: rgba(15, 11, 9, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.2vw, 1.12rem);
+  font-weight: 700; line-height: 1.35; letter-spacing: -0.01em;
+  color: #fff;
+  opacity: 0;
+}
+/* Down the LEFT of the band, which is the half the form does not occupy.
+   Staggered horizontally as well as vertically so five in a column do not read
+   as a list; percentages, because the band's height moves with the viewport. */
+.bg-ask:nth-child(1)  { top: 12%; left: 6%; }
+.bg-ask:nth-child(2)  { top: 24%; left: 13%; }
+.bg-ask:nth-child(3)  { top: 36%; left: 7%; }
+.bg-ask:nth-child(4)  { top: 48%; left: 15%; }
+.bg-ask:nth-child(5)  { top: 60%; left: 6%; }
+.bg-ask:nth-child(6)  { top: 72%; left: 12%; }
+.bg-ask:nth-child(7)  { top: 84%; left: 7%; }
+.bg-ask:nth-child(8)  { top: 18%; left: 20%; }
+.bg-ask:nth-child(9)  { top: 42%; left: 22%; }
+.bg-ask:nth-child(10) { top: 66%; left: 20%; }
+/* The resting state with the script dead, and the first one before it runs. */
+.bg-ask.is-on { opacity: 1; }
+
+/* ---------- The form ---------- */
+.bg-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.bg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.bg-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.bg-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.bg-opt { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
+/* style.css's field recipe: white, 14px radius, no border at rest, blue focus
+   ring. DESIGN.md > Components. */
+.bg-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: none; border-radius: 14px;
+  background: var(--white);
+  font-family: inherit; font-size: 0.92rem; color: var(--text-dark);
+  transition: box-shadow 0.2s;
+}
+.bg-input::placeholder { color: rgba(92,86,82,0.55); }
+/* The ring is white on glass, not blue: Jayco blue on a dark tinted panel over
+   a river reads as part of the photograph rather than as focus. */
+.bg-input:focus { outline: none; box-shadow: 0 0 0 2px #fff; }
+.bg-label { color: rgba(255,255,255,0.86); }
+.bg-go { margin-top: 0.4rem; align-self: flex-start; }
+.bg-note { margin: 0.9rem 0 0; font-size: 0.82rem; color: rgba(255,255,255,0.86); }
+
+.bg-done-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+  margin: 0.5rem 0 0.9rem;
+}
+.bg-done-h:focus { outline: none; }
+.bg-done-body { margin: 0 0 1.6rem; font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.9); }
+
+/* ---------- Responsive ---------- */
+/* ---------- Stacked, under 901px ----------
+   The band comes apart into what it was before: a contained, rounded picture
+   with the questions scattered over it, and the form beneath it on its own
+   Surface panel in the page's own ink. Glass needs a photograph behind it, and
+   below this width the form is taller than the picture — a pane of glass with
+   nothing behind its lower half is just a grey box with a blur on it. */
+@media (max-width: 900px) {
+  .bg-get-band {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+  }
+  /* The section's own padding does the spacing down here; the band is no longer
+     a full screen of anything. */
+  /* The picture is a child of the band, not of .bg-get-inner, so it has to put
+     the page gutter back for itself down here — full-bleed is the wide layout's
+     idea and it does not survive the stack. */
+  .bg-get-media {
+    position: relative; inset: auto;
+    max-width: var(--bg-frame);
+    margin: 0 auto clamp(1.25rem, 3vw, 2rem);
+    width: calc(100% - var(--bg-pad) * 2);
+    aspect-ratio: 3 / 2;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  /* No wash: nothing but the questions sits on the picture down here, and they
+     carry their own tint. */
+  .bg-get-media::after { display: none; }
+  .bg-get-inner { padding: 0 var(--bg-pad); }
+  .bg-get-grid { grid-template-columns: minmax(0, 1fr); }
+  .bg-get-left { display: none; }
+
+  /* Surface, not glass — see the note above. */
+  .bg-get-panel {
+    background: var(--surface);
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    color: var(--text-dark);
+  }
+  .bg-get-panel .section-label { color: var(--blue); }
+  .bg-get-h, .bg-done-h { color: var(--text-dark); }
+  .bg-list li { color: var(--text-dark); }
+  .bg-list li::before { background: var(--blue); }
+  .bg-label { color: var(--text-mid); }
+  .bg-input:focus { box-shadow: 0 0 0 2px var(--blue); }
+  .bg-note, .bg-done-body { color: var(--text-mid); }
+
+  /* The five places open back out across the whole picture, and a question is
+     allowed more of the width because there is less of it. */
+  .bg-ask { max-width: min(84%, 30ch); }
+  .bg-ask:nth-child(1)  { top: 8%;  left: 6%; }
+  .bg-ask:nth-child(2)  { top: 26%; left: auto; right: 6%; }
+  .bg-ask:nth-child(3)  { top: auto; bottom: 32%; left: 7%; }
+  .bg-ask:nth-child(4)  { top: 54%; left: auto; right: 8%; }
+  .bg-ask:nth-child(5)  { top: auto; bottom: 8%; left: 6%; }
+  .bg-ask:nth-child(6)  { top: 16%; left: auto; right: 10%; }
+  .bg-ask:nth-child(7)  { top: 40%; left: 8%; }
+  .bg-ask:nth-child(8)  { top: auto; bottom: 22%; left: auto; right: 7%; }
+  .bg-ask:nth-child(9)  { top: 30%; left: 10%; }
+  .bg-ask:nth-child(10) { top: 68%; left: auto; right: 9%; }
+}
+@media (max-width: 768px) {
+  .bg-hero { height: 72svh; min-height: 460px; }
+  .bg-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone, so the left-weighted layer stops
+     helping and the vertical one does the work. */
+  .bg-hero-overlay {
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
+  }
+  .bg-row { grid-template-columns: minmax(0, 1fr); }
+  .bg-go { align-self: stretch; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-input { transition: none; }
+  /* Zero travel on both, so initParallax() returns before it binds anything. */
+  .bg-page { --bg-drift: 0%; --bg-panel-drift: 0%; }
+  /* buyers-guide.js does not start the loop under reduced motion, so the first
+     question stays put — which is why .is-on carries the visible state rather
+     than the script setting it. */
+}

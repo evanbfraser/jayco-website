@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-9" />
-  <link rel="stylesheet" href="css/brochures.css?v=v5-br-1" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
+  <link rel="stylesheet" href="css/brochures.css?v=v5-br-5" />
   <!-- The request form is a component shared with model.html, so it is its own
        file rather than a port into two page stylesheets. See its header. -->
   <link rel="stylesheet" href="css/brochure-form.css?v=v5-brf-3" />
@@ -131,32 +131,32 @@
 
     <!-- Hero. Static photograph, so the header keeps its transparent-to-solid
          fade (no data-header="solid" on <body>) and the copy stands in the
-         bottom-left, over the shadowed water rather than the blown-out sky. -->
+         bottom-left, over the shaded grass at the foot of the frame rather
+         than the pale overcast sky along the top. -->
     <section class="br-hero">
       <div class="br-hero-media">
         <img class="br-hero-img"
              src="../assets/brochures/web/hero-1800.webp"
              srcset="../assets/brochures/web/hero-1200.webp 1200w,
                      ../assets/brochures/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="810"
+             sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A Jayco camper van parked on a rock ledge beside a creek in autumn woodland" />
+             alt="A family cooking over a fire pit beside a Jayco North Point fifth wheel in a mountain meadow" />
       </div>
       <div class="br-hero-overlay" aria-hidden="true"></div>
       <div class="br-hero-content">
         <span class="br-hero-eyebrow">Brochures</span>
         <h1 class="br-hero-heading">Take the lineup with you.</h1>
         <p class="br-hero-tagline">Floorplans, standard equipment, option packages and full
-          specifications — every 2027 Jayco, in one file each.</p>
+          specifications — the whole library, back to 2017.</p>
       </div>
     </section>
 
     <!-- Filter. The four facets jayco.com filters by — Model Year, Product Type,
-         Literature Type, Language — but every option is DERIVED from
-         window.JAYCO rather than written here, so nothing is offered that the
-         data cannot back. Today that means one live facet and three standing
-         facts; the same render promotes any of them to chips the moment a
-         second value exists. See brochures.js. -->
+         Literature Type, Language — every option DERIVED from the library
+         rather than written here, so nothing is offered that the data cannot
+         back. All four narrow now: eleven model years, eight product types,
+         two kinds of literature and three languages. See brochures.js. -->
     <section class="br-filter" aria-labelledby="br-filter-h">
       <div class="br-inner">
        <div class="br-filter-panel">
@@ -173,9 +173,10 @@
     </section>
 
     <!-- No data-animation on this section: app.js runs one staggered gsap.from()
-         over every .section-* and .btn-* inside such a section, and 27 cards
-         would be a multi-second stagger with the buttons invisible until they
-         arrive. -->
+         over every .section-* and .btn-* inside such a section, and 595 cards
+         would be a stagger measured in minutes with the buttons invisible until
+         they arrive. The cards arrive a row at a time instead — brochures.js,
+         initCardReveal(). -->
     <section class="br-grid-wrap" aria-label="Brochures">
       <div class="br-inner">
         <ul class="br-grid" id="br-grid" role="list"><!-- built by brochures.js --></ul>
@@ -325,13 +326,20 @@
                      autocomplete="postal-code" placeholder="46526" />
             </div>
           </div>
-          <div class="brf-field">
-            <label class="brf-label" for="brf-email">Email</label>
-            <input class="brf-input" id="brf-email" name="email" type="email" required
-                   autocomplete="email" placeholder="you@example.com" />
+          <div class="brf-row">
+            <div class="brf-field">
+              <label class="brf-label" for="brf-email">Email</label>
+              <input class="brf-input" id="brf-email" name="email" type="email" required
+                     autocomplete="email" placeholder="you@example.com" />
+            </div>
+            <div class="brf-field">
+              <label class="brf-label" for="brf-phone">Phone <span class="brf-opt">optional</span></label>
+              <input class="brf-input" id="brf-phone" name="phone" type="tel"
+                     autocomplete="tel" placeholder="(574) 555-0134" />
+            </div>
           </div>
 
-          <button type="submit" class="btn-primary brf-go">Send it to me</button>
+          <button type="submit" class="btn-primary brf-go">Download</button>
         </form>
         <p class="brf-note" id="brf-note" role="status" aria-live="polite"></p>
       </div>
@@ -417,29 +425,29 @@
           <h4>Find Your RV</h4>
           <ul>
             <li><a href="quiz.html">RV Finder Quiz</a></li>
-            <li><a href="#">Top-Selling RVs</a></li>
-            <li><a href="#">Buyer's Guide</a></li>
-            <li><a href="#">Tow vs. Drive Guide</a></li>
-            <li><a href="#">New to RVing?</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Shop &amp; Tools</h4>
           <ul>
             <li><a href="dealers.html">Find a Dealer</a></li>
-            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
             <li><a href="brochures.html">Brochures</a></li>
             <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
             <li><a href="towing.html">Towing Calculator</a></li>
-            <li><a href="#">Value Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Owners</h4>
           <ul>
             <li><a href="#">Owner Services</a></li>
-            <li><a href="#">Manuals</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
             <li><a href="#">Warranty Coverage</a></li>
             <li><a href="#">Recalls</a></li>
             <li><a href="#">Wingmate App</a></li>
@@ -451,9 +459,9 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <ul>
-            <li><a href="#">Blog</a></li>
+            <li><a href="blog.html">Blog</a></li>
             <li><a href="videos.html">Video Gallery</a></li>
-            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
             <li><a href="#">Dealer Marketing Hub</a></li>
@@ -462,14 +470,14 @@
         <div class="footer-col">
           <h4>About</h4>
           <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">The Jayco Difference</a></li>
-            <li><a href="#">100% PDI</a></li>
-            <li><a href="#">R&amp;D &amp; Innovation</a></li>
-            <li><a href="#">Safety &amp; JaySMART</a></li>
-            <li><a href="#">Award-Winning RVs</a></li>
-            <li><a href="#">Sustainability</a></li>
-            <li><a href="#">Visit Us</a></li>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
             <li><a href="#">Careers</a></li>
             <li><a href="#">Newsroom</a></li>
           </ul>
@@ -501,7 +509,10 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/brochures.js?v=v5-br-1"></script>
+  <!-- The library itself: 595 entries, 2027 back to 2017, three languages.
+       Harvested from jayco.com/brochures/ — see the file header. -->
+  <script src="js/brochures-library.js?v=v5-brl-2"></script>
+  <script src="js/brochures.js?v=v5-br-4"></script>
   <script src="js/brochure-form.js?v=v5-brf-3"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>

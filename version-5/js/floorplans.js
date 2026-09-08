@@ -1129,6 +1129,92 @@
 
   }
 
+  /* ---------- The rows arriving ----------
+     One reveal per model row, not one per card: the row IS the unit here — a
+     head on the left and its own rail of plans to the right — and 27 sections
+     of a shared page-wide stagger would be a queue minutes long.
+
+     An IntersectionObserver rather than a ScrollTrigger, for the reason the
+     whole file is built around: this catalog REFLOWS on every filter click, and
+     a ScrollTrigger caches its start against the layout it was made in. A
+     filtered-out section is display:none and never intersects, so it waits and
+     arrives properly the first time a filter lets it back.
+
+     WHAT MOVES IS THE RAIL, NOT THE CARDS. .fpc-cards is overflow-x: auto, and
+     a container that scrolls on one axis clips the other — so a card translated
+     20px down would have its View Details button cut off against the track's
+     6px of padding for the length of the tween, and its travel would push the
+     track's scrollHeight around while the rails measure themselves. The lift is
+     put on .fpc-cardrail, which is outside the scroller and clips nothing; the
+     cards inside it only fade, one after the next.
+
+     Only the cards actually on screen are staggered. A rail runs off the right
+     edge by design and holds up to fourteen plans, so lighting them all up in
+     sequence would spend most of the animation behind the edge of the screen
+     and leave the last one arriving long after the row did. The rest are simply
+     shown — which is also what a card hidden by a filter gets, so it is clean
+     the moment a filter brings it back. */
+  function initRowReveal() {
+    if (typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+
+    const sections = SECTIONS.map((s) => s.el).filter(Boolean);
+    if (!sections.length) return;
+
+    /* Below 769 the ROW is the scroller, head and all — so the row clips on the
+       cross axis too and the 20px lift would cut the bottom off everything in
+       it for the length of the tween. There, the arrival is the fade alone. */
+    const lifts = (row) => getComputedStyle(row).overflowX === 'visible';
+
+    function reveal(el) {
+      const head = $('.fpc-model-head', el);
+      const rail = $('.fpc-cardrail', el);
+      const cards = $$('.fpc-card', el);
+      const vw = window.innerWidth;
+      const near = cards.filter((c) => {
+        const r = c.getBoundingClientRect();
+        return r.width && r.left < vw && r.right > 0;
+      });
+      const rest = cards.filter((c) => near.indexOf(c) < 0);
+
+      gsap.to([head, rail], {
+        opacity: 1, y: 0,
+        duration: 0.55, ease: 'power2.out',
+        stagger: 0.06,
+        clearProps: 'all',
+      });
+      if (near.length) {
+        gsap.to(near, {
+          opacity: 1,
+          duration: 0.5, ease: 'power2.out',
+          stagger: 0.07, delay: 0.12,
+          clearProps: 'all',
+        });
+      }
+      if (rest.length) gsap.set(rest, { clearProps: 'all' });
+    }
+
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        obs.unobserve(e.target);
+        reveal(e.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+
+    /* Hidden here rather than in the stylesheet, so the resting state a reader
+       gets with this script dead — or with reduced motion on — is the visible
+       one. */
+    sections.forEach((el) => {
+      const row = $('.fpc-model-row', el);
+      gsap.set([$('.fpc-model-head', el), $('.fpc-cardrail', el)],
+        { opacity: 0, y: row && lifts(row) ? 20 : 0 });
+      gsap.set($$('.fpc-card', el), { opacity: 0 });
+      io.observe(el);
+    });
+  }
+
   /* ---------- Boot ---------- */
   if (!ROWS.length || !SECTIONS.length) return;
 
@@ -1147,4 +1233,6 @@
   /* A rail measured before its drawings land measures wrong, so every rail is
      re-read once the page has actually loaded. */
   window.addEventListener('load', () => { syncAllRails(); refresh(); }, { once: true });
+
+  document.addEventListener('jayco:animations-ready', initRowReveal, { once: true });
 }());

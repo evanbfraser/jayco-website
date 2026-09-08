@@ -1,0 +1,357 @@
+/* ===================================================
+   Jayco — Our Story
+   ---------------------------------------------------
+   The hero, the intro and the CTA band are ported from
+   jayco-difference.css and named there. The timeline is
+   the only thing here that is new, and it is the reason
+   the page exists.
+   =================================================== */
+
+.os-page {
+  --os-frame: 1440px;
+  --os-pad: 6vw;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift past the media overhang; the reduced-motion
+     block at the foot sets it to 0. */
+  --os-drift: 12%;
+}
+.os-page [hidden] { display: none !important; }
+.os-inner { max-width: var(--os-frame); margin: 0 auto; padding: 0 var(--os-pad); }
+
+/* ---------- Hero ---------- */
+.os-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+.os-hero-media {
+  position: absolute; inset: calc(-1 * var(--os-drift)) 0; z-index: 0;
+  will-change: transform;
+}
+.os-hero-img { width: 100%; height: 100%; object-fit: cover; }
+/* DEEPER THAN THE SITEWIDE STEP BELOW THE MIDPOINT, and only below it. The top
+   30% is untouched at rgba(...,0), so the archive montage still reads in full
+   colour where the eye lands first.
+
+   Why this plate needs it: it is a montage of scanned photographs, and scanned
+   photographs come on white — so the ground behind the copy is far brighter
+   than a photograph's would be. Measured per line on the shared ramp, the
+   eyebrow came out at 3.4:1 against its 4.5 bar. The stops below carry it.
+   value-tool.css, manuals.css and jayco-difference.css make the same local
+   deepening on the same reasoning; none of them touches the shared token. */
+.os-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 30%,
+    rgba(15,11,9,0.80) 52%,
+    rgba(15,11,9,0.93) 76%,
+    rgba(15,11,9,0.97) 100%);
+}
+.os-hero-content {
+  position: relative; z-index: 2;
+  max-width: var(--os-frame); margin: 0 auto; width: 100%;
+  padding: 0 var(--os-pad) clamp(3rem, 6vw, 5rem);
+  color: #fff;
+}
+.os-hero-eyebrow {
+  display: block; margin-bottom: 1.2rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+}
+.os-hero-heading {
+  margin: 0; max-width: 15ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+}
+.os-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.os-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.os-intro-body {
+  max-width: var(--measure-wide);
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+.os-intro-body strong { color: var(--text-dark); }
+
+/* ---------- Timeline ----------
+   PORTED FROM .build-journey IN version-3's style.css — a topographic ground,
+   a route drawn across it and a lit dot travelling the route. That page used it
+   as a metaphor for a journey; here the journey is literal, so the same
+   apparatus carries a company's history instead of a mood.
+
+   THE MAP IS THE CONCEPT'S OWN, assets/topography-map.svg — the dense 3035x5384
+   survey version-3 used, not the sparse 13-path tile. It is drawn as filled
+   contours in #005680, so it takes the same brightness/invert recolouring v3
+   gave it to read as white line work on the blue.
+
+   REPEATED, NOT COVERED. v3 stretched it to cover a section about one screen
+   tall. This run is nineteen thousand pixels; covering would scale the contours
+   to the size of dinner plates and crop most of the drawing away. Sized to the
+   width and repeated down instead, so the survey keeps the scale it was drawn
+   at however long the history gets.
+
+   AND THE TILE IS THE MIRRORED PAIR, NOT THE MAP ITSELF. The map does not wrap:
+   tiled directly, the join showed a hard horizontal line — measured at 6.3 grey
+   levels against a row-to-row variation of 0.28, so about twenty times the
+   noise, and a straight edge across a drawing where nothing else is straight.
+   assets/topography-map-tile.svg is the same artwork with a vertically flipped
+   copy stacked under it, so the tile's top and bottom edges are the same edge
+   and there is nothing left to mismatch. The paths are referenced once through
+   <use>, so mirroring costs no bytes. */
+.os-time {
+  position: relative; overflow: hidden;
+  background: var(--blue);
+  padding: clamp(4rem, 8vw, 7rem) 0 clamp(5rem, 9vw, 8rem);
+}
+.os-topo {
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url('../../assets/topography-map-tile.svg');
+  background-repeat: repeat-y;
+  background-position: center top;
+  background-size: 100% auto;
+  /* The drawing is dark blue; this turns it to white line work. */
+  filter: brightness(0) invert(1);
+  opacity: 0.22;
+  pointer-events: none;
+}
+.os-time > .os-inner { position: relative; z-index: 2; }
+.os-sec-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+.os-sec-head .section-label { color: #fff; }
+/* .section-heading.dark is the dark-ground variant; on blue it inverts. */
+.os-sec-head .section-heading.dark { color: #fff; }
+.os-sec-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: #fff;
+}
+
+/* THE RAIL. A horizontal scroller and nothing more — the page is never pinned
+   and the vertical scroll is never touched. The run stops at the end of each
+   decade and asks whether to carry on; .os-ask is that question. */
+.os-track { position: relative; z-index: 1; }
+.os-rail {
+  position: relative;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: clamp(1.5rem, 3vw, 2.5rem) var(--os-pad) clamp(2rem, 4vw, 3rem);
+}
+.os-rail::-webkit-scrollbar { display: none; }
+.os-rail:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.os-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; align-items: stretch;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  width: max-content;
+  position: relative; z-index: 2;
+}
+
+/* The route crosses the rail behind the cards, and scrolls with them. */
+.os-route {
+  position: absolute; left: 0; top: 0; height: 100%;
+  z-index: 1; pointer-events: none; overflow: visible;
+}
+.os-route-base, .os-route-trail {
+  fill: none; stroke-width: 2.5;
+  stroke-linejoin: round; stroke-linecap: round;
+}
+.os-route-base { stroke: rgba(255,255,255,0.34); }
+.os-route-trail { stroke: #fff; }
+.os-dot {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 16px rgba(255,255,255,0.9);
+  pointer-events: none; will-change: transform;
+}
+.os-dot::after {
+  content: ''; position: absolute; inset: -5px;
+  border-radius: 50%; border: 2px solid #fff;
+  animation: osPulse 1.9s ease-out infinite;
+}
+@keyframes osPulse {
+  0%   { transform: scale(0.55); opacity: 0.85; }
+  100% { transform: scale(2.4);  opacity: 0; }
+}
+
+/* The decade, standing on its side between one run and the next. */
+.os-era {
+  flex: 0 0 auto; display: flex; align-items: center;
+  scroll-snap-align: start;
+}
+.os-era-tag {
+  display: inline-block;
+  padding: 0.5rem 1.15rem;
+  border-radius: var(--radius-btn);
+  background: #fff; color: var(--blue-dark);
+  font-family: var(--font-display);
+  font-size: 0.88rem; font-weight: 800; letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 10px rgba(15,11,9,0.18);
+  white-space: nowrap;
+}
+
+.os-item {
+  flex: 0 0 clamp(260px, 26vw, 340px);
+  display: flex; scroll-snap-align: start;
+}
+.os-card {
+  display: flex; flex-direction: column; width: 100%;
+  background: var(--white); border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15,11,9,0.16);
+}
+.os-item.is-big .os-card { background: var(--blue-dark); }
+.os-card-media { aspect-ratio: 3 / 2; overflow: hidden; background: var(--surface); flex: none; }
+.os-card-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.os-card:hover .os-card-img { transform: scale(1.04); }
+.os-card-body { padding: clamp(1.1rem, 2vw, 1.5rem); }
+.os-year {
+  display: block; margin-bottom: 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 900; letter-spacing: -0.02em; line-height: 1;
+  color: var(--blue-dark);
+  font-variant-numeric: tabular-nums;
+}
+.os-head {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.os-body { margin: 0; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+/* Solid white on the deep-blue landmark cards, no alpha — the measured rule the
+   panels on jayco-difference.css follow. */
+.os-item.is-big .os-year,
+.os-item.is-big .os-head,
+.os-item.is-big .os-body { color: #fff; }
+
+/* THE ASK. The card that does not assume the reader wants the next fifty
+   years. It names what is coming rather than saying "more", because a decade
+   is a reason to carry on and "more" is not. */
+.os-ask {
+  flex: 0 0 clamp(260px, 26vw, 340px);
+  display: flex; scroll-snap-align: start;
+}
+.os-ask-in {
+  display: flex; flex-direction: column; justify-content: center;
+  width: 100%; padding: clamp(1.5rem, 2.6vw, 2rem);
+  border: 2px dashed rgba(255,255,255,0.55);
+  border-radius: var(--radius-card);
+  /* Deep enough to be a ground rather than a tint. At 0.08 the contour map and
+     the route showed straight through the card and crossed its heading; this
+     sits the question on something solid without making it a third card style
+     competing with the entries. */
+  background: var(--blue-dark);
+}
+.os-ask-k {
+  display: block; margin-bottom: 0.5rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #fff;
+}
+.os-ask-h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+}
+.os-ask-b { margin: 0 0 1.25rem; font-size: 0.92rem; line-height: 1.65; color: #fff; }
+/* A Jayco blue pill on a Jayco blue ground is a label with no button behind it,
+   so the primary inverts here, keeping style.css's hover wipe. */
+.os-ask .btn-primary {
+  align-self: flex-start;
+  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
+  background-size: 200% 100%; background-position: 100% 0;
+  color: var(--blue-dark);
+}
+.os-ask .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
+.os-ask .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* Where you are, and the two controls. Under the rail, because a control on the
+   cards would read as part of them. */
+.os-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+  max-width: var(--os-frame); margin: 0 auto;
+  padding: 0 var(--os-pad);
+}
+.os-nav-at { font-size: 0.88rem; font-weight: 600; color: #fff; }
+.os-nav-btns { display: flex; gap: 0.5rem; }
+.os-arrow {
+  width: 44px; height: 44px;              /* WCAG 2.5.5 — a finger, not a pointer */
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.55);
+  background: none; color: #fff; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.os-arrow:hover { background: #fff; border-color: #fff; color: var(--blue-dark); }
+.os-arrow:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- CTA ---------- */
+.os-cta { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.os-cta-band {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(425px, 40vw, 560px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+.os-cta-media { position: absolute; inset: 0; z-index: 0; }
+.os-cta-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.os-cta-band:hover .os-cta-img { transform: scale(1.04); }
+/* The sitewide rule: bottom-weighted, top untouched. */
+.os-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.os-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
+.os-cta .section-label { color: #fff; }
+.os-cta-h {
+  margin: 0.5rem 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.os-cta-body p {
+  margin: 0 0 1.5rem; max-width: 46ch;
+  font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.88);
+}
+
+.os-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  /* The rail stays a rail. A horizontal scroller is BETTER on a phone than on a
+     desktop — it is a swipe rather than a drag — so nothing here collapses to a
+     column. Only the card narrows, and the arrows stay because they are also
+     the affordance that says the rail moves. */
+  .os-item, .os-ask { flex-basis: min(78vw, 320px); }
+  .os-nav-at { font-size: 0.8rem; }
+}
+@media (max-width: 768px) {
+  .os-hero { height: 72svh; min-height: 460px; }
+  .os-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone and a shorter hero gives it a
+     bigger share of the frame, so the ramp has to start sooner — which is
+     exactly what the card step is. */
+  .os-hero-overlay { background: var(--scrim-card); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .os-card-img, .os-cta-img { transition: none; }
+  .os-card:hover .os-card-img, .os-cta-band:hover .os-cta-img { transform: none; }
+  /* The fill is set to full by the JS under this, and zero travel means the
+     parallax returns before it binds anything. */
+  .os-page { --os-drift: 0%; }
+}

@@ -1,0 +1,455 @@
+/* ===================================================
+   Jayco — Owner’s Manuals (brochures.html)
+   ---------------------------------------------------
+   This page loads style.css, this file and
+   brochure-form.css. It does NOT load type.css, so the
+   hero and the quiz band are ported here under mn-
+   names — the house rule compare.css sets: port,
+   rename, and name the source, so a reader who greps a
+   class finds one owner.
+
+   The FAQ is not ported. Its component lives in the
+   shared style.css and app.js binds it, so this page
+   ships the markup and nothing else.
+   =================================================== */
+
+.manuals-page {
+  background: var(--canvas);
+  /* Ported tokens the hero and quiz bands depend on. type.css declares these on
+     .type-page; the blocks below would silently collapse without them. */
+  --mn-pad: var(--page-pad);
+  --mn-frame: 1440px;
+  --mn-gap-section: clamp(5rem, 10.4vw, 9.375rem);
+  /* Hidden headroom above and below the drifting photograph, so the parallax
+     can never expose a bare edge. brochures.js reads this number and derives
+     its travel from it, so the two cannot disagree. */
+  --mn-drift: 8%;
+}
+.manuals-page [hidden] { display: none !important; }
+.manuals-page button { font-family: inherit; }
+
+.mn-inner {
+  max-width: var(--mn-frame);
+  margin: 0 auto;
+  padding: 0 var(--mn-pad);
+}
+
+/* ---------- Hero ----------
+   Ported from type.css .tp-hero / .tp-hero--still. Full-bleed, therefore square
+   and unshadowed. No parallax: type.css keeps --tp-drift headroom for a
+   scrubbed media element, and this one is static, so the media is flush.
+   The height is the --still variant's: the full 100vh is the reward for an
+   authored motion moment, and this page does not have one. */
+.mn-hero {
+  position: relative;
+  height: clamp(560px, 84vh, 900px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+/* Inset by the drift on both edges, so the media overhangs the band and has
+   somewhere to travel. GSAP moves this box, not the <img> — transforming the
+   image itself would fight object-fit's own box. */
+.mn-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--mn-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.mn-hero-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* The plate is the full 3:2 frame rather than a crop of it: the band asks for
+     a wide strip and a phone asks for something near portrait, and cover cannot
+     invent height. Cropping to the band first left the phone with one man's
+     chest filling the screen, so the height stays in the file and the band
+     spends it. Holding the frame just left of centre keeps the fire pit and the
+     man standing over it in shot with the coach behind them — dead centre
+     pushes the far chair in and the coach out. */
+  object-position: 46% 50%;
+}
+/* Two layers, and both are load-bearing.
+
+   VERTICAL is type.css's curve, and its comment is worth repeating: the stops
+   were set by measurement against a different plate, and the EYEBROW is the
+   binding constraint — 0.72rem is small text, so it needs 4.5:1, and it sits
+   about 40% up from the bottom edge. A scrim tuned to the heading alone (900
+   weight, 3.2rem+, only needs 3:1) will fail the line above it.
+
+   DEEPER THAN THE SITEWIDE STEP BELOW THE MIDPOINT, and only below it. The
+   top 30% is untouched at rgba(...,0), so the open side door and the river
+   beyond it still read at full colour.
+
+   Why this hero needs it: the photograph is a dark van interior with a very
+   bright doorway and windscreen, and both of those sit high in the frame right
+   where the copy starts. Measured per line on the shared ramp, the eyebrow came
+   out at 3.2:1 against its 4.5 bar and the first line of the headline at 2.9:1
+   against its 3.0 — both under. The stops below are what carries them.
+   value-tool.css and jayco-difference.css make the same local deepening on the
+   same reasoning; none of them touches the shared token. */
+.mn-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 30%,
+    rgba(15,11,9,0.78) 52%,
+    rgba(15,11,9,0.92) 76%,
+    rgba(15,11,9,0.97) 100%);
+}
+.mn-hero-content {
+  position: relative; z-index: 2;
+  width: 100%;
+  max-width: var(--mn-frame);
+  margin: 0 auto;
+  padding: 0 var(--mn-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+/* inline-block, not block: as a full-width block its box spans the whole frame,
+   which puts the pale granite on the right inside a box that only holds ~90px
+   of type on the left. That is wrong for a contrast measurement and wrong for a
+   focus ring. */
+.mn-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+  margin-bottom: 1.2rem;
+}
+/* Wider than --measure so the headline sets in two lines rather than three. It
+   is not a reading measure — it is a display line, and at three lines it filled
+   a 504px band top to bottom and climbed off the grass into the busy half of
+   the frame, where the chairs and the fire are. */
+.mn-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch;
+  margin: 0;
+}
+.mn-hero-tagline {
+  margin: 1.35rem 0 0;
+  max-width: 44ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Filter ----------
+   A Jayco blue panel. Blue is rationed on this site — DESIGN.md calls it a
+   signal, not a mood, and explicitly says it never becomes a background wash —
+   so this is the page's one use of it as a ground, and it earns that by being
+   the one thing on the page you operate rather than read.
+
+   Everything inside goes white or near-white. --blue is a mid-tone: white
+   measures 4.60:1 on it, --text-dark only 3.89 and --text-mid 1.60, so the
+   ordinary type colours are not available here. The fields themselves are solid
+   white with ink type rather than a translucent tint — a white tint over Jayco
+   blue composites LIGHTER, which is the worst possible bed for small text and
+   the same trap the model page's floorplan band hit. */
+/* ---------- Intro ----------
+   Restated from buyers-guide.css and request-quote.css, which state it the same
+   way: one paragraph at reading measure between the photograph and the first
+   control. It carries the section's top padding, which is why .mn-filter below
+   gives its own back — the two are one block, not two. */
+
+.mn-filter { padding: clamp(3rem, 6vw, 5rem) 0 0; }
+.mn-filter-panel {
+  background: var(--blue);
+  border-radius: 32px;
+  padding: clamp(1.75rem, 3vw, 2.5rem) clamp(1.5rem, 2.6vw, 2.25rem);
+}
+.mn-filter-h {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff;
+  margin: 0 0 1.25rem;
+}
+.mn-facets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.mn-facet { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.mn-facet-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #fff;
+}
+
+/* The trigger is a white field on the blue — style.css's input recipe, which on
+   this ground is also the only thing with enough contrast to hold small type.
+   The panel below it is the same white and the same radius, pinned to the
+   trigger's own edges with left:0 right:0 so the two are one width by
+   construction rather than by a number kept in step. */
+.mn-dd { position: relative; }
+.mn-dd-trigger {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem; font-weight: 500; text-align: left;
+  color: var(--text-dark);
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 0.72rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, border-radius 0.2s;
+}
+.mn-dd-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-dd-chev {
+  flex: none; width: 8px; height: 8px; margin-top: -3px;
+  border-right: 1.5px solid var(--text-mid);
+  border-bottom: 1.5px solid var(--text-mid);
+  transform: rotate(45deg);
+  transition: transform 0.25s var(--ease-out);
+}
+.mn-dd-trigger:hover { border-color: rgba(255,255,255,0.55); }
+.mn-dd-trigger:focus-visible {
+  outline: none; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.55);
+}
+/* Open: the trigger squares off its bottom corners and the panel squares off
+   its top ones, so the two read as one piece of white that has grown downward
+   rather than as a field with a card floating under it. */
+.mn-dd-trigger[aria-expanded="true"] { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.mn-dd-trigger[aria-expanded="true"] .mn-dd-chev { transform: rotate(225deg); margin-top: 2px; }
+.mn-dd.is-set .mn-dd-trigger { font-weight: 700; }
+
+.mn-dd-list {
+  position: absolute;
+  top: 100%; left: 0; right: 0;      /* the trigger's width, exactly */
+  z-index: 40;
+  margin: 0; padding: 0.35rem 0 0.5rem;
+  list-style: none;
+  max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+  background: #fff;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.mn-dd-list:focus-visible { outline: none; }
+.mn-dd-head {
+  padding: 0.6rem 0.9rem 0.3rem;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.mn-dd-opt {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem; color: var(--text-dark);
+  cursor: pointer;
+}
+.mn-dd-opt:hover,
+.mn-dd-opt.is-cursor { background: var(--surface); }
+.mn-dd-opt[aria-selected="true"] { font-weight: 700; }
+.mn-dd-opt[aria-selected="true"]::after {
+  content: ''; flex: none;
+  width: 5px; height: 9px; margin: 0 0 2px 0;
+  border-right: 2px solid var(--blue); border-bottom: 2px solid var(--blue);
+  transform: rotate(45deg);
+}
+.mn-dd-opt-n { font-size: 0.76rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+/* Dimmed rather than removed: dropping it would reshuffle the list under an
+   open panel, moving the row out from under the cursor mid-click. */
+.mn-dd-opt.is-dead { opacity: 0.35; cursor: default; }
+.mn-dd-opt.is-dead:hover { background: none; }
+
+.mn-bar {
+  display: flex; align-items: baseline; gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255,255,255,0.28);
+}
+.mn-count {
+  font-size: 0.85rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.mn-count:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+.mn-clear {
+  border: none; background: none; padding: 0; cursor: pointer; white-space: nowrap;
+  font-size: 0.8rem; font-weight: 600; color: #fff;
+  border-bottom: 1.5px solid rgba(255,255,255,0.5); transition: border-color 0.2s;
+}
+.mn-clear:hover { border-bottom-color: #fff; }
+.mn-clear:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- Cards ---------- */
+.mn-grid-wrap { padding: clamp(2rem, 3.5vw, 3rem) 0 0; }
+.mn-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.2vw, 2rem);
+}
+.mn-card {
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+  transition: background 0.25s, transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.mn-card:hover {
+  background: var(--surface-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(15,11,9,0.14);
+}
+/* Cut-out renders on transparency get no radius and no shadow — there is no box
+   to round. DESIGN.md > Shapes. */
+/* The document mark is now the FALLBACK. Jayco does publish cover artwork per
+   manual — this file previously said otherwise, which was wrong — so the card
+   leads with the cover and only reaches for the mark when a row has none.
+   Same circle the feature callouts use. */
+.mn-card-icon {
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem; margin-bottom: 1rem;
+  border-radius: 50%; background: var(--white); color: var(--blue-dark);
+  flex: none;
+}
+.mn-card-icon svg { width: 22px; height: 22px; }
+
+/* ONE SHAPE FOR THE BOX, WHATEVER SHAPE THE SCAN IS. 159 of the 164 covers
+   are portrait and cluster tightly; five are landscape — the 2027 Class A, B,
+   C, Super C and Towable. Left to size themselves they made a row of cards
+   whose pictures ended at four different heights, so the headings below them
+   never lined up and short cards opened a gap above their button.
+
+   The box therefore holds the ratio and the picture fits inside it. contain,
+   NOT cover: these are documents, and a cover that reads TOWABLE WARRANTY
+   GUIDE loses the words the moment it is cropped. The five landscape scans
+   letterbox instead, which is the honest way to show a wide thing in a tall
+   slot. No radius and no shadow — it is a flat scan, not a card. */
+.mn-card-cover {
+  display: grid; place-items: center;
+  width: 100%; max-width: 190px; margin: 0 auto 1rem;
+  aspect-ratio: 3 / 4;
+}
+.mn-card-cover-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.mn-card-body { flex: 1 1 auto; }
+.mn-card-meta {
+  display: block;
+  font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+  margin-bottom: 0.3rem;
+}
+.mn-card-name {
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-dark); margin: 0 0 0.4rem;
+}
+/* Which classes this one manual answers for — the reason the Product Type
+   filter can return a towable manual for a fifth wheel. */
+.mn-card-covers {
+  margin: 0.7rem 0 0; font-size: 0.8rem; line-height: 1.5; color: var(--text-mid);
+}
+.mn-card-covers-k {
+  font-weight: 700; color: var(--text-dark);
+  text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem;
+  margin-right: 0.35rem;
+}
+.mn-card-text {
+  margin: 0; font-size: 0.8rem; line-height: 1.55; color: var(--text-mid);
+}
+.mn-card-cta {
+  display: inline-block; text-align: center; text-decoration: none;
+  margin-top: 1.1rem; width: 100%;
+  padding: 0.62rem 1rem;
+  border: 1.5px solid rgba(15,11,9,0.22);
+  border-radius: var(--radius-btn);
+  background: none; color: var(--text-dark);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.mn-card-cta:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.mn-card-cta:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.mn-empty {
+  margin: clamp(3rem, 6vw, 5rem) 0; text-align: center;
+  font-size: 1.05rem; color: var(--text-mid);
+}
+
+.manuals-page .faq-section { padding-top: var(--mn-gap-section); }
+
+/* ---------- Ask for one ----------
+   Jayco blue, and every piece of type on it is SOLID WHITE — no 0.82 alpha.
+   White on #007AC2 measures 4.6:1; it clears the bar, but the usual alpha for
+   secondary copy takes it to about 3.6, which fails at body size. Hierarchy
+   comes from weight and size instead. Same rule as the panels on
+   jayco-difference.css and value-tool.css. */
+.mn-ask { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.mn-ask-panel {
+  background: var(--blue); border-radius: 32px;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  color: #fff;
+}
+.mn-ask-panel .section-label { color: #fff; }
+.mn-ask-h {
+  margin: 0.5rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.mn-ask-b {
+  margin: 0 0 1.6rem; max-width: 52ch;
+  font-size: 0.98rem; line-height: 1.75; color: #fff;
+}
+/* A Jayco blue pill on a Jayco blue panel is a label with no button behind it,
+   so the primary inverts here, keeping style.css's hover wipe. */
+.mn-ask-panel .btn-primary {
+  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  color: var(--blue-dark);
+}
+.mn-ask-panel .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
+.mn-ask-panel .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .mn-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  .mn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mn-facets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* quiz: type.css:794-798, ported with the block above */
+}
+@media (max-width: 768px) {
+  /* The still hero is not shortened here: a phone viewport is near portrait, so
+     a short band would crop the photograph to a letterbox strip. */
+  .mn-hero { height: 78svh; min-height: 460px; }
+  .mn-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* On a phone the copy spans the full width and the crop turns near-portrait,
+     which puts more of that bright doorway behind the type. --scrim-card is the
+     tighter of the two sitewide steps — it starts ramping at 20% rather than
+     34% — and on this photograph that is enough on its own: measured over the
+     real crop at 390px, the headline floor is 7.6:1 against its 3.0 bar and the
+     eyebrow and tagline floor is 7.9:1 against 4.5. No local deepening needed
+     here, unlike the desktop ramp above. */
+  .mn-hero-overlay {
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
+  }
+  .mn-grid { grid-template-columns: minmax(0, 1fr); }
+  .mn-card { flex-direction: row; align-items: center; gap: 1rem; padding: 1rem; }
+  .mn-card-icon { margin-bottom: 0; }
+  .mn-card-cover { margin: 0; flex: 0 0 84px; max-width: 84px; }
+  .mn-card-cta {
+  display: inline-block; text-align: center; text-decoration: none; margin-top: 0.75rem; }
+  .mn-card-body { display: flex; flex-direction: column; }
+}
+@media (max-width: 560px) {
+  .mn-card { flex-direction: column; align-items: stretch; }
+  .mn-card-icon { margin-bottom: 0.75rem; }
+  .mn-card-cover { margin: 0 auto 0.75rem; flex: none; max-width: 150px; }
+}
+@media (max-width: 620px) {
+  .mn-facets { grid-template-columns: minmax(0, 1fr); }
+  .mn-filter-panel { border-radius: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-card, .mn-dd-trigger, .mn-dd-chev, .mn-card-cta {
+  display: inline-block; text-align: center; text-decoration: none; transition: none; }
+  .mn-card:hover { transform: none; }
+  /* Zeroing the headroom is what stops the parallax: brochures.js derives its
+     travel from this value and bails when it is 0, so the image simply sits
+     still rather than being animated to nowhere. */
+  .manuals-page { --mn-drift: 0%; }
+}

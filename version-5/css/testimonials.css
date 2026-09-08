@@ -48,33 +48,27 @@
 .tm-hero-img {
   width: 100%; height: 100%;
   object-fit: cover;
-  /* The family sits centre-left and the trailer fills the right. Holding the
-     frame slightly left keeps the table in shot when a narrow viewport crops
-     hard, rather than centring on sheet metal. */
-  object-position: 42% 50%;
+  /* The plate is the photograph's own frame, uncropped: the band wants a wide
+     strip and a phone wants something near portrait, and cover cannot invent
+     height — the height stays in the file and the band spends it.
+     The van sits centre-left with the creek across the bottom, so the frame is
+     held a little left of centre: that keeps the open door and the man beside
+     it in shot when a narrow viewport crops hard, instead of centring on the
+     empty rock ledge. */
+  object-position: 45% 50%;
 }
 /* Two layers. VERTICAL is type.css's measured curve, and its comment carries:
    the stops were set against a different plate, and the EYEBROW is the binding
    constraint — 0.72rem is small text needing 4.5:1, sitting about 40% up from
    the bottom edge. A scrim tuned to the heading alone fails the line above it.
 
-   HORIZONTAL is for this photograph. The copy stands bottom-left, where a dark
-   mossy trunk fills the left edge — but the family and the white trailer door
-   are bright and start around a third of the way across, so the left-weighted
-   layer has to carry further than the brochures hero's does. */
+   HORIZONTAL is for this photograph. The copy stands bottom-left, over creek
+   water that carries the sky's highlights in it — brighter than the mossy trunk
+   the stops were first set against, and bright in moving specks rather than in
+   one block, so the left-weighted layer still has to carry as far as it does. */
 .tm-hero-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background:
-    linear-gradient(to right,
-      rgba(15,11,9,0.80) 0%,
-      rgba(15,11,9,0.52) 42%,
-      rgba(15,11,9,0.10) 72%,
-      rgba(15,11,9,0) 100%),
-    linear-gradient(to top,
-      rgba(15,11,9,0.74) 0%,
-      rgba(15,11,9,0.42) 34%,
-      rgba(15,11,9,0.14) 62%,
-      rgba(15,11,9,0.30) 100%);
+  background: var(--scrim-image);
 }
 .tm-hero-content {
   position: relative; z-index: 2;
@@ -214,11 +208,10 @@
      width — so the left-weighted layer stops helping and the vertical one does
      the work, much heavier at the bottom where all of it sits. */
   .tm-hero-overlay {
-    background: linear-gradient(to top,
-      rgba(15,11,9,0.90) 0%,
-      rgba(15,11,9,0.74) 40%,
-      rgba(15,11,9,0.34) 70%,
-      rgba(15,11,9,0.28) 100%);
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
   }
   .tm-grid { column-count: 1; }
 }
@@ -401,6 +394,28 @@
 .tm-rev-meta { display: flex; flex-direction: column; min-width: 0; }
 .tm-rev-name { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); }
 .tm-rev-when { font-size: 0.78rem; color: var(--text-mid); }
+
+/* ---------- The intro headline's arrival ----------
+   Two spans per line: the outer one clips, the inner one travels. A line that
+   rises inside its own clip reads as type being set rather than a block being
+   faded, which is the difference between a heading arriving and a heading
+   appearing.
+
+   display:block on both is load-bearing — the <br> in the markup becomes the
+   boundary between two .tm-h-line spans, and inline spans would put both lines
+   back on one row. The heading keeps its own font-size and leading; nothing
+   here touches type. */
+.tm-h-line {
+  display: block;
+  overflow: hidden;
+  /* .section-heading sets line-height 0.98 — TIGHTER than the em box — so a
+     clip at the line box cuts the descender off the "p" in "part". The padding
+     opens the clip below the baseline and the equal negative margin takes the
+     space straight back, so the heading occupies exactly the height it did. */
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.tm-h-inner { display: block; }
 
 /* ===================================================
    Owner gallery — the expanding strip

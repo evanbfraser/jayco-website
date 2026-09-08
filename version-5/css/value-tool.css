@@ -1,0 +1,371 @@
+/* ===================================================
+   Jayco — Value Tool
+   ---------------------------------------------------
+   Everything here is ported from a page that already
+   ships it, and named where it came from:
+     • the hero            — jayco-difference.css
+     • the slider          — .ntr-slider, new-to-rving.css
+     • the two-up image CTA— .tvd-cta, tow-vs-drive.css
+   Restated rather than shared, per the house rule: a
+   change to one is a deliberate change to both.
+   =================================================== */
+
+.vt-page {
+  --vt-frame: 1440px;
+  --vt-pad: 6vw;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhang; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in value-tool.js. */
+  --vt-drift: 12%;
+}
+.vt-page [hidden] { display: none !important; }
+.vt-page button { font-family: inherit; }
+.vt-inner { max-width: var(--vt-frame); margin: 0 auto; padding: 0 var(--vt-pad); }
+
+/* ---------- Hero ---------- */
+.vt-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.vt-hero-media {
+  position: absolute; inset: calc(-1 * var(--vt-drift)) 0; z-index: 0;
+  will-change: transform;
+}
+.vt-hero-img { width: 100%; height: 100%; object-fit: cover; }
+/* THE SITEWIDE SHAPE, DEEPER BELOW THE MIDPOINT — and only below it. The top
+   34% is untouched at rgba(...,0), exactly as --scrim-image has it, so the
+   river and the treeline still read at full colour.
+
+   Why this hero needs it: measured per line on the shared ramp, the eyebrow
+   came out at 3.5:1. The headline is large text and clears its 3:1 bar at that
+   ground, but the eyebrow is 0.72rem — small text, 4.5:1 — and it did not. The
+   stops below are what carries it. jayco-difference.css makes the same local
+   deepening on the same reasoning; neither touches the shared token. */
+.vt-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 30%,
+    rgba(15,11,9,0.76) 52%,
+    rgba(15,11,9,0.90) 76%,
+    rgba(15,11,9,0.96) 100%);
+}
+.vt-hero-content {
+  position: relative; z-index: 2;
+  max-width: var(--vt-frame); margin: 0 auto; width: 100%;
+  padding: 0 var(--vt-pad) clamp(3rem, 6vw, 5rem);
+  color: #fff;
+}
+.vt-hero-eyebrow {
+  display: block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.vt-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.vt-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.vt-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.vt-intro-body {
+  max-width: var(--measure-wide);
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- The tool ---------- */
+.vt-tool { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.vt-sec-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.vt-sec-head .section-heading { margin: 0.5rem 0 0; }
+.vt-sec-head--tight { margin-top: clamp(3rem, 6vw, 5rem); }
+.vt-sec-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+
+/* Step one. Two choices, so they are two panels rather than a select — the
+   question is the whole of the first screen and it should look like it. */
+.vt-types {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.vt-type {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  text-align: left; cursor: pointer;
+  background: var(--surface); border: 2px solid transparent;
+  border-radius: var(--radius-card);
+  transition: border-color 0.2s, background 0.2s;
+}
+.vt-type:hover { background: var(--surface-hover); }
+.vt-type:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.vt-type.is-on { border-color: var(--blue); background: var(--white); }
+.vt-type-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.vt-type-sub { font-size: 0.88rem; color: var(--text-mid); }
+
+/* Step two. One card per feature: the name, what it is, and the slider. */
+.vt-rate {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.vt-item {
+  display: flex; flex-direction: column;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+/* The photograph sits at the head of the card, bled to its inside edges — the
+   card's own padding would otherwise leave a grey margin around a picture that
+   is already inside a panel. A negative inset of exactly the padding, and the
+   top corners rounded to match the card.
+
+   4:3, which is the ratio the source images were cut to, so object-fit has
+   nothing to crop and no subject loses their head to a card. */
+.vt-item-media {
+  margin: calc(-1 * clamp(1.35rem, 2.4vw, 1.9rem));
+  margin-bottom: clamp(1rem, 1.8vw, 1.35rem);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+.vt-item-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vt-item-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+.vt-item-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--text-dark);
+}
+/* The reading, not a number. A range that announces "3" tells the reader
+   nothing; the word it maps to is the answer they actually gave. */
+.vt-item-read {
+  flex: none;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--blue-dark);
+}
+.vt-item-body {
+  margin: 0 0 1.25rem;
+  font-size: 0.92rem; line-height: 1.65; color: var(--text-mid);
+}
+
+/* PORTED FROM .ntr-slider IN new-to-rving.css — same track, same thumb, same
+   focus ring. The filled portion is driven by --vt-slider-pos, which
+   value-tool.js writes on every input. */
+.vt-slider {
+  width: 100%; margin: auto 0 0; -webkit-appearance: none; appearance: none;
+  background: none; height: 26px; cursor: pointer;
+  --vt-slider-pos: 50%;
+}
+.vt-slider::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(to right, var(--blue) 0 var(--vt-slider-pos),
+                              rgba(15,11,9,0.14) var(--vt-slider-pos) 100%);
+}
+.vt-slider::-moz-range-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(to right, var(--blue) 0 var(--vt-slider-pos),
+                              rgba(15,11,9,0.14) var(--vt-slider-pos) 100%);
+}
+.vt-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; margin-top: -9px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--blue);
+  box-shadow: 0 1px 5px rgba(15,11,9,0.28); cursor: pointer;
+}
+.vt-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--blue); cursor: pointer;
+}
+.vt-slider:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+/* aria-hidden in the markup: the range announces its own position through
+   aria-valuetext, and two loose labels after it would only repeat itself. */
+.vt-ends-label {
+  display: flex; justify-content: space-between;
+  margin-top: 0.35rem;
+  font-size: 0.72rem; font-weight: 600; color: var(--text-mid);
+}
+
+/* The two controls on a Jayco blue panel of their own, centred. Twenty cards up
+   the page the reader has stopped scanning and started deciding, and a pair of
+   buttons left-aligned under the last card reads as part of that card rather
+   than as the end of the set. On its own ground, centred, it reads as the line
+   under the question.
+
+   Solid white type again, no alpha: white on #007AC2 is 4.6:1 and the 0.82 the
+   reset would normally take drops it to about 3.6, which fails at this size. */
+.vt-actions {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 1rem 1.75rem;
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--blue); border-radius: 32px;
+}
+/* A Jayco blue pill on a Jayco blue panel is a label with no button behind it,
+   so the primary inverts here — the same swap jayco-difference.css makes, with
+   style.css's hover wipe kept so it behaves like every other primary. */
+.vt-actions .btn-primary {
+  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  color: var(--blue-dark);
+}
+.vt-actions .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
+.vt-actions .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.vt-reset {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600; color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+}
+.vt-reset:hover { border-bottom-color: #fff; }
+.vt-reset:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- The result ---------- */
+.vt-result { margin-top: clamp(3rem, 6vw, 5rem); }
+.vt-res-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.vt-res-h {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: var(--text-dark);
+}
+.vt-res-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+.vt-res-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.vt-res-item {
+  background: var(--blue); border-radius: var(--radius-card);
+  padding: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+/* Solid white on Jayco blue, no alpha anywhere. White on #007AC2 measures
+   4.6:1 — it clears the bar, but dropping to 0.82 alpha takes it to about 3.6,
+   which fails at body size. Hierarchy comes from weight and size instead. Same
+   rule as the panels on jayco-difference.css. */
+.vt-res-rank {
+  display: block; margin-bottom: 0.4rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #fff;
+}
+.vt-res-name {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: #fff;
+}
+.vt-res-body { margin: 0; font-size: 0.92rem; line-height: 1.65; color: #fff; }
+.vt-res-note {
+  margin: clamp(1.25rem, 2.4vw, 1.75rem) 0 0; max-width: var(--measure-wide);
+  font-size: 0.95rem; line-height: 1.7; color: var(--text-mid);
+}
+.vt-res-skip strong { color: var(--text-dark); }
+.vt-where { margin-top: clamp(2.5rem, 5vw, 4rem); }
+.vt-res-sub {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.vt-class-list {
+  list-style: none; margin: clamp(1rem, 2vw, 1.5rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem clamp(1rem, 2vw, 1.5rem);
+}
+.vt-class {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  padding-bottom: 0.7rem; border-bottom: 1px solid var(--hairline);
+}
+.vt-class-name {
+  font-weight: 700; color: var(--text-dark); text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.vt-class-name:hover { border-bottom-color: var(--blue); }
+.vt-class-n {
+  flex: none; font-size: 0.8rem; color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- The two ways off the page ----------
+   PORTED FROM .tvd-cta IN tow-vs-drive.css. */
+.vt-ends { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.vt-cta-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.vt-cta {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(340px, 32vw, 440px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+.vt-cta-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.vt-cta:hover .vt-cta-img { transform: scale(1.04); }
+/* The sitewide rule: bottom-weighted, top untouched. */
+.vt-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.vt-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
+.vt-cta .section-label { color: #fff; }
+.vt-cta-h {
+  margin: 0.5rem 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.vt-cta-body p {
+  margin: 0 0 1.5rem; max-width: 46ch;
+  font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.88);
+}
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for, not the ink. Inverted here, as
+   every other scrimmed photograph on this site inverts it. */
+.vt-cta .btn-secondary-light { border-color: rgba(255,255,255,0.55); color: #fff; }
+.vt-cta .btn-secondary-light:hover { border-color: #fff; background: #fff; color: var(--text-dark); }
+
+.vt-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .vt-rate, .vt-res-list, .vt-cta-grid, .vt-class-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+  .vt-hero { height: 72svh; min-height: 460px; }
+  .vt-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone and a shorter hero gives it a
+     bigger share of the frame, so the ramp has to start sooner — which is
+     exactly what the card step is. */
+  .vt-hero-overlay { background: var(--scrim-card); }
+  /* Two of these at 390px leaves about 165px a panel, which is too narrow for
+     the sub-line under the name. */
+  .vt-types { grid-template-columns: minmax(0, 1fr); }
+  .vt-item-head { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vt-cta-img { transition: none; }
+  .vt-cta:hover .vt-cta-img { transform: none; }
+  /* Zero travel, so the parallax returns before it binds anything. */
+  .vt-page { --vt-drift: 0%; }
+}

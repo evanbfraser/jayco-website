@@ -1,0 +1,628 @@
+/* ===================================================
+   Jayco — the About pages
+   pdi.html, visit-us.html, solar.html, awards.html,
+   safety.html, rd.html
+   ---------------------------------------------------
+   ONE STYLESHEET FOR SIX PAGES, which breaks this
+   site's per-page habit on purpose. Those six are not
+   six designs; they are one editorial template — hero,
+   intro, a run of paired image/text bands, a closing
+   CTA, the shared FAQ — filled with six subjects. Six
+   near-identical stylesheets would have meant six
+   places to fix the band rule, and the divergence would
+   have started on the first edit.
+
+   Everything below is either shared by all six or
+   scoped to one page under a body class (.pdi-page,
+   .vu-page, .sol-page, .aw-page, .sf-page, .rd-page).
+   A page that needs to look different can, without
+   touching the other five.
+
+   THE HERO IS PORTED, NOT INVENTED. It comes from
+   new-to-rving.css, which ported it from tow-vs-drive,
+   which ported it from jayco-difference and back
+   through towing, request-quote, buyers-guide,
+   top-selling, videos, testimonials and brochures to
+   type.css. The house rule is port, rename, and name
+   the source, so a reader who greps a class finds one
+   owner. Its scrim is not restated: it reads
+   --scrim-image, the sitewide rule in style.css.
+
+   THE FAQ IS NOT STYLED HERE. .faq-section is the
+   homepage's own component, drawn by style.css and
+   bound by app.js. These pages supply markup only.
+   =================================================== */
+
+.ab-page {
+  background: var(--canvas);
+  --ab-pad: var(--page-pad);
+  --ab-frame: 1440px;
+  /* How far a parallax plate travels, as a percentage of its own height. The
+     CSS owns it so the JS cannot drift further than the media overhangs — one
+     number sets both the negative inset and the distance moved, and they cannot
+     fall out of step. The reduced-motion block at the foot sets it to 0, which
+     is how the parallax is switched off without a second code path in
+     about.js. Same construction as --ntr-drift in new-to-rving.css. */
+  --ab-drift: 12%;
+}
+.ab-page [hidden] { display: none !important; }
+.ab-page button { font-family: inherit; }
+
+.ab-inner { max-width: var(--ab-frame); margin: 0 auto; padding: 0 var(--ab-pad); }
+
+/* ---------- Hero ---------- */
+.ab-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.ab-hero-media { position: absolute; inset: calc(-1 * var(--ab-drift)) 0; z-index: 0; will-change: transform; }
+.ab-hero-img { width: 100%; height: 100%; object-fit: cover; }
+.ab-hero-overlay { position: absolute; inset: 0; z-index: 1; background: var(--scrim-image); }
+.ab-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--ab-frame); margin: 0 auto;
+  padding: 0 var(--ab-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.ab-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.ab-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.ab-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ONE HERO NEEDS A DEEPER SCRIM THAN THE SITEWIDE ONE, and only one.
+   --scrim-image is built for a photograph that darkens toward its foot. The
+   solar hero is a glowing horizon under star trails, and the brightest ground
+   in that frame is exactly where the eyebrow stands: measured against the real
+   photograph it came in at 3.55:1 — fine for the display heading, which is
+   large text, and a genuine failure for 0.72rem type. At 0.64 it measures
+   5.76:1.
+
+   THE R&D PAGE USED TO BE HERE TOO, and the fix was a different one. Its
+   original hero had a lit vertical feature in the plant sitting under the last
+   three characters of the eyebrow, and it could not be scrimmed out: 0.64 gave
+   4.20:1 and 0.74 only reached 4.39:1, because the offending ground was a
+   near-blown highlight rather than a bright field. Five object-position values
+   were measured and all five failed, the best reaching 4.47:1. The photograph
+   was changed instead, and the factory shot moved down the page to the proving
+   ground band where it carries no type. Darkening a good picture until small
+   text survives on it is the wrong trade.
+
+   The fix is local and it keeps the sitewide rule: the top 30% is still
+   completely clear, so the header still carries its own band and the top of
+   the picture is still full colour. Only the ramp under the type is steeper.
+   our-story.css set the precedent for deepening one hero in place.
+
+   IF YOU CHANGE EITHER PHOTOGRAPH, RE-MEASURE. These numbers belong to those
+   two images, not to the pages. */
+/* The awards hero is a lit interior and the brightest thing in it — a pale wood
+   floor — runs right across the band the type sits in.
+
+   THIS SCRIM USED TO BE MUCH HEAVIER, AND THE REASON IT IS NOT ANY MORE IS
+   WORTH KNOWING. With a hero tagline under the heading, the type block reached
+   further up the frame into the bright part, and on the sitewide scrim it
+   measured eyebrow 2.30:1 and the first heading line 2.24:1 — the heading
+   failing being the serious half, since that is large display type. Seven crop
+   positions were measured and all seven failed. The ground was uniformly bright
+   rather than spiked (p50 0.149, every column between 0.12 and 0.25), so there
+   was no highlight to trim and nowhere darker to move to, and the scrim had to
+   fight the whole field: 0.78 got the heading over the line and left the
+   eyebrow at 3.32, 0.86 bought only 3.53 and cost the picture its fireplace
+   glow and the warmth of its floor.
+
+   Cutting the tagline dropped the block toward the foot of the hero, which is
+   deep scrim anyway, and at 1440x900 that alone took the eyebrow to 7.98:1.
+
+   THAT NUMBER WAS A TRAP, AND THE SHAPE BELOW IS THE ANSWER TO IT. The hero is
+   clamp(520px, 76vh, 820px), so BOTH the type's position within it and the crop
+   of the photograph behind it move with the viewport's HEIGHT. Measured at
+   1440 across five heights, the sitewide-ish light ramp that looked fine at
+   900px collapsed everywhere else — 3.72 at a 532px hero, 2.75 at 577px, 3.06
+   at 641px — and only passed on the tall ones. A laptop at 1440x800 sits in the
+   middle of that failing band. One measurement at one viewport size is not a
+   result; this is the second time on this page that a single reading pointed
+   the wrong way.
+
+   SO THE RAMP STARTS HIGH RATHER THAN STEEP. The earlier attempts all kept the
+   sitewide shape and pulled the bottom down harder, which does nothing for a
+   short hero, because a short hero puts the type in the MIDDLE of the gradient
+   where those versions were still at 0.18-0.30. This one is already at 0.52 by
+   40%, so the band the type can land in is dark wherever it lands. Worst
+   eyebrow across 700/760/844/900/1080 is 7.31:1, against 3.88:1 for the
+   previous best. Every heading line is over 8.
+
+   The cost is 0.10 at 22% — the top of the picture is very slightly off full
+   colour rather than perfectly clear, which is the one place this departs from
+   the sitewide rule, and it is not visible.
+
+   IF YOU CHANGE THIS PHOTOGRAPH, OR PUT A TAGLINE BACK IN THIS HERO,
+   RE-MEASURE AT SEVERAL VIEWPORT HEIGHTS, NOT ONE. */
+.aw-page .ab-hero-overlay {
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0.10) 22%,
+    rgba(15,11,9,0.52) 40%,
+    rgba(15,11,9,0.82) 56%,
+    rgba(15,11,9,0.92) 76%,
+    rgba(15,11,9,0.97) 100%);
+}
+
+.sol-page .ab-hero-overlay {
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 30%,
+    rgba(15,11,9,0.64) 56%,
+    rgba(15,11,9,0.86) 78%,
+    rgba(15,11,9,0.96) 100%);
+}
+
+/* ---------- Section rhythm ----------
+   One step, used by every band on every one of the six pages, so the pages
+   share a vertical rhythm as well as a vocabulary. .ntr-scale had no rule at
+   all for a while and three sections opened on zero; a single named step is
+   how that stops happening again. */
+.ab-sec { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ab-sec-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.ab-sec-head .section-heading { margin: 0.5rem 0 0; }
+.ab-sec-lead {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+.ab-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ab-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+.ab-intro-body + .ab-intro-body { margin-top: 1.4rem; }
+
+/* ---------- Paired image / text band ----------
+   The workhorse of all six pages: one photograph and the paragraph that belongs
+   to it, side by side, alternating sides down the page. Media is INSET, so it
+   rounds at --radius-card — DESIGN.md's radius-follows-bleed rule. The plate is
+   inset negatively by the drift for the same reason the hero is. */
+.ab-band { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ab-band-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 4rem);
+  align-items: center;
+}
+.ab-band.is-flip .ab-band-grid > .ab-band-media-wrap { order: 2; }
+.ab-band-media-wrap {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-card);
+  aspect-ratio: 3 / 2;
+}
+.ab-band-media { position: absolute; inset: calc(-1 * var(--ab-drift)) 0; will-change: transform; }
+.ab-band-img { width: 100%; height: 100%; object-fit: cover; }
+.ab-band-copy > .section-heading { margin: 0.5rem 0 0; font-size: clamp(1.9rem, 2.8vw, 2.8rem); }
+.ab-band-copy > p {
+  margin: 1.1rem 0 0; max-width: var(--measure);
+  font-size: 1rem; line-height: 1.78; color: var(--text-mid);
+}
+.ab-band-copy > .btn-primary,
+.ab-band-copy > .btn-secondary-light { margin-top: 1.75rem; }
+
+/* ---------- Named-thing list ----------
+   The alternative to a grid of identical icon-and-heading cards, which
+   DESIGN.md rules out by name. A hairline between rows, the name at title
+   weight, the explanation under it, and nothing drawn around any of it. */
+.ab-list { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; }
+.ab-item {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: clamp(0.75rem, 3vw, 3rem);
+  padding: clamp(1.4rem, 2.4vw, 1.9rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.ab-list > .ab-item:last-child { border-bottom: 1px solid var(--hairline); }
+.ab-item-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.ab-item-body { margin: 0; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); max-width: 62ch; }
+.ab-item-body + .ab-item-body { margin-top: 0.8rem; }
+
+/* ---------- Proof figures ----------
+   A figure and the sentence that makes it mean something. DESIGN.md: "Name the
+   number, then explain it. A spec without a narrative line is data." */
+.ab-stats {
+  list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+.ab-stat { border-top: 2px solid var(--blue); padding-top: 1.1rem; }
+.ab-stat-fig {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
+  font-weight: 800; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.ab-stat-txt { display: block; margin-top: 0.7rem; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+
+/* ---------- Numbered process ---------- */
+.ab-steps { list-style: none; counter-reset: abstep; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; }
+.ab-step {
+  counter-increment: abstep;
+  display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: clamp(1rem, 2vw, 1.75rem);
+  padding: clamp(1.2rem, 2.2vw, 1.7rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.ab-steps > .ab-step:last-child { border-bottom: 1px solid var(--hairline); }
+.ab-step::before {
+  content: counter(abstep, decimal-leading-zero);
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--blue); padding-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+.ab-step-name {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.ab-step-body { margin: 0; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); max-width: 66ch; }
+
+/* ---------- Pull quote ----------
+   Used once, on the PDI page, for the two things Jayco's own CEO is on record
+   saying about the programme. Not a testimonial component: this site has no
+   testimonials to invent, and this is a named, sourced quotation. */
+.ab-quote {
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: clamp(2.25rem, 4vw, 3.5rem) clamp(1.75rem, 3.4vw, 3.5rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.ab-quote-mark {
+  display: block; font-family: var(--font-display);
+  font-size: 3.5rem; font-weight: 800; line-height: 0.6; color: var(--blue);
+}
+.ab-quote-text {
+  margin: 1.25rem 0 0; max-width: 56ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.9vw, 1.6rem); font-weight: 500; line-height: 1.45;
+  letter-spacing: -0.01em; color: var(--text-dark);
+}
+.ab-quote-text + .ab-quote-text { margin-top: 1.4rem; }
+.ab-quote-by {
+  display: block; margin-top: 1.6rem;
+  font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+
+/* ---------- Closing CTA band ----------
+   Ported from .ntr-cta in new-to-rving.css. Inset, rounded, scrimmed at the
+   bottom only, with the top of the picture left in full colour — the sitewide
+   rule. */
+.ab-cta { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ab-cta-band {
+  position: relative; isolation: isolate; overflow: hidden;
+  border-radius: var(--radius-card);
+  min-height: clamp(360px, 46vw, 520px);
+  display: flex; align-items: flex-end;
+}
+.ab-cta-media { position: absolute; inset: calc(-1 * var(--ab-drift)) 0; z-index: 0; will-change: transform; }
+.ab-cta-img { width: 100%; height: 100%; object-fit: cover; }
+.ab-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.ab-cta-body {
+  position: relative; z-index: 2;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  color: #fff; max-width: 46rem;
+}
+.ab-cta-body .section-label { color: #fff; }
+.ab-cta-h {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.2vw, 3rem);
+  font-weight: 800; line-height: 1.02; letter-spacing: -0.02em;
+}
+.ab-cta-body > p { margin: 1rem 0 1.75rem; max-width: 52ch; font-size: 1rem; line-height: 1.72; color: rgba(255,255,255,0.9); }
+
+/* Two CTAs side by side, for the pages that close on a choice rather than one
+   action. Each keeps its own photograph; neither is a card inside a card. */
+.ab-cta-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
+.ab-cta-pair .ab-cta-band { min-height: clamp(340px, 34vw, 440px); }
+.ab-cta-pair .ab-cta-h { font-size: clamp(1.6rem, 2.3vw, 2.1rem); }
+
+/* ---------- Provenance note ----------
+   Where a page states where its figures came from, or says plainly that Jayco
+   does not publish something. Small, muted, and never dressed up as a warning. */
+.ab-note {
+  margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
+  padding-top: 1.25rem; border-top: 1px solid var(--hairline);
+  max-width: var(--measure-wide);
+  font-size: 0.86rem; line-height: 1.7; color: var(--text-mid);
+}
+.ab-note a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.14s var(--ease-out); }
+.ab-note a:hover { border-bottom-color: var(--blue); }
+
+/* Tail padding, so the last band on a page does not butt into the FAQ. */
+.ab-tail { padding-bottom: clamp(3.5rem, 7vw, 6rem); }
+
+/* ---------- Arrival ----------
+   The shared quiet handoff: copy arrives once, does not reverse, and every
+   section is legible with the animation layer dead. about.js adds .is-in; if
+   the JS never runs the elements are never hidden, because the hidden state is
+   only applied under .ab-armed, which the JS sets on <html> itself. */
+.ab-armed .ab-rise { opacity: 0; transform: translateY(18px); }
+.ab-armed .ab-rise.is-in {
+  opacity: 1; transform: none;
+  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
+}
+
+/* ===================================================
+   100% PDI  (.pdi-page)
+   =================================================== */
+
+/* The programme's own arithmetic, drawn. Three dated stops from the first
+   inspected unit to every unit, and a rule that fills to the share of the
+   lineup being inspected at each one. It is the page's one authored motion
+   moment: the bar is the claim. */
+.pdi-ramp { list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; gap: clamp(1.25rem, 2.5vw, 2rem); }
+.pdi-ramp-row { display: grid; grid-template-columns: minmax(0, 7rem) minmax(0, 1fr); gap: clamp(1rem, 2.5vw, 2rem); align-items: baseline; }
+.pdi-ramp-when {
+  font-family: var(--font-display);
+  font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-dark);
+}
+.pdi-ramp-bar { position: relative; height: 46px; background: var(--surface); border-radius: 6px; overflow: hidden; }
+.pdi-ramp-fill {
+  position: absolute; inset: 0 auto 0 0; width: 0;
+  background: var(--blue); border-radius: 6px;
+  transition: width 1.1s var(--ease-morph);
+}
+.pdi-ramp-row.is-full .pdi-ramp-fill { background: var(--blue-dark); }
+.pdi-ramp-pct {
+  position: absolute; top: 50%; left: 1rem; transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+  /* White on Jayco Blue measures 4.60:1 — past AA but with no headroom, so it
+     is set at a real weight and never tinted down. Hierarchy on this site comes
+     from weight and size, not from translucent white. */
+}
+.pdi-ramp-note { margin: 0.55rem 0 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-mid); }
+
+/* Where the inspections happen. Three plants, one line each, no card. */
+.pdi-where { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: clamp(1.25rem, 2.5vw, 2rem); }
+.pdi-where-item { border-top: 1px solid var(--hairline); padding-top: 1rem; }
+.pdi-where-place { display: block; font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
+.pdi-where-txt { display: block; margin-top: 0.45rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-mid); }
+
+/* ===================================================
+   Visit Us  (.vu-page)
+   =================================================== */
+
+.vu-facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
+.vu-fact { border-top: 2px solid var(--blue); padding-top: 1.1rem; }
+.vu-fact-k { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 0.7rem; }
+.vu-fact-v { display: block; font-size: 1rem; line-height: 1.65; color: var(--text-dark); }
+.vu-fact-v a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.14s var(--ease-out); }
+.vu-fact-v a:hover { border-bottom-color: var(--blue); }
+
+/* Leaflet, the same library and the same tile source the dealer locator uses —
+   dealers.js owns that setup and this borrows nothing from it but the CDN. One
+   marker, because there is one address. */
+.vu-map {
+  margin: clamp(1.75rem, 3.5vw, 2.5rem) 0 0;
+  height: clamp(300px, 42vw, 460px);
+  border-radius: var(--radius-card); overflow: hidden;
+  background: var(--surface);
+}
+.vu-map .leaflet-container { height: 100%; width: 100%; background: var(--off-white); font-family: var(--font-body); }
+
+/* A tour: what it is, when it runs, and how to book. Two of them, side by side,
+   each on its own photograph. */
+.vu-tours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.25rem, 2.5vw, 2rem); margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; }
+.vu-tour { display: flex; flex-direction: column; }
+.vu-tour-plate { position: relative; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 3 / 2; }
+.vu-tour-img { width: 100%; height: 100%; object-fit: cover; }
+/* align-self, not just inline-block. The tour card is a flex column, so the
+   default align-items: stretch pulled this pill to the full width of the card
+   and it read as a banner rather than a badge. */
+.vu-tour-when {
+  display: inline-block; align-self: flex-start; margin: 1.25rem 0 0;
+  padding: 0.42rem 0.95rem; border-radius: var(--radius-btn);
+  background: var(--blue); color: #fff;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.vu-tour-name { margin: 0.9rem 0 0; font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark); }
+.vu-tour-body { margin: 0.8rem 0 1.5rem; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); }
+.vu-tour .btn-primary { align-self: flex-start; margin-top: auto; }
+
+/* The rules Jayco sets on the tour, stated as rules rather than buried. */
+.vu-rules { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; display: grid; gap: 0.85rem; }
+.vu-rule { position: relative; padding-left: 1.6rem; font-size: 0.98rem; line-height: 1.7; color: var(--text-mid); }
+.vu-rule::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+
+/* ===================================================
+   Sustainability & Overlander  (.sol-page)
+   =================================================== */
+
+/* One package: its name, what is in it, and which coaches carry it. A surface
+   panel, because this is specification rather than photography. */
+.sol-packs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.25rem, 2.5vw, 2rem); margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; }
+.sol-pack { display: flex; flex-direction: column; }
+.sol-pack-plate { position: relative; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 3 / 2; }
+.sol-pack-img { width: 100%; height: 100%; object-fit: cover; }
+.sol-pack-name { margin: 1.35rem 0 0; font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark); }
+.sol-pack-body { margin: 0.7rem 0 0; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); }
+.sol-spec { list-style: none; margin: 1.4rem 0 0; padding: 0; }
+.sol-spec-row { display: flex; justify-content: space-between; gap: 1.5rem; padding: 0.8rem 0; border-top: 1px solid var(--hairline); }
+.sol-spec > .sol-spec-row:last-child { border-bottom: 1px solid var(--hairline); }
+.sol-spec-k { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mid); flex: 0 0 auto; padding-top: 0.15rem; }
+.sol-spec-v { font-size: 0.98rem; line-height: 1.6; color: var(--text-dark); text-align: right; font-variant-numeric: tabular-nums; }
+.sol-fit { margin: 1.4rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
+.sol-fit b { color: var(--text-dark); font-weight: 700; }
+.sol-fit + .sol-fit { margin-top: 0.7rem; }
+
+/* ===================================================
+   Award-Winning RVs  (.aw-page)
+   =================================================== */
+
+/* Filter pills. Same pill vocabulary as every other control on the site; the
+   active one is filled blue, which is the site's one active-state treatment. */
+.aw-filters { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; }
+/* 44px minimum, not the padding that happened to fall out of the type size.
+   PRODUCT.md: this audience skews older and touch targets carry more weight
+   than usual here. The same floor is on .sf-sig-btn below. */
+.aw-filter {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 0.62rem 1.35rem; border-radius: var(--radius-btn);
+  border: 1.5px solid rgba(15,11,9,0.22); background: transparent;
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dark);
+  transition: background 0.14s var(--ease-out), border-color 0.14s var(--ease-out), color 0.14s var(--ease-out);
+}
+.aw-filter:hover { background: rgba(15,11,9,0.06); }
+.aw-filter[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.aw-filter:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* One award per row: what it is, who gave it, and what won it. A table would be
+   right if every row had the same shape, and they do not — plenty are awarded
+   to the brand rather than to a coach — so the product cell is allowed to be
+   empty and the row still reads. */
+.aw-list { list-style: none; margin: clamp(1.25rem, 2.4vw, 1.75rem) 0 0; padding: 0; }
+.aw-year { margin: clamp(2.25rem, 4vw, 3.25rem) 0 0; }
+.aw-year:first-child { margin-top: clamp(1.25rem, 2.4vw, 1.75rem); }
+.aw-year-h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.6vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.aw-row {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) minmax(0, 9rem);
+  gap: clamp(0.6rem, 2vw, 2rem);
+  padding: clamp(1rem, 1.8vw, 1.35rem) 0;
+  border-top: 1px solid var(--hairline);
+  align-items: baseline;
+}
+.aw-list .aw-year:last-child .aw-row:last-child { border-bottom: 1px solid var(--hairline); }
+.aw-row-award { font-family: var(--font-display); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
+.aw-row-what { font-size: 0.95rem; line-height: 1.6; color: var(--text-mid); }
+.aw-row-what b { color: var(--text-dark); font-weight: 600; }
+.aw-row-by { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue-dark); }
+
+/* ===================================================
+   Safety & JaySMART  (.sf-page)
+   =================================================== */
+
+/* THE PAGE'S ONE AUTHORED MOTION MOMENT. JaySMART is a lighting system, and a
+   lighting system is a thing you can only really explain by showing it, so this
+   draws a trailer from behind and plays each of the four signals on it. The
+   buttons are real controls: the demo is legible stopped, and under
+   prefers-reduced-motion the flashing never starts and the lit state is held. */
+.sf-signal {
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+  background: var(--band-navy); border-radius: var(--radius-card);
+  padding: clamp(1.75rem, 3.4vw, 3rem);
+}
+.sf-signal-stage { display: block; width: 100%; max-width: 640px; margin: 0 auto; }
+.sf-lamp { transition: opacity 0.1s linear; }
+.sf-lamp.is-off { opacity: 0.16; }
+.sf-signal-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+.sf-sig-btn {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 0.6rem 1.3rem; border-radius: var(--radius-btn);
+  border: 1.5px solid rgba(255,255,255,0.32); background: transparent;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: #fff;
+  transition: background 0.14s var(--ease-out), border-color 0.14s var(--ease-out), color 0.14s var(--ease-out);
+}
+.sf-sig-btn:hover { background: rgba(255,255,255,0.1); }
+.sf-sig-btn[aria-pressed="true"] { background: #fff; border-color: #fff; color: var(--band-navy); }
+.sf-sig-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.sf-signal-say {
+  margin: clamp(1.25rem, 2.4vw, 1.75rem) auto 0; max-width: 54ch; text-align: center;
+  font-size: 0.98rem; line-height: 1.7; color: #fff;
+}
+
+/* ===================================================
+   R&D and Innovation  (.rd-page)
+   =================================================== */
+
+/* The three groups whose feedback becomes a change, as three columns of prose.
+   Not cards: there is no container, only a rule and a heading. */
+.rd-teams { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1.5rem, 3.5vw, 3rem); margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; }
+.rd-team { border-top: 2px solid var(--blue); padding-top: 1.2rem; }
+.rd-team-n { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--blue-dark); margin-bottom: 0.85rem; }
+.rd-team-h { margin: 0 0 0.7rem; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
+.rd-team-b { margin: 0; font-size: 0.95rem; line-height: 1.72; color: var(--text-mid); }
+
+/* Dated innovations. A year, a name, a line — read down, not scrolled sideways.
+   our-story.html already owns the horizontal timeline on this site and a second
+   one here would be a reprise, not a design. */
+.rd-innov { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; }
+.rd-innov-row {
+  display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: clamp(0.6rem, 3vw, 3rem);
+  padding: clamp(1.2rem, 2.2vw, 1.7rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.rd-innov > .rd-innov-row:last-child { border-bottom: 1px solid var(--hairline); }
+.rd-innov-when { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-dark); padding-top: 0.3rem; }
+.rd-innov-name { margin: 0 0 0.5rem; font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
+.rd-innov-body { margin: 0; font-size: 0.95rem; line-height: 1.75; color: var(--text-mid); max-width: 66ch; }
+
+/* ===================================================
+   Breakpoints
+   The site's own steps — 1024 two columns become one,
+   900 paired image/text stacks, 768 phone. See
+   DESIGN.md > Layout.
+   =================================================== */
+
+@media (max-width: 1024px) {
+  .rd-teams { grid-template-columns: 1fr; }
+  .aw-row { grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); }
+  .aw-row-by { grid-column: 1 / -1; }
+}
+
+@media (max-width: 900px) {
+  .ab-band-grid { grid-template-columns: 1fr; }
+  .ab-band.is-flip .ab-band-grid > .ab-band-media-wrap { order: 0; }
+  .ab-item { grid-template-columns: 1fr; gap: 0.6rem; }
+  .ab-cta-pair { grid-template-columns: 1fr; }
+  .vu-tours { grid-template-columns: 1fr; }
+  .sol-packs { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .ab-hero { height: clamp(460px, 68vh, 620px); }
+  .ab-step { grid-template-columns: 2rem minmax(0, 1fr); gap: 0.9rem; }
+  .pdi-ramp-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .aw-row { grid-template-columns: 1fr; gap: 0.35rem; }
+  .rd-innov-row { grid-template-columns: 1fr; gap: 0.35rem; }
+  .rd-innov-when { padding-top: 0; }
+  .sol-spec-row { flex-direction: column; gap: 0.35rem; }
+  .sol-spec-v { text-align: left; }
+}
+
+/* prefers-reduced-motion kills the whole animation layer, and every section
+   above is legible without it. Setting the drift token to 0 is what switches
+   the parallax off — about.js reads the same number and returns before binding
+   anything, so there is no second code path. */
+@media (prefers-reduced-motion: reduce) {
+  .ab-page { --ab-drift: 0%; }
+  .ab-armed .ab-rise { opacity: 1; transform: none; transition: none; }
+  .pdi-ramp-fill { transition: none; }
+  .sf-lamp { transition: none; }
+}

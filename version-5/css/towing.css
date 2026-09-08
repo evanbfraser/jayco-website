@@ -13,6 +13,11 @@
   background: var(--canvas);
   --tc-pad: var(--page-pad);
   --tc-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in towing.js. */
+  --tc-drift: 12%;
 }
 .towing-page [hidden] { display: none !important; }
 .towing-page button { font-family: inherit; }
@@ -23,19 +28,31 @@
   position: relative; height: clamp(520px, 76vh, 820px);
   display: flex; align-items: flex-end; overflow: hidden;
 }
-.tc-hero-media { position: absolute; inset: 0; z-index: 0; }
-.tc-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.tc-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--tc-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.tc-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The plate is 3:2 and the band is about 2:1, so on a wide screen the whole
+     width shows and only the height is cropped — the horizontal value does
+     nothing there. It earns its keep on a phone, where the crop turns sideways:
+     the rig sits centred around 46%, and that is what keeps the truck and the
+     fifth wheel both in frame rather than one of them. */
+  object-position: 46% 50%;
+}
 /* Vertical stops are type.css's measured curve — the EYEBROW binds at 0.72rem,
    and a scrim tuned to the 900-weight heading alone fails the line above it.
-   Horizontal is for this plate: the copy stands bottom-left over motion-blurred
-   asphalt, mid-grey rather than deep shadow, so the left layer works harder. */
+   Horizontal is for this plate: the copy stands bottom-left over lit summer
+   grass, which is brighter ground than the sky above it, so the left layer is
+   the one carrying the type. */
 .tc-hero-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background:
-    linear-gradient(to right,
-      rgba(15,11,9,0.84) 0%, rgba(15,11,9,0.56) 44%, rgba(15,11,9,0.12) 74%, rgba(15,11,9,0) 100%),
-    linear-gradient(to top,
-      rgba(15,11,9,0.78) 0%, rgba(15,11,9,0.46) 34%, rgba(15,11,9,0.14) 62%, rgba(15,11,9,0.30) 100%);
+  background: var(--scrim-image);
 }
 .tc-hero-content {
   position: relative; z-index: 2; width: 100%; max-width: var(--tc-frame); margin: 0 auto;
@@ -70,30 +87,54 @@
    and the field is solid white rather than a tint because a white tint over
    Jayco blue composites LIGHTER, the worst bed for small text. */
 .tc-calc { padding: clamp(2.5rem, 4.5vw, 3.5rem) 0 0; }
+/* Centred, now that the panel holds one question and nothing else. With the
+   submit button gone the row was a lone field sitting hard left under a
+   centred-width heading, which read as a fragment of a wider layout that had
+   been cut off. */
 .tc-panel {
   background: var(--blue); border-radius: 32px;
   padding: clamp(1.75rem, 3.2vw, 2.75rem) clamp(1.5rem, 2.8vw, 2.5rem);
+  text-align: center;
 }
 .tc-calc-h {
   font-size: clamp(1.35rem, 2.2vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em;
   color: #fff; margin: 0 0 1.5rem;
 }
-.tc-field { max-width: 760px; }
+.tc-field { max-width: 760px; margin: 0 auto; }
 .tc-label {
   display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
   text-transform: uppercase; color: #fff; margin-bottom: 0.5rem;
 }
 .tc-input-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: stretch; }
-.tc-input-wrap { position: relative; flex: 1 1 220px; min-width: 0; }
+/* Centred only INSIDE the calculator panel. Left as it was everywhere else —
+   this selector used to be unscoped and it reached the email row in the
+   take-away card, which centred "Send it" on a line of its own. */
+.tc-panel .tc-input-row { justify-content: center; }
+/* Narrower than the field it sits in. A five-digit number in a 760px box is
+   mostly empty box; the slider under it is the control that wants the width. */
+.tc-input-wrap { position: relative; flex: 0 1 320px; min-width: 0; }
 .tc-input {
   width: 100%; font-family: var(--font-body);
   font-size: 1.35rem; font-weight: 700; color: var(--text-dark);
   background: #fff; border: 1px solid transparent; border-radius: 14px;
-  padding: 0.7rem 3.4rem 0.7rem 1rem;
+  /* Symmetric, so the centred number sits in the middle of the field rather
+     than being pushed left by the gutter the unit stands in. */
+  padding: 0.7rem 3.4rem;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   transition: box-shadow 0.2s, border-color 0.2s;
 }
-.tc-input--email { font-size: 0.95rem; font-weight: 500; padding-right: 1rem; }
+/* The share form's field is not part of the centred panel — an email address
+   reads left, and it has no unit sitting in a gutter. */
+/* Not part of the centred panel: an email address reads left, and it has no
+   unit sitting in a gutter. It also has to share its row with Send it, so it
+   flexes rather than taking the full width .tc-input gives it. */
+.tc-input--email {
+  flex: 1 1 200px; width: auto; min-width: 0;
+  font-size: 0.95rem; font-weight: 500;
+  padding-left: 1rem; padding-right: 1rem;
+  text-align: left;
+}
 /* Chrome's spinner arrows in a 1.35rem field are a pair of 8px targets nobody
    hits; the slider below is the coarse control and the field is the fine one. */
 .tc-input::-webkit-outer-spin-button,
@@ -104,20 +145,12 @@
   position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   font-size: 0.85rem; font-weight: 600; color: var(--text-mid); pointer-events: none;
 }
-.tc-go, .tc-send { flex: none; }
-/* .btn-primary is a Jayco blue pill. On a Jayco blue panel that is blue on
-   blue — the label survives and the button disappears. Inverted to white with
-   deep-blue type, which is the same swap model.css:2429 makes for the primary
-   on its own blue band. The gradient is style.css's hover wipe, kept so the
-   button still behaves like every other primary on the site. */
-.tc-panel .btn-primary {
-  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
-  background-size: 200% 100%;
-  background-position: 100% 0;
-  color: var(--blue-dark);
-}
-.tc-panel .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
-.tc-panel .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.tc-send { flex: none; }
+/* The .tc-panel .btn-primary inversion that used to live here is gone with the
+   button it dressed — it existed because a Jayco blue pill on a Jayco blue
+   panel is a label with no button behind it. Nothing else on this page puts a
+   primary on blue. Bring it back from git if one ever lands there again.
+*/
 
 .tc-range { width: 100%; margin: 1.1rem 0 0; -webkit-appearance: none; appearance: none;
   background: none; height: 26px; }
@@ -147,6 +180,34 @@
   margin: 0.75rem 0 0; max-width: var(--measure-wide);
   font-size: 0.9rem; line-height: 1.7; color: var(--text-mid);
 }
+
+/* ---------- Jump to a class ----------
+   The pill is floorplans.css's .fpc-jump-link, ported and renamed — the house
+   rule is port, rename, and name the source, so a reader who greps a class
+   finds one owner. No is-current state here: that page pins its rail and spies
+   on scroll to keep the marker honest, and this one is a plain row above the
+   results with nothing watching it. A marker that could go stale is worse than
+   no marker.
+
+   Wraps rather than scrolls sideways. There are at most four towable classes,
+   which fits on one line on anything wider than a phone and on two below that;
+   a horizontal scroller would hide links behind an edge for no gain. */
+.tc-jump {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+.tc-jump-link {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  white-space: nowrap;
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white); padding: 0.45rem 0.9rem;
+  font-size: 0.78rem; font-weight: 600; color: var(--text-dark);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.tc-jump-link:hover { border-color: var(--blue); }
+.tc-jump-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.tc-jump-n { font-size: 0.72rem; font-weight: 700; color: var(--text-mid); font-variant-numeric: tabular-nums; }
 
 .tc-group { margin-bottom: clamp(2.5rem, 4.5vw, 3.5rem); }
 .tc-group-head {
@@ -179,6 +240,46 @@
    means an error. A left border would be the obvious move and DESIGN.md rules
    it out, so the flag is the note plus a tinted ground. */
 .tc-card.is-tight { background: #F6EFE2; }
+/* ---------- The two pictures ----------
+   Side by side: the coach on the left, its floorplan on the right. Both are
+   answers to the same question — a card that names 27BH and shows neither is
+   asking the reader to go and look it up somewhere else.
+
+   ONE RATIO FOR BOTH BOXES, not one each. The render is 400x248 and the drawing
+   is 1400x716, so given their own ratios the two shots would sit at different
+   heights and the card's text would start on a ragged line across a row of
+   three. A shared 16:10 box with contain inside letterboxes the drawing
+   slightly, which costs nothing — it is line art with white all round it
+   already. */
+/* NOT an even split. Every drawing in the library is rendered at ONE SCALE
+   across the whole lineup — a 44ft North Point fills its canvas edge to edge
+   and a 16ft Jay Flight sits in a small patch in the middle of the same 1400px
+   frame. That is real information and worth keeping, but it means the shortest
+   plans need all the width they can get, where the exterior render is a
+   silhouette that reads perfectly well small. So the drawing takes the larger
+   share. Scaling the short ones up to fill their box was the other option and
+   it throws the shared scale away. */
+.tc-card-media {
+  display: grid; grid-template-columns: 36fr 64fr;
+  gap: 0.5rem; margin-bottom: 1rem;
+}
+.tc-card-shot { position: relative; aspect-ratio: 16 / 10; min-width: 0; }
+/* BOTH pictures are cut-outs on transparency — all 181 drawings in the library
+   are yuva420p with a clear ground, not art on a white plate, which is easy to
+   assume and wrong. So neither gets a box: DESIGN.md gives a cut-out no radius
+   and no shadow, because there is nothing to round. They stand on the card's
+   own Surface, and on the amber ground of a card flagged close to its limit,
+   the same way the exterior render does. */
+.tc-card-img {
+  position: absolute; inset: 0; margin: auto;
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+}
+/* One picture left standing after the other's file failed should not sit in
+   half a card. */
+.tc-card-media:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+
 .tc-card-head { margin-bottom: 0.9rem; }
 .tc-card-model {
   display: block; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em;
@@ -203,62 +304,227 @@
 .tc-tight-note {
   margin: 0 0 0.9rem; font-size: 0.76rem; line-height: 1.5; color: #7A5A16; font-weight: 600;
 }
-.tc-card-links { margin-top: auto; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
-.tc-card-links a {
-  font-size: 0.78rem; font-weight: 600; color: var(--blue-dark); text-decoration: none;
-  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+/* auto on the top margin, so the buttons sit on one line across a row however
+   long the plan names above them run — .ts-card-actions in top-selling.css does
+   the same thing for the same reason, and the small size is that file's too. */
+.tc-card-actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tc-card-actions .btn-primary,
+.tc-card-actions .btn-secondary-light {
+  padding: 0.65rem 1rem;
+  font-size: 0.74rem;
 }
-.tc-card-links a:hover { border-bottom-color: var(--blue-dark); }
-.tc-card-links a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
 
 .tc-empty {
   margin: clamp(2rem, 4vw, 3rem) 0; max-width: var(--measure);
   font-size: 1.05rem; line-height: 1.7; color: var(--text-mid);
 }
 
-/* ---------- Share ---------- */
-.tc-share { padding: clamp(4rem, 8vw, 7rem) 0 0; }
-.tc-share-grid {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(2rem, 4vw, 4rem); align-items: start;
+/* ---------- Your reach ----------
+   The heaviest block in the region, and deliberately so. Below the cards this
+   page used to run four Surface panels of equal weight, which is what made it
+   read as filler; now it steps down — ink, then Surface, then hairline, then
+   the quiet legal ground.
+
+   Jayco blue, the same ground the calculator stands on: the question and the
+   answer are one exchange, and giving them one colour says so.
+
+   THE ACCENTS ALL HAD TO MOVE with it. On navy the light blue was the bright
+   thing in the panel; on blue it is barely a step at all. So the scale inverts
+   — white is now the strong mark and NAVY is the accent, which reads against
+   both the blue ground and the white bar it crosses. Nothing here is
+   light-blue-on-blue. */
+.tc-reach { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.tc-reach-panel {
+  background: var(--blue); border-radius: 32px;
+  padding: clamp(1.75rem, 3.4vw, 3rem);
+  color: #fff;
 }
-.tc-share-lead .section-heading { margin: 0.5rem 0 0.75rem; }
-.tc-share-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
-.tc-share-note { margin: 0.85rem 0 0; font-size: 0.82rem; color: var(--text-mid); min-height: 1.2em; }
-.tc-share-form-wrap {
+.tc-reach-panel .section-label { color: rgba(255,255,255,0.82); }
+.tc-reach-head { margin-bottom: clamp(1.75rem, 3vw, 2.5rem); }
+.tc-reach-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  color: #fff; margin: 0.5rem 0 0.75rem;
+}
+/* The reader's own figure, picked out of its sentence — it is the one word in
+   the heading that changes when they move the slider. */
+/* Ink on blue at 4.1:1 — under the 4.5 body text needs, over the 3.0 large
+   text needs, and this is 800-weight at 1.6rem and up. It is the same navy the
+   marker and its pill use, so the reader's own figure is one colour wherever
+   the panel prints it. */
+#tc-reach-cap { color: var(--navy); font-variant-numeric: tabular-nums; }
+.tc-reach-sub {
+  margin: 0; max-width: 62ch;
+  font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.9);
+}
+
+/* Every track is the full width of the panel and they all share one scale, so
+   a single marker can cut down through all four. That is the whole point of
+   the picture: one limit, four classes, seen at once. */
+.tc-reach-chart { position: relative; }
+.tc-reach-rows { position: relative; display: flex; flex-direction: column; gap: 1.1rem; }
+.tc-reach-key {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: 0.4rem;
+}
+.tc-reach-name { font-size: 0.85rem; font-weight: 700; color: #fff; }
+.tc-reach-n {
+  font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.82);
+  font-variant-numeric: tabular-nums;
+}
+.tc-reach-track {
+  position: relative; height: 12px;
+  background: rgba(255,255,255,0.16); border-radius: 50px;
+}
+/* The class's own span on the scale — where its lightest and heaviest
+   floorplans sit. Ghosted; the solid part inside it is what fits. */
+.tc-reach-span {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(255,255,255,0.42); border-radius: 50px; overflow: hidden;
+}
+.tc-reach-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: #fff; border-radius: 50px;
+  transition: width 0.25s var(--ease-out);
+}
+/* A class with nothing under the limit keeps its bar — seeing that toy haulers
+   start well above you is the answer, not an absence. */
+.tc-reach-row.is-out .tc-reach-name,
+.tc-reach-row.is-out .tc-reach-n { color: rgba(255,255,255,0.65); }
+
+/* The pill only — the line itself is drawn inside each track, see the note in
+   towing.js's renderReach().
+
+   It hangs UNDER the last bar rather than over the first. Above, it had to
+   clear that row's name and count and ended up floating some 78px clear of the
+   bar it marks, which read as a detached label; below there is nothing between
+   it and the track it points at. */
+.tc-reach-marker { position: absolute; bottom: 0; height: 0; width: 0; pointer-events: none; }
+.tc-reach-mark {
+  position: absolute; top: -3px; bottom: -3px;
+  width: 2px; margin-left: -1px;
+  background: var(--navy); border-radius: 2px;
+  pointer-events: none;
+}
+.tc-reach-marker-label {
+  position: absolute; top: 0.55rem; left: 50%; transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--navy); color: #fff;
+  border-radius: 50px; padding: 0.15rem 0.55rem;
+  font-size: 0.72rem; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+/* Clears the capacity pill, which now hangs below the last bar. */
+.tc-reach-axis {
+  display: flex; justify-content: space-between;
+  margin-top: 2.6rem;
+  font-size: 0.72rem; color: rgba(255,255,255,0.78);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Take it with you ----------
+   Two ways out, and no more: a PDF or your inbox. */
+.tc-take { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.tc-take-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.tc-take-head .section-heading { margin: 0.5rem 0 0; }
+.tc-take-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.tc-take-card {
+  display: flex; flex-direction: column; align-items: flex-start;
   background: var(--surface); border-radius: var(--radius-card);
   padding: clamp(1.5rem, 2.6vw, 2rem);
 }
-.tc-share-form-wrap .tc-label { color: var(--text-dark); }
-.tc-share-form-wrap .tc-input { border-color: var(--warm-gray); }
-.tc-share-form-wrap .tc-input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue); }
-.tc-share-form-wrap .tc-help { color: var(--text-mid); }
+.tc-take-icon {
+  display: grid; place-items: center;
+  width: 2.6rem; height: 2.6rem; margin-bottom: 1rem;
+  border-radius: 50%; background: var(--white); color: var(--blue-dark);
+}
+.tc-take-h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.tc-take-body {
+  margin: 0 0 1.5rem; max-width: 44ch;
+  font-size: 0.92rem; line-height: 1.7; color: var(--text-mid);
+}
+/* The button and the form both sit at the foot, so the two cards line up
+   however long the copy above them runs. */
+.tc-take-go { margin-top: auto; }
+.tc-take-card .tc-form { margin-top: auto; width: 100%; }
+.tc-take-card .tc-label { color: var(--text-mid); }
+.tc-take-card .tc-input { border-color: var(--warm-gray); }
+.tc-take-card .tc-input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue); }
+.tc-take-note { margin: 0.85rem 0 0; font-size: 0.82rem; color: var(--text-mid); min-height: 1.2em; }
 
-/* ---------- CTAs ---------- */
+/* ---------- Next steps ----------
+   Image-led. These were outlined boxes of text and they read as boilerplate;
+   a photograph of the place the button sends you does more work than another
+   paragraph of copy would.
+
+   The picture is the card, not an illustration inside it: it fills the panel
+   and the type stands on it under a scrim, which is the treatment the heroes
+   on this site already use. The two together are the last thing before the
+   small print, so they carry weight again — the region reads blue band,
+   Surface cards, photographs, quiet legal. */
 .tc-ctas { padding: clamp(4rem, 8vw, 7rem) 0 0; }
 .tc-cta-grid {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+  gap: clamp(1rem, 2vw, 1.5rem);
 }
 .tc-cta {
-  display: flex; flex-direction: column; align-items: flex-start;
-  background: var(--surface); border-radius: var(--radius-card);
-  padding: clamp(1.75rem, 3vw, 2.5rem);
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(360px, 34vw, 460px);
+  border-radius: var(--radius-card); overflow: hidden;
 }
-/* --blue-dark, not --blue. The eyebrow is 0.68rem, so it needs 4.5:1, and
-   Jayco blue measures 4.48 on canvas but only 3.61 on this panel's Surface
-   ground — a tone change under a colour that was already at its limit takes it
-   under. The deep step is the same accent and clears it at 6.3. */
-.tc-cta .section-label { color: var(--blue-dark); }
-.tc-cta-h {
-  margin: 0.5rem 0 0.6rem; font-size: clamp(1.3rem, 2vw, 1.7rem);
-  font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+.tc-cta-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+/* The one bit of motion these carry. DESIGN.md allows an authored moment and
+   this is the page's only one; it is also the affordance that says the whole
+   panel is a thing you act on rather than a picture with a button on it. */
+.tc-cta:hover .tc-cta-img { transform: scale(1.04); }
+/* Two layers, the way the heroes on this site build theirs. The type is three
+   short lines bottom-left, so the horizontal layer is doing real work here —
+   the dealer plate is low sun on pale aluminium and the interior is a lit
+   ceiling, and neither is ground a vertical fade alone can carry type on. */
+.tc-cta-scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-card);
 }
 .tc-cta-body {
-  margin: 0 0 1.5rem; max-width: 46ch;
-  font-size: 0.92rem; line-height: 1.7; color: var(--text-mid);
+  position: relative; z-index: 2;
+  padding: clamp(1.5rem, 2.8vw, 2.25rem);
+  color: #fff;
 }
-.tc-cta .btn-primary, .tc-cta .btn-secondary-light { margin-top: auto; }
+.tc-cta .section-label { color: #fff; }
+.tc-cta-h {
+  margin: 0.5rem 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: #fff;
+}
+/* The heading now runs straight into the button — there is no body copy and no
+   live line between them any more, so the heading carries the bottom margin the
+   paragraph used to. */
+.tc-cta-h { margin-bottom: 1.5rem; }
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for, not the ink. On a scrimmed
+   photograph it disappears, so it is inverted here the way .tc-panel .btn-primary
+   was inverted for the blue panel: same button, swapped for what it stands on. */
+.tc-cta .btn-secondary-light {
+  border-color: rgba(255,255,255,0.55);
+  color: #fff;
+}
+.tc-cta .btn-secondary-light:hover {
+  border-color: #fff; background: #fff; color: var(--text-dark);
+}
 
 /* ---------- Legal ----------
    Dune, not Surface: this is the one block on the page that is neither product
@@ -277,6 +543,24 @@
   font-size: 0.85rem; line-height: 1.7; color: var(--text-mid);
 }
 .tc-legal-inner p:last-child { margin-bottom: 0; }
+.tc-legal-lead { font-weight: 600; color: var(--text-dark) !important; }
+.tc-legal-sub { margin-bottom: 0.5rem !important; }
+/* The things this tool cannot see, as a list — because that is what they are,
+   and somebody scanning for whether their own limit is on it should not have to
+   read a paragraph to find out. */
+.tc-legal-list {
+  list-style: none; margin: 0 0 1.1rem; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 1.5rem;
+}
+.tc-legal-list li {
+  position: relative; padding-left: 1rem;
+  font-size: 0.85rem; line-height: 1.6; color: var(--text-mid);
+}
+.tc-legal-list li::before {
+  content: ''; position: absolute; left: 0; top: 0.6em;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--text-mid);
+}
 .tc-legal-inner strong { color: var(--text-dark); font-weight: 700; }
 
 .towing-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
@@ -284,7 +568,7 @@
 /* ---------- Responsive ---------- */
 @media (max-width: 1023px) {
   .tc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tc-share-grid, .tc-cta-grid { grid-template-columns: minmax(0, 1fr); }
+  .tc-take-grid, .tc-cta-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 768px) {
   .tc-hero { height: 72svh; min-height: 460px; }
@@ -292,31 +576,51 @@
   /* The copy spans the full width on a phone, so the left-weighted layer stops
      helping and the vertical one does the work. */
   .tc-hero-overlay {
-    background: linear-gradient(to top,
-      rgba(15,11,9,0.90) 0%, rgba(15,11,9,0.74) 40%, rgba(15,11,9,0.34) 70%, rgba(15,11,9,0.28) 100%);
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
   }
   .tc-cards { grid-template-columns: minmax(0, 1fr); }
-  .tc-go, .tc-send { width: 100%; }
+  /* One card per row down here, so the two buttons no longer fit on one line —
+     and two pills of different widths stacked left is a ragged edge. Full width
+     each instead. They still sit side by side in the two-across layout above
+     this breakpoint, where they do fit. */
+  .tc-card-actions a { flex: 1 1 100%; text-align: center; }
+  .tc-send { width: 100%; }
   .tc-panel { border-radius: 24px; }
 }
 
 /* ---------- Print ----------
-   The honest half of "email a PDF": no PDF is generated anywhere, but the
-   browser's own Save as PDF will produce a clean sheet of the answer. Chrome,
-   the hero, the calculator and every CTA come off; the figures stay. */
+   Kept, but no longer the page's answer to "give me a PDF" — towing.js draws a
+   real one now, laid out for the job rather than being whatever the page
+   happened to look like. This is the fallback for somebody who hits Cmd-P
+   anyway: chrome, hero, calculator, both take-away bands and the CTAs come off,
+   the figures and the small print stay. */
 @media print {
   .site-header, .mobile-menu, .site-footer, .hero-chat-btn, #loader,
-  .tc-hero, .tc-calc, .tc-share, .tc-ctas, .tc-faq, .tc-card-links { display: none !important; }
+  .tc-hero, .tc-calc, .tc-reach, .tc-take, .tc-ctas, .tc-faq { display: none !important; }
   .towing-page { background: #fff; }
   .tc-inner { max-width: none; padding: 0; }
   .tc-results-wrap, .tc-legal { padding: 0 0 1rem; }
   .tc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
   .tc-card { background: none; border: 1px solid #ccc; padding: 0.6rem; break-inside: avoid; }
+  /* The renders go; the drawing stays. This sheet is carried onto a lot to
+     check trailers against, where the floorplan is the useful half and 51
+     duplicated exterior shots are just ink. */
+  .tc-card-media { grid-template-columns: minmax(0, 1fr); margin-bottom: 0.5rem; }
+  .tc-card-shot--model { display: none; }
+  .tc-card-actions { display: none; }
   .tc-card.is-tight { background: none; }
   .tc-group { break-inside: avoid; }
+  /* Navigation is not something a sheet of paper can do. */
+  .tc-jump { display: none; }
   .tc-legal-inner { background: none; border-top: 1px solid #ccc; border-radius: 0; padding: 1rem 0 0; }
   a[href]::after { content: ''; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tc-input, .tc-card-links a { transition: none; }
+  .tc-input, .tc-reach-fill, .tc-cta-img { transition: none; }
+  .tc-cta:hover .tc-cta-img { transform: none; }
+  /* Zero travel, so initParallax() returns before it binds anything. */
+  .towing-page { --tc-drift: 0%; }
 }

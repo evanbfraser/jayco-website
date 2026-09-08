@@ -95,11 +95,7 @@
      daylight frame. Holding ~0.35 at that height carries it to 5.5:1. The
      heading is 900-weight at 3.2rem+ and only needs 3:1, so it was never the
      problem; a scrim tuned to the heading alone will fail the line above it. */
-  background: linear-gradient(to top,
-    rgba(15,11,9,0.78) 0%,
-    rgba(15,11,9,0.42) 34%,
-    rgba(15,11,9,0.14) 62%,
-    rgba(15,11,9,0.30) 100%);
+  background: var(--scrim-image);
 }
 /* hero copy sits on the same left spine as every section below it */
 .tp-hero-content {
@@ -453,10 +449,21 @@
 .tp-feat-scrim {
   position: absolute;
   inset: 0;
+  /* This band's copy runs down the LEFT and is vertically centred, so it cannot
+     take the sitewide bottom scrim — it keeps its horizontal layer, at full
+     strength. Only the TOP and BOTTOM layers were pulled back in the lightening
+     pass; those carry no type, and the top one was greying the sky for nobody.
+
+     The horizontal layer was reduced too at first and put back. Measured, the
+     white eyebrow over the brightest part of this photograph is about 2.4:1
+     against a lightened wash and about 3.0:1 against this one — so this band
+     does not reach 4.5:1 either way. That is a PRE-EXISTING problem, not one
+     the lightening introduced, and the fix is a darker plate or a moved
+     headline rather than a heavier wash. Left as found rather than made worse. */
   background:
     linear-gradient(to right,  rgba(15,11,9,0.70) 0%, rgba(15,11,9,0.54) 34%, rgba(15,11,9,0.12) 58%, rgba(15,11,9,0) 70%),
-    linear-gradient(to bottom, rgba(15,11,9,0.34) 0%, rgba(15,11,9,0.16) 30%, rgba(15,11,9,0) 52%),
-    linear-gradient(to top,    rgba(15,11,9,0.40) 0%, rgba(15,11,9,0.12) 32%, rgba(15,11,9,0) 50%);
+    linear-gradient(to bottom, rgba(15,11,9,0.16) 0%, rgba(15,11,9,0.06) 30%, rgba(15,11,9,0) 46%),
+    linear-gradient(to top,    rgba(15,11,9,0.34) 0%, rgba(15,11,9,0.10) 32%, rgba(15,11,9,0) 50%);
 }
 
 /* The headline alone, on the page's spine, centred in the frame. Outside the

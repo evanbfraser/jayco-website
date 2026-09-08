@@ -1,0 +1,551 @@
+/* ===================================================
+   Jayco — The Jayco Difference (jayco-difference.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from towing.css (which ported it from
+   request-quote.css, from buyers-guide.css, from
+   top-selling.css, from videos.css, from
+   testimonials.css, from brochures.css, from type.css)
+   — the house rule is port, rename, and name the
+   source, so a reader who greps a class finds one
+   owner.
+
+   The hero scrim is NOT restated here. It reads
+   --scrim-image, the sitewide rule in style.css:
+   darken the bottom of a picture enough to carry the
+   type on it and leave the top alone.
+
+   THE PAGE IS A SWITCH. Everything between the intro
+   and the CTA is one of two lists, and the control that
+   chooses is the thing the eye should land on after the
+   intro — so it is the widest, quietest element on the
+   page rather than a pair of buttons tucked beside a
+   heading.
+   =================================================== */
+
+.jd-page {
+  background: var(--canvas);
+  --jd-pad: var(--page-pad);
+  --jd-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in jayco-difference.js. */
+  --jd-drift: 12%;
+  /* The FAQ container's gutter. The plates sit inside it and the rail bleeds
+     back out through it by exactly the same amount, so the two can never
+     disagree — which they did when one was 100px and the other --jd-pad
+     between 769 and 900. */
+  --jd-gut: 100px;
+}
+.jd-page [hidden] { display: none !important; }
+.jd-page button { font-family: inherit; }
+
+.jd-inner { max-width: var(--jd-frame); margin: 0 auto; padding: 0 var(--jd-pad); }
+
+/* ---------- Hero ---------- */
+.jd-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.jd-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--jd-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.jd-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The galley and island are right of centre and the fireplace wall runs down
+     the left, which is where the copy stands. Holding the frame left of centre
+     keeps the cabinetry behind the type and the kitchen in shot. */
+  object-position: 42% 50%;
+}
+/* THE SITEWIDE SHAPE, ONE STEP DEEPER BELOW THE MIDPOINT — and only below it.
+   The top 34% is untouched at rgba(...,0), exactly as --scrim-image has it, so
+   the cabinetry and the window still read at full colour.
+
+   Why this hero needs it: --scrim-image is cut for the darker photographs most
+   of the site's heroes use, and this one is a bright galley — white shakers, a
+   lit window and a pale counter directly behind the headline. Measured per
+   line, the first line of the headline sat at 2.9:1 on the shared ramp, which
+   is under the 3:1 that even large text has to clear. The stops below are the
+   smallest change that fixes it: 0.44 -> 0.52, 0.72 -> 0.80, 0.92 -> 0.94.
+   Mobile is untouched — the 768 block swaps in --scrim-card, which already
+   measured 7:1 on this picture. */
+.jd-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 34%,
+    rgba(15,11,9,0.52) 56%,
+    rgba(15,11,9,0.80) 78%,
+    rgba(15,11,9,0.94) 100%);
+}
+.jd-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--jd-frame); margin: 0 auto;
+  padding: 0 var(--jd-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.jd-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.jd-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.jd-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.jd-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.jd-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- The switch ----------
+   A segmented control, centred, with the two options sharing one track. NOT
+   index.html's .cs-group, which looks related and is an accordion — see the
+   note in jayco-difference.js.
+
+   The track is the affordance: two pills floating on canvas would read as two
+   buttons, where one track split in half reads as a choice between two states,
+   which is what it is. */
+.jd-switch { padding: clamp(2.5rem, 5vw, 4rem) 0 0; text-align: center; }
+.jd-switch-label {
+  display: block; margin-bottom: 1rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.jd-tabs {
+  display: inline-flex; gap: 0.35rem;
+  padding: 0.35rem;
+  background: var(--surface); border-radius: var(--radius-btn);
+}
+.jd-tab {
+  appearance: none; border: none; cursor: pointer;
+  padding: 0.7rem 1.7rem;
+  border-radius: var(--radius-btn);
+  background: none; color: var(--text-mid);
+  font-size: 0.88rem; font-weight: 600; letter-spacing: 0.01em;
+  transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out);
+}
+.jd-tab:hover { color: var(--text-dark); }
+.jd-tab.is-on { background: var(--blue); color: #fff; }
+.jd-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Panels ---------- */
+/* padding-TOP only. The element also carries .jd-inner, which sets the page
+   gutter through the padding shorthand — a second shorthand here would win on
+   source order and zero it, which is exactly what it did. */
+.jd-groups { padding-top: clamp(2.5rem, 5vw, 3.5rem); }
+.jd-panel:focus { outline: none; }
+.jd-panel-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
+.jd-panel-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark); margin: 0 0 0.9rem;
+}
+.jd-panel-lead {
+  margin: 0; max-width: var(--measure-wide);
+  font-size: 1.02rem; line-height: 1.75; color: var(--text-mid);
+}
+
+/* ---------- Rows ----------
+   One photograph at the width of the FAQ container, with its highlights on a
+   rail underneath. Scrolling pins the row and pulls the rail sideways; when the
+   last highlight has passed, the row lets go and the next photograph comes up.
+   jayco-difference.js > initRails() drives it.
+
+   THE GUTTER IS THE FAQ'S, NOT THE PAGE'S — a flat 100px, which is what
+   .faq-section carries, dropping to the page pad at 768 exactly where that
+   section drops too. That is why #jd-groups no longer wears .jd-inner: its
+   1440px frame and 6vw pad would have put these photographs on a different
+   measure from the panel below them. The heading above each run keeps the page
+   frame, because it is page copy rather than one of these plates. */
+.jd-panel-head {
+  max-width: var(--jd-frame); margin: 0 auto;
+  padding: 0 var(--jd-pad);
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+.jd-row {
+  padding: 0 var(--jd-gut);
+  margin-bottom: clamp(3rem, 6vw, 5.5rem);
+}
+.jd-row:last-child { margin-bottom: 0; }
+
+/* Capped against the viewport, not only by ratio. A pinned row has to fit on
+   screen with its rail — a 21:9 plate at this width is over 500px on its own,
+   and the rail wants its share. */
+.jd-row-media {
+  /* width: 100% is load-bearing. With only aspect-ratio and max-height set, the
+     height cap shrinks the WIDTH to preserve the ratio — the plate came out at
+     966px against the FAQ's 1240. Pinning the width makes the cap crop the
+     photograph instead, which is what object-fit: cover is there for. */
+  width: 100%;
+  position: relative;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  /* The cap is no longer about fitting a pinned row on screen — nothing pins
+     any more — it is only so a very tall window does not turn the plate into a
+     full page of photograph before a single highlight is reached. */
+  max-height: 78vh;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+/* Inset NEGATIVELY by the drift, top and bottom — the same construction the
+   hero uses. That overhang is what the parallax travels through, so neither
+   edge of the photograph can come into view at either end of the pass. The
+   plate is what GSAP moves; the scrim and the title stay still above it. */
+.jd-row-plate {
+  position: absolute; inset: calc(-1 * var(--jd-drift)) 0; z-index: 0;
+  will-change: transform;
+}
+.jd-row-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* LIGHTER THAN THE SITEWIDE STEP, and it can afford to be. --scrim-card is cut
+   for body copy; the only thing standing on these plates is one 800-weight
+   headline at 3rem and up, which is large text — 3:1 rather than the 4.5:1 a
+   small label needs. So the ramp starts later and tops out lower, and more of
+   each photograph survives.
+
+   The numbers below were not guessed: the title's ground was measured on all
+   six plates and the lightest of them clears 4.5:1 with room to spare, so this
+   passes the stricter bar anyway. Lighten it further and that stops being
+   true — the factory plate is the one that binds. */
+.jd-row-scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 44%,
+    rgba(15,11,9,0.22) 64%,
+    rgba(15,11,9,0.55) 84%,
+    rgba(15,11,9,0.74) 100%);
+}
+.jd-row-title {
+  position: absolute; z-index: 2; left: clamp(1.25rem, 2.6vw, 2.25rem); bottom: clamp(1.1rem, 2.2vw, 1.9rem);
+  margin: 0; max-width: min(60%, 22ch);
+  font-family: var(--font-display);
+  /* Twice the step it was: the old cap was 2.4rem, and 4.6rem is the step this
+     site's type ramp actually carries nearest to double it. (4.8rem is on no
+     ramp at all, and 4.5rem — the first choice here — turns out to appear
+     elsewhere only as SPACING, never as a font size, which is not the same
+     thing as being a type step.) */
+  font-size: clamp(3rem, 6vw, 4.6rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.02;
+  color: #fff;
+}
+
+/* ---------- The highlights ----------
+   A STATIC GRID, not a scroller. There is no rail, no arrows and nothing to
+   swipe: every highlight under a photograph is on screen at once.
+
+   The column count follows the number of cards rather than being fixed at
+   three, because it is not always three — the towable rows run 3+3+3 but the
+   motorized rows run 4+4+3, and a four-card row forced into three columns
+   leaves one card alone on a second line. data-n is written by
+   jayco-difference.js from the row's own feature count. */
+.jd-cards {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+.jd-cards[data-n="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.jd-callout {
+  display: flex; flex-direction: column;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+.jd-callout-icon {
+  display: grid; place-items: center;
+  width: 2.6rem; height: 2.6rem; margin-bottom: 1rem;
+  border-radius: 50%; background: var(--white); color: var(--blue-dark);
+}
+/* A FITTED BOX, NOT A FIXED SHAPE — same reasoning as .tvd-card-icon in
+   tow-vs-drive.css, and the same numbers. The supplied icons are Illustrator
+   exports and no two share a viewBox: two are square, the rest run from 1.4:1
+   to nearly 2:1. preserveAspectRatio letterboxes each one inside this box
+   rather than stretching it, and the box is wider than it is tall because most
+   of the set is wide — the height cap is what stops a square icon rendering at
+   full size and outweighing the truck beside it.
+
+   The six line-art icons still in the table are drawn on a 24x24 viewBox, so
+   they land square in the same box and sit at the height cap. */
+.jd-callout-icon svg { width: 26px; height: 22px; }
+.jd-callout-name {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.jd-callout-body {
+  margin: 0;
+  font-size: 0.92rem; line-height: 1.7; color: var(--text-mid);
+}
+
+.jd-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+
+/* ---------- Four reasons ----------
+   A summary of the argument, set before the twenty-item switch rather than
+   after it. Numbered because they are read in order and because each one has a
+   section below it: 01 is the engineering band, 02 the feature panels, 03 the
+   PDI band, 04 the warranty and the dealer network. */
+.jd-reasons { padding: clamp(3rem, 6vw, 5rem) 0 0; }
+.jd-reason-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+}
+.jd-reason { border-top: 2px solid var(--blue); padding-top: 1rem; }
+.jd-reason-k {
+  display: block; margin-bottom: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em;
+  color: var(--blue-dark); font-variant-numeric: tabular-nums;
+}
+.jd-reason-h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2;
+  color: var(--text-dark);
+}
+.jd-reason-b { margin: 0; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+
+/* ---------- 100% PDI ----------
+   The figure is set as a plate of its own beside the copy rather than inline in
+   it: 100% is the whole claim, and a number that IS the argument should not be
+   a word in a sentence. */
+.jd-pdi { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+/* JAYCO BLUE, AND EVERY PIECE OF TYPE ON IT IS SOLID WHITE — no 0.82 alpha
+   anywhere, which is the usual treatment for secondary copy on a coloured
+   panel. White on #007AC2 measures 4.6:1: it clears the 4.5 bar, but only just,
+   and dropping the alpha to 0.82 takes it to about 3.6, which fails for
+   anything at body size. So the label and the caption keep full white and lean
+   on weight and size for hierarchy instead of on opacity. */
+.jd-pdi-panel {
+  background: var(--blue); border-radius: 32px;
+  padding: clamp(1.75rem, 3.4vw, 3rem);
+  display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(1.5rem, 3vw, 3rem); align-items: center;
+}
+.jd-pdi-fig { text-align: center; }
+.jd-pdi-n {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.6rem);
+  font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+  color: #fff;
+}
+.jd-pdi-l {
+  display: block; margin-top: 0.6rem;
+  font-size: 0.76rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #fff;
+}
+.jd-pdi-h {
+  margin: 0.5rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.jd-pdi-b { margin: 0 0 1.25rem; font-size: 0.98rem; line-height: 1.75; color: #fff; }
+/* The eyebrow is Jayco blue by default, which would disappear into the panel. */
+.jd-pdi-panel .section-label { color: #fff; }
+/* What the inspection covers, as chips rather than a bulleted column — five
+   short nouns set as a list would be five mostly-empty lines. */
+.jd-pdi-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+}
+.jd-pdi-list li {
+  border: 1.5px solid var(--warm-gray); border-radius: var(--radius-btn);
+  background: var(--white); padding: 0.4rem 0.85rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-dark);
+}
+
+/* ---------- Engineering ----------
+   Short on purpose. It is the reason the feature lists exist, so it reads as a
+   statement and stops; another grid here would make it compete with them. */
+.jd-eng { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-eng-h {
+  margin: 0.5rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: var(--text-dark);
+}
+.jd-eng-b {
+  margin: 0; max-width: var(--measure-wide);
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- Proof strip ---------- */
+.jd-proof { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-proof-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+}
+/* The same blue, and the same reason for solid white on it. */
+.jd-proof-stat {
+  background: var(--blue); border-radius: 16px;
+  padding: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+.jd-proof-fig {
+  display: block; margin-bottom: 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+  color: #fff;
+}
+.jd-proof-cap { display: block; font-size: 0.88rem; line-height: 1.5; color: #fff; }
+.jd-awards { margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+.jd-awards-h {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2;
+  color: var(--text-dark);
+}
+.jd-awards-b {
+  margin: 0; max-width: var(--measure-wide);
+  font-size: 0.98rem; line-height: 1.75; color: var(--text-mid);
+}
+
+/* ---------- Value Tool CTA ----------
+   Jayco blue, and every piece of type on it is SOLID WHITE — the same rule the
+   PDI panel and the proof cards follow. White on #007AC2 measures 4.6:1: it
+   clears the bar, but only just, and the usual 0.82 alpha for secondary copy
+   would take it to about 3.6, which fails at body size. Hierarchy comes from
+   weight and size instead. */
+.jd-tool { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-tool-panel {
+  background: var(--blue); border-radius: 32px;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  color: #fff;
+}
+.jd-tool-panel .section-label { color: #fff; }
+.jd-tool-h {
+  margin: 0.5rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.jd-tool-b {
+  margin: 0 0 1.6rem; max-width: 52ch;
+  font-size: 0.98rem; line-height: 1.75; color: #fff;
+}
+/* A Jayco blue pill on a Jayco blue panel is a label with no button behind it,
+   so the primary is inverted here — the same swap model.css makes for a primary
+   on its own blue band, with style.css's hover wipe kept so it still behaves
+   like every other primary on the site. */
+.jd-tool-panel .btn-primary {
+  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  color: var(--blue-dark);
+}
+.jd-tool-panel .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
+.jd-tool-panel .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- The two ways off the page ----------
+   PORTED FROM .tvd-cta IN tow-vs-drive.css, which is the site's two-up image
+   CTA. Restated rather than shared, per the house rule — a change to one is a
+   deliberate change to both — and renamed to this page's prefix.
+
+   The min-height is what makes the pair a matched set: the two photographs are
+   different shapes (the dealer plate is 1200x840, the assembly line 1200x600),
+   so without it the cards would stand at different heights and object-fit would
+   have nothing to crop into. */
+.jd-ends { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-cta-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.jd-cta {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(340px, 32vw, 440px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+.jd-cta-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.jd-cta:hover .jd-cta-img { transform: scale(1.04); }
+/* The sitewide rule: bottom-weighted, top untouched. */
+.jd-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.jd-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
+.jd-cta .section-label { color: #fff; }
+.jd-cta-h {
+  margin: 0.5rem 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.jd-cta-body p {
+  margin: 0 0 1.5rem; max-width: 46ch;
+  font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.88);
+}
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for, not the ink. On a scrimmed
+   photograph it has to be inverted, exactly as tow-vs-drive.css inverts it. */
+.jd-cta .btn-secondary-light { border-color: rgba(255,255,255,0.55); color: #fff; }
+.jd-cta .btn-secondary-light:hover { border-color: #fff; background: #fff; color: var(--text-dark); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .jd-reason-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jd-cta-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .jd-row-media { aspect-ratio: 4 / 3; max-height: none; }
+  /* Two across at tablet, whatever the row's own count is. */
+  .jd-cards, .jd-cards[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The figure stops being a column beside the copy and becomes a plate above
+     it — at this width a 0.7fr column is too narrow to carry 4.6rem of type. */
+  .jd-pdi-panel { grid-template-columns: minmax(0, 1fr); }
+  .jd-pdi-fig { text-align: left; }
+}
+@media (max-width: 768px) {
+  /* .faq-section drops from a flat 100px to the page pad at exactly this width;
+     these plates follow it so the two stay on one measure, and the rail's bleed
+     follows with them because both read the same token. */
+  .jd-page { --jd-gut: var(--jd-pad); }
+  .jd-hero { height: 72svh; min-height: 460px; }
+  .jd-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone and a shorter hero gives it a
+     bigger share of the frame, so the ramp has to start sooner — that is
+     exactly what the card step is. Same rule, one notch tighter. */
+  .jd-hero-overlay { background: var(--scrim-card); }
+  /* The two options split the width rather than sitting in the middle of it —
+     a 44px touch target each, which is what WCAG 2.5.5 asks for. */
+  .jd-cards, .jd-cards[data-n="4"] { grid-template-columns: minmax(0, 1fr); }
+  .jd-tabs { display: flex; width: 100%; }
+  .jd-tab { flex: 1 1 0; min-height: 44px; padding: 0.7rem 0.9rem; }
+  /* Two columns of this at 390px leaves about 165px a card, which is too narrow
+     for a three-line paragraph. One column, and the numbers keep the order. */
+  .jd-reason-grid { grid-template-columns: minmax(0, 1fr); }
+  .jd-proof-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jd-tab { transition: none; }
+  /* Zero travel, so initParallax() returns before it binds anything. */
+  .jd-page { --jd-drift: 0%; }
+}

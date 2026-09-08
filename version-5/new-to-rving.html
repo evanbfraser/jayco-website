@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>New to RVing? — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
+  <link rel="stylesheet" href="css/blog.css?v=v5-bl-11" />
+  <!-- blog.css above: the three post cards are blog-ui.js's own .bl-card and are
+       drawn by that stylesheet, so they match every other post card on the site. -->
+  <link rel="stylesheet" href="css/new-to-rving.css?v=v5-ntr-21" />
+  </head>
+<!-- No data-header="solid" here, unlike compare, the builder and the floorplans
+     catalog. This page opens on a full-bleed photograph, so the header keeps the
+     transparent-to-solid scroll fade app.js binds when the flag is absent —
+     model.html is the precedent. -->
+<body class="ntr-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+
+  <!-- ===== NEW TO RVING? =====
+       For somebody who has not bought one and is not sure where to begin, in
+       the order the questions actually arrive: how you want to travel, whether
+       you tow or drive, what the types are, then the three numbers that narrow
+       everything — space, tow rating, budget.
+
+       MOST OF THIS IS MEASURED, NOT WRITTEN. The type counts and starting
+       prices, and every figure in the three counting sections, are computed at
+       load from models-data.js and build-data.js. The three articles are real
+       posts resolved by slug against blog-data.js and drawn with blog-ui.js's
+       card.
+
+       THE EXCEPTIONS, said plainly: the four travel styles and the RV types
+       each one recommends are AUTHORED content, held in new-to-rving.js, and
+       the four RVing 101 cards below are written copy. Neither follows the
+       lineup — if the range changes, somebody has to revisit them. Only the
+       floorplan count printed beside each recommended type is measured.
+       See js/new-to-rving.js. -->
+  <main class="ntr" id="new-to-rving">
+
+    <section class="ntr-hero">
+      <div class="ntr-hero-media">
+        <img class="ntr-hero-img"
+             src="../assets/new-to-rving/web/hero-1800.webp"
+             srcset="../assets/new-to-rving/web/hero-1200.webp 1200w,
+                     ../assets/new-to-rving/web/hero-1800.webp 1800w"
+             sizes="100vw" width="1800" height="1200"
+             fetchpriority="high" decoding="async"
+             alt="A Jayco Class B camper van parked on rock beside a creek in autumn woodland, its side door open and a runner passing in front" />
+      </div>
+      <div class="ntr-hero-overlay" aria-hidden="true"></div>
+      <div class="ntr-hero-content">
+        <span class="ntr-hero-eyebrow">New to RVing?</span>
+        <h1 class="ntr-hero-heading">Start here.</h1>
+        <p class="ntr-hero-tagline">Nobody is born knowing what a dry weight is. This is what to
+          work out first, in the order it actually matters — and the numbers behind each answer.</p>
+      </div>
+    </section>
+
+    <!-- 2. How do you want to RV? — one question, four travel styles. The
+         styles and their matches are authored (they are a way in, not a
+         specification), so they live in one place: the STYLES array in
+         js/new-to-rving.js. Nothing here duplicates the RV Finder Quiz. -->
+    <section class="ntr-style-sec" aria-labelledby="ntr-style-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">First things first</span>
+          <h2 class="section-heading dark" id="ntr-style-h">How do you<br>want to RV?</h2>
+          <p class="ntr-sec-lead">Before any of the hardware, one question about you. How you
+            travel narrows the lineup faster than any specification will — pick the trip that
+            sounds most like yours and see which classes it points at.</p>
+        </div>
+        <!-- One question, four travel styles. The options and the panel are
+             written by new-to-rving.js — the styles, their matches and their
+             reasons are authored content held there, and the floorplan count
+             beside each class is read from build-data.js at render time. -->
+        <div class="ntr-ask" id="ntr-ask">
+          <div class="ntr-ask-q">
+            <h3 class="ntr-ask-title" id="ntr-ask-title">What kind of trips do you have in mind?</h3>
+            <p class="ntr-ask-why">Four of the common ones. Pick whichever is closest — most people
+              end up doing a bit of each, and the types overlap accordingly.</p>
+            <!-- A radiogroup: one answer of a small known set, which is what
+                 these are. The buttons carry role="radio" and aria-checked so a
+                 screen reader is told it is a choice rather than four unrelated
+                 controls. -->
+            <div class="ntr-ask-opts" id="ntr-ask-opts" role="radiogroup"
+                 aria-labelledby="ntr-ask-title"></div>
+            <div class="ntr-ask-nav">
+              <a class="btn-primary ntr-ask-next" href="quiz.html">Take the full quiz</a>
+            </div>
+          </div>
+          <!-- aria-live so a choice made on the left is announced on the right,
+               which is otherwise a change a screen reader never hears. -->
+          <div class="ntr-ask-r" id="ntr-ask-result" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- 3. Tow It or Drive It? -->
+    <section class="ntr-cta" aria-labelledby="ntr-tvd-h">
+      <div class="ntr-inner">
+        <div class="ntr-cta-band">
+          <div class="ntr-cta-media">
+            <img class="ntr-cta-img"
+                 src="../assets/new-to-rving/web/cta-tow-1200.webp"
+                 srcset="../assets/new-to-rving/web/cta-tow-800.webp 800w,
+                         ../assets/new-to-rving/web/cta-tow-1200.webp 1200w"
+                 sizes="(max-width: 1023px) 92vw, 88vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="A pickup towing a Jayco fifth wheel down a wet forest highway, tall evergreens either side and mountains ahead" />
+          </div>
+          <div class="ntr-cta-scrim" aria-hidden="true"></div>
+          <div class="ntr-cta-body">
+            <span class="section-label">The big fork</span>
+            <h2 class="ntr-cta-h" id="ntr-tvd-h">Tow it, or drive it?</h2>
+            <p>A towable is a home with no engine; a motorhome is one thing that drives. It changes
+              what you spend, what you can choose from and what your day looks like once you have
+              parked. The guide puts the two side by side on Jayco's own numbers.</p>
+            <a class="btn-primary" href="tow-vs-drive.html">Read the Guide</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Understand the main RV types -->
+    <section class="ntr-types" aria-labelledby="ntr-types-h">
+      <div class="ntr-inner">
+        <div class="ntr-types-head">
+          <div class="ntr-sec-head">
+            <span class="section-label">The main types</span>
+            <h2 class="section-heading dark" id="ntr-types-h">Understand<br>the main types.</h2>
+            <p class="ntr-sec-lead">Not sure where to start? These are the main RV types and what
+              makes each one different.</p>
+          </div>
+          <!-- Hidden by new-to-rving.js if the rail ever fits without scrolling.
+               The buttons take the real disabled attribute at the ends, not just
+               a faded class: a control that looks spent should be spent to a
+               keyboard too. -->
+          <div class="ntr-rail-nav" id="ntr-rail-nav">
+            <button type="button" class="ntr-rail-arrow" id="ntr-rail-prev"
+                    aria-label="Scroll the RV types left" aria-controls="ntr-types">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="ntr-rail-arrow" id="ntr-rail-next"
+                    aria-label="Scroll the RV types right" aria-controls="ntr-types">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- OUTSIDE .ntr-inner on purpose: the rail runs to the viewport edge, and
+           carries its own left padding to line its first card up with the framed
+           heading above it. -->
+      <ul class="ntr-rail" id="ntr-types" role="list"><!-- built by new-to-rving.js --></ul>
+    </section>
+
+    <!-- 5. How much space do you need? -->
+    <section class="ntr-scale" aria-labelledby="ntr-space-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">Space</span>
+          <h2 class="section-heading dark" id="ntr-space-h">How much space<br>do you need?</h2>
+          <p class="ntr-sec-lead">Sleeping capacity is the fastest filter there is. Pick the number
+            you need and the types that carry it appear alongside.</p>
+        </div>
+        <!-- The same picker as the travel-style section above, on the same
+             shared renderer in new-to-rving.js. The options and their
+             recommendations are authored; the floorplan counts beside each
+             class are read from build-data.js at render time. -->
+        <div class="ntr-ask" id="ntr-space">
+          <div class="ntr-ask-q">
+            <h3 class="ntr-ask-title" id="ntr-space-title">How many people need a bed?</h3>
+            <p class="ntr-ask-why">Count the beds that have to work on a normal trip, not the most
+              the RV could ever take.</p>
+            <div class="ntr-ask-opts" id="ntr-space-opts" role="radiogroup"
+                 aria-labelledby="ntr-space-title"></div>
+            <div class="ntr-ask-nav">
+              <a class="btn-primary ntr-ask-next" href="floorplans.html">Browse all floorplans</a>
+            </div>
+          </div>
+          <div class="ntr-ask-r" id="ntr-space-result" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scrubbed film band. FULL-BLEED BY OMISSION: every other section here
+         wraps its content in .ntr-inner, which is what applies the frame and
+         the gutter — this one has no .ntr-inner, so it runs edge to edge
+         without a negative margin. 100vw in a bleed margin is what puts a
+         horizontal scrollbar on the page in Chrome, and there is none here.
+
+         The video NEVER plays on its own: no autoplay, no loop, no controls.
+         new-to-rving.js maps scroll position onto currentTime, so the truck
+         only moves while the reader is moving. It is muted and audio-free at
+         the file level, which is also what lets a browser seek it freely.
+
+         Decorative: it shows the same towing this section then puts numbers
+         on, so it is aria-hidden and the poster carries the first frame until
+         the video is decoded. -->
+    <section class="ntr-film" aria-hidden="true">
+      <video class="ntr-film-video"
+             src="../assets/new-to-rving/web/tow-scrub.mp4"
+             poster="../assets/new-to-rving/web/tow-scrub-poster.webp"
+             muted playsinline preload="auto"
+             disablepictureinpicture disableremoteplayback
+             width="1280" height="720"></video>
+    </section>
+
+    <!-- 6. What can you tow? -->
+    <section class="ntr-scale" aria-labelledby="ntr-tow-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">Tow rating</span>
+          <h2 class="section-heading dark" id="ntr-tow-h">What can<br>you tow?</h2>
+          <p class="ntr-sec-lead">If you are towing, this is the hard limit — and it is set by the
+            vehicle on your drive, not by the trailer you like.</p>
+        </div>
+        <!-- A slider rather than a stack of options: a tow rating is a number on
+             a scale, and dragging to yours reads as looking yourself up. Built
+             by new-to-rving.js on the same renderer as the two pickers above. -->
+        <div class="ntr-ask" id="ntr-tow">
+          <div class="ntr-ask-q">
+            <h3 class="ntr-ask-title" id="ntr-tow-title">Slide to your tow rating.</h3>
+            <p class="ntr-ask-why">It is on the driver's door jamb, in the owner's manual, or on
+              the manufacturer's site under your exact trim.</p>
+            <div class="ntr-ask-opts ntr-slider-wrap" id="ntr-tow-opts"></div>
+            <div class="ntr-ask-nav">
+              <a class="btn-primary ntr-ask-next" href="towing.html">Use the full calculator</a>
+            </div>
+          </div>
+          <div class="ntr-ask-r" id="ntr-tow-result" role="status" aria-live="polite"></div>
+        </div>
+        <p class="ntr-band-note">Matched on gross vehicle weight rating — the most a trailer may
+          weigh once loaded — rather than on dry weight, which is what it weighs before you put
+          anything in it. Counted across the towable floorplans Jayco publishes a rating for.</p>
+        <p class="ntr-types-more">Put your own vehicle's rating into the
+          <a href="towing.html">Tow Capability Calculator</a> and it will name every floorplan that
+          comes in under it.</p>
+      </div>
+    </section>
+
+    <!-- 7. What should you expect to spend? -->
+    <section class="ntr-scale" aria-labelledby="ntr-spend-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">Budget</span>
+          <h2 class="section-heading dark" id="ntr-spend-h">What should you<br>expect to spend?</h2>
+          <p class="ntr-sec-lead">Knowing what you’d like to spend can quickly bring the right
+            RVs into focus.</p>
+        </div>
+        <!-- A slider, same renderer as the tow one above. -->
+        <div class="ntr-ask" id="ntr-spend">
+          <div class="ntr-ask-q">
+            <h3 class="ntr-ask-title" id="ntr-spend-title">Slide to your budget.</h3>
+            <p class="ntr-ask-why">Starting prices, before options. What you actually pay is set by
+              the dealer.</p>
+            <div class="ntr-ask-opts ntr-slider-wrap" id="ntr-spend-opts"></div>
+            <div class="ntr-ask-nav">
+              <a class="btn-primary ntr-ask-next" href="build-price.html">Build &amp; Price one</a>
+            </div>
+          </div>
+          <div class="ntr-ask-r" id="ntr-spend-result" role="status" aria-live="polite"></div>
+        </div>
+        <p class="ntr-band-note">Counted on real starting MSRP — each floorplan's own figure, not
+          its model's base — across the plans Jayco has priced. It badges 20 of the 181 as new
+          without pricing yet, and those are left out rather than estimated.</p>
+        <p class="ntr-types-more">To total a real configuration rather than a starting figure, use
+          <a href="build-price.html">Build &amp; Price</a>.</p>
+      </div>
+    </section>
+
+    <!-- 8. Find your RV quiz -->
+    <section class="ntr-cta" aria-labelledby="ntr-quiz-h">
+      <div class="ntr-inner">
+        <div class="ntr-cta-band">
+          <div class="ntr-cta-media">
+            <img class="ntr-cta-img"
+                 src="../assets/new-to-rving/web/cta-find-1200.webp"
+                 srcset="../assets/new-to-rving/web/cta-find-800.webp 800w,
+                         ../assets/new-to-rving/web/cta-find-1200.webp 1200w"
+                 sizes="(max-width: 1023px) 92vw, 88vw"
+                 width="1200" height="798" loading="lazy" decoding="async"
+                 alt="An aerial view of a Jayco fifth wheel camped on a grassy bluff above a turquoise river bend" />
+          </div>
+          <div class="ntr-cta-scrim" aria-hidden="true"></div>
+          <div class="ntr-cta-body">
+            <span class="section-label">Narrow it down</span>
+            <h2 class="ntr-cta-h" id="ntr-quiz-h">Find your RV.</h2>
+            <p>Answer the questions above properly — plus what you would tow it with — and the quiz
+              returns a shortlist instead of a lineup.</p>
+            <a class="btn-primary" href="quiz.html">Take the Quiz</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. RVing 101 -->
+    <section class="ntr-basics" aria-labelledby="ntr-basics-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">RVing 101</span>
+          <h2 class="section-heading dark" id="ntr-basics-h">What you<br>need to know.</h2>
+          <p class="ntr-sec-lead">Four things worth understanding before the first trip. Everything
+            else you will pick up on the first weekend.</p>
+        </div>
+        <ul class="ntr-basics-grid" role="list">
+          <li class="ntr-basic">
+            <h3 class="ntr-basic-h">Weights, and which one counts</h3>
+            <p>Every RV publishes two numbers. <strong>Dry weight</strong> is what it weighs empty,
+              before water, gear or people. <strong>Gross vehicle weight rating</strong> is the most
+              it may weigh once loaded — and that is the one to match against your tow rating.
+              Matching on the dry figure is the single most common mistake in this hobby, and it
+              only shows up the first time you fill the fresh tank.</p>
+          </li>
+          <li class="ntr-basic">
+            <h3 class="ntr-basic-h">Hitching, and driving something long</h3>
+            <p>A towable needs a hitch rated for it, and a fifth wheel needs a pickup bed as well.
+              Whichever you end up with, it is taller and longer than what you drive now — height
+              matters at petrol station canopies and low bridges, and length matters at every turn.
+              Both get easy quickly; neither is obvious on day one.</p>
+          </li>
+          <li class="ntr-basic">
+            <h3 class="ntr-basic-h">Three tanks, not one</h3>
+            <p>Fresh water goes in, grey water comes off the sinks and shower, and black is the
+              toilet. Their capacities decide how long you can stay somewhere without hookups, and
+              Jayco publishes all three for every floorplan — they are on each plan's spec sheet in
+              the <a href="floorplans.html">catalog</a>, worth a look before you commit.</p>
+          </li>
+          <li class="ntr-basic">
+            <h3 class="ntr-basic-h">Power, and going without hookups</h3>
+            <p>At a site with full hookups an RV runs on shore power and you barely think about it.
+              Away from one you are on battery and whatever you can generate — which is why every
+              Jayco leaves the line either solar-prepped or with a system fitted. If camping off the
+              grid appeals, that is the part to ask about early.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 10. Helpful articles -->
+    <section class="ntr-reading" aria-labelledby="ntr-reading-h">
+      <div class="ntr-inner">
+        <div class="ntr-sec-head">
+          <span class="section-label">Helpful articles</span>
+          <h2 class="section-heading dark" id="ntr-reading-h">Start Smart.<br>Travel Far.</h2>
+          <p class="ntr-sec-lead">Written for people at exactly this stage, by the people who build
+            them and the people who live in them.</p>
+        </div>
+        <ul class="ntr-posts" id="ntr-posts" role="list"><!-- built by new-to-rving.js --></ul>
+      </div>
+    </section>
+
+    <!-- 11. Walk through a few -->
+    <section class="ntr-cta" aria-labelledby="ntr-dealer-h">
+      <div class="ntr-inner">
+        <div class="ntr-cta-band">
+          <div class="ntr-cta-media">
+            <img class="ntr-cta-img"
+                 src="../assets/towing/web/cta-dealer-1200.webp"
+                 srcset="../assets/towing/web/cta-dealer-800.webp 800w,
+                         ../assets/towing/web/cta-dealer-1200.webp 1200w"
+                 sizes="(max-width: 1023px) 92vw, 88vw"
+                 width="1200" height="840" loading="lazy" decoding="async"
+                 alt="A Jayco dealership lot at golden hour, rows of trailers and motorhomes" />
+          </div>
+          <div class="ntr-cta-scrim" aria-hidden="true"></div>
+          <div class="ntr-cta-body">
+            <span class="section-label">Go and look</span>
+            <h2 class="ntr-cta-h" id="ntr-dealer-h">Walk through a few.</h2>
+            <p>Half an hour on a lot will tell you more than a week of reading — about height,
+              about bed length, about whether the bathroom is one you would use. It costs nothing
+              and you are not committing to anything.</p>
+            <a class="btn-secondary-light" href="dealers.html">Find a Dealer</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Beginner FAQs. The homepage's FAQ component — its CSS is in the
+         shared style.css and app.js binds .faq-question on DOMContentLoaded,
+         so this is markup and nothing else. -->
+    <section class="faq-section" id="faq">
+      <div class="faq-inner">
+        <div class="faq-header">
+          <span class="section-label">Frequently Asked Questions</span>
+          <h2 class="section-heading dark">Beginner<br>questions.</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Should I tow one or drive one?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>It is the question to settle first, and it comes down to whether you already have
+                something to pull with and whether you want a car at camp. The
+                <a href="tow-vs-drive.html">Tow vs. Drive Guide</a> puts the two side by side on
+                real figures — price, choice, length and weight — rather than on opinion.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What can my current vehicle pull?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Find its tow rating — owner's manual, driver's door jamb, or the manufacturer's
+                site under your exact trim — and put it into the
+                <a href="towing.html">Tow Capability Calculator</a>. It matches on loaded weight
+                rather than the dry figure, which is the mistake that catches most first-time
+                buyers out.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Do I need a special licence?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Usually not, but the thresholds are set per state by weight and sometimes by
+                length, and they differ — so check your own state rather than trusting a general
+                answer, this one included. A <a href="dealers.html">dealer</a> will know the local
+                rule for the coach in front of you.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Is it cheaper to rent one first?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>For one trip, almost always — and a weekend in something similar to what you are
+                considering answers questions no specification sheet can, particularly about size.
+                Plenty of owners rented first. It is not a step backwards.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How much of this do I need to know on day one?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Weights, hitching if you are towing, and how the three tanks work — the RVing 101
+                section above covers all of it. Everything else is learned by doing, and the
+                dealer walks you through the coach before you take it away.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <a href="#" class="footer-app-badge" aria-label="Download on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+          <a href="#" class="footer-app-badge" aria-label="Get it on Google Play">
+            <img src="../assets/google_play_badge-new.svg" alt="Get it on Google Play" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="#">Owner Services</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
+            <li><a href="#">Warranty Coverage</a></li>
+            <li><a href="#">Recalls</a></li>
+            <li><a href="#">Wingmate App</a></li>
+            <li><a href="#">Ambassador Program</a></li>
+            <li><a href="#">Jayco University</a></li>
+            <li><a href="#">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <!-- No models-data.js and no build-data.js: this page names features, not
+       floorplans, and reads nothing out of the lineup. -->
+  <!-- models-data.js and build-data.js for every count and price on the page;
+       blog-data.js and blog-ui.js for the three real posts and the card that
+       draws them. new-to-rving.js ships no content of its own. -->
+  <script src="js/models-data.js?v=v5-5"></script>
+  <script src="js/build-data.js?v=v5-bp-19"></script>
+  <script src="js/blog-data.js?v=v5-bl-5"></script>
+  <script src="js/blog-ui.js?v=v5-bl-3"></script>
+  <script src="js/new-to-rving.js?v=v5-ntr-17"></script>
+  <script src="js/app.js?v=v5-core-6"></script>
+</body>
+</html>

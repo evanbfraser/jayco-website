@@ -12,6 +12,11 @@
   background: var(--canvas);
   --vd-pad: var(--page-pad);
   --vd-frame: 1440px;
+  /* ONE TOKEN FOR BOTH HALVES of the hero parallax: it sets the negative inset
+     that gives .vd-hero-media its headroom below, and videos.js reads the same
+     value back for the distance it travels. Two numbers kept in step by hand is
+     how a bare edge appears at the top or bottom of the plate mid-scroll. */
+  --vd-drift: 12%;
 }
 .videos-page [hidden] { display: none !important; }
 .videos-page button { font-family: inherit; }
@@ -24,20 +29,44 @@
   height: clamp(520px, 76vh, 820px);
   display: flex; align-items: flex-end; overflow: hidden;
 }
-.vd-hero-media { position: absolute; inset: 0; z-index: 0; }
+/* Overhanging top and bottom by the drift, so there is always plate to move
+   into and the photograph never pulls a bare edge into the frame. */
+.vd-hero-media {
+  position: absolute; inset: calc(-1 * var(--vd-drift)) 0; z-index: 0;
+  will-change: transform;
+}
 .vd-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-/* Vertical stops from type.css, whose comment carries: the EYEBROW is the
-   binding constraint at 0.72rem, and a scrim tuned to the 900-weight heading
-   alone fails the line above it. Horizontal is for this plate — the copy stands
-   bottom-left over motion-blurred asphalt, which is mid-grey rather than the
-   deep shadow the other two heroes put there, so the left layer works harder. */
+/* A RAMP OF ITS OWN, not --scrim-image. The plate is a coach on a bridge under
+   a fully overcast sky: white cloud across the top third, a white motorhome
+   through the middle, pale road beneath. Measured against it the sitewide ramp
+   — transparent to 34%, only 0.44 by 56% — left the eyebrow at 2.61:1 against a
+   4.5 floor, failing at three of six viewport heights.
+
+   THE EYEBROW IS STILL THE BINDING CONSTRAINT at 0.72rem, as the old note here
+   said: a scrim tuned to the 900-weight heading alone passes the heading and
+   fails the small line above it. What the old note also said, and what is no
+   longer true, is that this was two layers with a horizontal wash — it is one
+   vertical ramp, and describing a second one sent the next reader looking for
+   a rule that is not here.
+
+   HOW FAR IT CAN BE LIGHTENED IS SET BY THE EYEBROW'S POSITION, not by taste.
+   The copy is bottom-anchored and the hero is a clamp, so the eyebrow's top
+   edge lands anywhere from 45.6% of the hero (480px, on a phone) to 66.8%
+   (671px). The plate is therefore untouched to 32% and does its rising between
+   there and 62% — asked for a fully clear top half, and measured, the eyebrow
+   fell to 1.67:1 and the heading to 2.67:1 at the short heroes, because on
+   those the eyebrow BEGINS above the halfway line. 32% is the lightest top this
+   type can stand: at it the worst reading on the page is 4.86:1 against a 4.5
+   floor. Lighten it further and re-measure before believing it. */
 .vd-hero-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background:
-    linear-gradient(to right,
-      rgba(15,11,9,0.82) 0%, rgba(15,11,9,0.54) 44%, rgba(15,11,9,0.12) 74%, rgba(15,11,9,0) 100%),
-    linear-gradient(to top,
-      rgba(15,11,9,0.76) 0%, rgba(15,11,9,0.44) 34%, rgba(15,11,9,0.14) 62%, rgba(15,11,9,0.30) 100%);
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0) 32%,
+    rgba(15,11,9,0.46) 46%,
+    rgba(15,11,9,0.76) 62%,
+    rgba(15,11,9,0.90) 80%,
+    rgba(15,11,9,0.96) 100%);
 }
 .vd-hero-content {
   position: relative; z-index: 2;
@@ -164,9 +193,93 @@
 .vd-card-model:hover { border-bottom-color: var(--blue-dark); }
 .vd-card-model:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
 
+/* ---------- Shelves ----------
+   The unfiltered view: one band per topic, each a rail of the same cards the
+   grid holds. The heading is what the grid could not give — seventy cards in
+   one list never say what you are looking at.
+
+   The rail BLEEDS off the right edge of the frame, the way every other card
+   rail on this site does: a track that stops short of the edge with a card
+   sitting flush against it reads as a list that ended, where a card cut by the
+   edge reads as a list that continues. Negative margin out, padding back in, so
+   the last card can still rest inside the gutter. */
+.vd-shelf { margin-bottom: clamp(2.5rem, 4.5vw, 4rem); }
+.vd-shelf:last-child { margin-bottom: 0; }
+/* The shelf sits outside .vd-inner so its rail can run off the right edge, so
+   the head has to re-create the frame for itself — same max-width, same gutter,
+   same centring. Without this the title would start at the viewport edge while
+   the rest of the page starts at 1440. */
+.vd-shelf-head {
+  max-width: var(--vd-frame); margin-inline: auto;
+  padding: 0 var(--vd-pad);
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: clamp(1rem, 1.6vw, 1.35rem);
+}
+.vd-shelf-h {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+  font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.vd-shelf-tools { display: flex; align-items: center; gap: 1rem; flex: none; }
+.vd-shelf-all {
+  border: none; background: none; padding: 0; cursor: pointer;
+  font-size: 0.8rem; font-weight: 600; color: var(--blue-dark);
+  white-space: nowrap;
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.vd-shelf-all:hover { border-bottom-color: var(--blue-dark); }
+.vd-shelf-all:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
+
+.vd-arrows { display: flex; gap: 0.4rem; }
+.vd-arrow {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--warm-gray); background: var(--white);
+  color: var(--text-dark); cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.vd-arrow:hover:not(:disabled) { background: var(--blue); border-color: var(--blue); color: #fff; }
+.vd-arrow:disabled { opacity: 0.35; cursor: default; }
+.vd-arrow:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* A rail with nothing to scroll has nothing for the arrows to say. */
+.vd-shelf.is-static .vd-arrows { display: none; }
+
+.vd-rail {
+  /* Lines the first card up with the shelf title above it, whatever the
+     viewport does: at or below the frame it is just the page gutter, and above
+     it, the gutter plus half the slack either side of the frame.
+
+     PADDING, NOT A NEGATIVE MARGIN. Chrome counts the scrollbar inside 100vw,
+     so negating it overshoots the edge and puts a horizontal scrollbar on the
+     whole page — the trap testimonials.css records against .tm-rev-body. The
+     old margin-right here escaped the container's own gutter but stopped at the
+     1440 frame, so on a wide screen the rail ended in mid-air rather than
+     running off the edge.
+
+     scroll-padding-left matches, so a snapped card stops under the title rather
+     than jammed against the viewport edge. */
+  --vd-rail-inset: max(var(--vd-pad), calc((100vw - var(--vd-frame)) / 2 + var(--vd-pad)));
+  list-style: none; margin: 0;
+  padding: 6px var(--vd-pad) 6px var(--vd-rail-inset);
+  scroll-padding-left: var(--vd-rail-inset);
+  display: flex; gap: clamp(1.25rem, 2.2vw, 2rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* The rail is the scroller, so it clips the other axis: the card's hover
+     lift on the thumbnail is inside its own rounded box and safe, but the 6px
+     of padding above is what keeps a focus ring from being shaved. */
+}
+.vd-rail::-webkit-scrollbar { display: none; }
+/* Same card the grid uses, given a width — the grid's three columns are a
+   fraction of the frame, and a rail has no columns to be a fraction of. */
+.vd-rail .vd-card {
+  flex: 0 0 clamp(260px, 30vw, 400px);
+  scroll-snap-align: start;
+}
+
 .vd-empty { margin: clamp(3rem, 6vw, 5rem) 0; text-align: center; font-size: 1.05rem; color: var(--text-mid); }
-.vd-note { margin: clamp(2rem, 3.5vw, 3rem) 0 0; font-size: 0.8rem; color: var(--text-mid); }
-.vd-note a { color: var(--blue-dark); }
 
 /* ---------- Player ---------- */
 .vd-player {
@@ -230,14 +343,31 @@ body.vd-playing { overflow: hidden; }
   /* The copy spans the full width on a phone, so the left-weighted layer stops
      helping and the vertical one does the work. */
   .vd-hero-overlay {
-    background: linear-gradient(to top,
-      rgba(15,11,9,0.90) 0%, rgba(15,11,9,0.74) 40%, rgba(15,11,9,0.34) 70%, rgba(15,11,9,0.28) 100%);
+    /* NOT --scrim-card. A phone gets the shortest hero on the page (480px at
+       667), so the type sits higher in the gradient than anywhere else and
+       needs the earliest ramp — the card step is not it. Measured at 3.18:1 on
+       the eyebrow before this. */
+    background: linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0) 28%,
+      rgba(15,11,9,0.52) 44%,
+      rgba(15,11,9,0.80) 60%,
+      rgba(15,11,9,0.92) 80%,
+      rgba(15,11,9,0.97) 100%);
   }
   .vd-grid { grid-template-columns: minmax(0, 1fr); }
+  /* The arrows are a second way to do what the finger already does, and they
+     charge a row of height to say it. Same call as the floorplans rails. */
+  .vd-shelf .vd-arrows { display: none; }
+  .vd-rail .vd-card { flex: 0 0 min(78vw, 320px); }
   .vd-player-x { top: -3rem; }
   .vd-player-foot { flex-direction: column; gap: 0.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .vd-thumb-img, .vd-play, .vd-cat, .vd-card-model { transition: none; }
   .vd-card-btn:hover .vd-thumb-img { transform: none; }
+  /* Zero travel. videos.js reads this and returns before it binds anything, so
+     there is one code path rather than a second one for stillness — and the
+     overhang collapses with it, leaving the plate exactly in its frame. */
+  .videos-page { --vd-drift: 0%; }
 }

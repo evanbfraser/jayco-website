@@ -1,0 +1,449 @@
+/* ===================================================
+   Jayco — Request a Quote (request-quote.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from buyers-guide.css (which ported it from
+   top-selling.css, from videos.css, from
+   testimonials.css, from brochures.css, from type.css)
+   — the house rule is port, rename, and name the
+   source, so a reader who greps a class finds one
+   owner.
+
+   THE PICKER IS THE PAGE. Three choices in order —
+   class, then model, then floorplan — and only then the
+   fields. A quote for "a Jayco" is not a quote, and a
+   form that asks for an email before it knows what the
+   email is about is a toll booth. Each step collapses
+   to a one-line answer when it is made, so the page
+   gets SHORTER as it is filled in rather than longer.
+
+   NO PRICES ANYWHERE ON THIS PAGE. That is the whole
+   point of a quote: the dealer sets it. build.js shows
+   MSRP because a configurator has to; here a price
+   would be answering the question the visitor came to
+   ask.
+
+   The FIELDS are brochure-form.css's, restated the same
+   way buyers-guide.css restates them: white, 14px
+   radius, no border at rest, blue focus ring.
+   DESIGN.md > Components.
+   =================================================== */
+
+.rq-page {
+  background: var(--canvas);
+  --rq-pad: var(--page-pad);
+  --rq-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block at the foot sets it to 0, which is how the parallax is
+     switched off without a second code path in request-quote.js. */
+  --rq-drift: 12%;
+}
+.rq-page [hidden] { display: none !important; }
+.rq-page button { font-family: inherit; }
+
+.rq-inner { max-width: var(--rq-frame); margin: 0 auto; padding: 0 var(--rq-pad); }
+
+/* ---------- Hero ---------- */
+.rq-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.rq-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--rq-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.rq-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The plate is 3:2 and the band is about 2:1, so on a wide screen the whole
+     WIDTH is shown and only the height is cropped — the horizontal value there
+     does nothing. It earns its keep on a phone, where the band is taller than
+     the picture and the crop turns sideways: she sits a third of the way in, so
+     38% is what keeps her in frame rather than the cabinetry.
+
+     The vertical stays centred. Pulling it up would gain the overhead lockers
+     and lose the notebook on the table, which is the whole subject of the
+     photograph. */
+  object-position: 38% 50%;
+}
+/* Vertical stops from videos.css, whose comment carries: the EYEBROW is the
+   binding constraint at 0.72rem, and a scrim tuned to the 900-weight heading
+   alone fails the line above it. Both layers work hard on this plate: it is a
+   lit interior, cream cabinetry and a pale bench cushion, and the copy stands
+   bottom-left across the brightest part of it. */
+/* A RAMP OF ITS OWN, not --scrim-image. The v2 photograph is a bright interior
+   — pale cabinetry with a lit window behind the subject — and the sitewide ramp
+   holds full transparency to 34% and reaches only 0.44 by 56%. Measured against
+   this picture the eyebrow came back 2.63:1 at a 532px hero, against a 4.5
+   floor, and failed at three of five viewport heights.
+
+   THE SHAPE MATTERS MORE THAN THE STRENGTH, which is the lesson the awards hero
+   taught: a short hero puts the type in the MIDDLE of the gradient, so a ramp
+   that ends steep arrives too late to help it. This one starts early and is
+   already at 0.52 by 40%, where the sitewide ramp is still at zero.
+
+   Ported from .aw-page .ab-hero-overlay in about.css — same reasoning, same
+   shape, restated here rather than shared. */
+.rq-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(15,11,9,0) 0%,
+    rgba(15,11,9,0.12) 20%,
+    rgba(15,11,9,0.56) 40%,
+    rgba(15,11,9,0.84) 58%,
+    rgba(15,11,9,0.93) 78%,
+    rgba(15,11,9,0.97) 100%);
+}
+.rq-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--rq-frame); margin: 0 auto;
+  padding: 0 var(--rq-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.rq-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.rq-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.rq-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.rq-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.rq-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- The picker ---------- */
+.rq-build { padding: clamp(3rem, 6vw, 5rem) 0 var(--space-md); }
+.rq-build-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+.rq-build-head .section-heading { margin-top: 0.5rem; }
+.rq-build-sub {
+  margin: 1.1rem 0 0; max-width: var(--measure-wide);
+  font-size: 1rem; line-height: 1.7; color: var(--text-mid);
+}
+
+/* The list is the flow. Numbering is authored rather than list-style, because
+   the marker sits inside the step's own header row beside the title. */
+.rq-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
+
+.rq-step {
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  padding: clamp(1.25rem, 2.4vw, 2rem);
+  transition: background 0.3s, opacity 0.3s;
+}
+/* A step that cannot be answered yet is still on the page — it is what tells
+   the reader how long this is going to take — but it is plainly not their turn.
+   Dimmed rather than hidden, and its options are not rendered at all until it
+   opens, so a locked step costs nothing to draw. */
+.rq-step[data-state="locked"] { opacity: 0.5; }
+.rq-step[data-state="done"] { background: var(--surface); }
+
+.rq-step-head {
+  display: flex; align-items: center; gap: 0.9rem;
+  min-height: 2.5rem;
+}
+.rq-step-num {
+  flex: 0 0 auto;
+  width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(15,11,9,0.10);
+  font-family: var(--font-display);
+  font-size: 0.92rem; font-weight: 700; color: var(--text-mid);
+  transition: background 0.3s, color 0.3s;
+}
+.rq-step[data-state="open"] .rq-step-num { background: var(--blue); color: #fff; }
+/* Answered steps carry a tick instead of their number — the number is a
+   position in a queue and the queue has moved on. The glyph is CSS rather than
+   an inline SVG because it is decorative and repeats three times. */
+.rq-step[data-state="done"] .rq-step-num {
+  background: var(--blue); color: transparent; position: relative;
+}
+.rq-step[data-state="done"] .rq-step-num::after {
+  content: ''; position: absolute;
+  width: 0.42rem; height: 0.78rem;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.rq-step-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;
+  color: var(--text-dark); margin: 0;
+}
+/* The answer, printed in the header once it exists. This is what lets three
+   open steps collapse into three lines of plain English. */
+.rq-step-choice {
+  min-width: 0; flex: 1 1 auto;
+  font-size: 0.95rem; font-weight: 600; line-height: 1.3;
+  color: var(--blue-dark);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rq-step-change {
+  flex: 0 0 auto;
+  background: none; border: none; padding: 0.3rem 0.1rem; cursor: pointer;
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-mid);
+  text-decoration: underline; text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.rq-step-change:hover { color: var(--text-dark); }
+
+.rq-step-body { margin-top: clamp(1.1rem, 2vw, 1.6rem); }
+/* Said once, in the one place a reader looks when a step will not open. */
+.rq-step-wait { margin: 0.75rem 0 0; font-size: 0.9rem; color: var(--text-mid); }
+
+/* ---------- Options, shared ----------
+   Every option is a button with aria-pressed, not a radio: the visible control
+   is a picture and a name, and a styled radio that has thrown away its own
+   appearance is a button wearing a radio's accessibility tree. The values that
+   actually reach Netlify are hidden inputs in the form below, which is the only
+   thing the POST reads. */
+.rq-opt {
+  position: relative;
+  display: flex; text-align: left;
+  background: var(--white);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 0.85rem;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: border-color 0.2s, box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+.rq-opt:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15,11,9,0.10); }
+.rq-opt:focus-visible { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,122,194,0.28); }
+.rq-opt[aria-pressed="true"] { border-color: var(--blue); box-shadow: 0 8px 22px rgba(0,122,194,0.18); }
+
+/* ---------- Step 1: class ----------
+   The cut-outs are index.html's own class silhouettes (.cs-vehicle-img there),
+   so the eight a visitor met on the home page are the eight they pick from
+   here. NOT at that page's size, though: index.html sits them on a Jayco Blue
+   chip at 66x44, and these coaches are mostly white aluminium — at 66px on a
+   white card the whole trailer disappears and the chip reads as a text button
+   with a wide left margin. They get the model card's picture box instead, which
+   is the same shape step 2 uses and makes all three steps one gesture: look at
+   the picture, read the name. */
+.rq-classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.9rem;
+}
+.rq-class { flex-direction: column; padding: clamp(0.9rem, 1.6vw, 1.2rem); }
+/* Out of flow for the reason .rq-model-media is — see the note there. */
+.rq-class-media { position: relative; aspect-ratio: 16 / 10; margin: 0 0 0.7rem; }
+.rq-class-img {
+  position: absolute; inset: 0; margin: auto;
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain;   /* show the whole model, not a crop */
+  display: block;
+}
+.rq-class-name {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--text-dark); min-width: 0;
+}
+
+/* ---------- Step 2: model ----------
+   The type-page model card, ported down to selection size: same cut-out on
+   canvas, same 800-weight display name, same ruled tagline. .ts-card in
+   top-selling.css is the other port of it and carries the full note — the two
+   are kept in step by hand. */
+.rq-models {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+.rq-model { flex-direction: column; padding: clamp(0.9rem, 1.6vw, 1.2rem); }
+/* Cut-out renders on transparency get no radius and no shadow — there is no box
+   to round. DESIGN.md > Shapes. The picture is taken OUT OF FLOW to hold the
+   ratio: aspect-ratio only states a preferred height, and in-flow content
+   taller than it stretches the box straight back out. Positioned, the render
+   cannot size its parent, and `margin: auto` inside `inset: 0` centres it on
+   both axes. */
+.rq-model-media { position: relative; aspect-ratio: 16 / 10; margin: 0 0 0.9rem; }
+.rq-model-img {
+  position: absolute; inset: 0; margin: auto;
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+}
+.rq-model-year {
+  display: block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-mid);
+  margin-bottom: 0.35rem;
+}
+.rq-model-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  color: var(--text-dark); margin: 0 0 0.7rem;
+}
+/* The rule belongs to the tagline, not to the card — it marks the line, so it
+   grows with it rather than spanning the panel. Kept in step with
+   .tp-model-tagline in type.css and .ts-card-tagline in top-selling.css, which
+   are the same card. */
+.rq-model-tagline {
+  margin: 0 0 0.8rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--blue);
+  font-size: 0.86rem; font-weight: 600; line-height: 1.35;
+  color: var(--text-dark);
+}
+.rq-model-plans { margin: auto 0 0; font-size: 0.8rem; line-height: 1.4; color: var(--text-mid); }
+
+/* ---------- Step 3: floorplan ----------
+   Jayco's own drawing, at the ratio it was drawn (1400x716). A plan is chosen
+   by looking at it, so the drawing is the card and the name is the caption. */
+.rq-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.9rem;
+}
+.rq-plan { flex-direction: column; padding: 0.85rem; }
+/* No ground of its own. The drawings are cut-outs on transparency — every one
+   of the 181 is yuva420p with a clear background — so the white card behind is
+   what shows through, and a second white plate on top of it did nothing but
+   claim otherwise. towing.css says the same where it draws the same pictures. */
+.rq-plan-media {
+  position: relative; aspect-ratio: 1400 / 716;
+  margin: 0 0 0.75rem;
+}
+.rq-plan-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+/* A plan with no published drawing keeps its card and closes the gap, the way
+   blog-ui.js drops a card's media rather than leaving a hole in it. */
+.rq-plan-media[hidden] { display: none !important; }
+.rq-plan-name {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;
+  color: var(--text-dark); margin: 0 0 0.35rem;
+}
+.rq-plan-specs { margin: auto 0 0; font-size: 0.8rem; line-height: 1.45; color: var(--text-mid); }
+/* Jayco publishes 20 plans with a NEW badge and no pricing. They are perfectly
+   quotable — a dealer prices them — so unlike build.js this page marks them and
+   leaves them selectable. */
+.rq-plan-new {
+  position: absolute; top: 0.6rem; right: 0.6rem; z-index: 1;
+  padding: 0.2rem 0.5rem; border-radius: 50px;
+  background: var(--blue); color: #fff;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+/* ---------- Step 4: the form ----------
+   Netlify's, and its markup is literal in request-quote.html for that reason —
+   forms are detected by post-processing the published HTML, so one built by JS
+   is never registered. The three choices above reach the POST as hidden inputs
+   whose values request-quote.js writes. */
+.rq-form { display: flex; flex-direction: column; gap: 0.9rem; max-width: 640px; }
+/* What the dealer is being asked to price, said back before the fields.
+
+   NO ACCENT BORDER DOWN ITS LEFT EDGE. That was the first thing here and it is
+   out: DESIGN.md rules the side tab out, and towing.css already carries the
+   note where it flags a trailer close to its limit — the ground does that work,
+   not a coloured strip. White on the step's Surface panel is the whole
+   distinction this box needs. */
+.rq-summary {
+  margin: 0 0 1.4rem; padding: 1rem 1.15rem;
+  border-radius: 14px; background: var(--white);
+}
+.rq-summary-label {
+  display: block;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-mid); margin-bottom: 0.3rem;
+}
+.rq-summary-build {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--text-dark);
+}
+.rq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.rq-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.rq-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.rq-opt-note { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
+/* style.css's field recipe: white, 14px radius, no border at rest, blue focus
+   ring. DESIGN.md > Components. */
+.rq-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: none; border-radius: 14px;
+  background: var(--white);
+  font-family: inherit; font-size: 0.92rem; color: var(--text-dark);
+  transition: box-shadow 0.2s;
+}
+.rq-input::placeholder { color: rgba(92,86,82,0.55); }
+.rq-input:focus { outline: none; box-shadow: 0 0 0 2px var(--blue); }
+textarea.rq-input { resize: vertical; min-height: 6.5rem; line-height: 1.6; }
+.rq-go { margin-top: 0.4rem; align-self: flex-start; }
+.rq-note { margin: 0.9rem 0 0; font-size: 0.82rem; color: var(--text-mid); }
+
+/* Replaces the form on success rather than sitting under it: the request has
+   been sent and leaving the fields on screen invites a second one. */
+.rq-done-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark); margin: 0 0 0.9rem;
+}
+.rq-done-h:focus { outline: none; }
+.rq-done-body { margin: 0 0 1.6rem; max-width: 52ch; font-size: 0.95rem; line-height: 1.7; color: var(--text-mid); }
+.rq-done-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .rq-hero { height: 72svh; min-height: 460px; }
+  .rq-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone, so the left-weighted layer stops
+     helping and the vertical one does the work. */
+  .rq-hero-overlay {
+    /* NOT --scrim-card, which is what this was and which is why the phone
+       measured 3.43:1 on the eyebrow while the desktop ramp above measured
+       8.85. The base rule never reached 390px: this override sat below it and
+       won, and the two mobile readings came back identical to the decimal
+       before and after that change — which is the tell that a rule never
+       arrived rather than one that failed.
+
+       A phone gets the shortest hero of all (480px at 667), so the type sits
+       higher in the gradient than anywhere else and the ramp has to be earlier
+       and harder still than the desktop one. */
+    background: linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0.20) 14%,
+      rgba(15,11,9,0.64) 34%,
+      rgba(15,11,9,0.87) 54%,
+      rgba(15,11,9,0.94) 76%,
+      rgba(15,11,9,0.98) 100%);
+  }
+  /* The answer moves under the title rather than fighting it for a line that is
+     no longer wide enough for both. */
+  .rq-step-head { flex-wrap: wrap; row-gap: 0.35rem; }
+  .rq-step-choice { flex-basis: 100%; padding-left: 3rem; white-space: normal; }
+  .rq-step-change { margin-left: auto; }
+  .rq-classes, .rq-models, .rq-plans { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .rq-row { grid-template-columns: minmax(0, 1fr); }
+  .rq-go { align-self: stretch; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rq-opt, .rq-input, .rq-step, .rq-step-num { transition: none; }
+  .rq-opt:hover { transform: none; }
+  /* Zero travel, so initParallax() returns before it binds anything. */
+  .rq-page { --rq-drift: 0%; }
+}

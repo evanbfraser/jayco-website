@@ -1,0 +1,373 @@
+/* ===================================================
+   Jayco — Top-selling RVs (top-selling.html)
+   ---------------------------------------------------
+   Loads style.css and this file. The hero is ported
+   from videos.css (which ported it from
+   testimonials.css, from brochures.css, from type.css)
+   — the house rule is port, rename, and name the
+   source, so a reader who greps a class finds one
+   owner.
+
+   The cards are cut-out renders on canvas rather than
+   photography in a well: DESIGN.md gives a cut-out no
+   radius and no shadow, because there is no box to
+   round. What holds the row together is the shared
+   baseline of the two buttons under each one.
+   =================================================== */
+
+.ts-page {
+  background: var(--canvas);
+  --ts-pad: var(--page-pad);
+  --ts-frame: 1440px;
+  /* How far the hero plate travels, as a percentage of its own height. The CSS
+     owns it so the JS cannot drift further than the media overhangs; the
+     reduced-motion block below sets it to 0, which is how the parallax is
+     switched off without a second code path in top-selling.js. */
+  --ts-drift: 12%;
+}
+.ts-page [hidden] { display: none !important; }
+.ts-page button { font-family: inherit; }
+
+.ts-inner { max-width: var(--ts-frame); margin: 0 auto; padding: 0 var(--ts-pad); }
+
+/* ---------- Hero ---------- */
+.ts-hero {
+  position: relative;
+  height: clamp(520px, 76vh, 820px);
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+/* Inset NEGATIVELY by the drift, top and bottom: that overhang is what the
+   parallax travels through, so neither edge can come into view. */
+.ts-hero-media {
+  position: absolute;
+  inset: calc(-1 * var(--ts-drift)) 0;
+  z-index: 0;
+  will-change: transform;
+}
+.ts-hero-img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* The coach sits centre-left with the butte on the right; holding the frame
+     left of centre keeps the coach in shot when a phone crops hard. */
+  object-position: 40% 50%;
+}
+/* Vertical stops from videos.css, whose comment carries: the EYEBROW is the
+   binding constraint at 0.72rem, and a scrim tuned to the 900-weight heading
+   alone fails the line above it. The horizontal layer works harder here than on
+   most of these pages — the copy stands bottom-left over sunlit desert floor,
+   which is the brightest ground any hero on this site puts type on. */
+.ts-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: var(--scrim-image);
+}
+.ts-hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: var(--ts-frame); margin: 0 auto;
+  padding: 0 var(--ts-pad) clamp(3.5rem, 8vh, 6rem);
+  color: #fff;
+}
+.ts-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #fff; margin-bottom: 1.2rem;
+}
+.ts-hero-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem);
+  font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+  max-width: 15ch; margin: 0;
+}
+.ts-hero-tagline {
+  margin: 1.35rem 0 0; max-width: 46ch;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ---------- Intro ---------- */
+.ts-intro { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.ts-intro-body {
+  max-width: var(--measure-wide); margin: 0;
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
+}
+
+/* ---------- Year tabs ---------- */
+.ts-years { padding: clamp(2.5rem, 4.5vw, 3.5rem) 0 0; }
+.ts-years-h {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+  margin: 0 0 1.1rem;
+}
+.ts-tabs { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.ts-tab {
+  padding: 0.55rem 1.35rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--warm-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  font-size: 0.9rem; font-weight: 700; letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.ts-tab:hover { border-color: var(--blue-light); }
+.ts-tab.is-on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ts-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Groups ---------- */
+.ts-panes-wrap { padding: clamp(2rem, 3.5vw, 3rem) 0 var(--space-xl); }
+.ts-pane:focus { outline: none; }
+.ts-group { margin-bottom: clamp(3rem, 5.5vw, 4.5rem); }
+.ts-group:last-child { margin-bottom: 0; }
+/* A hairline under the type, not a band behind it: depth on this site is tonal,
+   and seven of these down a page would be seven grey blocks. */
+/* The head keeps the frame the rest of the page sits in — the hairline under it
+   is what the reader reads the page's edges from, so it stops at the gutter
+   even though the rail beside it does not. */
+.ts-group-head {
+  max-width: var(--ts-frame);
+  margin: 0 auto clamp(1.25rem, 2vw, 1.75rem);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+  padding: 0 var(--ts-pad) 0.8rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.ts-group-h {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--blue);
+  margin: 0;
+}
+
+/* ---------- The rail ----------
+   Each product type scrolls rather than wrapping: Class C runs to six models in
+   every year, and six of these cards in a grid is two rows that read as two
+   groups. It runs off the right edge of the VIEWPORT — a card cut by the edge
+   reads as a list that continues, where one sitting flush against a gutter
+   reads as a list that ended.
+
+   THE LEAD PADDING IS WHAT LINES CARD ONE UP with the heading above it, at the
+   frame's own left gutter however wide the window gets; only the right side
+   bleeds. type.css's feature rails are built the same way, and its comment
+   carries the rule this follows: width 100%, never 100vw. 100vw is safe in a
+   PADDING but not in a negative margin — Chrome counts the scrollbar in it, so
+   negating it would push the rail past the edge and put a horizontal scrollbar
+   on the page. Hence padding here and no bleed margin. */
+.ts-rail {
+  list-style: none; margin: 0;
+  padding: 4px var(--ts-pad) 4px
+           max(var(--ts-pad), calc((100vw - var(--ts-frame)) / 2 + var(--ts-pad)));
+  display: flex; gap: clamp(1.5rem, 2.4vw, 2.25rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: max(var(--ts-pad), calc((100vw - var(--ts-frame)) / 2 + var(--ts-pad)));
+  scrollbar-width: none;
+}
+.ts-rail::-webkit-scrollbar { display: none; }
+
+.ts-arrows { display: flex; gap: 0.4rem; flex: none; }
+.ts-arrow {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--warm-gray); background: var(--white);
+  color: var(--text-dark); cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.ts-arrow:hover:not(:disabled) { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ts-arrow:disabled { opacity: 0.35; cursor: default; }
+.ts-arrow:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* A rail with nothing to scroll has nothing for the arrows to say. */
+.ts-group.is-static .ts-arrows { display: none; }
+
+/* ---------- Cards ----------
+   type.css's .tp-model-card, ported and renamed — see the note over card() in
+   top-selling.js. Surface panel at DESIGN.md's 32px feature radius, the name in
+   the display face, the tagline on its blue rule, the cut-out standing ON the
+   panel (a panel inside a panel is the nesting the design system rules out),
+   and the specs ruled across the foot. */
+.ts-card {
+  flex: 0 0 clamp(300px, 30vw, 400px);
+  scroll-snap-align: start;
+  display: flex; flex-direction: column;
+  padding: clamp(1.5rem, 2.2vw, 2rem);
+  border-radius: 32px;
+  background: var(--surface);
+  transition: background 0.3s;
+}
+.ts-card:hover { background: var(--surface-hover); }
+/* Cut-out renders on transparency get no radius and no shadow — there is no box
+   to round. DESIGN.md > Shapes. The fixed ratio is what lines the names up
+   across a row of coaches that are photographed at different lengths. */
+/* The box holds the shape; the render sits inside it at whatever ratio it was
+   photographed at. Jayco's own are a mix of 3:2 and 16:9, and letting each card
+   take its picture's ratio left the names and buttons stepping up and down
+   across a row.
+
+   The picture is taken OUT OF FLOW to do it. aspect-ratio only states a
+   preferred height — in-flow content taller than that stretches the box right
+   back out, which is exactly what the 3:2 renders did. Positioned, they cannot
+   size the parent, and `margin: auto` inside `inset: 0` centres them on both
+   axes. */
+.ts-card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  margin: 0.25rem 0 1.75rem;
+}
+.ts-card-img {
+  position: absolute; inset: 0; margin: auto;
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+}
+.ts-card-name {
+  font-family: var(--font-display);
+  /* The source card's own step, not a new one: .tp-model-name in type.css sets
+     clamp(1.7rem, 2.2vw, 2.15rem), and a ported card that quietly resizes its
+     name is a different card. */
+  font-size: clamp(1.7rem, 2.2vw, 2.15rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark);
+  margin: 0 0 0.7rem;
+}
+/* The rule belongs to the tagline, not to the card — it marks the line, so it
+   grows with it rather than spanning the panel. Kept in step with
+   .tp-model-tagline in type.css, which is the same card. */
+.ts-card-tagline {
+  margin: 0 0 1.4rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--blue);
+  font-size: 0.95rem; font-weight: 600; line-height: 1.35;
+  color: var(--text-dark);
+}
+/* Ruled between, three across, pinned above the buttons so uneven cards still
+   line up. */
+.ts-card-stats {
+  margin: 0 0 1.5rem;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+}
+.ts-card-stat { padding-left: 0.9rem; border-left: 1px solid var(--hairline); min-width: 0; }
+.ts-card-stat:first-child { padding-left: 0; border-left: none; }
+.ts-card-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 700; line-height: 1.25;
+  color: var(--text-dark); margin-bottom: 0.3rem;
+}
+.ts-card-stat-label { display: block; font-size: 0.76rem; line-height: 1.35; color: var(--text-mid); }
+/* auto on the top margin, so the buttons sit on one line across the row however
+   long the names above them run. */
+.ts-card-actions {
+  margin-top: auto;   /* the foot of the panel, whatever the name above it does */
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+}
+.ts-card-actions .btn-primary,
+.ts-card-actions .btn-secondary-light {
+  padding: 0.7rem 1.15rem;
+  font-size: 0.76rem;
+}
+.ts-sheet { display: inline-flex; align-items: center; gap: 0.5rem; }
+.ts-sheet svg { flex: none; }
+
+/* ---------- Reading ----------
+   --space-md below, not the xl this section used to carry: the FAQ that follows
+   brings 7rem of its own padding, and xl on top of that put nearly 320px of
+   nothing between the last card and the first question. md plus the FAQ's own
+   inset lands close to one xl gap in total, which is the rhythm the scale asks
+   for between two major sections. */
+.ts-reading { padding: 0 0 var(--space-md); }
+.ts-reading-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1rem; margin-bottom: clamp(1.5rem, 2.4vw, 2.25rem);
+}
+.ts-reading-h {
+  font-family: var(--font-display);
+  /* The section-heading step the blog's own headings use (.bl-h), so the two
+     pages that carry post cards set their headings the same. */
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark); margin: 0.5rem 0 0;
+}
+.ts-reading-all {
+  font-size: 0.8rem; font-weight: 600; color: var(--blue-dark); text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.ts-reading-all:hover { border-bottom-color: var(--blue-dark); }
+.ts-reading-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+}
+/* TWIN: .bl-card in blog.css, restated rather than shared — the house rule is
+   port, rename, and name the source. Every measurement below is that card's, so
+   a post card looks the same whether it is met here or in the archive. */
+.ts-read-link {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  height: 100%;
+  text-decoration: none; color: inherit;
+}
+.ts-read-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+.ts-read-media {
+  aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: var(--radius-card); background: var(--surface);
+  margin-bottom: 0.35rem;
+}
+.ts-read-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.ts-read-link:hover .ts-read-img { transform: scale(1.04); }
+.ts-read-date {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.ts-read-title {
+  margin: 0;
+  font-size: 1.25rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.ts-read-excerpt {
+  margin: 0; font-size: 0.85rem; line-height: 1.65; color: var(--text-mid);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+.ts-read-more {
+  margin-top: auto;
+  padding-top: 0.9rem; padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; font-weight: 600; color: var(--text-dark);
+}
+.ts-read-more svg { flex: none; transition: transform 0.25s var(--ease-out); }
+.ts-read-link:hover .ts-read-more svg { transform: translate(2px, -2px); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .ts-reading-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .ts-hero { height: 72svh; min-height: 460px; }
+  .ts-hero-content { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+  /* The copy spans the full width on a phone, so the left-weighted layer stops
+     helping and the vertical one does the work. */
+  .ts-hero-overlay {
+    /* The copy spans the full width on a phone and a shorter hero gives it a
+       bigger share of the frame, so the ramp has to start sooner — that is
+       exactly what the card step is. Same rule, one notch tighter. */
+    background: var(--scrim-card);
+  }
+  .ts-reading-grid { grid-template-columns: minmax(0, 1fr); }
+  .ts-card { flex: 0 0 min(82vw, 340px); }
+  /* The arrows are a second way to do what the finger already does, and they
+     charge a row of height to say it. Same call as the floorplans rails. */
+  .ts-arrows { display: none; }
+  /* Both buttons full width and stacked: at 390px they would otherwise wrap to
+     two lines anyway, with one of them orphaned at half width. */
+  .ts-card-actions { flex-direction: column; align-items: stretch; }
+  .ts-card-actions .btn-primary,
+  .ts-card-actions .btn-secondary-light { text-align: center; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ts-tab, .ts-card, .ts-read-img, .ts-read-more svg { transition: none; }
+  .ts-read-link:hover .ts-read-img,
+  .ts-read-link:hover .ts-read-more svg { transform: none; }
+  /* Zero travel, so initParallax() returns before it binds anything. */
+  .ts-page { --ts-drift: 0%; }
+}

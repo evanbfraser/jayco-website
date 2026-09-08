@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-9" />
-  <link rel="stylesheet" href="css/towing.css?v=v5-tc-1" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
+  <link rel="stylesheet" href="css/towing.css?v=v5-tc-15" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -136,9 +136,9 @@
              src="../assets/towing/web/hero-1800.webp"
              srcset="../assets/towing/web/hero-1200.webp 1200w,
                      ../assets/towing/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="808"
+             sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A pickup towing a Jayco North Point fifth wheel along a forest highway" />
+             alt="A pickup towing a Jayco North Point fifth wheel across a grass field, mountains and cloud behind" />
       </div>
       <div class="tc-hero-overlay" aria-hidden="true"></div>
       <div class="tc-hero-content">
@@ -171,6 +171,10 @@
 
           <div class="tc-field">
             <label class="tc-label" for="tc-lbs">Maximum towing capacity</label>
+            <!-- No submit button. The field and the slider both recalculate on
+                 input, so there was never anything to commit — the button
+                 re-ran a render that had already happened by the time anyone
+                 could reach it. -->
             <div class="tc-input-row">
               <div class="tc-input-wrap">
                 <input class="tc-input" id="tc-lbs" type="number" inputmode="numeric"
@@ -178,7 +182,6 @@
                        aria-describedby="tc-lbs-help" />
                 <span class="tc-unit" aria-hidden="true">lbs</span>
               </div>
-              <button type="button" class="btn-primary tc-go" id="tc-go">Show what I can tow</button>
             </div>
             <input class="tc-range" id="tc-range" type="range" min="1000" max="25000" step="250"
                    value="7500" aria-label="Towing capacity, slider" />
@@ -197,6 +200,13 @@
           </h2>
           <p class="tc-results-sub" id="tc-sub"></p>
         </div>
+        <!-- Jump nav, built by towing.js alongside the groups it points at —
+             the classes that survive a capacity change are not the same set
+             every time, so a hand-written list here would go stale the first
+             time the slider moved. Real hrefs to each group's own heading, so
+             the no-JS path still works; the click handler only takes over to
+             offset the landing for the fixed header. -->
+        <nav class="tc-jump" id="tc-jump" aria-label="Jump to a class" hidden></nav>
         <div id="tc-results"><!-- built by towing.js --></div>
         <p class="tc-empty" id="tc-empty" hidden>Nothing in the towable range comes in under that
           figure. The lightest Jayco travel trailer is 3,500 lbs loaded — below that, a Class B
@@ -204,32 +214,87 @@
       </div>
     </section>
 
-    <!-- Share. No PDF is generated: nothing in this repo makes one, and a
-         button that says PDF and produces nothing is the kind of claim
-         PRODUCT.md rules out. What IS real: the capacity lives in the URL, so
-         the link restores the exact result; and the page carries print styles,
-         so the browser's own Save as PDF produces a clean sheet. -->
-    <section class="tc-share" aria-labelledby="tc-share-h">
+    <!-- ===== YOUR REACH =====
+         The one band on this page that tells the reader something the card
+         grid cannot: where their number sits against the WHOLE towable
+         lineup, class by class.
+
+         It is here because "51 floorplans" is an answer without a scale. The
+         four classes barely overlap — travel trailers run 3,500-11,995,
+         destination 12,000-13,600, fifth wheels 9,500-19,200, toy haulers
+         11,700-21,000 — so one glance shows which kinds of trailer are open
+         to you, which are partly open, and which are not on the table at all.
+         Every figure is measured from the same 115 published GVWRs the cards
+         are filtered on. Built by towing.js and redrawn on every change. -->
+    <section class="tc-reach" aria-labelledby="tc-reach-h">
       <div class="tc-inner">
-        <div class="tc-share-grid">
-          <div class="tc-share-lead">
-            <span class="section-label">Keep it</span>
-            <h2 class="section-heading dark" id="tc-share-h">Take the list<br>with you.</h2>
-            <p class="section-body">Your capacity is in the address of this page, so the link
-              opens on the same list. Print it and your browser will save it as a PDF.</p>
-            <div class="tc-share-actions">
-              <button type="button" class="btn-secondary-light" id="tc-copy">Copy the link</button>
-              <button type="button" class="btn-secondary-light" id="tc-print">Print / Save as PDF</button>
-            </div>
-            <p class="tc-share-note" id="tc-copy-note" role="status" aria-live="polite"></p>
+        <div class="tc-reach-panel">
+          <div class="tc-reach-head">
+            <span class="section-label">Your reach</span>
+            <h2 class="tc-reach-h" id="tc-reach-h">Where <span id="tc-reach-cap">7,500 lbs</span> lands.</h2>
+            <p class="tc-reach-sub" id="tc-reach-sub"></p>
           </div>
 
-          <div class="tc-share-form-wrap">
-            <!-- TWIN of the markup in brochures.html and model.html in shape,
-                 not in name: Netlify detects forms by parsing the literal HTML
-                 in the publish directory, so this block is static and carries
-                 every field it should record. See js/brochure-form.js's header
-                 for the full rule. -->
+          <!-- role="img" with a written label: the bars are a picture of the
+               numbers, and the numbers are already printed beside every one of
+               them. A screen reader gets the sentence rather than eight
+               unlabelled divs. -->
+          <div class="tc-reach-chart" id="tc-reach-chart" role="img" aria-label="">
+            <!-- rows + capacity marker built by towing.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TAKE IT WITH YOU =====
+         Two ways out of this page and no more: a PDF you download, or the list
+         in your inbox.
+
+         THE PDF IS REAL. It is drawn at click time by jsPDF, loaded from the
+         CDN only when somebody asks for it — a 300KB library on every page
+         load, for a button most readers never press, is not a trade worth
+         making. It carries the capacity, the reach figures and every matching
+         floorplan with its weights, which is the sheet you want in your hand
+         on a dealer's lot.
+
+         THE EMAIL IS NETLIFY'S, and its markup has to be literal: forms are
+         detected by post-processing the published HTML, so one built by JS is
+         never registered. Same rule brochure-form.js's header sets out. -->
+    <section class="tc-take" aria-labelledby="tc-take-h">
+      <div class="tc-inner">
+        <div class="tc-take-head">
+          <span class="section-label">Keep it</span>
+          <h2 class="section-heading dark" id="tc-take-h">Take the list<br>with you.</h2>
+        </div>
+
+        <div class="tc-take-grid">
+          <div class="tc-take-card">
+            <span class="tc-take-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </span>
+            <h3 class="tc-take-h">Download the PDF</h3>
+            <p class="tc-take-body">Every floorplan under your limit, grouped by class, with
+              loaded and dry weights and the hitch figure. One sheet, made for a dealer&rsquo;s lot.</p>
+            <button type="button" class="btn-primary tc-take-go" id="tc-pdf">Download the PDF</button>
+            <p class="tc-take-note" id="tc-pdf-note" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="tc-take-card">
+            <span class="tc-take-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <polyline points="22 6 12 13 2 6"/>
+              </svg>
+            </span>
+            <h3 class="tc-take-h">Email it to yourself</h3>
+            <p class="tc-take-body">The same list, sent to your inbox, so it is waiting when you
+              start ringing round. We send this and nothing else.</p>
+
             <form class="tc-form" id="tc-form" name="tow-results" method="POST"
                   data-netlify="true" netlify-honeypot="bot-field">
               <input type="hidden" name="form-name" value="tow-results" />
@@ -237,59 +302,94 @@
               <input type="hidden" name="capacity" id="tc-form-capacity" />
               <input type="hidden" name="matches" id="tc-form-matches" />
 
-              <label class="tc-label" for="tc-email">Email the list to yourself</label>
+              <label class="tc-label" for="tc-email">Your email</label>
               <div class="tc-input-row">
                 <input class="tc-input tc-input--email" id="tc-email" name="email" type="email"
                        required autocomplete="email" placeholder="you@example.com" />
                 <button type="submit" class="btn-primary tc-send">Send it</button>
               </div>
-              <p class="tc-help">We will send this list and nothing else.</p>
             </form>
-            <p class="tc-share-note" id="tc-form-note" role="status" aria-live="polite"></p>
+            <p class="tc-take-note" id="tc-form-note" role="status" aria-live="polite"></p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="tc-ctas">
+    <!-- Two next steps, image-led and down to three things each: where you are
+         going, what it is called, and the way in. The photograph carries the
+         rest — a picture of the place the button sends you says more than the
+         paragraph that used to sit here, and by this point in the page the
+         reader has had the whole answer and does not need persuading again. -->
+    <section class="tc-ctas" aria-label="Next steps">
       <div class="tc-inner">
         <div class="tc-cta-grid">
-          <div class="tc-cta">
-            <span class="section-label">Go and look</span>
-            <h2 class="tc-cta-h">Hitch it up at a dealer.</h2>
-            <p class="tc-cta-body">Numbers get you a shortlist. A dealer will put your truck and
-              the trailer on the same lot and check the hitch, the pin weight and the wiring
-              before you sign anything.</p>
-            <a class="btn-primary" href="dealers.html">Find a Dealer</a>
-          </div>
-          <div class="tc-cta">
-            <span class="section-label">Get a figure</span>
-            <h2 class="tc-cta-h">Ask what one costs.</h2>
-            <p class="tc-cta-body">Pick a floorplan from your list and build it the way you would
-              order it — packages, axles, options — and a dealer will come back with a real
-              out-the-door price.</p>
-            <a class="btn-secondary-light" href="build-price.html">Request a Quote</a>
-          </div>
+
+          <article class="tc-cta">
+            <img class="tc-cta-img"
+                 src="../assets/towing/web/cta-dealer-1200.webp"
+                 srcset="../assets/towing/web/cta-dealer-800.webp 800w,
+                         ../assets/towing/web/cta-dealer-1200.webp 1200w"
+                 sizes="(max-width: 1023px) 92vw, 46vw"
+                 width="1200" height="840" loading="lazy" decoding="async"
+                 alt="A Jayco dealership lot at golden hour, rows of trailers and motorhomes" />
+            <div class="tc-cta-scrim" aria-hidden="true"></div>
+            <div class="tc-cta-body">
+              <span class="section-label">Go and look</span>
+              <h2 class="tc-cta-h">Hitch it up<br>at a dealer.</h2>
+              <a class="btn-primary" href="dealers.html">Find a Dealer</a>
+            </div>
+          </article>
+
+          <article class="tc-cta">
+            <img class="tc-cta-img"
+                 src="../assets/towing/web/cta-quote-1200.webp"
+                 srcset="../assets/towing/web/cta-quote-800.webp 800w,
+                         ../assets/towing/web/cta-quote-1200.webp 1200w"
+                 sizes="(max-width: 1023px) 92vw, 46vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="The living area of a Jayco fifth wheel, sectional sofa and kitchen beyond" />
+            <div class="tc-cta-scrim" aria-hidden="true"></div>
+            <div class="tc-cta-body">
+              <span class="section-label">Get a figure</span>
+              <h2 class="tc-cta-h">Ask what<br>one costs.</h2>
+              <a class="btn-secondary-light" href="request-quote.html">Request a Quote</a>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>
 
+    <!-- Every word of this is load-bearing and none of it is hidden behind a
+         toggle. What changed is the shape: the list of things the tool cannot
+         see is now a list, because that is what it is, and a reader scanning
+         for whether their own limit is on it should not have to read a
+         paragraph to find out. -->
     <section class="tc-legal" aria-labelledby="tc-legal-h">
       <div class="tc-inner">
         <div class="tc-legal-inner">
           <h2 class="tc-legal-h" id="tc-legal-h">Before you tow anything</h2>
-          <p>This tool compares one number you give us against each trailer's published gross
-            vehicle weight rating. It is a shortlist, not a clearance to tow.</p>
-          <p><strong>It does not account for</strong> your vehicle's tongue or pin weight limit,
-            its gross combined weight rating, payload left after passengers and cargo, hitch
-            class, brake controller, axle ratio, altitude, or the weight of anything already in
-            the truck. Any one of those can rule out a trailer this page shows you.</p>
+          <p class="tc-legal-lead">This tool compares one number you give us against each
+            trailer&rsquo;s published gross vehicle weight rating. It is a shortlist, not a
+            clearance to tow.</p>
+
+          <p class="tc-legal-sub">It does not account for any of these, and any one of them can
+            rule out a trailer this page has shown you:</p>
+          <ul class="tc-legal-list" role="list">
+            <li>Your tongue or pin weight limit</li>
+            <li>Gross combined weight rating</li>
+            <li>Payload left after passengers and cargo</li>
+            <li>Hitch class and brake controller</li>
+            <li>Axle ratio and altitude</li>
+            <li>The weight of anything already in the truck</li>
+          </ul>
+
           <p><strong>Fifth wheels and toy haulers</strong> need a pickup with a bed and a
             fifth-wheel or gooseneck hitch. A tow rating alone does not make a vehicle suitable
             for one.</p>
-          <p>Weights are Jayco's published figures for the model year shown and are subject to
-            change; options add weight. Verify against the trailer's own weight label and your
-            vehicle's manual, and have a dealer confirm the match before purchase.</p>
+          <p>Weights are Jayco&rsquo;s published figures for the model year shown and are subject
+            to change; options add weight. Verify against the trailer&rsquo;s own weight label and
+            your vehicle&rsquo;s manual, and have a dealer confirm the match before purchase.</p>
         </div>
       </div>
     </section>
@@ -442,29 +542,29 @@
           <h4>Find Your RV</h4>
           <ul>
             <li><a href="quiz.html">RV Finder Quiz</a></li>
-            <li><a href="#">Top-Selling RVs</a></li>
-            <li><a href="#">Buyer's Guide</a></li>
-            <li><a href="#">Tow vs. Drive Guide</a></li>
-            <li><a href="#">New to RVing?</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Shop &amp; Tools</h4>
           <ul>
             <li><a href="dealers.html">Find a Dealer</a></li>
-            <li><a href="build-price.html">Request a Quote</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
             <li><a href="build-price.html">Build &amp; Price</a></li>
             <li><a href="brochures.html">Brochures</a></li>
             <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
             <li><a href="towing.html">Towing Calculator</a></li>
-            <li><a href="#">Value Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Owners</h4>
           <ul>
             <li><a href="#">Owner Services</a></li>
-            <li><a href="#">Manuals</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
             <li><a href="#">Warranty Coverage</a></li>
             <li><a href="#">Recalls</a></li>
             <li><a href="#">Wingmate App</a></li>
@@ -476,9 +576,9 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <ul>
-            <li><a href="#">Blog</a></li>
+            <li><a href="blog.html">Blog</a></li>
             <li><a href="videos.html">Video Gallery</a></li>
-            <li><a href="#">eBooks &amp; Guides</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
             <li><a href="#">FAQs</a></li>
             <li><a href="#">Events</a></li>
             <li><a href="#">Dealer Marketing Hub</a></li>
@@ -487,14 +587,14 @@
         <div class="footer-col">
           <h4>About</h4>
           <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">The Jayco Difference</a></li>
-            <li><a href="#">100% PDI</a></li>
-            <li><a href="#">R&amp;D &amp; Innovation</a></li>
-            <li><a href="#">Safety &amp; JaySMART</a></li>
-            <li><a href="#">Award-Winning RVs</a></li>
-            <li><a href="#">Sustainability</a></li>
-            <li><a href="#">Visit Us</a></li>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
             <li><a href="#">Careers</a></li>
             <li><a href="#">Newsroom</a></li>
           </ul>
@@ -524,7 +624,7 @@
 
   <script src="js/models-data.js?v=v5-5"></script>
   <script src="js/build-data.js?v=v5-bp-19"></script>
-  <script src="js/towing.js?v=v5-tc-1"></script>
+  <script src="js/towing.js?v=v5-tc-10"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>
