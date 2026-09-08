@@ -90,3 +90,63 @@
   from = "/build"
   to = "/version-5/build-price.html"
   status = 302
+
+# ---------------------------------------------------------------------------
+# The rest of the shareable set. Same 302-not-200 reasoning as every rule
+# above: these pages load their CSS and JS by relative path, so a rewrite would
+# leave the short URL in the address bar and the browser would ask for
+# /css/style.css and get a 404.
+#
+# Exact paths with no placeholders, so nothing here can shadow or be shadowed
+# by the rules above — the root rule matches "/" alone.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/awards"
+  to = "/version-5/awards.html"
+  status = 302
+
+[[redirects]]
+  from = "/blog"
+  to = "/version-5/blog.html"
+  status = 302
+
+[[redirects]]
+  from = "/buyers-guide"
+  to = "/version-5/buyers-guide.html"
+  status = 302
+
+[[redirects]]
+  from = "/jayco-difference"
+  to = "/version-5/jayco-difference.html"
+  status = 302
+
+[[redirects]]
+  from = "/manuals"
+  to = "/version-5/manuals.html"
+  status = 302
+
+[[redirects]]
+  from = "/new-to-rving"
+  to = "/version-5/new-to-rving.html"
+  status = 302
+
+[[redirects]]
+  from = "/request-quote"
+  to = "/version-5/request-quote.html"
+  status = 302
+
+[[redirects]]
+  from = "/top-selling"
+  to = "/version-5/top-selling.html"
+  status = 302
+
+[[redirects]]
+  from = "/tow-vs-drive"
+  to = "/version-5/tow-vs-drive.html"
+  status = 302
+
+[[redirects]]
+  from = "/value-tool"
+  to = "/version-5/value-tool.html"
+  status = 302
