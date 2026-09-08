@@ -511,11 +511,33 @@
 }
 .aw-row {
   display: grid;
-  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) minmax(0, 9rem);
+  grid-template-columns: 9.75rem minmax(0, 12rem) minmax(0, 1fr) minmax(0, 9rem);
   gap: clamp(0.6rem, 2vw, 2rem);
   padding: clamp(1rem, 1.8vw, 1.35rem) 0;
   border-top: 1px solid var(--hairline);
-  align-items: baseline;
+  /* CENTRED, not baseline. The mark is now taller than the three text cells put
+     together, and baseline alignment would hang the award name off the top of
+     it with the rest of the row floating. Centring is what makes the mark and
+     the line of text read as one row rather than two stacked things. */
+  align-items: center;
+}
+/* A FIXED SQUARE, and the mark fits inside it. These are 63 different marks
+   from seven awarding bodies — medallions, wordmarks, wide banners — and left
+   to size themselves they would end at 63 different heights and the award names
+   beside them would stop lining up. max-width/max-height with auto on both axes
+   scales the long edge and leaves the short one alone, so nothing is stretched
+   and nothing is cropped.
+
+   The files are 480px on their long edge, which is a shade over 2x this box —
+   they were stored at 240 when the box was a third of this size, and re-exported
+   at native when it grew rather than being scaled up into softness. */
+.aw-row-badge {
+  width: 9.75rem; aspect-ratio: 1;
+  display: grid; place-items: center;
+}
+.aw-row-badge img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto; display: block;
 }
 .aw-list .aw-year:last-child .aw-row:last-child { border-bottom: 1px solid var(--hairline); }
 .aw-row-award { font-family: var(--font-display); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
@@ -592,8 +614,10 @@
 
 @media (max-width: 1024px) {
   .rd-teams { grid-template-columns: 1fr; }
-  .aw-row { grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); }
-  .aw-row-by { grid-column: 1 / -1; }
+  .aw-row { grid-template-columns: 8.25rem minmax(0, 10rem) minmax(0, 1fr); }
+  .aw-row-badge { width: 8.25rem; }
+  /* The body sits under the two text cells, clear of the mark's column. */
+  .aw-row-by { grid-column: 2 / -1; }
 }
 
 @media (max-width: 900px) {
@@ -609,7 +633,15 @@
   .ab-hero { height: clamp(460px, 68vh, 620px); }
   .ab-step { grid-template-columns: 2rem minmax(0, 1fr); gap: 0.9rem; }
   .pdi-ramp-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  /* One column on a phone, and the mark leads the row rather than sitting in a
+     column of its own that would cost a third of the width. */
   .aw-row { grid-template-columns: 1fr; gap: 0.35rem; }
+  /* LEFT, with the text, not centred. Stacked there is no row to centre the
+     mark against — it sits above the copy rather than beside it — and a centred
+     mark over three left-ranged lines reads as a stray object. Same left edge
+     as the award name keeps the two as one unit reading down the page. */
+  .aw-row-badge { width: 7.5rem; justify-self: start; margin-bottom: 0.35rem; }
+  .aw-row-by { grid-column: auto; }
   .rd-innov-row { grid-template-columns: 1fr; gap: 0.35rem; }
   .rd-innov-when { padding-top: 0; }
   .sol-spec-row { flex-direction: column; gap: 0.35rem; }

@@ -132,8 +132,23 @@
       ? '<b>' + esc(row.what) + '</b>' + (row.note ? ' — ' + esc(row.note) : '')
       : (row.note ? esc(row.note) : 'Jayco'));
 
+    /* The awarding body's own mark, alt="" ON PURPOSE. The badge says the same
+       thing the three cells beside it already say — award, category, coach —
+       so giving it alt text would make a screen reader read every row twice.
+       It is decoration here in the strict sense: the information is the row.
+
+       lazy on all of them: 63 marks, and a filtered view renders only one
+       year's worth, so most are never in the viewport at all. */
+    const badge = (row) => (row.badge
+      ? '<span class="aw-row-badge">' +
+          '<img src="../assets/awards/badges/' + esc(row.badge) + '" alt="" ' +
+          'loading="lazy" decoding="async" />' +
+        '</span>'
+      : '<span class="aw-row-badge" aria-hidden="true"></span>');
+
     const rowHTML = (row) => (
       '<li class="aw-row">' +
+        badge(row) +
         '<span class="aw-row-award">' + esc(row.award) + '</span>' +
         '<span class="aw-row-what">' + what(row) + '</span>' +
         '<span class="aw-row-by">' + esc(row.by) + '</span>' +
