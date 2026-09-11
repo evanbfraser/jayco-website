@@ -15,7 +15,7 @@
        win, and index.html loads it in this same order. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.css" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/dealers.css?v=v5-dl-10" />
+  <link rel="stylesheet" href="css/dealers.css?v=v5-dl-12" />
 </head>
 <!-- data-header="solid": like the builder, this page opens on canvas rather
      than a dark hero, so the white logo and nav need the bar filled in from the
@@ -161,6 +161,31 @@
           </div>
           <button type="submit" class="dl-go">Search</button>
         </form>
+
+        <!-- Search by country, as jayco.com offers it, one country at a time.
+             dealers.js writes the options from the countries that actually have
+             a dealer, and opens on the United States. Picking Canada turns the
+             field above into "City, province or postal code". -->
+        <div class="dl-country-row">
+          <label class="dl-country-label" for="dl-country">Or search by country</label>
+          <select class="dl-model dl-country" id="dl-country">
+            <option value="US">United States</option>
+          </select>
+        </div>
+
+        <!-- The two lookups jayco.com offers under its own search, for someone
+             who knows the town but not the code. "CLICK HERE" is their wording
+             and stays the visible text; the aria-label says where each goes,
+             since a screen reader's link list would otherwise read two
+             identical "CLICK HERE"s. -->
+        <ul class="dl-lookups">
+          <li><a href="https://tools.usps.com/zip-code-lookup.htm?bycitystate" target="_blank" rel="noopener"
+                 aria-label="Look up a United States ZIP code by city and state on USPS.com (opens in a new tab)">CLICK HERE</a>
+            to determine the United States ZIP Code for a City and State</li>
+          <li><a href="https://www.canadapost-postescanada.ca/cpo/mc/personal/postalcode/fpc.jsf" target="_blank" rel="noopener"
+                 aria-label="Look up a Canadian postal code for an address on Canada Post (opens in a new tab)">CLICK HERE</a>
+            to determine the Canadian Postal Code for an Address</li>
+        </ul>
 
         <!-- Geolocation is offered, never taken. It only runs on this press, and
              it needs a secure context — on plain http it fails and the message
@@ -375,9 +400,9 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1/dist/leaflet.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-5"></script>
-  <script src="js/dealer-data.js?v=v5-dl-12"></script>
-  <script src="js/dealers.js?v=v5-dl-13"></script>
+  <script src="js/models-data.js?v=v5-6"></script>
+  <script src="js/dealer-data.js?v=v5-dl-13"></script>
+  <script src="js/dealers.js?v=v5-dl-15"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

@@ -248,6 +248,24 @@
   font-size: 0.78rem; color: var(--text-dark); cursor: pointer;
 }
 
+/* ---------- Search by country ----------
+   The model select's own look (.dl-model on the same element), on a row of its
+   own under the search field, with the label jayco.com uses beside it. */
+.dl-country-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
+.dl-country-label { flex: none; font-size: 0.78rem; font-weight: 600; color: var(--text-mid); }
+.dl-country { flex: 1 1 auto; }
+
+/* The ZIP / postal code lookups: help text, not controls, so they sit quieter
+   than the field above them — small, mid-grey, with only the link in blue. */
+.dl-lookups {
+  list-style: none; margin: 0.75rem 0 0; padding: 0;
+  display: grid; gap: 0.3rem;
+  font-size: 0.78rem; line-height: 1.45; color: var(--text-mid);
+}
+.dl-lookups a { font-weight: 700; color: var(--blue); text-decoration: none; }
+.dl-lookups a:hover { text-decoration: underline; }
+.dl-lookups a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
 /* ---------- Count bar ---------- */
 .dl-bar {
   flex: none; display: flex; align-items: center; gap: 0.75rem;

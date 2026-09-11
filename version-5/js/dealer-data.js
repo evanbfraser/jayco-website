@@ -18,6 +18,18 @@
  * PRODUCT.md:67 lists dealer data among the absences not to invent.
  *
  * COUNT: 428 dealers (CA 64, US 364). The site copy says "300+", which this supports.
+ *
+ * INTERNATIONAL — added 2026-09-11 for search by country. GET
+ * /dealers/-/-/<CC>/-/ for each of the 15 non-North-American countries in
+ * jayco.com's own Country dropdown returned 9 dealers in 8 countries (BR, CL,
+ * JP, KR, OM x2, QA, AE, GB); CN, CO, IT, JO, KW, PR and TW returned none.
+ * Coordinates are Jayco's own, from the result page's map data. Two dealers
+ * (QA, GB) have NONE anywhere on jayco.com, so lat/lng are null and they list
+ * without a pin rather than at a guessed point. `models` is empty on all nine:
+ * Jayco publishes no carried-model list for them (the detail page's model
+ * dropdown is its lead form, not inventory). Oman's two listings are Jayco's —
+ * different street and phone at one map point — and both are kept.
+ * TOTAL: 437 dealers.
  */
 window.JAYCO_DEALERS = {
   harvested: '2026-08-03',
@@ -450,5 +462,14 @@ window.JAYCO_DEALERS = {
     {"slug": "smith-rv-sales-and-service-inc-evansville", "name": "Smith RV Sales and Service,inc", "street": "3500 E Yellowstone Hwy, P.o. Box 115", "city": "Evansville", "state": "WY", "zip": "82636", "country": "US", "phone": "307-234-5617", "lat": 42.856962, "lng": -106.275935, "models": ["Jay Feather", "Jay Flight SLX", "Jay Flight SLX 8", "Jay Flight SLX 7", "Jay Flight", "Jay Flight Bungalow", "Eagle HT Travel Trailer", "Eagle Fifth Wheel", "North Point", "Pinnacle", "Seismic Fifth Wheel", "Eagle Travel Trailer", "Eagle HT Fifth Wheel", "Jay Feather Air"], "hasService": null},
     {"slug": "sonny-s-rv-sales-inc-evansville", "name": "Sonny's RV Sales, INC", "street": "5000 East Yellowstone Highway", "city": "Evansville", "state": "WY", "zip": "82636", "country": "US", "phone": "307-237-5000", "lat": 42.857248, "lng": -106.252915, "models": ["Swift", "Redhawk SE", "Redhawk", "Greyhawk", "Melbourne", "Melbourne Prestige", "Seneca", "Seneca Prestige", "Alante", "Precept", "Precept Prestige", "Terrain", "Seneca XT", "Solstice", "Solstice Li", "Comet", "Granite Ridge", "Greyhawk XL"], "hasService": null},
     {"slug": "first-choice-ford-lincoln-rock-springs", "name": "First Choice Ford/lincoln", "street": "1264 Dewar Drive", "city": "Rock Springs", "state": "WY", "zip": "82901", "country": "US", "phone": "307-362-5671", "lat": 41.578641, "lng": -109.234369, "models": ["Jay Feather", "Jay Flight SLX", "Jay Flight SLX 8", "Jay Flight SLX 7", "Jay Flight", "Jay Flight Bungalow", "Eagle HT Travel Trailer", "Eagle Fifth Wheel", "North Point", "Pinnacle", "Seismic Fifth Wheel", "Eagle Travel Trailer", "Eagle HT Fifth Wheel", "Jay Feather Air"], "hasService": null},
+    {"slug": "itu-trailers-ltda--sao-paulo", "name": "Itu Trailers Ltda.", "street": "Avenida Nove Du Julho, 145, Jardim Oliveria", "city": "Sao Paulo", "state": "", "zip": "13313-310", "country": "BR", "phone": "55 11-7823-2314", "lat": -23.566595, "lng": -46.658709, "models": [], "hasService": null},
+    {"slug": "kostner-ltda", "name": "Kostner Ltda", "street": "San Ramon 2381, Las Condes", "city": "Santiago", "state": "", "zip": "762 0040", "country": "CL", "phone": "56-99885-4069", "lat": -33.405673, "lng": -70.512107, "models": [], "hasService": null},
+    {"slug": "bonanza-musashimrayama-shi", "name": "Bonanza", "street": "3-12-1 Mitsufuji", "city": "Musashimrayama-Shi", "state": "", "zip": "208-0021", "country": "JP", "phone": "718-656-6265", "lat": 35.757684, "lng": 139.368433, "models": [], "hasService": null},
+    {"slug": "b2win-inc-gyeonggi-do", "name": "B2Win, Inc", "street": "69, Gimpo-Daero 1766, Yangchon-Eup", "city": "Gimpo", "state": "Gyeonggi-Do", "zip": "10052", "country": "KR", "phone": "309-262-6822", "lat": 37.670353, "lng": 126.643838, "models": [], "hasService": null},
+    {"slug": "sea-eagles-trading-bidbid-oman-241301", "name": "Sea Eagles Trading", "street": "Flat #8, Building #44, Way 6535, Block 165, Al-Nuzha St", "city": "Bidbid", "state": "", "zip": "613", "country": "OM", "phone": "011-96896777590", "lat": 23.406956, "lng": 58.125238, "models": [], "hasService": null},
+    {"slug": "sea-eagles-trading", "name": "Sea Eagles Trading", "street": "Building #14, Street 1183, Zone 51", "city": "Bidbid", "state": "", "zip": "613", "country": "OM", "phone": "011-96899449549", "lat": 23.406956, "lng": 58.125238, "models": [], "hasService": null},
+    {"slug": "caravany-trading", "name": "Caravany Trading", "street": "Barwa Village, Building 11, Shop Number 1, Al Wakra Rd", "city": "", "state": "", "zip": "", "country": "QA", "phone": "+974 4 4918970", "lat": null, "lng": null, "models": [], "hasService": null},
+    {"slug": "heartland-emirates-rv-llc-abu-dhabi", "name": "Heartland Emirates RV LLC", "street": "Al Mafraqe Industrial City St. E13", "city": "Abu Dhabi", "state": "", "zip": "", "country": "AE", "phone": "", "lat": 24.50034, "lng": 54.374732, "models": [], "hasService": null},
+    {"slug": "anglo-american-truck-trailer-", "name": "Anglo American Truck & Trailer", "street": "North Farm, Holcot Rd", "city": "Moulton", "state": "Northampton", "zip": "NN3 7QN", "country": "GB", "phone": "0-160-488-2222", "lat": null, "lng": null, "models": [], "hasService": null},
   ],
 };

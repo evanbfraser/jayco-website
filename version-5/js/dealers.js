@@ -49,6 +49,7 @@
     origin: null,        // {lat,lng,label} once located
     service: 'all',
     model: '',
+    country: 'US',       // ISO code from COUNTRY_NAMES; '' only when a search spans every country
     query: '',           // free text, matched against dealer name and city
     stateCode: '',       // exact state/province filter, e.g. 'ID'
     zipPrefix: '',       // US ZIP region when a ZIP cannot be geocoded
@@ -81,14 +82,60 @@
   };
   const STATE_CODES = new Set(Object.values(STATES));
 
-  const centroid = (rows) => ({
-    lat: rows.reduce((s, d) => s + d.lat, 0) / rows.length,
-    lng: rows.reduce((s, d) => s + d.lng, 0) / rows.length,
-  });
+  /* ---------- Countries ----------
+     Search by country, as jayco.com offers it, one country at a time — the US
+     and Canada are separate choices, and the page opens on the United States.
+     Names for the codes dealer-data.js uses; the dropdown lists only the
+     countries that actually have a dealer, so a new market appears when its
+     first dealer is added. A typed search or a location moves the dropdown to
+     the country it lands in, so the two never disagree. */
+  const COUNTRY_NAMES = {
+    US: 'United States', CA: 'Canada', BR: 'Brazil', CL: 'Chile', JP: 'Japan',
+    KR: 'South Korea', OM: 'Oman', QA: 'Qatar', AE: 'United Arab Emirates',
+    GB: 'United Kingdom',
+  };
+  const NA = new Set(['US', 'CA']);
+  const countryName = (c) => COUNTRY_NAMES[c] || c;
+  /* Two international dealers have no published coordinates. They list, but
+     get no pin and no distance — never a guessed point. */
+  const hasPos = (d) => typeof d.lat === 'number' && typeof d.lng === 'number';
+  /* "City, ST ZIP" in North America; elsewhere the parts that exist, then the
+     country, because an address in Bidbid means nothing without "Oman". */
+  /* What the search field asks for, by country: Canada has provinces and
+     postal codes, not states and ZIP codes. */
+  function fieldWords(c) {
+    if (c === 'CA') return { label: 'City, province or postal code', hint: 'Try a province, or a postal code.' };
+    if (c && c !== 'US') return { label: 'City or postal code', hint: 'Try a city, or a postal code.' };
+    return { label: 'City, state or ZIP code', hint: 'Try a state, or a ZIP code.' };
+  }
+  function syncField() {
+    const w = fieldWords(state.country);
+    $('#dl-input').placeholder = w.label;
+    $('label[for="dl-input"]').textContent = w.label;
+  }
+  /* Point the filter, the dropdown and the field wording at one country. */
+  function useCountry(code) {
+    state.country = code || '';
+    $('#dl-country').value = state.country;
+    syncField();
+  }
+
+  function place(d) {
+    const line = [[d.city, d.state].filter(Boolean).join(', '), d.zip].filter(Boolean).join(' ');
+    return NA.has(d.country) ? line : [line, countryName(d.country)].filter(Boolean).join(', ');
+  }
+
+  const centroid = (all) => {
+    const rows = all.filter(hasPos);
+    return {
+      lat: rows.reduce((s, d) => s + d.lat, 0) / rows.length,
+      lng: rows.reduce((s, d) => s + d.lng, 0) / rows.length,
+    };
+  };
 
   /* ---------- Distance ----------
-     Haversine. Canada gets kilometres, everywhere else miles — a Canadian
-     dealer listing distances in miles reads as an oversight. */
+     Haversine. The US gets miles and everywhere else kilometres — a Canadian
+     or Chilean dealer listing distances in miles reads as an oversight. */
   const R_KM = 6371;
   const rad = (d) => (d * Math.PI) / 180;
   function distanceKm(a, b) {
@@ -98,7 +145,7 @@
     return 2 * R_KM * Math.asin(Math.sqrt(s));
   }
   function distanceLabel(km, country) {
-    if (country === 'CA') return Math.round(km).toLocaleString('en-US') + ' km';
+    if (country !== 'US') return Math.round(km).toLocaleString('en-US') + ' km';
     return Math.round(km * 0.621371).toLocaleString('en-US') + ' mi';
   }
 
@@ -106,6 +153,9 @@
      The query matches city, state, ZIP or dealer name so that typing
      "Boise", "ID" or "83702" all land somewhere sensible. */
   function matches(d) {
+    /* One country at a time. '' — every country — only happens when a search
+       lands somewhere with no dealer of its own to show. */
+    if (state.country && d.country !== state.country) return false;
     if (state.model && d.models.indexOf(state.model) < 0) return false;
     /* hasService is null on every record — Jayco publishes none. The control is
        disabled in the markup; this guard is here so the filter starts working
@@ -114,7 +164,7 @@
     /* Exact, not substring: a two-letter code like "ID" appears inside plenty of
        dealer names, so loose matching would pull in unrelated states. */
     if (state.stateCode && d.state !== state.stateCode) return false;
-    if (state.zipPrefix && (d.country !== 'US' || d.zip.indexOf(state.zipPrefix) !== 0)) return false;
+    if (state.zipPrefix && d.zip.replace(/\s+/g, '').toUpperCase().indexOf(state.zipPrefix) !== 0) return false;
     if (state.query) {
       const q = state.query.toLowerCase();
       if ((d.city + ' ' + d.name).toLowerCase().indexOf(q) < 0) return false;
@@ -125,7 +175,7 @@
   function results() {
     const rows = ALL.filter(matches);
     if (state.origin) {
-      rows.forEach((d) => { d._km = distanceKm(state.origin, d); });
+      rows.forEach((d) => { d._km = hasPos(d) ? distanceKm(state.origin, d) : Infinity; });
       rows.sort((a, b) => a._km - b._km);
     } else {
       rows.sort((a, b) => (a.state + a.city).localeCompare(b.state + b.city));
@@ -144,12 +194,12 @@
 
   /* ---------- Result list ---------- */
   function card(d) {
-    const dist = state.origin
+    const dist = state.origin && isFinite(d._km)
       ? `<span class="dl-dist">${distanceLabel(d._km, d.country)}</span>` : '';
     const tel = d.phone
       ? `<a class="dl-tel" href="tel:${esc(d.phone.replace(/[^\d+]/g, ''))}">${esc(d.phone)}</a>` : '';
     const dir = `https://maps.google.com/maps?daddr=${encodeURIComponent(
-      [d.street, d.city + ', ' + d.state + ' ' + d.zip, d.country].filter(Boolean).join(' '))}`;
+      [d.street, place(d)].filter(Boolean).join(', '))}`;
     return `
     <li class="dl-card${state.selected === d.slug ? ' is-selected' : ''}" data-slug="${esc(d.slug)}">
       <button type="button" class="dl-card-hit" data-slug="${esc(d.slug)}">
@@ -157,7 +207,7 @@
           <span class="dl-card-name">${esc(d.name)}</span>
           ${dist}
         </span>
-        <span class="dl-card-addr">${esc(d.street)}<br />${esc(d.city)}, ${esc(d.state)} ${esc(d.zip)}</span>
+        <span class="dl-card-addr">${[d.street, place(d)].filter(Boolean).map(esc).join('<br />')}</span>
       </button>
       <span class="dl-card-acts">
         ${tel}
@@ -179,14 +229,18 @@
     $('#dl-results').innerHTML = html;
     $('#dl-empty').hidden = rows.length > 0;
 
+    /* The count is out of the picked country. */
+    const pool = state.country ? ALL.filter((d) => d.country === state.country).length : ALL.length;
+    const plural = (n) => n + (n === 1 ? ' dealer' : ' dealers');
+    const where = state.country ? ` in ${esc(countryName(state.country))}` : '';
     const near = state.origin ? ` near ${esc(state.origin.label)}`
-      : state.zipPrefix ? ` in the ${esc(state.zipPrefix)} ZIP region` : '';
-    $('#dl-count').innerHTML = rows.length === ALL.length
-      ? `${ALL.length} dealers`
-      : `${rows.length} of ${ALL.length} dealers${near}`;
+      : state.zipPrefix ? ` in the ${esc(state.zipPrefix)} ${state.country === 'CA' ? 'postal' : 'ZIP'} region` : where;
+    $('#dl-count').innerHTML = rows.length === pool
+      ? `${plural(pool)}${where}`
+      : `${rows.length} of ${plural(pool)}${near}`;
     $('#dl-grip-label').textContent = rows.length === 1 ? '1 dealer' : rows.length + ' dealers';
 
-    const dirty = !!(state.query || state.model || state.origin || state.zipPrefix || state.service !== 'all');
+    const dirty = !!(state.query || state.model || state.country !== 'US' || state.origin || state.zipPrefix || state.service !== 'all');
     $('#dl-reset').hidden = !dirty;
 
     drawMarkers(rows);
@@ -227,7 +281,7 @@
 
   const popupHtml = (d) =>
     `<span class="dl-pop-name">${esc(d.name)}</span>
-     <span class="dl-pop-sub">${esc(d.city)}, ${esc(d.state)}</span>`;
+     <span class="dl-pop-sub">${esc([d.city, d.state].filter(Boolean).join(', ') || countryName(d.country))}</span>`;
 
   const HOME = { lat: 44.5, lng: -95, zoom: 4 };
 
@@ -423,7 +477,8 @@
        alphabetically-first states and drew a continent with a hole in it.
        Once there IS an origin the nearest 120 is plenty, and that is also the
        case where marker count would otherwise cost the most. */
-    mapApi.setMarkers(state.origin ? rows.slice(0, 120) : rows);
+    const pinned = rows.filter(hasPos);          // no coordinates, no pin
+    mapApi.setMarkers(state.origin ? pinned.slice(0, 120) : pinned);
     /* frame(), not focus(): a new search sets the view outright. focus() only
        ever zooms IN, so searching a whole state right after selecting a single
        dealer would have kept the street-level zoom and shown one pin.
@@ -441,7 +496,7 @@
     const d = ALL.find((x) => x.slug === slug);
     renderResults();
     if (!d) return;
-    if (mapApi) {
+    if (mapApi && hasPos(d)) {
       mapApi.focus(d.lat, d.lng, 9);
       mapApi.showInfo(d);
     }
@@ -546,7 +601,12 @@
       (pos) => {
         $('#dl-locate').disabled = false;
         note('');
-        setOrigin(pos.coords.latitude, pos.coords.longitude, 'you', 'auto');
+        /* the country of the nearest dealer — the one someone here would visit */
+        const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const nearest = ALL.filter(hasPos).reduce((b, d) =>
+          (!b || distanceKm(here, d) < distanceKm(here, b) ? d : b), null);
+        if (nearest) useCountry(nearest.country);
+        setOrigin(here.lat, here.lng, 'you', 'auto');
       },
       (err) => {
         $('#dl-locate').disabled = false;
@@ -566,11 +626,37 @@
     state.hoisted = null;
   }
 
+  /* Where the map should look for a country: the whole of North America for
+     the default, the country's own dealers otherwise. A country whose dealers
+     have no coordinates has nothing to look at, so the map stays put and the
+     note says why the list has no pin. */
+  function countryView(code) {
+    if (!code) return { view: { lat: HOME.lat, lng: HOME.lng, zoom: HOME.zoom }, msg: '' };
+    const rows = ALL.filter((d) => d.country === code && hasPos(d));
+    if (!rows.length) {
+      return { view: null, msg: 'Jayco has not published a map location for this dealer, so it is listed without a pin.' };
+    }
+    const c = centroid(rows);
+    const zoom = code === 'US' || code === 'CA' ? 4 : 9;
+    return { view: { lat: c.lat, lng: c.lng, zoom: zoom }, msg: '' };
+  }
+
+  function setCountry(code) {
+    clearSearch();
+    $('#dl-input').value = ''; $('#dl-clear').hidden = true;
+    useCountry(code); state.selected = null; state.limit = 40;
+    const cv = countryView(code);
+    state.view = cv.view;
+    note(cv.msg);
+    renderResults();
+  }
+
   function runSearch() {
     const raw = $('#dl-input').value.trim();
     state.limit = 40;
     if (!raw) { clearSearch(); note(''); renderResults(); return; }
     const q = raw.toLowerCase();
+    const flat = q.replace(/\s+/g, '');
 
     /* 1. A state or province, by name or code. Anchors the list to that state
           and sorts from its centre, so "Idaho" is a useful answer. */
@@ -580,6 +666,7 @@
       if (rows.length) {
         clearSearch();
         state.stateCode = code;
+        useCountry(rows[0].country);
         const c = centroid(rows);
         note('');
         setOrigin(c.lat, c.lng, code, 5);          // a state, not a street
@@ -589,12 +676,14 @@
 
     /* 2. An exact city, "City, ST", or ZIP that a dealer actually sits in. */
     const exact = ALL.find((d) =>
-      d.zip.toLowerCase() === q ||
+      (d.zip && d.zip.toLowerCase().replace(/\s+/g, '') === flat) ||
       d.city.toLowerCase() === q ||
       (d.city + ', ' + d.state).toLowerCase() === q);
     if (exact) {
       clearSearch(); note('');
-      setOrigin(exact.lat, exact.lng, exact.city + ', ' + exact.state, 'auto');
+      useCountry(exact.country);
+      if (!hasPos(exact)) { state.query = raw; renderResults(); return; }
+      setOrigin(exact.lat, exact.lng, [exact.city, exact.state].filter(Boolean).join(', '), 'auto');
       return;
     }
 
@@ -612,6 +701,7 @@
         const inRegion = ALL.filter((d) => d.country === 'US' && d.zip.indexOf(p) === 0);
         if (inRegion.length) {
           clearSearch();
+          useCountry('US');
           state.zipPrefix = p;
           /* A view, not an origin: the map can look at the region, but with no
              geocoder there is no defensible point to measure distances from. */
@@ -624,12 +714,37 @@
       }
     }
 
+    /* 3b. A Canadian postal code with no dealer in it. The first three
+          characters (the FSA) are a real area and the first letter a province
+          region, so it narrows the same honest way a ZIP does: a region to
+          look at, no distances measured from a guessed point. */
+    const pc = raw.toUpperCase().replace(/\s+/g, '');
+    if (/^[A-Z]\d[A-Z](\d[A-Z]\d)?$/.test(pc)) {
+      for (const p of [pc.slice(0, 3), pc.slice(0, 1)]) {
+        const inRegion = ALL.filter((d) => d.country === 'CA' &&
+          d.zip.replace(/\s+/g, '').toUpperCase().indexOf(p) === 0);
+        if (inRegion.length) {
+          clearSearch();
+          useCountry('CA');
+          state.zipPrefix = p;
+          const c = centroid(inRegion);
+          state.view = { lat: c.lat, lng: c.lng, zoom: inRegion.length > 3 ? 6 : 8 };
+          note('Showing dealers in the ' + p + ' postal region. Add a Maps key for exact distances.');
+          renderResults();
+          return;
+        }
+      }
+    }
+
     /* 4. With a key, ask Google — this is the only path that resolves a place
           with no dealer anywhere near it. */
     if (GOOGLE_MAPS_KEY && window.google && window.google.maps && google.maps.Geocoder) {
       new google.maps.Geocoder().geocode({ address: raw }, (res, status) => {
         if (status === 'OK' && res[0]) {
           clearSearch(); note('');
+          const cc = (res[0].address_components || []).find((x) => x.types.indexOf('country') >= 0);
+          const code = cc && cc.short_name;
+          useCountry(code && ALL.some((d) => d.country === code) ? code : '');
           const l = res[0].geometry.location;
           setOrigin(l.lat(), l.lng(), res[0].formatted_address.split(',').slice(0, 2).join(',').trim(), 'auto');
         } else {
@@ -645,8 +760,15 @@
           names, and say so rather than showing a bare zero. */
     clearSearch();
     state.query = raw;
-    const n = ALL.filter(matches).length;
-    note(n ? '' : 'No dealer matches “' + raw + '”. Try a state, or a ZIP code.', 'warn');
+    let n = ALL.filter(matches).length;
+    if (!n) {
+      /* Nothing by that name in the picked country — look everywhere, and
+         move to the country it is in rather than reporting a false zero. */
+      const hit = ALL.find((d) => (d.city + ' ' + d.name).toLowerCase().indexOf(q) >= 0 &&
+        (!state.model || d.models.indexOf(state.model) >= 0));
+      if (hit) { useCountry(hit.country); n = ALL.filter(matches).length; }
+    }
+    note(n ? '' : 'No dealer matches “' + raw + '”. ' + fieldWords(state.country).hint, 'warn');
     renderResults();
   }
 
@@ -849,8 +971,14 @@
       state.model = e.target.value; state.limit = 40; renderResults();
     });
 
+    $('#dl-country').addEventListener('change', (e) => setCountry(e.target.value));
+
     $('#dl-reset').addEventListener('click', () => {
+      const hadCountry = state.country !== 'US';
       clearSearch(); state.model = ''; state.service = 'all';
+      useCountry('US');
+      /* back to North America if a country had moved the map away from it */
+      if (hadCountry) state.view = { lat: HOME.lat, lng: HOME.lng, zoom: HOME.zoom };
       state.selected = null; state.limit = 40;
       $('#dl-input').value = ''; $('#dl-clear').hidden = true; $('#dl-model').value = '';
       Array.from($('.dl-seg').children).forEach((x, i) => x.classList.toggle('is-active', i === 0));
@@ -907,6 +1035,27 @@
   const models = Array.from(new Set(ALL.flatMap((d) => d.models))).sort();
   $('#dl-model').innerHTML = '<option value="">Any model</option>' +
     models.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+
+  /* The country list, from the data: the United States and Canada first, then
+     everywhere else alphabetically by name. */
+  const present = Array.from(new Set(ALL.map((d) => d.country)));
+  const countries = ['US', 'CA'].filter((c) => present.indexOf(c) >= 0).concat(
+    present.filter((c) => !NA.has(c)).sort((a, b) => countryName(a).localeCompare(countryName(b))));
+  /* The hidden first option is only ever chosen by code — a Maps search that
+     lands in a country with no dealer of its own, so every dealer is shown. */
+  $('#dl-country').innerHTML = '<option value="" hidden>All countries</option>' +
+    countries.map((c) => `<option value="${esc(c)}">${esc(countryName(c))}</option>`).join('');
+  useCountry('US');
+
+  /* ?country=GB — the same filter as the dropdown, for a link from elsewhere.
+     An unknown code is ignored rather than filtering to nothing. */
+  const wantedCountry = (new URLSearchParams(window.location.search).get('country') || '').toUpperCase();
+  if (wantedCountry && countries.indexOf(wantedCountry) >= 0) {
+    useCountry(wantedCountry);
+    const cv = countryView(wantedCountry);
+    state.view = cv.view;
+    if (cv.msg) note(cv.msg);
+  }
 
   /* ---------- ?model= deep link ----------
      The quiz hands off here. The contract is the DEALER-FACING name — the
