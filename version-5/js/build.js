@@ -636,6 +636,19 @@
         </div>
         ${renderThumb(i)}
       </div>`).join('');
+    /* The three asks, written once and placed twice: at the top of the
+       selections, so someone who lands on Summary ready to act does not have to
+       scroll past the build and the spec sheet to find them, and under the
+       total, where they read as the end of the review. Both copies are handled
+       by the delegated click handler on #step-panel. Shop Inventory points at
+       the inventory page, which is still to be built — "#" is the site's
+       placeholder, the same one the header's View Inventory uses. */
+    const ctas = `
+            <a class="btn-primary" href="#">Shop Inventory</a>
+            <a class="btn-print" href="index.html#dealer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Find a Dealer</a>
+            <button type="button" class="btn-print" data-action="print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print</button>`;
+    /* The full spec sheet goes under the whole review, at full width — the
+       same sheet the Packages step prints, for the plan that was chosen. */
     return `<div class="step-head"><h2>Review your build</h2><p>Here's your ${m.year} ${m.name} as configured.</p></div>
       <div class="summary-review">
         <figure class="summary-visual">
@@ -645,15 +658,13 @@
           <span class="sv-media"><img src="${modelImg(m)}" alt="${m.year} ${m.name}" /></span>
         </figure>
         <div>
+          <div class="review-ctas review-ctas--top">${ctas}</div>
           <div class="review-lines">${rows}</div>
           <div class="review-total"><span class="rt-label">Total MSRP as built</span><span class="rt-val">${fmt(total())}</span></div>
-          <div class="review-ctas">
-            <button type="button" class="btn-primary" data-action="quote">Request a Quote</button>
-            <a class="btn-print" href="index.html#dealer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Find a Dealer</a>
-            <button type="button" class="btn-print" data-action="print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print</button>
-          </div>
+          <div class="review-ctas">${ctas}</div>
         </div>
-      </div>`;
+      </div>
+      ${renderSpecSheet(planOf(m), m)}`;
   }
 
   /* ----- the enlarged floorplan -----
@@ -868,6 +879,11 @@
       const zoomBtn = e.target.closest('[data-zoom]');
       if (zoomBtn) { openZoom(zoomBtn); return; }
 
+      /* Shop Inventory's "#" placeholder. Left bare, a click scrolls the page
+         to the top, which reads as the button misfiring rather than as a page
+         that is not built yet. Point the href somewhere real to retire this. */
+      if (e.target.closest('a[href="#"]')) { e.preventDefault(); return; }
+
       const act = e.target.closest('[data-action]');
       if (act) {
         const a = act.dataset.action;
@@ -923,7 +939,9 @@
     $('#build-back').addEventListener('click', () => goStep(state.step - 1));
     $('#build-next').addEventListener('click', () => goStep(state.step + 1));
     $('#mobile-next').addEventListener('click', () => goStep(state.step + 1));
-    $('#summary-quote').addEventListener('click', openQuote);
+    /* the sidebar's Shop Inventory — the same "#" placeholder. The quote form
+       (openQuote) stays wired below but nothing in the builder opens it now. */
+    $('#summary-inventory').addEventListener('click', (e) => e.preventDefault());
 
     wireQuoteModal();
   }

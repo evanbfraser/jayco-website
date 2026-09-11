@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/build.css?v=v5-bp-32" />
+  <link rel="stylesheet" href="css/build.css?v=v5-bp-33" />
 </head>
 <!-- data-header="solid": the builder opens on canvas, not a dark hero, so the
      white logo and nav need the bar filled in from the first paint. app.js
@@ -163,7 +163,7 @@
         </div>
         <p class="summary-disclaimer">Estimated MSRP. Excludes tax, title, freight &amp; dealer prep. See your dealer for final pricing.</p>
 
-        <button class="btn-primary summary-cta" id="summary-quote" type="button">Request a Quote</button>
+        <a href="#" class="btn-primary summary-cta" id="summary-inventory">Shop Inventory</a>
         <a class="build-summary-dealer" href="dealers.html">Find a Dealer</a>
       </aside>
     </div>
@@ -364,13 +364,13 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-5"></script>
+  <script src="js/models-data.js?v=v5-6"></script>
   <!-- build-data.js is loaded here and on request-quote.html, and nowhere else:
        it holds the Jay Flight's 35 floorplan drawings and spec sheets, which the
        homepage has no use for. The quote page needs the same 181 real plans,
        because a dealer prices a floorplan rather than a model. -->
   <script src="js/build-data.js?v=v5-bp-19"></script>
-  <script src="js/build.js?v=v5-bp-30"></script>
+  <script src="js/build.js?v=v5-bp-32"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>
