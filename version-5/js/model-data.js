@@ -23,8 +23,8 @@
      when Jayco has not published them.
 
    DATA PROVENANCE
-   • Swift specs, MSRP, floorplan codes, package and option
-     pricing are the real 2027 figures from jayco.com.
+   • Swift specs, MSRP and floorplan codes are the real
+     2027 figures from jayco.com.
    • Photography is Jayco/Entegra studio + lifestyle assets
      supplied for this build (some studio shots are of the
      equivalent MY25 coach, which shares the interior).
@@ -110,7 +110,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
       heading: 'Swift',
       sub: 'A camper van that parks in a normal spot, drives like the van it is, and sleeps you wherever the day ends.',
       ctas: [
-        { label: 'Build & Price', href: 'build-price.html?model=swift', style: 'primary' },
+        { label: 'View Floorplans', href: 'build-price.html?model=swift&step=floorplan', style: 'primary' },
         { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
       ],
     },
@@ -280,7 +280,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
        percentages of the 1800×920 drawing export that would have to be measured
        again. Nothing reads them today. */
     plan: {
-      label: 'The Layout',
+      label: 'Floorplans',
       heading: 'Twenty-one feet, laid out.',
       body: 'Two ways to arrange the same van. Open either drawing full size, or walk it in 3D.',
     },
@@ -394,38 +394,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
         ],
       },
     ],
-
-    /* ---- Pricing ---- */
-    pricing: {
-      label: 'Pricing',
-      heading: 'What it costs.',
-      msrp: 150300,
-      msrpNote: 'Starting MSRP, 2027 Swift. Excludes freight, dealer prep, taxes and title.',
-      /* Sits under the MSRP figure, tied to the asterisk on it. Says the same
-         thing the disclaimer says at the foot of the section, but at the point
-         someone is actually reading the number. */
-      starNote: 'Check a dealer near you pricing to get a true picture of the actual price you will pay.',
-      mandatory: {
-        name: 'Customer Value Package',
-        price: 11250,
-        note: 'Required on every Swift',
-        items: [
-          'JRide® — Hellwig helper springs and premium heavy-duty suspension',
-          'Electric patio awning with LED light strip',
-          'Truma Combi® G Comfort Plus water heater and furnace',
-          '6-way adjustable driver and passenger seats',
-          '2,000W inverter',
-        ],
-      },
-      options: [
-        { name: 'Pop-top roof — 50.5″ x 79.5″', price: 13493, note: '20E only. Sleeps two more.' },
-        { name: 'Rear cabin seats', price: 2843, note: 'Two extra seats with slide and recline' },
-        { name: '250W roof solar with control panel', price: 1275, note: 'Pop-top coaches' },
-        { name: '200W roof solar with control panel', price: 525, note: 'Standard roof' },
-        { name: 'Exterior colour — Silver or Ceramic', price: 30, note: 'Either scheme' },
-      ],
-      disclaimer: 'Jayco publishes no-haggle MSRP. Your dealer confirms final pricing, availability and any regional fees.',
-    },
 
     /* ---- Features ----
        One eyebrow for the whole section, then five categories of plain
@@ -600,25 +568,29 @@ window.JAYCO_MODEL_DETAIL = (function () {
       note: 'More than 300 Jayco dealers across North America.',
     },
 
-    brochure: {
-      label: 'Brochure',
-      heading: 'Take the Swift with you.',
-      body: 'The full 2027 Swift brochure — floorplans, standard equipment, option packages and specifications in one PDF.',
-      /* Opens the shared request form, prefilled with this model — there is
-         still no PDF, so "Download" would be a promise the button cannot keep.
-         The href is real so it degrades to the brochures page with JS off, and
-         so renderCtas()'s a[href="#"] preventDefault net lets it through. */
-      cta: { label: 'Request a Brochure', href: 'brochures.html?model=swift', open: 'swift' },
-      /* the CTA's background, not an inset render — a 1600px export of
-         jayco-swift-brochure.jpg, whose 8256px original is 74MB */
-      image: img('swift-brochure-bg.webp'),
-    },
-
     compare: {
       label: 'Compare',
       heading: 'Not sure it’s the one?',
       body: 'Put the Swift beside the rest of the Class B lineup and see the differences in length, layout, chassis and price side by side.',
       cta: { label: 'Compare Class B Models', href: 'compare.html' },
+    },
+
+    /* ---- Resources: earlier years, brochure, manual (renderResources) ----
+       The years are the ones jayco.com still gives a page of their own: each
+       URL was requested on 2026-09-11 and its <title> read back as that year's
+       Swift. 2022 and earlier redirect to the Class B listing instead, so they
+       are left out rather than linked to a page that is not the one promised.
+       The manual is Jayco's 2027 Class B book — the same PDF manuals-data.js
+       lists. No 2027 brochure PDF exists, so the brochure goes through the
+       request form, as the brochures page does. */
+    resources: {
+      years: [2026, 2025, 2024, 2023].map((y) => ({
+        year: y, href: 'https://www.jayco.com/rvs/class-b-motorhomes/' + y + '-swift/' })),
+      brochure: { href: 'brochures.html?model=swift', open: 'swift' },
+      manual: {
+        href: 'https://www.jayco.com/uploads/rvs/manuals/656-Jayco-B---Book-MY27.pdf',
+        note: 'Jayco’s 2027 Swift owner’s manual, as a PDF.',
+      },
     },
 
     /* ---- Similar models: pulled from window.JAYCO by slug ---- */
@@ -821,7 +793,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
       heading: 'Jay Feather',
       sub: 'Sixteen floorplans on a half-ton hitch — from a 23-foot couple’s coach to a 36-foot bunkhouse that sleeps eleven.',
       ctas: [
-        { label: 'Build & Price', href: 'build-price.html?model=jay-feather', style: 'primary' },
+        { label: 'View Floorplans', href: 'build-price.html?model=jay-feather&step=floorplan', style: 'primary' },
         { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
       ],
     },
@@ -879,7 +851,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
     },
 
     plan: {
-      label: 'The Layout',
+      label: 'Floorplans',
       /* No <br> — only intro.heading is rendered raw; every other heading
          goes through esc(), so a tag here prints as text. */
       heading: 'Sixteen ways to lay it out.',
@@ -950,7 +922,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
         { x: 52, y: 13,   title: 'Coleman® Mach Quiet Series A/C' },
         { x: 95, y: 85,   title: 'American-made Norco® Z-frame with integrated A-frame' },
       ],
-      note: 'Construction element names are Jayco’s own, from the 2027 Jay Feather specification.',
     },
 
 
@@ -1016,57 +987,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
         ],
       },
     ],
-
-    /* Real 2027 figures from build-data.js's option table. Customer Value and
-       JaySport are both mandatory, which is why the "from" price on this page
-       is not what anyone actually pays. */
-    pricing: {
-      label: 'Pricing',
-      heading: 'What it costs.',
-      /* A range, because sixteen floorplans do not share a price and a single
-         "from" figure quietly implies they do. Both ends are real published
-         MSRPs — the 18RBF floor and the 29QBH ceiling — and both are checked
-         against the floorplan table at render time (see renderPricing), so an
-         edit to build-data.js cannot leave this pair stale and wrong.
-         Fifteen of the sixteen are priced; Jayco has not published 33BH, which
-         is why the floorplan list prints "Pricing to come" against it. */
-      msrp: 37493,
-      msrpHigh: 53243,
-      msrpNote: 'MSRP spans the 2027 floorplans, from the 18RBF up to the 29QBH — where you land depends on the floorplan you choose. Excludes freight, dealer prep, taxes and title.',
-      /* Sits under the MSRP figure, tied to the asterisk on it. Says the same
-         thing the disclaimer says at the foot of the section, but at the point
-         someone is actually reading the number. */
-      starNote: 'Check a dealer near you pricing to get a true picture of the actual price you will pay.',
-      mandatory: {
-        name: 'Customer Value Package',
-        price: 6000,
-        note: 'Required on every Jay Feather, alongside the Jay Sport Package',
-        items: [
-          '13,500 BTU ducted Quiet Series air conditioner',
-          '55-gallon fresh water tank and four stabiliser jacks',
-          'Power awning with LED lights and a power tongue jack',
-          'On-demand tankless water heater and NuvoH2O prep',
-          'Radiant-barrier-backed roller shades',
-          'Aluminium rims and 20 lb LP bottles with auto regulator',
-        ],
-      },
-      options: [
-        { name: 'Jay Sport Package', price: 4500, note: 'Also mandatory — InVision™ appliances, Climate Shield™ insulation, 200W solar, LED smart TV, rear ladder' },
-        { name: 'Premier Package', price: 2243, note: 'Dual MaxxAir® fans, multi-function stainless sink, power 5-point stabilisation, solid-surface countertops' },
-        { name: 'Overlander II Solar Package', price: 1193, note: 'Replaces the Overlander I package' },
-        { name: '2nd 13,500 BTU A/C in bedroom', price: 1043 },
-        { name: 'Theater seating with table trays, in place of the dinette', price: 1043 },
-        { name: '50 amp service with 2nd A/C prep', price: 488 },
-        { name: '120V heated tank pads', price: 413 },
-        { name: 'Theater seating in place of the tri-fold sofa', price: 368 },
-        { name: '15,000 BTU A/C', price: 300 },
-        { name: 'King bed', price: 293, note: 'Select floorplans' },
-        { name: 'App-monitored in-stem TPMS', price: 270 },
-        { name: 'Free-standing table with four chairs', price: 233 },
-        { name: '30 lb LP bottles with auto regulator and fill gauge', price: 113 },
-      ],
-      disclaimer: 'Jayco publishes no-haggle MSRP. Your dealer confirms final pricing, availability and any regional fees.',
-    },
 
     /* Three of sixteen. The mobile switcher slices to three columns and the CSS
        only defines is-col-0/1/2, so this is a hard ceiling rather than a choice
@@ -1136,19 +1056,25 @@ window.JAYCO_MODEL_DETAIL = (function () {
       note: 'More than 300 Jayco dealers across North America.',
     },
 
-    brochure: {
-      label: 'Brochure',
-      heading: 'Take the Jay Feather with you.',
-      body: 'The full 2027 Jay Feather brochure — every floorplan, standard equipment, package contents and specifications in one PDF.',
-      cta: { label: 'Request a Brochure', href: 'brochures.html?model=jay-feather', open: 'jay-feather' },
-      image: jfImg('jf-kitchen.jpg'),
-    },
-
     compare: {
       label: 'Compare',
       heading: 'Not sure it’s the one?',
       body: 'Put the Jay Feather beside the rest of the travel trailer lineup and compare length, weight, layout and price side by side.',
       cta: { label: 'Compare travel trailers', href: 'compare.html' },
+    },
+
+    /* Resources — the same rules as Swift's. 2023–2026 each have their own
+       jayco.com page (checked 2026-09-11, titles read back); 2022 and earlier
+       redirect to the travel trailer listing or 404, so they are left out. The
+       manual is Jayco's single 2027 towable book, which covers every trailer. */
+    resources: {
+      years: [2026, 2025, 2024, 2023].map((y) => ({
+        year: y, href: 'https://www.jayco.com/rvs/travel-trailers/' + y + '-jay-feather/' })),
+      brochure: { href: 'brochures.html?model=jay-feather', open: 'jay-feather' },
+      manual: {
+        href: 'https://www.jayco.com/uploads/rvs/manuals/659-Towable-Manual---Book-2027.pdf',
+        note: 'Jayco’s 2027 Jay Feather owner’s manual, as a PDF.',
+      },
     },
 
     similar: ['jay-feather-air', 'jay-feather-sl', 'jay-flight'],
@@ -1164,6 +1090,426 @@ window.JAYCO_MODEL_DETAIL = (function () {
         a: 'Jayco’s insulation package, tested from 0 to 100 degrees Fahrenheit. It comes with the Jay Sport Package, alongside radiant-barrier insulation and dual 12V vent fans.' },
       { q: 'Why is the 33BH not priced?',
         a: 'It is too new for Jayco to have published pricing. The floorplan and its drawing are final; your dealer can quote it.' },
+    ],
+  };
+
+  /* ===================================================
+     Greyhawk — the first Class C, and the first
+     motorhome to carry a construction cutaway (Swift
+     has none). Motorized, so it keeps the "Every
+     number." specs table that towables drop, and its
+     carousel arrows ride on the intro line.
+
+     PROVENANCE. Copy, the eight construction elements
+     (titles, descriptions and pin positions), the video
+     ids and the standard-feature list are read from
+     jayco.com/rvs/class-c-motorhomes/2027-greyhawk/ on
+     2026-09-11. Floorplan codes, sleeps, lengths, tanks,
+     ratings and price deltas come from build-data.js.
+     The 27U's Matterport id is from its own floorplan
+     page — the other three pages carry no tour.
+     Photography and the hero film were supplied for
+     this build, in assets/model details/Greyhawk.
+     =================================================== */
+  const GH = kit('Greyhawk', []);
+  const ghImg = GH.img, ghCard = GH.card;
+
+  /* ---------- The four floorplans ----------
+     DERIVED from build-data.js, as Jay Feather's are, so every figure matches
+     the builder and the compare page. The drawings are the builder's own
+     exports (p.img) — the same files, so no second copy to drift.
+
+     30Z-CSA is left out: it is the Canadian-standards build of the 30Z, with
+     the same drawing and the same numbers, and jayco.com lists four layouts.
+     A motorhome publishes ratings, not an unloaded weight, so the rows under
+     each plan are GVWR, tanks, outside storage and awning instead. */
+  const GH_PLANS = (function () {
+    const B = (window.JAYCO_BUILD && window.JAYCO_BUILD.greyhawk) || {};
+    const FEAT = (window.JAYCO_FEATURES && window.JAYCO_FEATURES.plans) || {};
+    const plans = (B.floorplans || []).filter((p) => p.id !== '30z-csa');
+    const BASE = 172793;
+
+    /* One line per plan, written to its own feature flags and spec sheet. */
+    const BLURBS = {
+      '27u':  'The shortest, and the only Greyhawk with a king — plus a front living room with a hide-a-bed.',
+      '29mv': 'A couple’s coach at 32 feet, with a booth dinette and theater seating.',
+      '31f':  'The family plan: bunks rated for 300 lbs each, and room for seven.',
+      '30z':  'Front living room, an electric fireplace and 95 cu. ft. of outside storage — the most in the range.',
+    };
+
+    function specRows(p) {
+      const s = p.specs || {};
+      const w = s.Weights || {}, t = s['Tank Capacities'] || {};
+      const m = s.Miscellaneous || {}, me = s.Measurements || {};
+      const pick = (obj, re) => {
+        const hit = Object.keys(obj).filter((k) => re.test(k))[0];
+        return hit ? obj[hit] : null;
+      };
+      const out = [];
+      const gvwr = pick(w, /gross vehicle/i);
+      const fresh = pick(t, /fresh/i);
+      const grey = pick(t, /gray|grey/i);
+      const black = pick(t, /black/i);
+      const cargo = pick(m, /cargo/i);
+      const awning = pick(me, /awning/i);
+      if (gvwr) out.push(['GVWR', gvwr + ' lbs']);
+      if (fresh) out.push(['Fresh water', Math.round(parseFloat(fresh)) + ' gal']);
+      if (grey && black) out.push(['Grey / black', Math.round(parseFloat(grey)) + ' / ' + Math.round(parseFloat(black)) + ' gal']);
+      if (cargo) out.push(['Outside storage', cargo + ' cu. ft.']);
+      if (awning) out.push(['Awning', awning]);
+      return out;
+    }
+
+    return plans.map((p) => ({
+      id: p.id,
+      name: p.name,
+      blurb: BLURBS[p.id] || '',
+      sleeps: p.sleeps ? 'Up to ' + p.sleeps : undefined,
+      sleepsMax: p.sleeps || 0,
+      length: p.length || undefined,
+      price: p.price == null ? null : BASE + p.price,
+      tour360: TOUR('greyhawk', p.id),
+      image: p.img,
+      specs: specRows(p),
+      tags: FEAT['greyhawk__' + p.id] || [],
+    }));
+  }());
+
+  const greyhawk = {
+    slug: 'greyhawk',
+    name: 'Greyhawk',
+    year: 2027,
+    category: 'class-c',
+    categoryLabel: 'Class C Motorhome',
+    priceFrom: 172793,
+
+    hero: {
+      video:  ghImg('gh-hero.mp4'),
+      poster: ghImg('gh-hero-poster.jpg'),
+      heading: 'Greyhawk',
+      sub: 'Jayco’s top-of-the-line gas Class C — a Ford® E-450 underneath, a seamless one-piece cap up front, and room for up to seven.',
+      ctas: [
+        { label: 'View Floorplans', href: 'build-price.html?model=greyhawk&step=floorplan', style: 'primary' },
+        { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
+      ],
+    },
+
+    intro: {
+      label: 'The Class C Life',
+      heading: 'All the coach,<br>none of the hitch.',
+      body: [
+        'The Greyhawk drives on a Ford® E-450 with a 7.3L V8, and the JRide® Plus package underneath — Koni® FSD shocks, stabilizer bars front and rear, Hellwig® helper springs — keeps it settled on the highway and on the way into camp.',
+        'Off the grid it looks after itself: a 4,000W generator that starts on its own when the batteries need it, 200W of roof solar and a 1,000W inverter. Inside, a walk-around queen (a king in the 27U), a legless dinette that turns into a bed, and seat belts at every seat.',
+      ],
+      image: {
+        src: ghImg('gh-render.webp'),
+        alt: '2027 Jayco Greyhawk 30Z Class C motorhome, three-quarter front view',
+        type: 'render',
+        w: 1600, h: 859,
+        /* Cropped to the render's own alpha bounding box on export, as Jay
+           Feather's was, so the ink is centred by construction. */
+        inkCentre: 0.5,
+      },
+    },
+
+    /* Exactly six — .md-stats is repeat(6, 1fr). Every figure is Jayco's, from
+       the standard-feature list or build-data.js. */
+    highlights: [
+      { value: 'Up to 7',    label: 'Sleeps',        note: '31F, with bunks' },
+      { value: '30–33 ft',   label: 'Length',        note: '29′ 11″ to 32′ 6″ overall' },
+      { value: '7.3L V8',    label: 'Engine',        note: '325 hp, 450 lb-ft' },
+      { value: '4,000W',     label: 'Generator',     note: 'Auto-gen start' },
+      { value: '15,000 BTU', label: 'Air conditioner', note: 'With heat pump' },
+      { value: '750 lbs',    label: 'Overhead bunk', note: '300 over industry standard' },
+    ],
+
+    scenery: {
+      heading: 'Where it takes you.',
+      image: {
+        src: ghImg('gh-ext-03045.jpg'),
+        alt: 'Two people standing beside a Jayco Greyhawk with its awning out at a pine forest campsite',
+      },
+      items: [
+        ghCard('gh-27u-btf.jpg', 'The Greyhawk 27U interior looking from the back toward the cab',
+          'Back to front', 'Galley down one side, sofa and dinette down the other, and the cab at the far end.'),
+        ghCard('gh-kitchen.jpg', 'The galley of a Jayco Greyhawk',
+          'The galley', 'An all-in-one cooktop and oven, a residential-size microwave and a recessed stainless sink with a cutting-board cover.'),
+        ghCard('gh-29mv-seating.jpg', 'Theater seating in a Jayco Greyhawk 29MV',
+          'Theater seating', 'Power theater seating is on the option list in place of the sofa.'),
+        ghCard('gh-27u-bed.jpg', 'The bedroom of a Jayco Greyhawk 27U',
+          'The bedroom', 'The 27U carries a king; the others a walk-around queen. Wireless charging pads sit in the nightstands.'),
+        ghCard('gh-29mv-bath-shower.jpg', 'The bathroom and shower of a Jayco Greyhawk 29MV',
+          'The shower', 'Glass door, skylight overhead, and the Aqua View® SHOWERMI$ER™ saving the water that runs while it heats.'),
+        ghCard('gh-29mv-bunk.jpg', 'The overhead bunk above the cab of a Jayco Greyhawk',
+          'Over the cab', 'The overhead bunk is rated for 750 lbs — two full-sized adults, or the gear.'),
+        ghCard('gh-29mv-dash.jpg', 'The cab and dashboard of a Jayco Greyhawk',
+          'The cab', 'Sony® infotainment with Apple® CarPlay and Android Auto™, and backup and side-view cameras.'),
+      ],
+    },
+
+    plan: {
+      label: 'Floorplans',
+      heading: 'Four ways to lay it out.',
+      body: 'Scroll through the four floorplans to see each drawing and its real numbers. Open any drawing full size, or walk the 27U in 3D.',
+    },
+
+    /* No floorplanFilters: four plans read at a glance on the rail, and a chip
+       row over four slides would be more control than content. */
+    floorplans: GH_PLANS,
+
+    features: {
+      label: 'Features',
+      heading: 'What comes with it.',
+    },
+
+    /* ---------- The construction cutaway ----------
+       Jayco's own "Superior Construction Elements" band, verbatim: the eight
+       titles and descriptions, in their 1-8 order, and the pin positions from
+       their markup (left/top percentages of this same 1920x1080 art). The art
+       is shared with the Redhawk on jayco.com. It is NOT cropped to its ink —
+       Jayco's percentages are measured against the full frame, so cropping
+       would move every pin. REORDERING THIS ARRAY RENUMBERS THE DIAGRAM. */
+    cutaway: {
+      label: 'Superior construction',
+      heading: 'What is under the skin.',
+      body: 'Eight things Jayco builds into every Greyhawk. Tap a number to read about each one.',
+      image: {
+        src: ghImg('gh-cutaway.webp'),
+        mid: ghImg('mid/gh-cutaway.webp'),
+        alt: '2027 Jayco Greyhawk construction cutaway, with the sidewall opened to show the structure',
+        w: 1920, h: 1080,
+      },
+      pins: [
+        { x: 80, y: 77, title: 'The JRide® Plus ride and handling package',
+          body: 'A quiet, comfortable drive from a computer-balanced driveshaft, Koni® FSD shocks, a heavy-duty rear stabilizer bar, a front stabilizer bar, Hellwig® helper springs and rubber isolation mounts.' },
+        { x: 25, y: 39, title: 'StrongholdVBL® roof, floor and sidewalls',
+          body: 'A vacuum-bond process presses the wall layers — fiberglass siding, welded aluminum framing, block foam, metal backers and interior panels — at 144 tons for 16 to 18 minutes. Jayco builds every wall, floor and roof in a temperature- and humidity-controlled plant.' },
+        { x: 83, y: 28, title: 'One-piece seamless front cap with panoramic window',
+          body: 'The seamless cap resists fading and moisture damage over the years, and an automotive-bonded panoramic window with a power shade lets the daylight in.' },
+        { x: 13, y: 20, title: 'One-piece fiberglass roof',
+          body: 'A crowned, one-piece fiberglass roof for durability.' },
+        { x: 65, y: 37, title: '750 lb. overhead bunk rating',
+          body: 'Three hundred pounds over the industry standard — enough for two full-sized adults, or extra gear on the road.' },
+        { x: 26, y: 20, title: 'Standard solar power',
+          body: 'A 200W panel with a dual controller that charges the house and chassis batteries at the same time.' },
+        { x: 43, y: 41, title: 'Frameless windows',
+          body: 'Easier to keep clean outside, and a sleeker line down the side of the coach.' },
+        { x: 36, y: 47, title: 'Seatbelts in all designated seating positions',
+          body: 'Stress-tested belts at every designated seat, so the whole family rides belted.' },
+      ],
+    },
+
+    featureGroups: [
+      {
+        id: 'driving',
+        name: 'Chassis & driving',
+        items: [
+          { title: 'Ford® E-450 chassis',
+            body: 'A 7.3L V8 making 325 hp and 450 lb-ft, through a six-speed TorqShift® transmission with overdrive.' },
+          { title: 'JRide® Plus',
+            body: 'Koni® FSD shocks, stabilizer bars front and rear, Hellwig® helper springs and a computer-balanced driveshaft — in the mandatory Customer Value Package.' },
+          { title: 'Automatic leveling',
+            body: 'Hydraulic jacks level the coach at the campsite, also part of the Customer Value Package.' },
+          { title: 'Driver assistance',
+            body: 'Automatic emergency braking, electronic stability and traction control, and hill start assist.' },
+          { title: 'Cameras',
+            body: 'Backup and side-view cameras, with remote-controlled, heated side mirrors.' },
+          { title: 'Tows too',
+            body: 'A 7,500 lb. hitch with a 750 lb. tongue capacity and a 7-pin plug.' },
+        ],
+      },
+      {
+        id: 'living',
+        name: 'Kitchen & living',
+        items: [
+          { title: 'The legless dinette',
+            body: 'A Jayco-exclusive table that converts from dining to sleeping and stays solid either way, with car seat tethers on select floorplans.' },
+          { title: 'Hardwood, soft-close',
+            body: 'Hardwood cabinet doors and drawer fronts on soft-close hinges and ball-bearing guides.' },
+          { title: 'The galley',
+            body: 'A 10.6 cu. ft. 12V refrigerator, an all-in-one cooktop and oven, and a residential-size microwave.' },
+          { title: 'Sony® infotainment',
+            body: 'Tilt and swivel, with Apple® CarPlay and Android Auto™ — plus an LED HD Smart TV in the living area.' },
+          { title: 'BMPRO coach control',
+            body: 'Tanks, batteries and systems on one wall-mounted touchscreen, and in a mobile app.' },
+          { title: 'Seven feet inside',
+            body: 'An 84-inch ceiling with recessed LED lighting and blackout night roller shades.' },
+        ],
+      },
+      {
+        id: 'sleep',
+        name: 'Sleep & bath',
+        items: [
+          { title: 'Walk-around bed',
+            body: 'A queen with nightstands on three plans and a king on the 27U, with USB ports and wireless charging in the nightstands.' },
+          { title: 'A 750 lb. overhead bunk',
+            body: 'Three hundred pounds over the industry standard, with a safety net.' },
+          { title: 'Bunks on the 31F',
+            body: 'Rated for an industry-exclusive 300 lbs each.' },
+          { title: 'A proper shower',
+            body: 'Glass door, decorative surround, a skylight and its own light.' },
+          { title: 'SHOWERMI$ER™',
+            body: 'Aqua View®’s water management system catches the water that runs while the shower heats.' },
+        ],
+      },
+      {
+        id: 'power',
+        name: 'Power & climate',
+        items: [
+          { title: '4,000W generator',
+            body: 'Auto-gen start, drawing from the fuel tank, so power is there when the batteries need it.' },
+          { title: '200W solar',
+            body: 'A dual controller and a second house battery, charging house and chassis together.' },
+          { title: '1,000W inverter',
+            body: 'Household outlets from the batteries, without the generator running.' },
+          { title: '15,000 BTU A/C',
+            body: 'With a heat pump as standard; dual 13,500 BTU units with power management are an option.' },
+          { title: 'Heat and hot water',
+            body: 'A 30,000 BTU auto-ignition furnace and a Suburban tankless water heater.' },
+          { title: 'Heated tanks',
+            body: '12V pads on the holding tanks, for shoulder-season camping.' },
+        ],
+      },
+      {
+        id: 'outside',
+        name: 'Outside',
+        items: [
+          { title: 'Seamless front cap',
+            body: 'One piece of fiberglass, with an automotive-bonded panoramic window and a power shade.' },
+          { title: 'Crowned fiberglass roof',
+            body: 'One piece, seamless, over StrongholdVBL™ construction.' },
+          { title: 'Frameless windows',
+            body: 'A cleaner line down the side, and less to maintain.' },
+          { title: 'Electric awning',
+            body: 'A power patio awning with LED lights, in the Customer Value Package.' },
+          { title: 'Storage that hoses clean',
+            body: 'Large rotocast compartments with lockable slam latches.' },
+          { title: 'Connected',
+            body: 'A Winegard 2.0 Wi-Fi/4G antenna, satellite prep and an outside shower.' },
+        ],
+      },
+    ],
+
+    videos: {
+      label: 'Videos',
+      heading: 'The walkthrough, and nine features.',
+      /* Jayco's own "Greyhawk Videos" gallery, in its order. */
+      items: [
+        { id: 'Qqj5iuq4fr8', title: 'Full walkthrough',   note: 'The 2027 Greyhawk, end to end.' },
+        { id: 'OeVeMgaoRIU', title: 'JRide®',             note: 'Ride and handling package.' },
+        { id: 'o2A1jffHjUk', title: 'Leveling system',    note: 'Automatic hydraulic jacks.' },
+        { id: 'Q-A_KGx3qzQ', title: 'BMPRO',              note: 'The whole coach, one screen.' },
+        { id: 'Mopd4FXlOw4', title: 'Frameless windows',  note: 'Sleeker, and easier to clean.' },
+        { id: '46AexFE9QOE', title: '200W solar',         note: 'House and chassis, charged together.' },
+        { id: 'hJvDS4RDvHM', title: '15,000 BTU A/C',     note: 'Cooling, with a heat pump.' },
+        { id: 'uZv5DX1C9bQ', title: 'Seamless front cap', note: 'One piece, nothing to seal.' },
+        { id: 'D4lHWqWd3Ac', title: 'Exclusive dinette',  note: 'The legless table.' },
+        { id: 'tUEEbK3uXX4', title: 'Sony® infotainment', note: 'CarPlay and Android Auto.' },
+      ],
+    },
+
+    /* Three of four — the CSS only defines three columns. The shortest, the
+       one with the most outside storage, and the one that sleeps seven. All
+       figures from build-data.js except the fuel tank, which the 31F's sheet
+       omits and Jayco's standard-feature list gives as 55 gal. on every plan. */
+    specs: {
+      label: 'Specifications',
+      heading: 'Every number.',
+      columns: ['27U', '30Z', '31F'],
+      groups: [
+        {
+          group: 'Dimensions',
+          note: 'Three of the four floorplans. The 29MV matches the 30Z’s length and height; its full sheet is in Build & Price.',
+          rows: [
+            ['Exterior length (overall)', '29′ 11″', '32′ 6″', '32′ 6″'],
+            ['Exterior width', '8′ 4″', '8′ 4″', '8′ 4″'],
+            ['Exterior width with slides out', '10′ 4″', '10′ 2″', '9′ 10″'],
+            ['Exterior height with A/C', '11′ 8″', '11′ 8″', '11′ 8″'],
+            ['Interior height', '7′ 0″', '7′ 0″', '7′ 0″'],
+            ['Awning length', '18′ 0″', '18′ 0″', '18′ 0″'],
+          ],
+        },
+        {
+          group: 'Ratings',
+          note: 'A motorhome publishes ratings rather than an unloaded weight: GVWR is the most the coach may weigh loaded, GCWR the most with a vehicle in tow.',
+          rows: [
+            ['Gross vehicle weight rating', '14,500 lbs', '14,500 lbs', '14,500 lbs'],
+            ['Gross combined weight rating', '22,000 lbs', '22,000 lbs', '22,000 lbs'],
+            ['Hitch rating', '7,500 lbs', '7,500 lbs', '7,500 lbs'],
+          ],
+        },
+        {
+          group: 'Tanks',
+          rows: [
+            ['Fresh water', '42 gal', '43 gal', '47 gal'],
+            ['Grey water', '41 gal', '41 gal', '41 gal'],
+            ['Black water', '31 gal', '31 gal', '31 gal'],
+            ['Propane', '56 lbs', '56 lbs', '56 lbs'],
+            ['Fuel', '55 gal', '55 gal', '55 gal'],
+          ],
+        },
+        {
+          group: 'Chassis & systems',
+          rows: [
+            ['Sleeps', 'Up to 5', 'Up to 6', 'Up to 7'],
+            ['Engine', '7.3L V8', '7.3L V8', '7.3L V8'],
+            ['Tire size', 'LT225/75R16E', 'LT225/75R16E', 'LT225/75R16E'],
+            ['Water heater', 'Tankless', 'Tankless', 'Tankless'],
+            ['Furnace', '30,000 BTU', '30,000 BTU', '30,000 BTU'],
+            ['Outside storage', '37 cu. ft.', '95 cu. ft.', '51 cu. ft.'],
+          ],
+        },
+      ],
+    },
+
+    visit: {
+      label: 'See it in person',
+      heading: 'Drive one before you decide.',
+      body: 'A drawing shows you where the bed goes. It cannot tell you how the E-450 feels with JRide® Plus underneath, or how the overhead bunk sits with two adults in it. A dealer can.',
+      ctas: [
+        { label: 'Find a Dealer', href: 'dealers.html', style: 'primary' },
+        { label: 'View Inventory', href: '#', style: 'secondary' },
+      ],
+      note: 'More than 300 Jayco dealers across North America.',
+    },
+
+    compare: {
+      label: 'Compare',
+      heading: 'Not sure it’s the one?',
+      body: 'Put the Greyhawk beside the rest of the Class C lineup and compare length, sleeping, chassis and price side by side.',
+      cta: { label: 'Compare Class C Models', href: 'compare.html' },
+    },
+
+    /* Resources — the same rules as the other two. 2023–2026 each have their
+       own jayco.com page (checked 2026-09-11, titles read back); 2022 falls
+       back to the Class C listing, so it is left out. The manual is Jayco's
+       2027 Class C book (manuals-data.js lists the same PDF). */
+    resources: {
+      years: [2026, 2025, 2024, 2023].map((y) => ({
+        year: y, href: 'https://www.jayco.com/rvs/class-c-motorhomes/' + y + '-greyhawk/' })),
+      brochure: { href: 'brochures.html?model=greyhawk', open: 'greyhawk' },
+      manual: {
+        href: 'https://www.jayco.com/uploads/rvs/manuals/657-Jayco-C---Book-MY27.pdf',
+        note: 'Jayco’s 2027 Greyhawk owner’s manual, as a PDF.',
+      },
+    },
+
+    /* Jayco's own "You may also like" lists Melbourne, Redhawk and Redhawk SE;
+       Melbourne has no record in models-data.js, so Greyhawk XL takes its
+       place — the same coach, longer, on a diesel. */
+    similar: ['redhawk', 'redhawk-se', 'greyhawk-xl'],
+
+    faqs: [
+      { q: 'What chassis is the Greyhawk built on?',
+        a: 'A Ford® E-450 with a 7.3L V8 making 325 hp and 450 lb-ft of torque, through a six-speed TorqShift® transmission. It is rated at 14,500 lbs GVWR and 22,000 lbs GCWR.' },
+      { q: 'Can I tow a car behind it?',
+        a: 'Yes — the hitch is rated for 7,500 lbs with a 750 lb. tongue capacity and a 7-pin plug. Keep the loaded coach and the towed vehicle together under the 22,000 lb. GCWR.' },
+      { q: 'How long can I stay off the grid?',
+        a: 'Longer than most. The 4,000W generator has auto-gen start and draws from the fuel tank, the 200W solar panel charges the house and chassis batteries together through a dual controller, and a 1,000W inverter runs household outlets from the batteries.' },
+      { q: 'Which floorplan sleeps the most?',
+        a: 'The 31F sleeps seven, with bunks rated for 300 lbs each. The 30Z sleeps six, and the 27U and 29MV sleep five. Every plan has the 750 lb. overhead bunk.' },
+      { q: 'What is in the Customer Value Package, and is it optional?',
+        a: 'It is mandatory, at $12,750, and it brings JRide® Plus, automatic hydraulic leveling jacks, frameless windows, an electric awning with LED lights, the 15,000 BTU A/C with heat pump, a 1,000W inverter, the Sony® infotainment center, backup and side-view cameras, and an LED HD Smart TV.' },
     ],
   };
 
@@ -1215,7 +1561,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
 
   /* Key is what ?model= matches, so it is the slug. Comet stays last: its
      own comment asks to remain the degradation test at the end. */
-  return { swift, 'jay-feather': jayFeather, comet };
+  return { swift, 'jay-feather': jayFeather, greyhawk, comet };
 })();
 
 /* The list in models-data.js tells every OTHER page which slugs have a real

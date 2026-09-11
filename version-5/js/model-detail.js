@@ -50,12 +50,11 @@
   const NAV = [
     { id: 'md-intro',     label: 'Overview' },
     { id: 'md-scenery',   label: 'Gallery'  },
-    { id: 'md-plan',      label: 'Layout'   },
+    { id: 'md-plan',      label: 'Floorplans' },
     { id: 'md-features',  label: 'Features' },
     { id: 'md-cutaway', label: 'Construction' },
     { id: 'md-videos',    label: 'Videos'   },
     { id: 'md-specs',     label: 'Specs'    },
-    { id: 'md-pricing',   label: 'Pricing'  },
     /* No FAQ entry: it now sits below the CTAs at the very end of the page, so
        a link to it would jump past everything the sub-nav exists to move
        between. The section keeps its id — it is still a valid anchor target
@@ -74,6 +73,16 @@
     return header + bar + 24;
   }
 
+  /* Smooth-scroll to a section, landing on its first real content rather than
+     its top padding. Shared by the sub-nav and the hero's in-page CTA. */
+  function scrollToSection(target) {
+    const head = target.querySelector(
+      '.md-section-head, .md-intro-text, .faq-header, .md-scenery-band, .md-specs-inner');
+    const top = (head || target).getBoundingClientRect().top + window.scrollY - navOffset() - 16;
+    if (window.__jaycoLenis) window.__jaycoLenis.scrollTo(top);
+    else window.scrollTo({ top, behavior: 'smooth' });
+  }
+
   /* ---------- Hero ---------- */
   function renderHero() {
     const h = model.hero || {};
@@ -86,6 +95,16 @@
     const ctas = (h.ctas || []).map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`
     ).join('');
+
+    /* an in-page CTA ("View Floorplans" → #md-plan) scrolls like the sub-nav */
+    const heroEl = $('#md-hero');
+    if (heroEl) heroEl.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      const target = a && document.getElementById(a.getAttribute('href').slice(1));
+      if (!target) return;
+      e.preventDefault();
+      scrollToSection(target);
+    });
 
     set('#md-hero', `
       <div class="md-hero-media">${media}</div>
@@ -517,55 +536,20 @@
         </div>
       </div>` : '';
 
-    /* The floorplan selector only earns its place when there is a choice to
-       make. A listbox rather than a <select>: the open panel has to carry the
-       band's frosted treatment, which a native option list cannot.
-       `note` is a differentiator pulled from data that already exists —
-       specs carries a ['Best for', …] pair — rather than a new field. */
-    const planNote = (p) => {
-      const hit = (p.specs || []).find((s) => s[0] === 'Best for');
-      return hit ? hit[1] : '';
-    };
-    const selector = plans.length > 1 ? `
-      <div class="md-fp-select" id="md-fp-select">
-        <span class="md-fp-select-label" id="md-fp-select-label">Select Your Floorplan</span>
-        <div class="md-fp-select-shell">
-          <button type="button" class="md-fp-select-trigger" id="md-fp-select-trigger"
-                  aria-haspopup="listbox" aria-expanded="false"
-                  aria-labelledby="md-fp-select-label md-fp-select-value">
-            <span class="md-fp-select-value" id="md-fp-select-value">${esc(plans[0].name)}</span>
-            <svg class="md-fp-select-chev" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                 stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <!-- data-cols is set once, from the plan count: past ten options a
-               single column runs longer than the list is allowed to be and the
-               visitor is scrolling a dropdown. --fp-rows is ceil(n/3), which is
-               what pins the grid to exactly three columns however many plans a
-               model has — see .md-fp-select-list[data-cols="3"] in model.css. -->
-          <ul class="md-fp-select-list" id="md-fp-select-list" role="listbox" tabindex="-1"
-              aria-labelledby="md-fp-select-label" hidden
-              ${plans.length >= 10 ? `data-cols="3" style="--fp-rows:${Math.ceil(plans.length / 3)}"` : ''}>
-            ${plans.map((p, i) => {
-              const note = planNote(p);
-              /* The thumbnail is the same file as the drawing on the page, so it
-                 is already in cache — a purpose-built small export would cost a
-                 request to save bytes that are already spent. alt="" and an
-                 aria-hidden wrapper: the option's accessible name is its text,
-                 and a plan shape at 62px tells a screen reader nothing. */
-              return `<li class="md-fp-option" role="option" id="fp-opt-${p.id}"
-                  aria-selected="${i === 0 ? 'true' : 'false'}" data-plan="${p.id}">
-                <span class="md-fp-option-thumb" aria-hidden="true">
-                  <img src="${p.image}" alt="" ${i === 0 ? '' : 'loading="lazy"'} decoding="async" />
-                </span>
-                <span class="md-fp-option-text">
-                  <span class="md-fp-option-name">${esc(p.name)}</span>
-                  ${note ? `<span class="md-fp-option-note">${esc(note)}</span>` : ''}
-                </span>
-              </li>`;
-            }).join('')}
-          </ul>
-        </div>
+    /* A rail, not a selector. Every plan is on the page at once — the drawing
+       with its specs beneath it — and the arrows page through them the way the
+       video rail's do. The dropdown this replaced hid all but one plan behind a
+       click; the next slide peeking in from the right says there are more. */
+    const arrow = (dir, d) => `
+      <button type="button" class="md-fp-nav" id="md-fp-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} floorplan" aria-controls="md-fp-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+    const controls = plans.length > 1 ? `
+      <div class="md-fp-controls">
+        ${arrow('prev', 'M15 5l-7 7 7 7')}
+        ${arrow('next', 'M9 5l7 7-7 7')}
       </div>` : '';
 
     /* Every spec row below is guarded, because Jayco's own data is ragged: the
@@ -583,8 +567,8 @@
 
       const stage = `
         <div class="md-plan-stage">
-          <!-- Only the open panel's drawing is eager. Swift has two plans so this
-               never mattered; Jay Feather has sixteen, fifteen of them hidden. -->
+          <!-- Only the first slide's drawing is eager; the rest sit off to the
+               right of the rail and lazy-load as it scrolls toward them. -->
           <img class="md-plan-drawing" src="${p.image}" alt="${planAlt}"
                ${first ? '' : 'loading="lazy"'} decoding="async" />
         </div>`;
@@ -647,8 +631,8 @@
       const body = stageBox;
 
       return `
-      <div class="md-fp-panel${first ? ' is-active' : ''}"
-           ${plans.length > 1 ? `role="group" aria-label="${esc(p.name)} floorplan"` : ''}
+      <div class="md-fp-slide" role="group" aria-roledescription="slide"
+           aria-label="${esc(p.name)} floorplan, ${i + 1} of ${plans.length}"
            id="fp-panel-${p.id}"
            data-plan="${p.id}">
         ${body}
@@ -677,7 +661,7 @@
                drawing itself, where it is one of that component's two actions —
                see .md-plan-tools above. -->
           <div class="md-fp-ctas">
-            <a href="build-price.html?model=${slug}" class="btn-primary">Build This Floorplan</a>
+            <a href="build-price.html?model=${slug}" class="btn-primary">Price this Floorplan</a>
             <a href="build-price.html?model=${slug}&amp;step=floorplan"
                class="btn-secondary-light">View All Floorplans</a>
           </div>
@@ -685,154 +669,41 @@
       </div>`;
     }).join('');
 
+    /* Where the arrows sit. A towable carries the "Narrow it down" chips, the
+       control someone is already using to move through the plans, so the
+       arrows share that row. A motorhome has no chips, so they ride on the
+       intro sentence's line instead — as does a towable with too few plans to
+       earn a filter row. */
+    const barArrows = !!filterRow && isTowable();
+    const ledeArrows = barArrows ? '' : controls;
+
     /* .light throughout: this section is the page's one dark band */
     set('#md-plan', `
       <div class="md-section-head">
         <span class="section-label light">${esc(p0.label || 'Floorplans')}</span>
         <h2 class="section-heading light">${esc(p0.heading || `${plans.length} way${plans.length > 1 ? 's' : ''} to lay out ${model.name}.`)}</h2>
-        ${p0.body ? `<p class="section-body light">${esc(p0.body)}</p>` : ''}
+        <!-- arrows at the frame's far edge: on the chips' line for a towable,
+             on the intro sentence's line otherwise (see barArrows) -->
+        ${p0.body || ledeArrows ? `<div class="md-fp-lede">
+          ${p0.body ? `<p class="section-body light">${esc(p0.body)}</p>` : ''}
+          ${ledeArrows}
+        </div>` : ''}
       </div>
-      ${filterRow}
-      ${selector}
-      <div class="md-fp-panels" id="md-fp-panels">${panels}</div>
-      <p class="md-fp-empty" id="md-fp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>`);
+      ${filterRow ? `<div class="md-fp-bar">${filterRow}${barArrows ? controls : ''}</div>` : ''}
+      <div class="md-fp-track" id="md-fp-track" role="region" aria-roledescription="carousel"
+           aria-label="${esc(model.name)} floorplans">${panels}</div>
+      <p class="md-fp-empty" id="md-fp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>
+      <div class="md-fp-more">
+        <a href="build-price.html?model=${slug}&amp;step=floorplan" class="btn-secondary">View All Floorplans</a>
+      </div>`);
 
-    /* ---- plan switching ---- */
-    const optionEls = Array.from(document.querySelectorAll('.md-fp-option'));
-    const panelEls  = Array.from(document.querySelectorAll('.md-fp-panel'));
-    const trigger   = $('#md-fp-select-trigger');
-    const listEl    = $('#md-fp-select-list');
-    const valueEl   = $('#md-fp-select-value');
-
-    function select(id) {
-      optionEls.forEach((o) => {
-        o.setAttribute('aria-selected', o.dataset.plan === id ? 'true' : 'false');
-      });
-      const chosen = plans.find((p) => p.id === id);
-      if (valueEl && chosen) valueEl.textContent = chosen.name;
-      panelEls.forEach((p) => {
-        const on = p.dataset.plan === id;
-        p.classList.toggle('is-active', on);
-        /* the panel that is opening carries the only image left in it, and it
-           was rendered lazy because it was hidden — promote it so the drawing
-           is not fetched after the panel is already on screen */
-        if (!on) return;
-        const art = p.querySelector('.md-plan-drawing');
-        if (art) art.loading = 'eager';
-      });
-      /* the panel swap changes document height — the scrubbed parallax below
-         it would otherwise keep its stale start/end */
-      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-    }
-
-    /* ---- the listbox ----
-       The list holds focus while open and points at the cursor option with
-       aria-activedescendant, so the options themselves never take focus — the
-       roving-tabindex dance the tablists here use would fight the listbox
-       pattern. .is-cursor is the visible counterpart of that pointer. */
-    if (trigger && listEl) {
-      let cursor = 0;   /* index the keyboard is sitting on, not the selection */
-
-      const visible = () => optionEls.filter((o) => !o.classList.contains('is-hidden'));
-
-      function paintCursor() {
-        optionEls.forEach((o, i) => o.classList.toggle('is-cursor', i === cursor));
-        const at = optionEls[cursor];
-        if (at) {
-          listEl.setAttribute('aria-activedescendant', at.id);
-          /* The list scrolls once a model has enough plans to overflow it, so
-             arrowing down has to bring the cursor with it. 'nearest' keeps the
-             list still when the option is already in view. */
-          if (at.scrollIntoView) at.scrollIntoView({ block: 'nearest' });
-        }
-      }
-
-      function openList() {
-        listEl.hidden = false;
-        trigger.setAttribute('aria-expanded', 'true');
-        /* open on the current selection, not on wherever the cursor last was */
-        const sel = optionEls.findIndex((o) => o.getAttribute('aria-selected') === 'true');
-        cursor = sel === -1 ? 0 : sel;
-        paintCursor();
-        listEl.focus();
-      }
-
-      function closeList(refocus) {
-        listEl.hidden = true;
-        trigger.setAttribute('aria-expanded', 'false');
-        listEl.removeAttribute('aria-activedescendant');
-        optionEls.forEach((o) => o.classList.remove('is-cursor'));
-        if (refocus) trigger.focus();
-      }
-
-      const isOpen = () => !listEl.hidden;
-
-      function commit(i) {
-        const opt = optionEls[i];
-        if (!opt) return;
-        select(opt.dataset.plan);
-        closeList(true);
-      }
-
-      trigger.addEventListener('click', () => (isOpen() ? closeList(false) : openList()));
-      trigger.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openList();
-        }
-      });
-
-      listEl.addEventListener('keydown', (e) => {
-        const shown = visible();
-        if (!shown.length) return;
-        const pos  = shown.indexOf(optionEls[cursor]);
-        const last = shown.length - 1;
-        let next = null;
-        if (e.key === 'ArrowDown') next = pos >= last ? 0 : pos + 1;
-        if (e.key === 'ArrowUp')   next = pos <= 0 ? last : pos - 1;
-        if (e.key === 'Home')      next = 0;
-        if (e.key === 'End')       next = last;
-        /* Once the list lays out in columns it is a 2D field, so left and right
-           should move by a column rather than do nothing. The grid is
-           column-major — DOM order runs down column one, then column two — so a
-           column is exactly `rows` steps, and up/down keep meaning what they
-           look like. Clamped rather than wrapped: falling off the side of a
-           grid and reappearing on the far edge reads as a glitch. */
-        const rows = parseInt(listEl.style.getPropertyValue('--fp-rows'), 10);
-        if (rows > 0 && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-          const step = e.key === 'ArrowRight' ? rows : -rows;
-          next = Math.min(last, Math.max(0, pos + step));
-        }
-        if (next !== null) {
-          e.preventDefault();
-          cursor = optionEls.indexOf(shown[next]);
-          paintCursor();
-          return;
-        }
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); commit(cursor); return; }
-        if (e.key === 'Escape' || e.key === 'Tab') {
-          /* Tab closes too, or focus would land inside a list the sighted
-             visitor can no longer see */
-          if (e.key === 'Escape') e.preventDefault();
-          closeList(true);
-        }
-      });
-
-      optionEls.forEach((o, i) => {
-        o.addEventListener('click', () => commit(i));
-        o.addEventListener('mousemove', () => { cursor = i; paintCursor(); });
-      });
-
-      /* pointerdown, not click: a mousedown that starts outside should dismiss
-         before the click ever resolves */
-      document.addEventListener('pointerdown', (e) => {
-        if (isOpen() && !e.target.closest('#md-fp-select')) closeList(false);
-      });
-    }
+    /* ---- the rail ---- */
+    const rail = initRail($('#md-fp-track'), $('#md-fp-prev'), $('#md-fp-next'),
+      '.md-fp-slide:not([hidden])');
 
     /* ---- Floorplan zoom ----
-       One modal serves every plan and reads the live drawing when it opens, so
-       it can never drift out of step with the dropdown. It is appended to
+       One modal serves every plan and reads the drawing off the slide whose
+       button opened it. It is appended to
        <body> rather than left inside the section: Lenis can transform a scroll
        wrapper, and position:fixed inside a transformed ancestor resolves
        against that ancestor instead of the viewport.
@@ -873,7 +744,7 @@
       let hideT = null;
 
       function openZoom(btn) {
-        const panel = document.querySelector('.md-fp-panel.is-active');
+        const panel = btn && btn.closest('.md-fp-slide');
         const art   = panel && panel.querySelector('.md-plan-drawing');
         if (!art) return;
         const plan = plans.find((p) => p.id === panel.dataset.plan);
@@ -937,15 +808,15 @@
         })
       );
       const ids = matches.map((p) => p.id);
-      /* filters hide options in the dropdown now, not tabs in a row */
-      optionEls.forEach((o) => o.classList.toggle('is-hidden', ids.indexOf(o.dataset.plan) === -1));
+      /* filters take slides out of the rail, and the rail goes back to its
+         start so the first match is the one on screen */
+      document.querySelectorAll('.md-fp-slide').forEach((s) => {
+        s.hidden = ids.indexOf(s.dataset.plan) === -1;
+      });
       empty.hidden = ids.length > 0;
-      const current = document.querySelector('.md-fp-panel.is-active');
-      if (ids.length && (!current || ids.indexOf(current.dataset.plan) === -1)) {
-        select(ids[0]);                                    /* select() refreshes */
-      } else if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.refresh();                           /* hiding options also moves things */
-      }
+      if (rail) rail.reset();
+      /* the tallest remaining slide sets the band's height */
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
     }
 
     chips.forEach((chip) => {
@@ -961,119 +832,6 @@
         applyFilters();
       });
     });
-  }
-
-  /* ---------- Pricing ----------
-
-     One figure or two. A model whose floorplans all cost the same (Swift) says
-     one number; a model whose floorplans span sixteen thousand dollars says
-     both ends, because a lone "from" price reads as the price and sets up a
-     surprise at the dealer.
-
-     The range is set in model-data.js rather than derived from the floorplan
-     table on purpose: the copy beside it names the two floorplans by code, and
-     a silently-derived pair would drift out of step with that sentence the
-     first time a plan is added. What runs here instead is the check — the pair
-     is proved against the same table the floorplan list prints from, so the
-     two can never disagree without saying so. */
-  function priceRangeCheck(p) {
-    const priced = (model.floorplans || [])
-      .map((f) => f.price).filter((n) => typeof n === 'number');
-    if (priced.length < 2) return;
-    const low = Math.min.apply(null, priced);
-    const high = Math.max.apply(null, priced);
-    if (p.msrp !== low || (p.msrpHigh != null && p.msrpHigh !== high)) {
-      console.warn('[jayco] pricing range is out of step with the floorplan table. '
-        + 'Shown ' + money(p.msrp) + (p.msrpHigh ? '–' + money(p.msrpHigh) : '')
-        + ', floorplans run ' + money(low) + '–' + money(high) + '. '
-        + 'Fix pricing.msrp / pricing.msrpHigh in model-data.js — and the '
-        + 'floorplan codes named in msrpNote, which will have moved too.');
-    }
-  }
-
-  /* Ranges set smaller than a single figure. Two prices and a dash is more than
-     twice the characters, and at the display size it would wrap mid-range on
-     any laptop; the number is still the largest thing in the card. */
-  /* The star is a link to the note beneath, not decoration, so it carries a
-     real reference rather than sitting in the DOM as a bare glyph a screen
-     reader would read as "asterisk" and leave unexplained. On a range it goes
-     on the HIGH end — the last figure the eye lands on, and the one someone is
-     most likely to read as what they will pay. */
-  const STAR = '<sup class="md-price-star" aria-hidden="true">*</sup>';
-
-  function priceFigure(p) {
-    if (p.msrpHigh == null) {
-      return `<span class="md-price-msrp-value">${money(p.msrp)}${STAR}</span>`;
-    }
-    return `<span class="md-price-msrp-value md-price-msrp-value--range">`
-      + `<span class="md-price-end">${money(p.msrp)}</span>`
-      /* The dash is shape, not speech — an en dash is read out inconsistently
-         and sometimes not at all, which would leave two prices and nothing
-         joining them. Spoken as the word instead. */
-      + `<span class="md-price-dash" aria-hidden="true">–</span>`
-      + `<span class="sr-only"> to </span>`
-      + `<span class="md-price-end">${money(p.msrpHigh)}${STAR}</span>`
-      + `</span>`;
-  }
-
-  function renderPricing() {
-    const p = model.pricing;
-    if (!p) { drop('#md-pricing'); return; }
-    priceRangeCheck(p);
-
-    const mandatory = p.mandatory ? `
-      <div class="md-price-card md-price-card--pkg">
-        <div class="md-price-card-head">
-          <span class="md-price-tag">${esc(p.mandatory.note || 'Included')}</span>
-          <h3>${esc(p.mandatory.name)}</h3>
-          <span class="md-price-figure">${money(p.mandatory.price)}</span>
-        </div>
-        <ul class="md-price-list">
-          ${p.mandatory.items.map((i) => `<li>${esc(i)}</li>`).join('')}
-        </ul>
-      </div>` : '';
-
-    const options = (p.options || []).length ? `
-      <div class="md-price-card">
-        <div class="md-price-card-head">
-          <span class="md-price-tag">Popular options</span>
-          <h3>Make it yours</h3>
-        </div>
-        <ul class="md-price-options">
-          ${p.options.map((o) => `
-            <li>
-              <div class="md-opt-text">
-                <span class="md-opt-name">${esc(o.name)}</span>
-                ${o.note ? `<span class="md-opt-note">${esc(o.note)}</span>` : ''}
-              </div>
-              <span class="md-opt-price">${money(o.price)}</span>
-            </li>`).join('')}
-        </ul>
-      </div>` : '';
-
-    set('#md-pricing', `
-      <div class="md-pricing-inner">
-        <div class="md-price-lead">
-          <div class="md-section-head md-section-head--left">
-            <h2 class="section-heading dark">${esc(p.heading)}</h2>
-            <div class="md-price-msrp">
-              <!-- The figure is labelled rather than left to speak for itself:
-                   this is one number on a page that also quotes a price per
-                   floorplan and a price per package, and "MSRP starting at"
-                   says which of them it is. -->
-              <span class="md-price-msrp-label">MSRP starting at</span>
-              ${priceFigure(p)}
-              <p class="md-price-star-note">
-                <span class="md-price-star" aria-hidden="true">*</span>
-                ${esc(p.starNote)}
-              </p>
-              <span class="md-price-msrp-note">${esc(p.msrpNote)}</span>
-            </div>
-          </div>
-        </div>
-        <div class="md-price-cards">${mandatory}${options}</div>
-      </div>
-      <p class="md-price-disclaimer">${esc(p.disclaimer)}</p>`);
   }
 
   /* ---------- Features ----------
@@ -1362,17 +1120,21 @@
      Position is read from scrollLeft, never from a counter, so a swipe, a
      trackpad flick and an arrow all leave the buttons telling the truth. */
   function initVideoCarousel() {
-    const track = $('#md-video-track');
-    const prev  = $('#md-video-prev');
-    const next  = $('#md-video-next');
-    if (!track || !prev || !next) return;
+    initRail($('#md-video-track'), $('#md-video-prev'), $('#md-video-next'), '.md-video');
+  }
+
+  /* Shared by the video rail and the floorplan rail. Returns sync/reset so a
+     caller that changes what is in the track (the floorplan filters) can put
+     the arrows right again; null when the markup is not there. */
+  function initRail(track, prev, next, cardSel) {
+    if (!track || !prev || !next) return null;
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* measured, not computed from the CSS card width — the two would otherwise
        have to be kept in sync by hand across three breakpoints */
     function step() {
-      const card = track.querySelector('.md-video');
+      const card = track.querySelector(cardSel);
       if (!card) return track.clientWidth;
       const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
       return card.getBoundingClientRect().width + gap;
@@ -1407,11 +1169,25 @@
     /* the cards are sized off the track's width, so the first honest
        measurement is after layout, not during the render pass */
     requestAnimationFrame(sync);
+    return {
+      sync: sync,
+      reset() { track.scrollLeft = 0; sync(); },
+    };
+  }
+
+  /* Towables (travel trailers, destination, fifth wheels, toy haulers) skip the
+     "Every number." table: each floorplan slide already carries its own specs.
+     The type comes from models-data.js's category list, so a new towable model
+     needs no change here. */
+  function isTowable() {
+    const cats = (window.JAYCO && window.JAYCO.categories) || [];
+    const cat = cats.find((c) => c.id === model.category);
+    return !!cat && cat.type === 'towable';
   }
 
   function renderSpecs() {
     const s = model.specs;
-    if (!s || !s.groups || !s.groups.length) { drop('#md-specs'); return; }
+    if (!s || !s.groups || !s.groups.length || isTowable()) { drop('#md-specs'); return; }
 
     const cols = s.columns || [];
     const head = `<tr><th class="md-spec-key">Specification</th>${cols.map((c, i) =>
@@ -1460,14 +1236,106 @@
     });
   }
 
+  /* ---------- Resources: earlier years, brochure, manual ----------
+     One container, three asks. It follows the specs table on a motorhome; a
+     towable drops that table (see renderSpecs), so the same slot lands under
+     the videos. Earlier years and the manual live on jayco.com and open in a
+     new tab. The brochure goes through the shared request form, as the
+     brochures page does — there is no 2027 PDF to hand over yet.
+
+     The year picker is a disclosure of links, not a listbox: each year is a
+     page to go to, not a value to choose, so a list of real <a>s is both the
+     simplest markup and the one assistive tech describes correctly. */
+  function renderResources() {
+    const r = model.resources;
+    if (!r) { drop('#md-resources'); return; }
+    const years = r.years || [];
+    const b = r.brochure;
+    const m = r.manual;
+
+    const cell = (title, note, control) => `
+      <div class="md-res-cell">
+        <h3 class="md-res-title">${esc(title)}</h3>
+        <p class="md-res-body">${esc(note)}</p>
+        ${control}
+      </div>`;
+
+    const yearCell = years.length ? cell('Earlier model years',
+      r.yearsNote || `Past ${model.name} model years, on Jayco’s own site.`, `
+        <div class="md-res-menu">
+          <button type="button" class="btn-secondary-light md-res-trigger" id="md-res-trigger"
+                  aria-expanded="false" aria-controls="md-res-years">
+            View Previous Year Model
+            <svg class="md-res-chev" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <ul class="md-res-years" id="md-res-years" data-lenis-prevent hidden>
+            ${years.map((y) => `<li><a href="${esc(y.href)}" target="_blank" rel="noopener noreferrer"
+                aria-label="${y.year} ${esc(model.name)} on jayco.com — opens in a new tab">${y.year} ${esc(model.name)}</a></li>`).join('')}
+          </ul>
+        </div>`) : '';
+
+    const brochureCell = b ? cell('Brochure', b.note || 'Floorplans, equipment and specifications in one PDF.', `
+        <a href="${esc(b.href)}" class="btn-secondary-light"${
+          b.open ? ` data-brochure-open="${esc(b.open)}"` : ''}>Download the Brochure</a>`) : '';
+
+    const manualCell = m ? cell('Owner’s manual', m.note || `The ${model.year} manual, as a PDF from Jayco.`, `
+        <a href="${esc(m.href)}" class="btn-secondary-light" target="_blank" rel="noopener noreferrer"
+           aria-label="Download the ${model.year} owner’s manual — opens in a new tab">Download the Manual</a>`) : '';
+
+    set('#md-resources', `
+      <div class="md-res-inner">
+        <h2 class="sr-only">${esc(model.name)} resources</h2>
+        <div class="md-res-panel">${yearCell}${brochureCell}${manualCell}</div>
+      </div>`);
+
+    const trig = $('#md-res-trigger');
+    const list = $('#md-res-years');
+    if (!trig || !list) return;
+    const links = Array.from(list.querySelectorAll('a'));
+
+    function setOpen(on, refocus) {
+      list.hidden = !on;
+      trig.setAttribute('aria-expanded', on ? 'true' : 'false');
+      if (!on && refocus) trig.focus();
+    }
+
+    trig.addEventListener('click', () => setOpen(list.hidden));
+    trig.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      setOpen(true);
+      links[0].focus();
+    });
+    list.addEventListener('keydown', (e) => {
+      const i = links.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); links[Math.min(links.length - 1, i + 1)].focus(); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); if (i <= 0) trig.focus(); else links[i - 1].focus(); }
+      if (e.key === 'Escape')    { e.preventDefault(); setOpen(false, true); }
+    });
+    trig.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !list.hidden) { e.preventDefault(); setOpen(false); }
+    });
+    /* tabbing past the last year closes it, or the list would hang open over
+       the band below with nothing in it focused */
+    list.addEventListener('focusout', (e) => {
+      if (!e.relatedTarget || !e.relatedTarget.closest('.md-res-menu')) setOpen(false);
+    });
+    /* pointerdown, not click, so a press that starts outside dismisses first */
+    document.addEventListener('pointerdown', (e) => {
+      if (!list.hidden && !e.target.closest('.md-res-menu')) setOpen(false);
+    });
+    links.forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  }
+
   /* ---------- See it in person (+ brochure, compare) ----------
      The page's whole job is to get someone standing next to the coach, so the
      dealer ask leads the closing band and everything else sits beneath it. */
   function renderCtas() {
     const v = model.visit;
-    const b = model.brochure;
     const c = model.compare;
-    if (!v && !b && !c) { drop('#md-ctas'); return; }
+    if (!v && !c) { drop('#md-ctas'); return; }
 
     /* An array, the same shape hero.ctas already uses, so a second ask needs
        data and not a second template. The single-`cta` form is still accepted:
@@ -1486,44 +1354,25 @@
         ${v.note ? `<span class="md-cta-note">${esc(v.note)}</span>` : ''}
       </div>` : '';
 
-    /* The two quieter asks sit side by side as a matched pair of panels: the
-       brochure on its photograph, compare on the band navy. Same geometry and
-       centred content, so they read as two of the same thing rather than a
-       photo block next to a text block. */
-    const secondary = (b || c) ? `
+    /* Compare, the quieter ask, the full width of the frame beneath the dealer
+       lead. The brochure panel that stood beside it is gone: "Download the
+       Brochure" lives in the resources container above this band now, and two
+       brochure buttons a screen apart is one too many. */
+    const secondary = c ? `
       <div class="md-cta-secondary">
-        ${b ? `
-        <div class="md-cta-panel md-cta-panel--photo">
-          ${b.image ? `
-            <img class="md-cta-panel-bg" src="${b.image}" alt="" aria-hidden="true" loading="lazy" />
-            <div class="md-cta-panel-scrim" aria-hidden="true"></div>` : ''}
-          <div class="md-cta-panel-text">
-            <h3>${esc(b.heading)}</h3>
-            <p>${esc(b.body)}</p>
-            <!-- data-brochure-open hands this to the shared request form
-                 (js/brochure-form.js), prefilled with this model. The href is a
-                 real page rather than "#", so it still goes somewhere with JS
-                 off — and that is also what takes it out of the preventDefault
-                 net below, exactly as that comment asks. -->
-            <a href="${b.cta.href}" class="btn-secondary"${
-              b.cta.open ? ` data-brochure-open="${esc(b.cta.open)}"` : ''}>${esc(b.cta.label)}</a>
-          </div>
-        </div>` : ''}
-        ${c ? `
         <div class="md-cta-panel md-cta-panel--solid">
           <div class="md-cta-panel-text">
             <h3>${esc(c.heading)}</h3>
             <p>${esc(c.body)}</p>
             <a href="${c.cta.href}" class="btn-secondary">${esc(c.cta.label)}</a>
           </div>
-        </div>` : ''}
+        </div>
       </div>` : '';
 
     set('#md-ctas', `<div class="md-cta-inner">${visit}${secondary}</div>`);
 
-    /* PLACEHOLDER HREFS. Two destinations on this band do not exist yet — the
-       dealer inventory page, and the brochure PDF, which has never been in the
-       repo. "#" is what the site already uses for those (the footer is full of
+    /* PLACEHOLDER HREFS. One destination on this band does not exist yet — the
+       dealer inventory page. "#" is what the site already uses for those (the footer is full of
        them), but left bare a click scrolls the document to the top and Lenis
        smooth-scrolls the whole way, which reads as the button misfiring rather
        than as nothing happening. Scoped to this section and to "#" alone, so
@@ -1615,13 +1464,7 @@
       a.addEventListener('click', (e) => {
         e.preventDefault();
         const target = document.getElementById(a.dataset.target);
-        if (!target) return;
-        /* land on the section's first real content, not on its top padding */
-        const head = target.querySelector(
-          '.md-section-head, .md-intro-text, .faq-header, .md-scenery-band, .md-pricing-inner, .md-specs-inner');
-        const top = (head || target).getBoundingClientRect().top + window.scrollY - navOffset() - 16;
-        if (window.__jaycoLenis) window.__jaycoLenis.scrollTo(top);
-        else window.scrollTo({ top, behavior: 'smooth' });
+        if (target) scrollToSection(target);
       });
     });
 
@@ -1721,7 +1564,7 @@
          an inactive panel is display:none, so ScrollTrigger cannot measure it
          and a tween there would strand it at opacity 0 when its tab is picked */
       '.md-feat-tabs', '.md-feat-panels',
-      '.md-price-card', '.md-similar-card', '.md-cta-lead',
+      '.md-similar-card', '.md-cta-lead', '.md-res-panel',
       '.md-intro-media--render',       /* a cut-out has no crop to hide a drift */
     ].join(',');
 
@@ -1758,10 +1601,9 @@
        carries it alone now.
        once:true — a focal moment that replays on scroll-back is a party trick.
 
-       It runs for EVERY plan now. The gate used to be `has a hotspot`, which
-       meant the moment fired on three of eighteen plans and the other fifteen
-       opened with a static drawing for no reason the reader could see. */
-    const stage = document.querySelector('#md-plan .md-fp-panel.is-active .md-plan-stage');
+       It plays on the first slide of the rail, the one on screen when the
+       band arrives; the rest are already open when they scroll in. */
+    const stage = document.querySelector('#md-plan .md-fp-slide .md-plan-stage');
     if (stage) {
       /* --exp is scrubbed through a proxy object and written with
          setProperty, the same way the homepage drives its stage
@@ -1775,10 +1617,6 @@
         scrollTrigger: { trigger: '#md-plan', start: 'top 72%', once: true, invalidateOnRefresh: false },
         defaults: { ease: 'power3.out' },
         onStart() {
-          /* resolve the panel now, not at creation: the visitor may have
-             switched floorplans before this ever fired */
-          const live = document.querySelector('#md-plan .md-fp-panel.is-active .md-plan-stage') || stage;
-          if (live !== stage) return;
           stage.classList.add('is-drawing');
           exp.v = 1; writeExp();
         },
@@ -1958,7 +1796,7 @@
   renderCutaway();
   renderVideos();
   renderSpecs();
-  renderPricing();
+  renderResources();
   renderFaqs();
   renderCtas();
   renderSimilar();

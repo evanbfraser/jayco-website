@@ -54,12 +54,6 @@
      eases to a 56px floor so a phone does not spend a third of the screen on
      navy. One knob for both edges — the band is symmetrical. */
   --md-band-pad: clamp(3.5rem, 7vw, 6.25rem);
-  /* Gap between the two containers in the Layout band. They sit fully apart —
-     an earlier pass had the right one lapping onto the drawing so its blur had
-     art behind it. Both the blur and the split are gone now — the drawing has
-     the full frame and .md-plan-stage-box is a solid panel. Kept because
-     .md-fp-select-list still reads it. */
-  --md-split-gap: clamp(1.25rem, 2.5vw, 2.5rem);
   /* Inset of the features panel. Named because two rules depend on it being
      the same number: the panel's own padding, and the tab row's inset — which
      is what puts a tab label on the same axis as the feature names below it. */
@@ -312,7 +306,6 @@
 .md-section-head {
   margin-bottom: var(--md-gap-head);
 }
-.md-section-head--left { margin-left: 0; }
 
 /* ---------- Intro ----------
    The whole section is the studio: the cyclorama runs edge to edge behind the
@@ -590,7 +583,8 @@
    arrows — two carousels on one page pointing at each other with different
    buttons is how a page stops looking designed. */
 .md-scenery-btn,
-.md-video-nav {
+.md-video-nav,
+.md-fp-nav {
   width: 46px;
   height: 46px;
   display: flex;
@@ -605,14 +599,16 @@
   transition: background 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
 }
 .md-scenery-btn:hover,
-.md-video-nav:not([disabled]):hover {
+.md-video-nav:not([disabled]):hover,
+.md-fp-nav:not([disabled]):hover {
   background: #fff;
   transform: scale(1.08);
   box-shadow: 0 8px 24px rgba(15,11,9,0.14);
 }
 /* An end of the rail is worth saying out loud. Dimmed rather than removed, so
    the pair keeps its shape and the row does not reflow on every scroll. */
-.md-video-nav[disabled] {
+.md-video-nav[disabled],
+.md-fp-nav[disabled] {
   opacity: 0.32;
   cursor: default;
 }
@@ -697,9 +693,7 @@
   padding-top: var(--space-md);
   border-top: 1px solid rgba(255,255,255,0.14);
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(1rem, 1.8vw, 1.75rem);
-  align-items: stretch;
+  /* one panel now — Compare — the full width of the frame */
 }
 .md-cta-panel {
   position: relative;
@@ -719,20 +713,6 @@
    against. */
 .md-cta-panel--solid { background: var(--md-band-sunk); }
 
-.md-cta-panel-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-/* the copy sits on the photograph, so it needs its own ground — the two-stop
-   dark gradient the design system asks for over card imagery */
-.md-cta-panel-scrim {
-  position: absolute;
-  inset: 0;
-  background: var(--scrim-card);
-}
 .md-cta-panel-text {
   position: relative;
   z-index: 1;
@@ -754,6 +734,87 @@
   margin-bottom: 1.75rem;
 }
 
+/* ---------- Resources: earlier years, brochure, manual ----------
+   One surface panel on the frame, three equal cells split by hairlines. It
+   sits on the canvas between the specs (or videos) and the blue closing band:
+   the section step above it, and the band's own margin below. Each cell's copy
+   takes the slack (flex: 1), so the three buttons stand on one line. */
+.md-resources { padding-top: var(--md-gap-section); }
+.md-res-inner { max-width: var(--md-frame); margin: 0 auto; padding: 0 var(--md-pad); }
+.md-res-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-res-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(1.75rem, 2.8vw, 2.75rem);
+}
+.md-res-cell + .md-res-cell { border-left: 1px solid var(--hairline); }
+/* the same step as the closing band's panel headings, two sections down */
+.md-res-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  color: var(--text-dark);
+}
+.md-res-body {
+  flex: 1;
+  margin: 0.6rem 0 1.5rem;
+  max-width: 34ch;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+}
+.md-res-menu { position: relative; }
+/* .btn-secondary-light is inline-block, which cannot sit a glyph beside a label */
+.md-res-trigger { display: inline-flex; align-items: center; gap: 0.6rem; }
+.md-res-chev { flex: none; transition: transform 0.3s var(--ease-out); }
+.md-res-trigger[aria-expanded="true"] .md-res-chev { transform: rotate(180deg); }
+/* Opens downward, over the band below if it has to — z-index clears it. Tall
+   enough for Jay Feather's ten years without a scrollbar on a laptop. */
+.md-res-years {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: 0 8px 24px rgba(15,11,9,0.14);   /* the carousel arrows' hover lift */
+  max-height: min(60vh, 440px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.md-res-years[hidden] { display: none; }
+.md-res-years a {
+  display: block;
+  padding: 0.6rem 0.9rem;
+  border-radius: 14px;            /* DESIGN.md rounded.field, inside a 20px box */
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.md-res-years a:hover { background: var(--surface); }
+.md-res-years a:focus-visible { background: var(--surface); outline: 2px solid var(--blue); outline-offset: -2px; }
+@media (max-width: 900px) {
+  .md-res-panel { grid-template-columns: 1fr; }
+  .md-res-cell + .md-res-cell { border-left: none; border-top: 1px solid var(--hairline); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-res-chev { transition: none; }
+}
+
 /* ---------- Floorplans ----------
    The one coloured band on the page. .md-scenery's padding-bottom keeps its
    100px of canvas ABOVE the navy, so the band reads as a block set into the
@@ -765,16 +826,43 @@
   background: var(--md-band-bg);
 }
 /* The one deliberate exception to the 100px head step. Every other section on
-   the page uses --md-gap-head; here the headline and the selector are one unit
+   the page uses --md-gap-head; here the headline and the floorplan rail are one unit
    — the heading asks a question the control answers — so they sit closer than
    a section head normally does from what follows it. Changing this to 100
    would undo that pairing, so it stays at the md step until asked otherwise. */
 .md-plan .md-section-head { margin-bottom: var(--space-md); }
 
-.md-fp-filter {
-  max-width: var(--md-frame);      /* same left spine as the tabs below it */
+/* The intro sentence and the rail's arrows on one line: the sentence keeps its
+   measure on the spine, the arrows sit at the frame's far edge, and the two are
+   centred on each other. The row takes over the sentence's 1.5rem top margin
+   so the centring measures the text, not the margin above it. .model-page
+   outranks the spine rule that caps every head child at --measure. When the
+   sentence fills a phone's width, the arrows wrap under it, still right-hand. */
+.model-page .md-fp-lede {
+  max-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-top: 1.5rem;
+}
+.md-fp-lede > .section-body { margin-top: 0; flex: 0 1 var(--measure); }
+
+/* The filter chips, on the frame's spine above the rail — and on a towable the
+   rail's arrows too, pushed to the far end by .md-fp-controls' auto margin and
+   centred on the chips by align-items. */
+.md-fp-bar {
+  max-width: var(--md-frame);
   margin: 0 auto var(--space-md);
   padding: 0 var(--md-pad);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  flex-wrap: wrap;
+}
+.md-fp-filter {
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -796,9 +884,8 @@
   color: #fff;
 }
 /* Pills, in the white-tint-on-dark recipe this site uses for every control
-   standing on a dark ground — the same glass as the floorplan selector's
-   trigger directly below, so the two read as one set of controls rather than
-   a row of links above a button. Gap tightens from 1.25rem to 0.6rem: text
+   standing on a dark ground — one set of controls rather than a row
+   of links. Gap tightens from 1.25rem to 0.6rem: text
    links needed the air to read as separate, pills carry their own edges. */
 .md-fp-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .md-chip {
@@ -836,204 +923,79 @@
 }
 .md-chip--clear:hover { background: rgba(1,38,56,0.60); color: #fff; }
 
-/* ---------- Floorplan selector ----------
-   The page's only dropdown, and the first in the project. Built as a listbox
-   rather than a <select> because the open panel has to carry the same frosted
-   treatment as the band it sits on, which a native option list cannot. The
-   trigger keeps the pill geometry every other control here uses; the glass is
-   the white-tint-on-dark recipe from .card-learn-more / .model-card-build,
-   which is the site's vocabulary for a control standing on a dark ground. */
-.md-fp-select {
-  max-width: var(--md-frame);
-  margin: 0 auto var(--space-md);
-  padding: 0 var(--md-pad);
-}
-.md-fp-select-label {
-  display: block;
-  margin-bottom: 0.85rem;
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #fff;   /* was .section-label.light's 0.5 — 2.09:1 on the blue band */
-}
-/* the list is absolute against this, not against the full-width frame */
-.md-fp-select-shell {
-  position: relative;
-  width: min(100%, 340px);
-}
-.md-fp-select-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1.1rem 0.9rem 1.5rem;
-  border: 1px solid rgba(255,255,255,0.32);
-  border-radius: var(--radius-btn);
-  background: rgba(1,38,56,0.42);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  color: var(--text-light);
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.25s, border-color 0.25s;
-}
-.md-fp-select-trigger:hover {
-  background: rgba(1,38,56,0.60);
-  border-color: rgba(255,255,255,0.44);
-}
-/* base --blue sits too close to the band's navy to read as a focus ring */
-.md-fp-select-trigger:focus-visible,
-.md-fp-select-list:focus-visible {
-  outline: 2px solid var(--blue-light);
-  outline-offset: 3px;
-}
-.md-fp-select-chev { flex: none; transition: transform 0.3s var(--ease-out); }
-.md-fp-select-trigger[aria-expanded="true"] .md-fp-select-chev { transform: rotate(180deg); }
-
-.md-fp-select-list {
-  position: absolute;
-  z-index: 20;                    /* over the frosted zone panel below it */
-  top: calc(100% + 0.5rem);
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 0.4rem;
-  list-style: none;
-  border: 1px solid rgba(255,255,255,0.32);
-  border-radius: var(--radius-card);
-  /* Solid --md-band-sunk, not a white tint. This list opens OVER the floorplan
-     drawing, so what is behind it is not reliably the band; and on the band's
-     blue a 14% white lift took every option under AA. The sunk navy is the
-     15.7:1 ground these option colours were solved against, so nothing inside
-     the list had to move. */
-  background: var(--md-band-sunk);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 18px 44px rgba(0,0,0,0.4);   /* the documented dark-ground lift */
-  /* Swift has two floorplans, so this list has never needed a ceiling. Jay
-     Feather has sixteen — about 830px of dropdown, taller than the viewport it
-     opens in. overscroll-behavior stops the page scrolling once the list ends. */
-  max-height: min(60vh, 520px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.md-fp-select-list[hidden] { display: none; }
-
-/* ---------- Three columns for a long list, desktop only ----------
-   Sixteen floorplans in one column is 830px of dropdown; capped at 520 it
-   became a list you scroll to read, which is the thing a dropdown exists to
-   avoid. Three columns puts every plan on screen at once.
-
-   COLUMN-MAJOR, deliberately: grid-auto-flow: column with an explicit row
-   count fills down column one, then column two, so DOM order and reading
-   order agree. A normal row-major grid would make ArrowDown jump sideways,
-   which is why this is not `repeat(3, 1fr)`.
-
-   --fp-rows is ceil(n/3), written by the renderer. Pinning the rows is what
-   guarantees exactly three columns for any plan count — grid-auto-flow alone
-   would keep adding columns sideways and overflow horizontally.
-
-   The list also has to escape the 340px shell it is positioned against, hence
-   right: auto and its own width. Below 901px none of this applies: a phone has
-   no room for three columns and the single-column list is correct there. */
-@media (min-width: 901px) {
-  /* :not([hidden]) is load-bearing. .md-fp-select-list[hidden] { display: none }
-     above has the SAME specificity as this rule — a media query adds none — so
-     `display: grid` here simply won because it comes later in the file, and the
-     dropdown could never close again. Matching only when it is open makes that
-     independent of source order rather than a trap for the next edit. */
-  .md-fp-select-list[data-cols="3"]:not([hidden]) {
-    right: auto;
-    width: min(46rem, calc(100vw - 2 * var(--md-pad)));
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(var(--fp-rows, 6), auto);
-    gap: 0.15rem 0.4rem;
-    /* Three columns of sixteen is six rows — well inside this — but a model
-       with far more plans still scrolls vertically rather than sideways,
-       because the row count is fixed. */
-    max-height: min(70vh, 560px);
-    /* A DARK ground, not the narrow list's white 14%. At 340px the list only
-       ever covered navy, so a white scrim read as a lift. At 736px it covers
-       the floorplan drawing too, and white-on-white turned the options over the
-       drawing pale — 29BHB and 27MK were the first to go. Tinting with the band
-       colour keeps light text legible whatever it happens to be over. */
-    /* --md-band-sunk, not the band's own colour: at 86% of a mid-tone blue the
-       drawing showed through as a wash and the option text fell under AA. The
-       sunk navy is the ground every colour in this list was solved against. */
-    background: color-mix(in srgb, var(--md-band-sunk) 92%, transparent);
-    border-color: rgba(255,255,255,0.3);
-  }
-  /* The note wraps to a second line in a narrower column; keep every option
-     the same height so the grid rows stay level. */
-  .md-fp-select-list[data-cols="3"] .md-fp-option { align-items: center; }
-}
-.md-fp-option {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0.6rem 0.9rem;
-  border-radius: 14px;            /* DESIGN.md rounded.field, inside a 20px box */
-  cursor: pointer;
-  color: rgba(245,242,238,0.78);
-  transition: background 0.2s, color 0.2s;
-}
-/* A plan shape, not a legible drawing — at this size it reads as a silhouette
-   that tells the two layouts apart at a glance. It stands on the option itself
-   with no backing box, so the art's own transparency is what you see. */
-.md-fp-option-thumb {
-  flex: none;
-  width: 62px;
-  aspect-ratio: 1800 / 920;       /* the floorplan export's own ratio */
-}
-.md-fp-option-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.md-fp-option-text { min-width: 0; }
-/* .is-cursor is the keyboard position — the list holds focus and points at it
-   with aria-activedescendant, so the option itself never takes a focus ring */
-.md-fp-option:hover,
-.md-fp-option.is-cursor {
-  background: rgba(255,255,255,0.12);
-  color: var(--text-light);
-}
-.md-fp-option[aria-selected="true"] { background: rgba(0,122,194,0.28); color: #fff; }
-.md-fp-option.is-hidden { display: none; }
-.md-fp-option-name {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-.md-fp-option-note {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 0.78rem;
-  color: rgba(245,242,238,0.62);   /* 0.55 measured 4.34:1 on the glass — under AA */
-}
-.md-fp-option[aria-selected="true"] .md-fp-option-note { color: rgba(255,255,255,0.72); }
-
 /* An inset surface panel at 20px, the way the homepage frames its content
    blocks (.quiz-media, .dealer-ui, .newsletter-box) — it holds a spec table
    and body copy, not photography, so it does not bleed. */
-.md-fp-panels { position: relative; }
-.md-fp-panel { display: none; }
-.md-fp-panel.is-active { display: block; }
+.md-fp-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;               /* right-hand end, even with no chips beside it */
+}
+.md-fp-nav:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- Floorplan rail ----------
+   Every plan side by side, one slide per plan: the drawing, and its specs
+   panel beneath it. Same scroll mechanics as the video rail (native scroll,
+   snap, arrows driven by initRail) and the same lead, so slide one starts on
+   the page spine and the next plan peeks in from the right.
+
+   --fpslide is 82% of the contained frame: the drawing comes out a little
+   smaller than the full-width stage it replaced, and what that frees is the
+   peek. --fpframe resolves against the track's content box, for the reason
+   spelled out on .md-video-track below. */
+.md-fp-track {
+  --fpgap: clamp(1rem, 1.6vw, 1.5rem);
+  --fpframe: min(100%, calc(var(--md-frame) - 2 * var(--md-pad)));
+  --fpslide: calc(var(--fpframe) * 0.82);
+  --fplead: max(var(--md-pad), calc((100% - var(--md-frame)) / 2 + var(--md-pad)));
+  /* The drawing's height: what the viewport has left once the fixed header,
+     the sub-nav and ~26rem (specs card, panel padding, air) are taken out.
+     Floored so a short laptop still gets a readable plan, capped so a tall
+     screen does not blow it back up to full width. */
+  --fp-art-h: clamp(200px, calc(100svh - var(--md-header-h) - var(--md-subnav-h) - 26rem), 440px);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fpgap);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* a scroll container clips on every side; the block inset is room for focus rings */
+  padding: 7px var(--md-pad) 7px var(--fplead);
+  scroll-padding-inline-start: var(--fplead);
+}
+.md-fp-track::-webkit-scrollbar { display: none; }
+.md-fp-slide {
+  flex: 0 0 var(--fpslide);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.md-fp-slide[hidden] { display: none; }
+/* too narrow for label and figure side by side in two columns: stack each */
+@media (max-width: 600px) {
+  .md-fp-specs li { flex-direction: column; gap: 0.1rem; padding: 0.5rem 0; }
+}
+/* Every plan at once, in the configurator — under the rail, on the frame's
+   spine. .btn-secondary is the site's outline button for a dark ground. */
+.md-fp-more {
+  max-width: var(--md-frame);
+  margin: var(--space-md) auto 0;
+  padding: 0 var(--md-pad);
+}
 
 /* the info column: an inset surface panel under the stage and its zones */
 .md-fp-info {
-  width: var(--md-panel);
-  margin: var(--space-md) auto 0;
-  padding: clamp(2rem, 3.4vw, 3.25rem);
+  width: 100%;
+  margin: 1rem auto 0;
+  padding: clamp(1.5rem, 2.4vw, 2.25rem);
   border-radius: var(--radius-card);
   background: var(--surface);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(1.5rem, 3vw, 3.5rem);
+  /* columns only: a row gap this size pried the name, blurb and buttons apart
+     for no reason — each carries its own top margin */
+  gap: 0 clamp(1.5rem, 3vw, 3.5rem);
   align-items: start;
 }
 .md-fp-info .md-fp-name { grid-column: 1; }
@@ -1049,32 +1011,37 @@
   color: var(--text-dark);
 }
 .md-fp-blurb {
-  margin-top: 1.1rem;
+  margin-top: 0.75rem;
   font-size: 0.98rem;
   line-height: 1.75;
   color: var(--text-mid);
   max-width: 46ch;
 }
+/* Two columns of rows, so seven specs stand four deep instead of seven —
+   part of what lets the drawing and this card share one screen. */
 .md-fp-specs {
-  margin-top: 2rem;
-  border-top: 1px solid var(--hairline);
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: clamp(1.25rem, 2vw, 2rem);
 }
 .md-fp-specs li {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 0;
+  padding: 0.65rem 0;
   border-bottom: 1px solid var(--hairline);
   font-size: 0.88rem;
 }
+.md-fp-specs li:nth-child(-n+2) { border-top: 1px solid var(--hairline); }
 .md-fp-specs li span:first-child { color: var(--text-mid); }
 .md-fp-specs li span:last-child  { font-weight: 500; color: var(--text-dark); }
 .md-fp-ctas {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 /* The 3D tour, on the fourteen plans that have one. It is .btn-secondary-light
    plus the bits that class cannot know about: inline-block has no way to sit a
@@ -1107,210 +1074,6 @@
      measures 1.57:1. It shares the filter row's fate too — it only appears
      when every chip is on and nothing matches, so it had never been seen. */
   color: #fff;
-}
-
-/* ---------- Pricing ---------- */
-.md-pricing { padding: var(--md-gap-section) 0 0; }
-.md-pricing-inner {
-  max-width: var(--md-frame);
-  margin: 0 auto;
-  padding: 0 var(--md-pad);
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: clamp(2rem, 6vw, 7rem);
-  align-items: start;
-}
-/* The headline and the MSRP ride in their own panel, pinned while the cards
-   beside them scroll past — the price is the one figure that should never be
-   off screen while someone reads what is included.
-   The offset clears the fixed header AND the fixed sub-nav, using the same two
-   custom properties navOffset() reads so the sticky stop and the deep-link
-   landing can never disagree.
-   Sticky survives here because `overflow-x: hidden` sits on <body> with <html>
-   unset, so it propagates to the viewport rather than making an ancestor a
-   scroll container — and Lenis runs in its default mode, moving real scroll
-   position rather than transforming a wrapper. Both were checked; either one
-   would have silently killed this. */
-.md-price-lead {
-  position: sticky;
-  top: calc(var(--md-header-h) + var(--md-subnav-h) + 1.5rem);
-  padding: clamp(1.75rem, 2.6vw, 2.5rem);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-}
-.md-pricing .md-section-head--left {
-  max-width: none;
-  padding: 0;
-  margin: 0;
-}
-.md-price-msrp { margin-top: 2.25rem; }
-/* Names the figure below it. The tracked-uppercase eyebrow treatment, one step
-   quieter than .section-label — this labels a number inside a panel, it does not
-   open a section, and DESIGN.md keeps that eyebrow for the latter. */
-.md-price-msrp-label {
-  display: block;
-  margin-bottom: 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-mid);
-}
-/* Superscript by hand, not by <sup>'s default: the UA shrinks to 0.83em and
-   lifts by a fraction of the line box, which against a 4.6rem display figure
-   put the star level with the digits and nearly their size. Tied to the figure
-   by em so it holds at every step of the clamp. */
-.md-price-star {
-  font-size: 0.38em;
-  font-weight: 700;
-  line-height: 1;
-  vertical-align: super;
-  color: var(--blue);
-  margin-left: 0.06em;
-}
-/* The note the star points at. Sits directly under the figure and above the
-   existing MSRP caveat: this one is about where the real number comes from, the
-   other about what the figure excludes. The star repeats at the head of the
-   line so the pair reads as a footnote rather than as two loose sentences. */
-.md-price-star-note {
-  display: flex;
-  gap: 0.35rem;
-  margin-top: 1rem;
-  max-width: 38ch;
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: var(--text-dark);
-}
-/* Reset the figure's superscripting for the one in the note, where it is a
-   marker at text size rather than a mark on a display number. */
-.md-price-star-note .md-price-star {
-  flex: none;
-  font-size: 1em;
-  vertical-align: baseline;
-  margin-left: 0;
-}
-.md-price-msrp-value {
-  display: block;
-  font-family: var(--font-display);
-  font-size: clamp(2.8rem, 5.5vw, 4.6rem);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--blue);
-}
-/* A range is two figures and a connector — near enough double the width of a
-   single price, which at the size above wraps mid-range on any laptop. So it
-   sets below the heading rather than above it, and leans on blue against the
-   heading's near-black to stay the thing the eye lands on. flex, so if the
-   column ever does get narrow the break happens at the dash and never inside a
-   price: "$37," on one line and "493" on the next is not a number. */
-.md-price-msrp-value--range {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.32em;
-  /* Sized so the pair clears the column with room to spare, not so it merely
-     fits: at 3.4vw it filled all 456px of the 1440 column exactly and wrapped
-     by 1280, which is ordinary laptop width. The endpoints are the ramp's Title
-     and Headline steps rather than numbers picked to taste — the fit only
-     needed a ceiling, and documented steps sit inside it. */
-  font-size: clamp(1.6rem, 2.9vw, 2.4rem);
-}
-.md-price-end { white-space: nowrap; }
-/* Lighter and shorter than the figures: it joins them rather than competing,
-   and at 800 weight a dash this wide reads as a minus sign. */
-.md-price-dash {
-  font-weight: 400;
-  color: var(--blue-light);
-}
-
-.md-price-msrp-note {
-  display: block;
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  line-height: 1.65;
-  color: var(--text-mid);
-  max-width: 38ch;
-}
-.md-price-cards {
-  display: grid;
-  gap: var(--space-md);
-}
-.md-price-card {
-  background: none;
-  border: none;
-  border-top: 1px solid var(--hairline);
-  border-radius: 0;
-  padding: 1.75rem 0 0;
-}
-.md-price-card-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 1rem;
-  margin-bottom: 1.5rem;
-}
-.md-price-tag {
-  width: 100%;
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-mid);
-  background: none;
-  padding: 0;
-  border-radius: 0;
-}
-.md-price-card-head h3 {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-dark);
-}
-.md-price-figure {
-  margin-left: auto;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-.md-price-list li {
-  position: relative;
-  padding: 0.4rem 0 0.4rem 1.25rem;
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: var(--text-mid);
-}
-.md-price-list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.95rem;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-mid);
-  opacity: 0.5;
-}
-.md-price-options li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 2rem;
-  padding: 0.95rem 0;
-  border-bottom: 1px solid var(--hairline);
-}
-.md-price-options li:first-child { border-top: 1px solid var(--hairline); }
-.md-opt-name  { display: block; font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
-.md-opt-note  { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-mid); }
-.md-opt-price { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); white-space: nowrap; }
-.md-price-disclaimer {
-  max-width: var(--md-frame);
-  margin: var(--space-md) auto 0;
-  padding: 0 var(--md-pad);
-  font-size: 0.75rem;
-  line-height: 1.65;
-  color: var(--text-mid);
 }
 
 /* ---------- Features ----------
@@ -1440,10 +1203,17 @@
                    round calc(var(--exp) * var(--radius-card)));
 }
 /* a line drawing on the canvas: no box, so nothing to round */
+/* Height-capped by --fp-art-h (set on the rail) so the drawing and its specs
+   card fit one screen together. Both dimensions auto with both maxes set: a
+   replaced element keeps its ratio under the pair, so the plan shrinks whole
+   and rides centred in its panel rather than squashing. */
 .md-plan-drawing {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: var(--fp-art-h, none);
+  margin-inline: auto;
   border-radius: 0;
 }
 /* The floorplan's own container, and now the whole component: one panel, the
@@ -1451,7 +1221,7 @@
    a two-column split with the zone panel in the other 1fr — the drawing gets
    that width back. */
 .md-plan-stage-box {
-  width: var(--md-panel);
+  width: 100%;
   margin-inline: auto;
   position: relative;              /* the rail anchors to this */
   display: grid;
@@ -2209,20 +1979,15 @@
   }
   .md-cutaway-panel:last-child { border-bottom: none; }
   .md-fp-info { grid-template-columns: 1fr; }
-  .md-fp-info .md-fp-specs { grid-column: 1; grid-row: auto; }
+  .md-fp-info .md-fp-specs { grid-column: 1; grid-row: auto; margin-top: 1.25rem; }
+  /* a phone gives the slide more of the width; the peek still shows */
+  .md-fp-track { --fpslide: calc(var(--fpframe) * 0.9); }
 }
 
 @media (max-width: 1024px) {
   /* two and a bit — the peek is the point, so the count drops but never to a
      whole number */
   .md-video-track { --vcard: calc((var(--vframe) - var(--vgap) * 2) / 2.4); }
-  .md-pricing-inner { grid-template-columns: 1fr; }
-  /* Stacked, the lead is its own grid row, so sticky has nothing to travel
-     through — turned off explicitly rather than left to that coincidence, and
-     so it can never pin over the cards it is meant to sit beside. */
-  .md-price-lead { position: static; }
-  /* the two panels stack; each keeps its own ground and centred content */
-  .md-cta-secondary { grid-template-columns: 1fr; }
   /* the frame takes more of a narrower window, and the caption stacks above
      the controls once the two no longer fit side by side */
   .md-scenery-carousel { --frame: min(66vw, 108vh); }
@@ -2348,9 +2113,6 @@
   .md-spec-table.is-col-1 .md-spec-col-1,
   .md-spec-table.is-col-2 .md-spec-col-2 { display: table-cell; }
   .md-spec-key { width: 55%; }
-
-  .md-price-options li { flex-direction: column; gap: 0.35rem; }
-  .md-opt-price { align-self: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2361,11 +2123,9 @@
   .md-scenery-band-img,
   .md-similar-media img,
   .md-intro-media img { transition: none; transform: none !important; }
-  .md-fp-panel.is-active { animation: none; }
   .md-subnav-pill { transition: opacity 0.2s linear; }
   /* the plan stage stays in its finished, open state */
   .md-plan-stage { clip-path: none; }
-  .md-fp-select-chev { transition: none; }
   /* the modal still appears and dismisses, it just does not fade */
   .md-zoom { transition: none; }
   /* the stage rail's controls keep their hover tint and drop the scale */
@@ -2418,7 +2178,7 @@
    instead of two blues.
 
    Scoped to .md-cta-ctas and NOT to the band, because the Layout band's own
-   "Build This Floorplan" sits inside .md-fp-info, which is a light Surface
+   "Price this Floorplan" sits inside .md-fp-info, which is a light Surface
    panel. That one is blue on light grey and was always correct. */
 .md-cta-ctas .btn-primary {
   background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);

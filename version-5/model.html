@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/model.css?v=v5-md-20" />
+  <link rel="stylesheet" href="css/model.css?v=v5-md-26" />
   <!-- The brochure request form is a component shared with brochures.html,
        so it is its own pair of files rather than a port into two page
        stylesheets. See css/brochure-form.css for why. -->
@@ -142,10 +142,12 @@
     <!-- ===== FULL SPECS ===== -->
     <section class="md-specs" id="md-specs"><!-- injected --></section>
 
-    <!-- ===== PRICING ===== -->
-    <section class="md-pricing" id="md-pricing"><!-- injected --></section>
+    <!-- ===== RESOURCES — previous model years, brochure, manual. After specs
+         on a motorhome; on a towable the specs are dropped, so it sits under
+         the videos instead. ===== -->
+    <section class="md-resources" id="md-resources"><!-- injected --></section>
 
-    <!-- ===== SEE IT IN PERSON (+ brochure, compare) ===== -->
+    <!-- ===== SEE IT IN PERSON (+ compare) ===== -->
     <section class="md-ctas" id="md-ctas"><!-- injected --></section>
 
     <!-- ===== SIMILAR MODELS ===== -->
@@ -396,7 +398,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-5"></script>
+  <script src="js/models-data.js?v=v5-6"></script>
   <!-- Both are READ BY model-data.js, so they must load before it. The Jay
        Feather record derives its 16 floorplans from build-data (codes, sleeps,
        lengths, weights, prices) and its filter chips from floorplan-features,
@@ -404,8 +406,8 @@
        compare page can never quote different numbers for the same plan. -->
   <script src="js/build-data.js?v=v5-bp-19"></script>
   <script src="js/floorplan-features.js?v=v5-cmp-24"></script>
-  <script src="js/model-data.js?v=v5-md-18"></script>
-  <script src="js/model-detail.js?v=v5-md-19"></script>
+  <script src="js/model-data.js?v=v5-md-27"></script>
+  <script src="js/model-detail.js?v=v5-md-27"></script>
   <script src="js/brochure-form.js?v=v5-brf-3"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>

@@ -274,7 +274,7 @@ window.JAYCO = (function () {
    the moment it loads and warns in the console if the two have drifted, so the
    duplication cannot go quietly wrong.
    --------------------------------------------------- */
-window.JAYCO_MODEL_PAGES = ['swift', 'jay-feather'];
+window.JAYCO_MODEL_PAGES = ['swift', 'jay-feather', 'greyhawk'];
 
 /* ---------------------------------------------------
    Which floorplans have a Matterport walkthrough.
@@ -317,6 +317,11 @@ window.JAYCO_TOURS = {
     '29bhb': 'kuEjvCcL8Tg',
     '29qbh': 'guqqhXsbD9z',
     '30rkb': '4GuJB9u464t',
+  },
+  greyhawk: {
+    /* Only the 27U page carries a 360° button; the 29MV, 30Z and 31F pages
+       have none, so theirs render as the disabled tour control. */
+    '27u': 'MS4auzGZkd9',
   },
 };
 

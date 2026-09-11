@@ -35,6 +35,11 @@
   to = "/version-5/model.html?model=jay-feather"
   status = 302
 
+[[redirects]]
+  from = "/greyhawk"
+  to = "/version-5/model.html?model=greyhawk"
+  status = 302
+
 # /types/toy-haulers, /types/class-a, and the five others
 [[redirects]]
   from = "/types/:type"
