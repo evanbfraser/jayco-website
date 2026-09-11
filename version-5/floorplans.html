@@ -12,7 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/floorplans.css?v=v5-fpc-9" />
+  <link rel="stylesheet" href="css/floorplans.css?v=v5-fpc-13" />
+  <link rel="stylesheet" href="css/compare-table.css?v=v5-cmpt-2" />
 </head>
 <!-- data-header="solid": like compare and the builder, this page opens on
      canvas rather than a dark hero, so the white logo and nav need the bar
@@ -289,6 +290,32 @@
     </figure>
   </div>
 
+  <!-- Side by side — the comparison, on this page. The table is drawn into
+       #fpc-cmp-body by js/compare-table.js, the same table compare.html shows.
+       Opened from the compare tray; closed by the ×, the scrim or Escape. -->
+  <div class="fpc-overlay fpc-cmp" id="fpc-cmp" hidden role="dialog" aria-modal="true"
+       aria-label="Side by side floorplan comparison">
+    <div class="fpc-scrim" data-close="1"></div>
+    <div class="fpc-cmp-panel">
+      <button type="button" class="fpc-modal-x" id="fpc-cmp-x" aria-label="Close the comparison">&times;</button>
+      <div class="fpc-cmp-body" id="fpc-cmp-body" data-lenis-prevent></div>
+    </div>
+  </div>
+
+  <!-- Compare tray — the same one compare.html pins to its foot. Hidden until
+       a Compare toggle on a card is pressed; its Compare button opens
+       compare.html's side-by-side table with the picks. -->
+  <div class="fpc-tray" id="fpc-tray" hidden>
+    <div class="fpc-tray-inner">
+      <ul class="fpc-tray-slots" id="fpc-tray-slots"></ul>
+      <div class="fpc-tray-actions">
+        <span class="fpc-tray-count" id="fpc-tray-count" role="status" aria-live="polite"></span>
+        <button type="button" class="fpc-tray-clear" id="fpc-tray-clear">Clear</button>
+        <button type="button" class="btn-primary fpc-tray-go" id="fpc-tray-go">Compare</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
@@ -444,10 +471,11 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/models-data.js?v=v5-5"></script>
+  <script src="js/models-data.js?v=v5-6"></script>
   <script src="js/build-data.js?v=v5-bp-19"></script>
   <script src="js/floorplan-features.js?v=v5-cmp-24"></script>
-  <script src="js/floorplans.js?v=v5-fpc-9"></script>
+  <script src="js/compare-table.js?v=v5-cmpt-1"></script>
+  <script src="js/floorplans.js?v=v5-fpc-13"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

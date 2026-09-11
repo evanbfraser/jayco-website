@@ -106,7 +106,7 @@
 }
 .fpc-rail.is-open {
   width: var(--rail-w);
-  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2);
+  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2 - var(--fpc-tray-h, 0px));
   transition: width  0.44s var(--ease-morph),
               height 0.50s var(--ease-morph) 0.05s;
 }
@@ -128,7 +128,7 @@
    simply clipped while the container is short and wide. */
 .fpc-panel {
   width: var(--rail-w);
-  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2);
+  height: calc(100vh - var(--fpc-top) - var(--rail-gap) * 2 - var(--fpc-tray-h, 0px));
   padding: 1.1rem 1.1rem 1.5rem;
   overflow-y: hidden;
   overscroll-behavior: contain;
@@ -544,11 +544,11 @@
    and one selector for two components is how a stylesheet starts lying. */
 /* The track already reaches the viewport's right edge — .fpc-catalog carries a
    left gutter and no right one — so no negative margin is needed, and one here
-   would push it past the edge into a horizontal scrollbar. The trailing padding
-   is scroll room past the last card, not a gutter: it is inside the scroller,
-   so it travels with the content instead of holding the last card off the edge. */
+   would push it past the edge into a horizontal scrollbar. The room after the
+   last card is a spacer (::after below), not padding — padding would shrink
+   the content box that --fcard's percentage is measured against, and every card
+   with it. */
 .fpc-cards {
-  padding-right: var(--page-pad);
   --fgap: clamp(0.75rem, 1.2vw, 1.15rem);
   /* Clamped, not a fixed divisor per breakpoint: 2.6 cards of the catalog
      column is right at 1440 but only 226px at 1024, below which a drawing with
@@ -564,6 +564,16 @@
   scrollbar-width: none;
 }
 .fpc-cards::-webkit-scrollbar { display: none; }
+/* The end of the rail. A spacer after the last card, so the rail's last stop
+   holds that card off the edge of the viewport. floorplans.js (fitRead) sizes
+   it per rail through --fpc-end so the last stop also lands a card flush with
+   the track's left edge; the page gutter is the fallback, and the floor that
+   sizing never goes under. The negative margin cancels the flex gap in front of
+   it, so the room after the last card is exactly --fpc-end. */
+.fpc-cards::after {
+  content: ''; flex: 0 0 var(--fpc-end, var(--page-pad));
+  margin-left: calc(-1 * var(--fgap));
+}
 /* A column, so View Details lands on the same line across a rail of cards
    whose spec lines and badge rows are different heights. */
 .fpc-card {
@@ -587,6 +597,81 @@
   box-shadow: 0 4px 24px rgba(15,11,9,0.14);
 }
 .fpc-drawing { width: 100%; height: 100%; object-fit: contain; display: block; padding: 0.6rem; }
+
+/* ---------- Compare pick ----------
+   compare.css .cmp-pick, moved into the drawing's top-left corner — opposite
+   the tour and zoom, which own the right. Same 30px height, pill and white bed
+   as those two, so the corners read as one set of tools. */
+.fpc-pick {
+  position: absolute; top: 0.5rem; left: 0.5rem; z-index: 2;
+  height: 30px; display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0 0.7rem 0 0.5rem;
+  border-radius: 999px; border: 1px solid var(--warm-gray); background: #fff;
+  font-size: 0.62rem; letter-spacing: 0.06em; font-weight: 700; line-height: 1;
+  color: var(--text-dark); white-space: nowrap; cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.fpc-pick:not([disabled]):hover { border-color: var(--blue); }
+.fpc-pick:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+/* The fourth is refused, as on the compare page — dimmed so the limit reads. */
+.fpc-pick[disabled] { opacity: 0.45; cursor: default; }
+.fpc-pick-box {
+  display: grid; place-items: center;
+  width: 13px; height: 13px; border-radius: 4px;
+  border: 1.5px solid var(--warm-gray); background: #fff;
+  font-size: 0.62rem; line-height: 1; color: #fff;
+}
+.fpc-card.is-comparing .fpc-pick { border-color: var(--blue); color: var(--blue); }
+.fpc-card.is-comparing .fpc-pick-box { background: var(--blue); border-color: var(--blue); }
+.fpc-card.is-comparing .fpc-well { border-color: var(--blue); }
+
+/* ---------- Compare tray ----------
+   compare.css .cmp-tray, ported: pinned to the bottom, the picks as slots, the
+   count, Clear, and Compare — which opens compare.html's table with them. */
+.fpc-tray {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  background: var(--white);
+  border-top: 1px solid var(--warm-gray);
+  box-shadow: 0 -8px 30px rgba(15,11,9,0.14);
+}
+.fpc-tray-inner {
+  max-width: 1600px; margin: 0 auto;
+  padding: 0.7rem var(--page-pad);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.25rem;
+}
+.fpc-tray-slots { display: flex; gap: 0.6rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.fpc-slot {
+  position: relative; display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.35rem 2rem 0.35rem 0.35rem;
+  background: var(--white); border: 1px solid var(--warm-gray); border-radius: 14px;
+}
+.fpc-slot img { width: 56px; height: 30px; object-fit: contain; }
+.fpc-slot-name { font-size: 0.8rem; font-weight: 700; color: var(--text-dark); line-height: 1.15; }
+.fpc-slot-name small { display: block; font-weight: 500; font-size: 0.68rem; color: var(--text-mid); }
+.fpc-slot-x {
+  position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%);
+  border: none; background: none; font-size: 1.15rem; line-height: 1;
+  color: var(--text-mid); cursor: pointer; padding: 0.15rem 0.3rem;
+}
+.fpc-slot-x:hover { color: var(--text-dark); }
+.fpc-tray-actions { display: flex; align-items: center; gap: 0.9rem; flex: none; }
+.fpc-tray-count { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.fpc-tray-clear {
+  border: none; background: none; padding: 0;
+  font-size: 0.82rem; color: var(--text-mid); cursor: pointer;
+}
+.fpc-tray-clear:hover { color: var(--text-dark); }
+.fpc-tray-go { border: none; }
+.fpc-tray-go[disabled] { opacity: 0.45; cursor: default; }
+/* The chat button shares the tray's corner and layer; lift it clear. The body
+   gets the tray's height as bottom room so the footer can scroll above it. */
+.floorplans-page.has-tray .hero-chat-btn { bottom: calc(var(--fpc-tray-h, 5rem) + 1rem); }
+.floorplans-page.has-tray { padding-bottom: var(--fpc-tray-h, 5rem); }
+@media (max-width: 768px) {
+  .fpc-tray-inner { flex-direction: column; align-items: stretch; gap: 0.6rem; padding: 0.6rem var(--page-pad) 0.75rem; }
+  .fpc-slot img { width: 44px; height: 24px; }
+  .fpc-tray-actions { justify-content: space-between; }
+}
 
 /* ---------- Card tools ----------
    Ported from build.css .fp-card-tools / .fp-tour / .fp-zoom. Ink on light, not
@@ -825,6 +910,36 @@ body.fpc-modal-on,
    this class is never set. */
 body.fpc-sheet-on { overflow: hidden; }
 
+/* ---------- Side by side (the compare overlay) ----------
+   The table is css/compare-table.css's, shared with compare.html. This is only
+   where this page puts it: a panel over the page like the detail modal, with the
+   table as the one thing that scrolls — so its title and, on a phone, its plan
+   header and label column stay pinned inside it. */
+.fpc-cmp-panel {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  width: min(1200px, 100%); max-height: min(88vh, 900px);
+  background: var(--canvas); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.fpc-cmp-body {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+}
+/* compare-table.css bounds the pane against the compare page's header and tray
+   on a phone; in here the panel is the bound, so the pane simply fills it. */
+.fpc-cmp .cmp-table-scroll {
+  flex: 1 1 auto; min-height: 0; max-height: none;
+  overflow: auto; margin-top: 0; overscroll-behavior: contain;
+}
+.fpc-cmp .cmp-view-head {
+  position: sticky; top: 0; left: 0; z-index: 7;
+  background: var(--canvas); padding-bottom: 0.6rem;
+}
+/* above the pinned title, which would otherwise paint over it */
+.fpc-cmp .fpc-modal-x { z-index: 10; }
+
 /* ---------- Enlarged drawing ---------- */
 .fpc-zoom-x {
   position: absolute; top: clamp(0.75rem, 2vw, 1.5rem); right: clamp(0.75rem, 2vw, 1.5rem);
@@ -887,7 +1002,7 @@ body.fpc-sheet-on { overflow: hidden; }
   }
   .fpc-rail.is-open {
     width: auto;
-    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2);
+    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2 - var(--fpc-tray-h, 0px));
     transition: height 0.5s var(--ease-morph);
   }
 
@@ -895,7 +1010,7 @@ body.fpc-sheet-on { overflow: hidden; }
   .fpc-panel,
   .fpc-rail.is-open .fpc-panel {
     width: 100%;
-    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2);
+    height: calc(100dvh - var(--fpc-top) - var(--rail-gap) * 2 - var(--fpc-tray-h, 0px));
   }
 
   /* The x keeps its desktop rule and is load-bearing here: on a touch screen
@@ -1007,6 +1122,8 @@ body.fpc-sheet-on { overflow: hidden; }
        decide. */
     --fcard: min(calc(100vw - 5.5rem), 320px);
   }
+  /* the row carries the end room down here (its padding-right above) */
+  .fpc-cards::after { display: none; }
   .fpc-model-render { width: 84px; height: 52px; }
   .fpc-model-ctas .btn-primary,
   .fpc-model-ctas .btn-secondary-light { padding: 0.7rem 1.15rem; }

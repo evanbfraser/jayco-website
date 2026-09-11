@@ -114,6 +114,7 @@
         const row = {
           key: modelId + '__' + f.id,
           modelId: modelId, model: m.name, planId: f.id, name: f.name,
+          year: m.year, modelImg: m.img,       // read by the Side by side table
           category: m.category, catType: cat.type,
           img: f.img,
           price: f.price == null ? null : m.basePrice + f.price,
@@ -539,6 +540,110 @@
   const TOUR_ICON = `<svg width="18" height="18" viewBox="0 0 216 216" fill="currentColor" aria-hidden="true" focusable="false"><path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/></svg>`;
   const ZOOM_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>`;
 
+  /* ---------- Compare picks ----------
+     Mirrors compare.html: a Compare toggle on each card, three at most, a tray
+     pinned to the bottom, and ?c=model__plan,... in the URL so a reload keeps
+     them. The tray's Compare button opens the Side by side table right here, in
+     an overlay — drawn by js/compare-table.js, the same table compare.html shows,
+     so there is one comparison on the site rather than two copies of it. */
+  const MAX_PICK = 3;
+  const picked = [];
+
+  /* The label and its tick are the only part that changes with state; card()
+     and paintPicks() both write it, so it lives in one place (as pickInner does
+     in compare.js). Inner html only, so a pick patches the button rather than
+     replacing it and keyboard focus stays on the control just pressed. */
+  const pickInner = (on) =>
+    `<span class="fpc-pick-box" aria-hidden="true">${on ? '&#10003;' : ''}</span>${on ? 'Comparing' : 'Compare'}`;
+
+  function pickBtn(r) {
+    const on = picked.indexOf(r.key) > -1;
+    const full = picked.length >= MAX_PICK && !on;
+    return `<button type="button" class="fpc-pick" data-pick="${esc(r.key)}"${full ? ' disabled' : ''}
+      aria-pressed="${on ? 'true' : 'false'}"
+      aria-label="Compare the ${esc(r.model + ' ' + r.name)}">${pickInner(on)}</button>`;
+  }
+
+  function paintPicks() {
+    const full = picked.length >= MAX_PICK;
+    $$('.fpc-pick').forEach((b) => {
+      const on = picked.indexOf(b.dataset.pick) > -1;
+      b.disabled = full && !on;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.innerHTML = pickInner(on);
+      const c = b.closest('.fpc-card');
+      if (c) c.classList.toggle('is-comparing', on);
+    });
+  }
+
+  /* The tray's height moves with width (it stacks on a phone), and the chat
+     button, the filter panel and the page's foot all have to clear it — so it
+     is measured, as compare.js measures its own. */
+  function measureTray() {
+    const t = $('#fpc-tray');
+    const h = !t || t.hidden ? 0 : Math.round(t.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--fpc-tray-h', h + 'px');
+  }
+
+  function renderTray() {
+    const t = $('#fpc-tray');
+    if (!t) return;
+    t.hidden = picked.length === 0;
+    document.body.classList.toggle('has-tray', picked.length > 0);
+    $('#fpc-tray-slots').innerHTML = picked.map((k) => {
+      const r = ROWS.find((x) => x.key === k);
+      if (!r) return '';
+      return `<li class="fpc-slot">
+        <img src="${esc(r.img)}" alt="" loading="lazy" />
+        <span class="fpc-slot-name">${esc(r.name)}<small>${esc(r.model)}</small></span>
+        <button type="button" class="fpc-slot-x" data-drop="${esc(k)}"
+          aria-label="Remove the ${esc(r.model + ' ' + r.name)}">&times;</button>
+      </li>`;
+    }).join('');
+    $('#fpc-tray-count').textContent = picked.length + ' of ' + MAX_PICK;
+    $('#fpc-tray-go').disabled = picked.length < 2;
+    measureTray();
+  }
+
+  /* replaceState, never pushState — the same rule compare.js keeps: a pick is
+     not a page, and a history entry per click would break the back button. */
+  function syncPicksURL() {
+    if (!window.history || !window.history.replaceState) return;
+    const q = picked.length ? '?c=' + picked.join(',') : '';
+    window.history.replaceState({}, '', 'floorplans.html' + q + window.location.hash);
+  }
+  function readPicks() {
+    const c = new URLSearchParams(window.location.search).get('c');
+    if (!c) return;
+    c.split(',').forEach((k) => {
+      if (picked.length < MAX_PICK && ROWS.some((r) => r.key === k) && picked.indexOf(k) === -1) picked.push(k);
+    });
+  }
+
+  function pick(key) {
+    const i = picked.indexOf(key);
+    if (i > -1) picked.splice(i, 1);
+    else {
+      if (picked.length >= MAX_PICK) return;     // refuse the 4th outright, as compare.js does
+      picked.push(key);
+    }
+    syncPicksURL();
+    paintPicks(); renderTray(); refresh();
+  }
+
+  /* The comparison, on this page. Built fresh each time it opens so it is
+     always the tray's current picks, and shown through the same show()/hide()
+     every overlay here uses: focus in and trapped, Escape and the scrim close
+     it, focus goes back to the Compare button. */
+  function openCompare(src) {
+    const cols = picked.map((k) => ROWS.find((x) => x.key === k)).filter(Boolean);
+    if (cols.length < 2 || !window.JAYCO_COMPARE_TABLE) return;
+    $('#fpc-cmp-body').innerHTML = window.JAYCO_COMPARE_TABLE.html(cols);
+    show($('#fpc-cmp'), $('#fpc-cmp-x'), src);
+    const pane = $('#fpc-cmp .cmp-table-scroll');
+    if (pane) { pane.scrollTop = 0; pane.scrollLeft = 0; }
+  }
+
   function tools(r) {
     const who = esc(r.model + ' ' + r.name);
     const label = '<span class="fpc-tour-label">View 3D Tour</span>';
@@ -561,9 +666,10 @@
       ? '<p class="fpc-price fpc-price--tbd">Pricing to come</p>'
       : `<p class="fpc-price"><span class="fpc-price-label">MSRP Starting at</span>
            <span class="fpc-price-fig">${esc(money(r.price))}</span></p>`;
-    return `<li class="fpc-card">
+    return `<li class="fpc-card${picked.indexOf(r.key) > -1 ? ' is-comparing' : ''}">
       <div class="fpc-well">
         <img class="fpc-drawing" src="${esc(r.img)}" alt="" loading="lazy" decoding="async" />
+        ${pickBtn(r)}
         ${tools(r)}
       </div>
       <div class="fpc-card-body">
@@ -650,7 +756,8 @@
       /* measured, not computed from the CSS card width — the two would
          otherwise have to be kept in sync by hand across the breakpoints */
       function step() {
-        const c = $('.fpc-card', track);
+        /* the first card a filter has NOT hidden — a hidden one measures 0 wide */
+        const c = $('.fpc-card:not([hidden])', track);
         if (!c) return track.clientWidth;
         const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
         return c.getBoundingClientRect().width + gap;
@@ -665,8 +772,43 @@
         return st * Math.max(1, Math.floor((track.clientWidth - lead) / st));
       }
 
+      /* ---- The end of the rail ----
+         Mid-rail, paging moves whole cards, so a card always lands flush with the
+         track's left edge. The END was the exception: the last stop was wherever
+         the content ran out, which left a card cut off at the left edge and the
+         last card pressed against the glass. So the room after the last card is
+         sized to
+         make the last stop a card boundary too: k whole cards fit with at least
+         the page gutter after them, and the spacer is what is left over. Then
+         (content + spacer − width) is exactly (cards − k) steps — a card start.
+
+         Split read / write like sync() so a resize reads all 27 rails before it
+         writes any. The room is a spacer after the last card (--fpc-end on
+         .fpc-cards::after), not padding: padding would shrink the box the card
+         width is a percentage of. Below 769 the ROW is the scroller (see
+         floorplans.css), so the value is cleared and the stylesheet's applies. */
+      function fitRead() {
+        if (s.el.hidden) return undefined;                // leave it; re-fit when shown
+        if (getComputedStyle(track).overflowX === 'visible') return null;
+        const st = step();
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        const w = track.clientWidth;
+        const catalog = $('.fpc-catalog');
+        const gutter = catalog ? parseFloat(getComputedStyle(catalog).paddingLeft) || 0 : 0;
+        if (!st || !w) return undefined;
+        const k = Math.max(1, Math.floor((w - gutter + gap) / st));
+        return Math.max(gutter, w - (k * st - gap));
+      }
+      function fitWrite(end) {
+        if (end === undefined) return;
+        if (end === null) track.style.removeProperty('--fpc-end');
+        else track.style.setProperty('--fpc-end', end + 'px');
+      }
+
       s.rail = {
         track: track,
+        fitRead: fitRead,
+        fitWrite: fitWrite,
         go: (dir) => track.scrollBy({ left: dir * page(), behavior: reduce ? 'auto' : 'smooth' }),
         /* split so applyFilters() can read all 27 and then write all 27,
            instead of interleaving and forcing 27 layouts */
@@ -683,6 +825,10 @@
   }
 
   function syncAllRails() {
+    /* size every rail's end first (read all, then write all), then sync the
+       arrows against the new scroll widths */
+    const f = SECTIONS.map((s) => (s.rail ? s.rail.fitRead() : undefined));
+    SECTIONS.forEach((s, i) => { if (s.rail) s.rail.fitWrite(f[i]); });
     const m = SECTIONS.map((s) => (s.rail ? s.rail.read() : null));
     SECTIONS.forEach((s, i) => { if (s.rail) s.rail.write(m[i]); });
   }
@@ -1100,6 +1246,8 @@
         if (s && s.rail) s.rail.go(nav.dataset.dir === 'prev' ? -1 : 1);
         return;
       }
+      const p = e.target.closest('.fpc-pick');
+      if (p) { if (!p.disabled) pick(p.dataset.pick); return; }
       const z = e.target.closest('.fpc-zoom');
       if (z) { openZoom(z.dataset.key, z); return; }
       const d = e.target.closest('.fpc-details');
@@ -1108,6 +1256,21 @@
 
     $('#fpc-modal-x').addEventListener('click', hide);
     $('#fpc-zoom-x').addEventListener('click', hide);
+    $('#fpc-cmp-x').addEventListener('click', hide);
+
+    /* The compare tray: drop one, clear all, or open the Side by side table. */
+    const tray = $('#fpc-tray');
+    if (tray) tray.addEventListener('click', (e) => {
+      const x = e.target.closest('[data-drop]');
+      if (x) { pick(x.dataset.drop); return; }
+      if (e.target.closest('#fpc-tray-clear')) {
+        picked.length = 0;
+        syncPicksURL(); paintPicks(); renderTray(); refresh();
+        return;
+      }
+      const go = e.target.closest('#fpc-tray-go');
+      if (go && !go.disabled) openCompare(go);
+    });
     $$('.fpc-overlay').forEach((o) => o.addEventListener('click', (e) => {
       if (e.target.dataset.close) hide();
     }));
@@ -1124,7 +1287,7 @@
     let rq = 0;
     window.addEventListener('resize', () => {
       if (rq) return;
-      rq = requestAnimationFrame(() => { rq = 0; syncAllRails(); });
+      rq = requestAnimationFrame(() => { rq = 0; syncAllRails(); measureTray(); });
     });
 
   }
@@ -1224,15 +1387,17 @@
 
   renderFacets();
   renderJump();
+  readPicks();          // before the cards render, so a ?c= link paints them picked
   renderCatalog();
   initRails();
   wire();
   applyFilters();
+  renderTray();
   initSpy();
 
   /* A rail measured before its drawings land measures wrong, so every rail is
      re-read once the page has actually loaded. */
-  window.addEventListener('load', () => { syncAllRails(); refresh(); }, { once: true });
+  window.addEventListener('load', () => { syncAllRails(); refresh(); measureTray(); }, { once: true });
 
   document.addEventListener('jayco:animations-ready', initRowReveal, { once: true });
 }());

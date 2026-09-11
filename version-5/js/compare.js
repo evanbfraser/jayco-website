@@ -561,86 +561,16 @@
   }
 
   /* ---------- Compare table ----------
-     Ported from version-4's renderSpecs(): a label column plus one column per
-     plan, rows unioned across the columns so a spec one plan publishes and
-     another does not still gets a row, filled with an em dash. Group keys are
-     stable across Jayco's data; row keys are not. */
-  const GROUPS = ['Weights', 'Measurements', 'Tank Capacities', 'Miscellaneous'];
-
+     Drawn by js/compare-table.js, which floorplans.html shares, so the two
+     pages show one table rather than two copies that drift. This page owns
+     where it goes (#cmp-view, below the grid) and when it shows. */
   function renderCompare() {
     const cols = state.picked.map((k) => ROWS.find((x) => x.key === k)).filter(Boolean);
     const view = $('#cmp-view');
-    if (cols.length < 2) { view.hidden = true; view.innerHTML = ''; return; }
-
-    const head = `<tr><th class="cmp-key">Specification</th>${cols.map((r, i) => `
-      <th class="cmp-col cmp-col-${i}">
-        <span class="cmp-col-head">
-          <span class="cmp-col-media">
-            <span class="cmp-col-render-box"><img class="cmp-col-render" src="${esc(r.modelImg)}" alt="" /><span class="cmp-media-note">Exterior images may differ.</span></span>
-            <span class="cmp-col-plan-box"><img class="cmp-col-plan" src="${esc(r.img)}" alt="${esc(r.model + ' ' + r.name)} floorplan" /></span>
-          </span>
-          <span class="cmp-col-text">
-            <span class="cmp-col-name">${esc(r.name)}</span>
-            <span class="cmp-col-model"><span class="cmp-col-year">${esc(r.year)} </span>${esc(r.model)}</span>
-            <span class="cmp-col-price">${r.price == null ? 'Pricing to come' : money(r.price)}</span>
-          </span>
-        </span>
-      </th>`).join('')}</tr>`;
-
-    /* The headline four first — they are why someone opened this view. */
-    const lead = [
-      ['Sleeps',     cols.map((r) => (r.sleeps || null))],
-      ['Length',     cols.map((r) => r.lengthText)],
-      ['Dry weight', cols.map((r) => (r.weight ? r.weight.toLocaleString('en-US') + ' lb' : null))],
-      ['Slide-out',  cols.map((r) => (r.slide ? 'Yes' : 'No'))],
-    ];
-
-    const body = [];
-    body.push(groupRow('At a glance', cols.length));
-    lead.forEach(([label, vals]) => body.push(specRow(label, vals)));
-
-    GROUPS.forEach((g) => {
-      /* union of row keys, in the order Jayco lists them */
-      const keys = [];
-      cols.forEach((r) => Object.keys((r.specs && r.specs[g]) || {}).forEach((k) => {
-        if (keys.indexOf(k) === -1) keys.push(k);
-      }));
-      if (!keys.length) return;
-      body.push(groupRow(g, cols.length));
-      keys.forEach((k) => body.push(specRow(k, cols.map((r) => (r.specs && r.specs[g] && r.specs[g][k]) || null))));
-    });
-
-    /* No column switcher. On a phone the table scrolls sideways instead, which
-       keeps all three plans in one continuous surface — the whole point of the
-       view is reading them against each other, and a switcher made that a memory
-       test. The spec label column stays pinned so a row never loses its name. */
+    if (cols.length < 2 || !window.JAYCO_COMPARE_TABLE) { view.hidden = true; view.innerHTML = ''; return; }
     view.hidden = false;
-    view.innerHTML = `
-      <div class="cmp-table-scroll" tabindex="0" role="region" aria-label="Floorplan specifications, scrolls sideways">
-        <div class="cmp-view-head">
-          <h2 class="cmp-view-title">Side by side</h2>
-        </div>
-        <table class="cmp-table">
-          <thead>${head}</thead>
-          <tbody>${body.join('')}</tbody>
-        </table>
-      </div>`;
-
+    view.innerHTML = window.JAYCO_COMPARE_TABLE.html(cols);
     measureChart();   // the head only exists now, and the pane is sized against it
-  }
-
-  /* The label is wrapped rather than set directly on the cell so it can be made
-     sticky on a phone. A sticky element is clamped to its containing block, and
-     this cell already spans the whole table — no room to shift, so sticking the
-     cell itself does nothing. The span has the full cell to slide within. */
-  const groupRow = (name, n) =>
-    `<tr class="cmp-group"><th colspan="${n + 1}"><span class="cmp-group-label">${esc(name)}</span></th></tr>`;
-
-  function specRow(label, vals) {
-    return `<tr>
-      <td class="cmp-key">${esc(label)}</td>
-      ${vals.map((v, i) => `<td class="cmp-col cmp-col-${i}">${v == null || v === '' ? '&mdash;' : esc(v)}</td>`).join('')}
-    </tr>`;
   }
 
   /* ---------- URL ----------
@@ -858,6 +788,31 @@
     else window.scrollTo({ top: y, behavior: 'smooth' });
   }
 
+  /* The arrival jump from the floorplans page's tray. Not scrollToView(): that
+     one animates, which is right for a button pressed a screen away and wrong
+     for a page that has just loaded 40,000px above its target. Lenis caches the
+     scroll limit, so it is told the document's real height first (as toTop()
+     does) — otherwise the jump is clamped short of the table. */
+  function jumpToView() {
+    const v = $('#cmp-view');
+    if (v.hidden) return;
+    /* The whole view, "Side by side" heading included, landed clear of the
+       floating filter bar — measured, since the bar is fixed over the page and
+       its bottom edge, not the site header's, is what hides the heading. */
+    const bar = $('#cmp-bar');
+    const clear = bar && getComputedStyle(bar).position !== 'static'
+      ? bar.getBoundingClientRect().bottom + 16
+      : (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cmp-chart-top')) || 90) + 8;
+    const lenis = window.__jaycoLenis;
+    if (lenis && lenis.resize) lenis.resize();
+    const y = v.getBoundingClientRect().top + window.pageYOffset - clear;
+    if (lenis && lenis.scrollTo) {
+      lenis.scrollTo(y, { immediate: true, force: true });
+    } else {
+      window.scrollTo(0, y);
+    }
+  }
+
   const toggle = (set, v) => (set.has(v) ? set.delete(v) : set.add(v));
 
   /* ---------- Boot ---------- */
@@ -871,6 +826,17 @@
   renderTray();
   if (state.picked.length >= 2) renderCompare();
   wire();
-  window.addEventListener('load', () => { refresh(); measureTray(); }, { once: true });
+  /* Arriving from the floorplans page's compare tray (?view=1): the table is
+     already built above, but it sits below all 181 cards — take the reader
+     straight to it. After load, so the grid's images have their height and the
+     target is where it will stay. */
+  const arrivedToView = state.picked.length >= 2 &&
+    new URLSearchParams(window.location.search).has('view');
+  window.addEventListener('load', () => {
+    refresh(); measureTray();
+    /* Jump, then re-align twice: late fonts and the grid's images can still move
+       the table after load, and a landing that drifts off it is no landing. */
+    if (arrivedToView) { jumpToView(); setTimeout(jumpToView, 500); setTimeout(jumpToView, 1400); }
+  }, { once: true });
   window.addEventListener('resize', measureTray);
 }());

@@ -1,0 +1,200 @@
+/* ===================================================
+   Jayco — the Side by side comparison table
+   ---------------------------------------------------
+   Moved out of compare.css so floorplans.html can draw the same table (see
+   js/compare-table.js). Loaded by compare.html and floorplans.html. Where each
+   page PUTS the table stays in that page's own stylesheet — .cmp-table-wrap in
+   compare.css, .fpc-cmp in floorplans.css.
+   =================================================== */
+
+/* ---------- Compare table ----------
+   Ported from version-4/css/model.css .md-spec-table. Same structure: a label
+   column plus one column per plan and a group row spanning the width. Where v4
+   swapped in a column switcher on small screens, this scrolls sideways with the
+   label column pinned — comparing is the task, so all three plans stay on one
+   surface. */
+.cmp-view-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+  font-weight: 800; color: var(--text-dark);
+}
+.cmp-table-scroll { overflow-x: auto; margin-top: 1.5rem; }
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.cmp-table th,
+.cmp-table td {
+  text-align: left; padding: 0.95rem 1rem 0.95rem 0;
+  border-bottom: 1px solid var(--hairline); vertical-align: top;
+}
+.cmp-table thead th { vertical-align: bottom; padding-bottom: 1.2rem; }
+/* Same two-block treatment as the card, so the table header reads as the same
+   object the user picked from the grid. */
+/* Unlike the grid card, the table header is not a card — the column already is
+   the object. So the two images run side by side and small, a pair of
+   thumbnails identifying the column, with the name below carrying the weight.
+   No frame and no ground: at this size a border reads as chrome around chrome. */
+/* Height is stated outright rather than derived from aspect-ratio. These boxes
+   are flex items inside a table cell, and WebKit resolves aspect-ratio against
+   an indefinite flex basis there — the box grows to absurd heights while
+   object-fit quietly keeps the picture small, so the cell looks empty rather
+   than broken. Chrome sized it correctly and hid the bug. A fixed height is
+   deterministic in every engine; the images letterbox inside it either way. */
+.cmp-col-media {
+  display: flex; align-items: center; gap: 0.5rem;
+  height: 4.6rem;
+  margin-bottom: 0.6rem;
+}
+.cmp-col-render-box,
+.cmp-col-plan-box {
+  display: block; flex: 1 1 0; min-width: 0; height: 100%;
+}
+/* The note is overlaid on the card, where the render box is ~330px wide and has
+   room to spare. Here that box is a 4.6rem-tall thumbnail sharing the column
+   with the floorplan — roughly 130px, narrower than the sentence itself, so an
+   absolutely-positioned note laid across it ran over the coach and out into the
+   drawing beside it. Under the thumbnail instead, centred beneath the coach,
+   still qualifying the exterior and nothing else. Colour and size are set here
+   rather than inherited from compare.css's card rule, because floorplans.html
+   draws this table too and does not load compare.css. */
+.cmp-col-render-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.cmp-col-render-box .cmp-col-render { flex: 1 1 auto; min-height: 0; }
+.cmp-col-render-box .cmp-media-note {
+  position: static;
+  display: block;
+  flex: none;
+  margin-top: 0.15rem;
+  text-align: center;
+  font-size: 0.56rem;
+  line-height: 1.25;
+  color: var(--text-mid);
+  pointer-events: none;
+}
+.cmp-col-render,
+.cmp-col-plan { display: block; width: 100%; height: 100%; object-fit: contain; }
+.cmp-col-head { display: block; }
+.cmp-col-text { display: block; }
+.cmp-col-name {
+  display: block; font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800; color: var(--text-dark);
+}
+.cmp-col-model { display: block; font-size: 0.78rem; color: var(--text-mid); margin-top: 0.1rem; }
+.cmp-col-price { display: block; margin-top: 0.35rem; font-weight: 700; color: var(--blue); }
+
+.cmp-key { color: var(--text-mid); width: 30%; }
+.cmp-table td.cmp-col { font-weight: 600; color: var(--text-dark); }
+.cmp-group th {
+  padding-top: 2.4rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-dark);
+  border-bottom-color: rgba(15,11,9,0.28);
+}
+
+@media (max-width: 900px) {
+  /* Three dense columns do not fit a phone, so the table scrolls sideways
+     rather than showing one plan at a time. Comparing is the whole task; a
+     switcher turned it into remembering. */
+  /* The chart becomes its own scroll pane, bounded to what the sticky bar and
+     the tray leave of the screen. That bound is what lets the header row pin:
+     overflow-x already makes this a scroll container in BOTH axes (a `visible`
+     overflow-y is blockified to `auto` beside it), so a sticky `top` resolves
+     against this box rather than the viewport. Without a height it never
+     scrolls vertically, and the header just leaves with the page. */
+  /* The title lives INSIDE the pane so it cannot be separated from the table.
+     Pinned from outside it, the pane slides up underneath and the title ends up
+     floating over the rows. In here it shares the pane's scrollport, so it holds
+     the top-left corner in both axes and the plan header pins directly below it.
+     Its width is the pane's visible width, not the table's, which is what gives
+     the horizontal stick something to travel against. */
+  .cmp-view-head {
+    position: sticky;
+    top: 0; left: 0;
+    z-index: 7;
+    background: var(--canvas);
+    padding-bottom: 0.6rem;
+  }
+
+  .cmp-table-scroll {
+    overflow: auto;
+    margin-top: 0;
+    max-height: calc(100dvh - var(--cmp-chart-top, 8rem) - var(--cmp-tray-h, 5rem) - 1.5rem);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;      /* a swipe past either end must not move the page */
+    scroll-snap-type: x proximity;
+    /* The snapport has to start where the pinned label column ends. Without
+       this, snapping aligns a plan to the container's left edge — which is
+       underneath the sticky cell — and the first column can never be read. */
+    scroll-padding-left: 8.5rem;
+  }
+  .cmp-table-scroll:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .cmp-table { width: auto; min-width: 100%; }
+
+  /* The plan header rides the top of the screen so you never lose track of which
+     column you are reading once the specs get long. */
+  .cmp-table thead th {
+    position: sticky;
+    top: var(--cmp-view-head-h, 3rem); /* directly under the pinned title */
+    z-index: 3;
+    background: var(--canvas);
+    box-shadow: 0 1px 0 var(--hairline);
+  }
+  .cmp-table thead th.cmp-key { z-index: 4; }   /* the corner sits above both */
+
+  /* Pinned so a row never loses its label while the plans slide past it. */
+  .cmp-table th.cmp-key,
+  .cmp-table td.cmp-key {
+    position: sticky; left: 0; z-index: 2;
+    width: 8.5rem; min-width: 8.5rem;
+    background: var(--canvas);
+    box-shadow: 1px 0 0 var(--hairline);
+  }
+  /* The group row spans every column, so the cell cannot be stuck — sticky is
+     clamped to the containing block and a full-width cell has nowhere to go.
+     Stick the label inside it instead, so "At a glance" and "Weights" stay put
+     while the plans scroll past underneath them. */
+  .cmp-group th { background: var(--canvas); }
+  .cmp-group-label {
+    position: sticky; left: 0; z-index: 2;
+    display: inline-block;
+    background: var(--canvas);
+    padding-right: 0.75rem;
+  }
+
+  /* Wider than the 12.5rem it needs, to pay for the left padding below without
+     squeezing the model name back into a second line. */
+  .cmp-table .cmp-col { min-width: 13.5rem; scroll-snap-align: start; }
+  /* The base rule sets padding-left to 0, which puts the first column's values
+     hard against the pinned column's divider. */
+  .cmp-table th.cmp-col,
+  .cmp-table td.cmp-col { padding-left: 0.9rem; padding-right: 1.1rem; }
+
+  /* Images above the name, as on desktop but smaller. They sat beside it to
+     save height, but that strip was 5.4rem wide, which left the render box
+     ~2.6rem — narrower than "Exterior images may differ." The note then took
+     the thumbnail's whole height and there was no coach left for it to
+     qualify. Across the column the pair gets ~11rem between them: the coach
+     shows at a fixed height and the note sits centred under it in two short
+     lines. Fixed heights, not aspect-ratio, for the WebKit reason given on
+     .cmp-col-media above. */
+  .cmp-col-head { display: block; }
+  .cmp-col-media { width: 100%; height: auto; margin-bottom: 0.45rem; gap: 0.35rem; align-items: flex-start; }
+  .cmp-col-render-box,
+  .cmp-col-plan-box { height: auto; }
+  .cmp-col-render-box .cmp-col-render,
+  .cmp-col-plan-box .cmp-col-plan { flex: none; height: 2.4rem; }
+  .cmp-col-text { display: block; }
+
+  /* The header cell hugs its contents and sits at the top of the chart — less
+     padding than desktop, which spaces a larger stacked block. */
+  .cmp-table thead th { vertical-align: top; padding-top: 0.5rem; padding-bottom: 0.6rem; }
+  .cmp-col-name { font-size: 1rem; line-height: 1.2; }
+  .cmp-col-model { margin-top: 0; line-height: 1.25; }
+  .cmp-col-price { margin-top: 0.15rem; }
+  /* Every column is the same model year, so on a phone the year is pure width —
+     and width here is height, because it is what pushes the model name onto a
+     second line and drags the whole header row down with it. */
+  .cmp-col-year { display: none; }
+}
