@@ -68,14 +68,19 @@ window.JAYCO_VIDEOS = {
   verified: '2026-09-05',
   channel: 'https://www.youtube.com/@jayco',
 
+  /* `image` names the shelf's main photograph — client photography in
+     assets/videos/, served from assets/videos/web/section-<image>-1200.webp and
+     -2000.webp. `focus` is the object-position its crop holds on: the frame is
+     wider than the 3:2 photographs on a desktop and taller than them on a
+     phone. */
   categories: [
-    { id: 'towable', name: 'Towable Walkthroughs' },
-    { id: 'motorized', name: 'Motorized Walkthroughs' },
-    { id: 'difference', name: 'The Jayco Difference' },
-    { id: 'why', name: 'Why Buy a Jayco' },
-    { id: 'owners', name: 'Owner Stories' },
-    { id: 'questions', name: 'RV Questions' },
-    { id: 'reviews', name: 'Reviews & Tours' },
+    { id: 'towable', name: 'Towable Walkthroughs', image: 'walkthrough-towable', focus: '50% 55%' },
+    { id: 'motorized', name: 'Motorized Walkthroughs', image: 'walkthrough-motorized', focus: '50% 58%' },
+    { id: 'difference', name: 'The Jayco Difference', image: 'jayco-difference', focus: '55% 58%' },
+    { id: 'why', name: 'Why Buy a Jayco', image: 'why-buy', focus: '55% 38%' },
+    { id: 'owners', name: 'Owner Stories', image: 'owners-stories', focus: '40% 55%' },
+    { id: 'questions', name: 'RV Questions', image: 'questions', focus: '58% 42%' },
+    { id: 'reviews', name: 'Reviews & Tours', image: 'reviews', focus: '52% 60%' },
   ],
 
   items: [

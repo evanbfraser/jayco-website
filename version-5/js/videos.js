@@ -98,33 +98,45 @@
      floorplans catalog): the track scrolls, the arrows are geometry read off
      scrollLeft rather than a counter, so a swipe, a trackpad flick and a click
      all leave the buttons telling the truth. */
+  /* A shelf is a STAGE and a CAROUSEL. The stage is the topic's photograph in a
+     rounded frame with the topic's name set low on the left; the carousel is
+     lifted up over the foot of it, an arrow either side.
+
+     The photograph is alt="" on purpose: it sets the scene for the heading
+     beside it and says nothing the heading does not, so reading it out would
+     only put a picture description between a screen reader and the videos. */
   function shelf(c) {
     const items = DATA.items.filter((v) => v.cat === c.id);
     if (!items.length) return '';
+    const base = c.image ? '../assets/videos/web/section-' + esc(c.image) : '';
+    const arrow = (dir) => `<button type="button" class="vd-arrow" data-rail="${esc(c.id)}" data-dir="${dir}"
+        aria-controls="vd-rail-${esc(c.id)}"
+        aria-label="${dir < 0 ? 'Previous' : 'Next'} ${esc(c.name)} video"${dir < 0 ? ' disabled' : ''}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true"><path d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>
+      </button>`;
     return `<section class="vd-shelf" data-shelf="${esc(c.id)}"
       aria-labelledby="vd-sh-${esc(c.id)}">
-      <div class="vd-shelf-head">
-        <h2 class="vd-shelf-h" id="vd-sh-${esc(c.id)}">${esc(c.name)}</h2>
-        <div class="vd-shelf-tools">
-          <button type="button" class="vd-shelf-all" data-cat="${esc(c.id)}">
-            See all ${items.length}</button>
-          <span class="vd-arrows">
-            <button type="button" class="vd-arrow" data-rail="${esc(c.id)}" data-dir="-1"
-              aria-label="Scroll ${esc(c.name)} left" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-            </button>
-            <button type="button" class="vd-arrow" data-rail="${esc(c.id)}" data-dir="1"
-              aria-label="Scroll ${esc(c.name)} right">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-            </button>
-          </span>
+      <div class="vd-stage">
+        ${base ? `<div class="vd-stage-media">
+          <img class="vd-stage-img" src="${base}-2000.webp"
+            srcset="${base}-1200.webp 1200w, ${base}-2000.webp 2000w"
+            sizes="(max-width: 1440px) 90vw, 1300px"
+            style="object-position: ${esc(c.focus || '50% 50%')}"
+            alt="" loading="lazy" decoding="async" />
+        </div>` : ''}
+        <span class="vd-stage-scrim" aria-hidden="true"></span>
+        <div class="vd-stage-head">
+          <h2 class="vd-shelf-h" id="vd-sh-${esc(c.id)}">${esc(c.name)}</h2>
+          <button type="button" class="vd-shelf-all" data-cat="${esc(c.id)}">See all ${items.length}</button>
         </div>
       </div>
-      <ul class="vd-rail" id="vd-rail-${esc(c.id)}" role="list">${items.map(card).join('')}</ul>
+      <div class="vd-carousel">
+        ${arrow(-1)}
+        <ul class="vd-rail" id="vd-rail-${esc(c.id)}" role="list">${items.map(card).join('')}</ul>
+        ${arrow(1)}
+      </div>
     </section>`;
   }
 
@@ -144,9 +156,11 @@
     });
     wireThumbs();
     syncRails();
+    initStageZoom();
   }
 
   function renderGrid(items) {
+    killStageZoom();
     $('#vd-shelves').innerHTML = '';
     $('#vd-shelves').hidden = true;
     $('#vd-grid').innerHTML = items.map(card).join('');
@@ -155,16 +169,37 @@
   }
 
   /* ---------- Rail geometry ----------
-     A whole card-widths' worth of what is on screen, so the half-visible card at
-     the edge becomes the first full one after a click and nothing is scrolled
-     past unseen. Measured off a real card rather than computed from the CSS
-     width, which would have to be kept in step by hand across the breakpoints. */
+     ONE CARD per click: the next one moves in and the first one moves out. The
+     carousel is sized in videos.css to hold a whole number of cards, so a step
+     of exactly one card-plus-gap keeps every stop on a card boundary and no card
+     is ever left half across the edge. Measured off a real card rather than
+     computed from the CSS width, which would have to be kept in step by hand
+     across the breakpoints. */
   function railStep(track) {
     const c = $('.vd-card', track);
     if (!c) return track.clientWidth;
     const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    const step = c.getBoundingClientRect().width + gap;
-    return step * Math.max(1, Math.floor(track.clientWidth / step));
+    return c.getBoundingClientRect().width + gap;
+  }
+
+  /* To a card boundary, not by a relative amount: a second click landing while
+     the first is still gliding would otherwise add its step to a position part
+     way between two cards.
+
+     And counted from where the LAST CLICK was headed, while it is still on its
+     way: read off scrollLeft alone, a click in the first half of a glide rounds
+     back to the card it is leaving and is silently lost. After 700ms with no
+     click the position is read fresh, so a swipe in between is respected. */
+  function railGo(track, dir) {
+    const step = railStep(track);
+    const max = track.scrollWidth - track.clientWidth;
+    const last = Math.round(max / step);
+    const recent = track._vdAt && Date.now() - track._vdAt < 700;
+    const from = recent ? track._vdTo : Math.round(track.scrollLeft / step);
+    const to = Math.max(0, Math.min(last, from + dir));
+    track._vdTo = to;
+    track._vdAt = Date.now();
+    track.scrollTo({ left: Math.min(max, to * step), behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   function syncRail(shelfEl) {
@@ -184,7 +219,8 @@
     const shelves = $$('.vd-shelf');
     const m = shelves.map((el) => {
       const t = $('.vd-rail', el);
-      return t ? { max: t.scrollWidth - t.clientWidth, at: t.scrollLeft } : null;
+      const th = t && $('.vd-thumb', t);
+      return t ? { max: t.scrollWidth - t.clientWidth, at: t.scrollLeft, th: th ? th.offsetHeight : 0 } : null;
     });
     shelves.forEach((el, i) => {
       if (!m[i]) return;
@@ -192,6 +228,40 @@
       const a = $$('.vd-arrow', el);
       if (a[0]) a[0].disabled = m[i].at <= 1;
       if (a[1]) a[1].disabled = m[i].at >= m[i].max - 1;
+      /* The arrows sit on the middle of the thumbnails, whose height follows
+         the card width and so the breakpoint. Measured, then handed to CSS —
+         on the SHELF, not the carousel, because the overlap derived from it
+         also places the heading, which lives in the stage. */
+      if (m[i].th) el.style.setProperty('--vd-thumb-h', m[i].th + 'px');
+    });
+  }
+
+  /* ---------- The stage photographs, pushing in ----------
+     Each main photograph scales from 1 to 1.1 across the section's whole pass
+     through the viewport — scrubbed and linear, so it tracks the scrollbar
+     rather than performing, as DESIGN.md asks of scroll-linked media. The
+     stage's overflow and 20px corner hold the frame still while the picture
+     moves inside it.
+
+     Rebuilt with the shelves: they are torn down whenever a topic is chosen
+     and rebuilt when "All" comes back, and a ScrollTrigger left pointing at a
+     detached node is a leak that keeps measuring nothing. Under
+     prefers-reduced-motion nothing is bound. */
+  let zooms = [];
+  function killStageZoom() {
+    zooms.forEach((tw) => { if (tw.scrollTrigger) tw.scrollTrigger.kill(); tw.kill(); });
+    zooms = [];
+  }
+  function initStageZoom() {
+    killStageZoom();
+    if (reduceMotion || !window.gsap || !window.ScrollTrigger) return;
+    $$('.vd-stage').forEach((stage) => {
+      const img = $('.vd-stage-img', stage);
+      if (!img) return;
+      zooms.push(window.gsap.fromTo(img, { scale: 1 }, {
+        scale: 1.1, ease: 'none',
+        scrollTrigger: { trigger: stage, start: 'top bottom', end: 'bottom top', scrub: true },
+      }));
     });
   }
 
@@ -218,6 +288,32 @@
       img.addEventListener('load', () => { if (img.naturalWidth <= 120) swap(img); });
       /* A cached thumbnail can be done loading before this runs. */
       if (img.complete && img.naturalWidth && img.naturalWidth <= 120) swap(img);
+    });
+  }
+
+  /* "See all" from a shelf lands the reader at the top of the library — the
+     filter row, with that topic now pressed, and its grid beneath.
+
+     IT DID NOT MOVE BEFORE, and the reason is Lenis. Swapping seven shelves for
+     one grid makes the page thousands of pixels shorter, and Lenis still holds
+     the old scroll limit and target, so nothing it does moves the window. So:
+     one frame for the new layout to exist, tell Lenis the page's real height,
+     then scroll — clear of the fixed header, measured rather than assumed
+     because it changes height across the breakpoints. */
+  function toLibraryTop() {
+    requestAnimationFrame(() => {
+      const target = $('#vd-filter-h');
+      if (!target) return;
+      const hdr = $('#site-header');
+      const clear = (hdr ? hdr.getBoundingClientRect().height : 70) + 24;
+      const y = Math.max(0, target.getBoundingClientRect().top + window.pageYOffset - clear);
+      const l = window.__jaycoLenis;
+      if (l && l.scrollTo) {
+        if (l.resize) l.resize();
+        l.scrollTo(y, { immediate: reduceMotion, force: true });
+      } else {
+        window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
     });
   }
 
@@ -324,16 +420,14 @@
         filter = all.dataset.cat;
         applyFilter();
         $('#vd-count').focus({ preventScroll: true });
+        toLibraryTop();
         return;
       }
 
       const arrow = e.target.closest('.vd-arrow');
-      if (arrow) {
+      if (arrow && !arrow.disabled) {
         const track = $('#vd-rail-' + arrow.dataset.rail);
-        if (track) {
-          track.scrollBy({ left: Number(arrow.dataset.dir) * railStep(track),
-            behavior: reduceMotion ? 'auto' : 'smooth' });
-        }
+        if (track) railGo(track, Number(arrow.dataset.dir));
       }
     });
 

@@ -128,6 +128,24 @@
         ],
         "createdAt": "2026-08-03T23:00:18.586Z",
         "reason": "DESIGN.md:132 mandates one family: Host Grotesk carries display and body; hierarchy is weight-led"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "version-5/videos.html"
+        ],
+        "createdAt": "2026-09-12T23:44:45.606Z",
+        "reason": "Claude reviewed: the only shadows are neutral Ink rgba(15,11,9) elevation on video thumbnails and round arrow controls sitting over a photograph, not a colored halo"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "version-5/videos.html"
+        ],
+        "createdAt": "2026-09-12T23:44:45.634Z",
+        "reason": "Claude reviewed: .vd-stage and .vd-hero clip on purpose to hold a zooming/parallax photograph inside its frame; they contain no tooltip, menu or popover"
       }
     ]
   }

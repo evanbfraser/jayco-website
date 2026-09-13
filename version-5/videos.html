@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/videos.css?v=v5-vd-8" />
+  <link rel="stylesheet" href="css/videos.css?v=v5-vd-13" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -130,12 +130,12 @@
     <section class="vd-hero">
       <div class="vd-hero-media">
         <img class="vd-hero-img"
-             src="../assets/videos/web/hero-v2-1800.webp"
-             srcset="../assets/videos/web/hero-v2-1200.webp 1200w,
-                     ../assets/videos/web/hero-v2-1800.webp 1800w"
+             src="../assets/videos/web/hero-v3-1800.webp"
+             srcset="../assets/videos/web/hero-v3-1200.webp 1200w,
+                     ../assets/videos/web/hero-v3-1800.webp 1800w"
              sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A Jayco Class C motorhome driving toward the camera across a suspension bridge under heavy cloud, the road blurred with speed" />
+             alt="A Jayco Eagle fifth wheel with its awning out at a lakeside campsite in the pines, a family unloading bikes and gear beside it" />
       </div>
       <div class="vd-hero-overlay" aria-hidden="true"></div>
       <div class="vd-hero-content">
@@ -172,9 +172,9 @@
          over every .section-* inside such a section, and seventy cards would be
          a stagger minutes long. -->
     <section class="vd-grid-wrap" aria-label="Videos">
-      <!-- OUTSIDE .vd-inner on purpose: each shelf's rail runs to the viewport
-           edge, and the head and the rail each pay their own frame padding so
-           the first card still lines up under the shelf title. -->
+      <!-- Each shelf frames itself (videos.css .vd-shelf): the topic's
+           photograph in a rounded stage with its name low on the left, and a
+           carousel of that topic's videos lifted over the foot of it. -->
       <div class="vd-shelves" id="vd-shelves"><!-- built by videos.js --></div>
       <div class="vd-inner">
         <!-- TWO VIEWS OF ONE LIBRARY, and only ever one of them in the DOM.
@@ -385,8 +385,8 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <script src="js/models-data.js?v=v5-6"></script>
-  <script src="js/video-data.js?v=v5-vd-3"></script>
-  <script src="js/videos.js?v=v5-vd-7"></script>
+  <script src="js/video-data.js?v=v5-vd-4"></script>
+  <script src="js/videos.js?v=v5-vd-10"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>

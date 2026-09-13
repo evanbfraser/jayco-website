@@ -35,10 +35,14 @@
   position: absolute; inset: calc(-1 * var(--vd-drift)) 0; z-index: 0;
   will-change: transform;
 }
-.vd-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-/* A RAMP OF ITS OWN, not --scrim-image. The plate is a coach on a bridge under
-   a fully overcast sky: white cloud across the top third, a white motorhome
-   through the middle, pale road beneath. Measured against it the sitewide ramp
+/* The plate is an Eagle fifth wheel at a lakeside campsite, the coach and the
+   family right of centre and low in the frame. 58% 60% keeps both in view: the
+   hero is wider than the 3:2 photograph on a desktop, so the crop comes off the
+   sky, and far narrower on a phone, so it comes off the left-hand trees. */
+.vd-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: 58% 60%; }
+/* A RAMP OF ITS OWN, not --scrim-image. It was measured against the previous
+   plate — a white motorhome on a bridge under a fully overcast sky, brighter
+   than this one through the band the type sits in. Measured against it the sitewide ramp
    — transparent to 34%, only 0.44 by 56% — left the eyebrow at 2.61:1 against a
    4.5 floor, failing at three of six viewport heights.
 
@@ -63,7 +67,10 @@
   background: linear-gradient(to bottom,
     rgba(15,11,9,0) 0%,
     rgba(15,11,9,0) 32%,
-    rgba(15,11,9,0.46) 46%,
+    /* 0.54, up from 0.46, for the Eagle campsite plate: on a short desktop
+       (1440x700) the eyebrow rides up into this band over sunlit ground, and
+       at 0.46 its brightest pixel measured 4.26:1. */
+    rgba(15,11,9,0.54) 46%,
     rgba(15,11,9,0.76) 62%,
     rgba(15,11,9,0.90) 80%,
     rgba(15,11,9,0.96) 100%);
@@ -102,7 +109,9 @@
 .vd-filter { padding: clamp(2.5rem, 4.5vw, 3.5rem) 0 0; }
 .vd-filter-h {
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--blue); margin: 0 0 1.1rem;
+  /* --blue-dark, not --blue: Jayco blue measures 4.48:1 on canvas, just under
+     the 4.5 this 0.68rem label needs. The deep step is the same accent. */
+  text-transform: uppercase; color: var(--blue-dark); margin: 0 0 1.1rem;
 }
 .vd-cats { display: flex; flex-wrap: wrap; gap: 0.45rem; }
 .vd-cat {
@@ -194,89 +203,145 @@
 .vd-card-model:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
 
 /* ---------- Shelves ----------
-   The unfiltered view: one band per topic, each a rail of the same cards the
-   grid holds. The heading is what the grid could not give — seventy cards in
-   one list never say what you are looking at.
+   The unfiltered view: one band per topic. Each band is a STAGE — the topic's
+   photograph in a rounded frame, its name set low on the left — and a CAROUSEL
+   of that topic's videos lifted up over the foot of the photograph.
 
-   The rail BLEEDS off the right edge of the frame, the way every other card
-   rail on this site does: a track that stops short of the edge with a card
-   sitting flush against it reads as a list that ended, where a card cut by the
-   edge reads as a list that continues. Negative margin out, padding back in, so
-   the last card can still rest inside the gutter. */
-.vd-shelf { margin-bottom: clamp(2.5rem, 4.5vw, 4rem); }
-.vd-shelf:last-child { margin-bottom: 0; }
-/* The shelf sits outside .vd-inner so its rail can run off the right edge, so
-   the head has to re-create the frame for itself — same max-width, same gutter,
-   same centring. Without this the title would start at the viewport edge while
-   the rest of the page starts at 1440. */
-.vd-shelf-head {
-  max-width: var(--vd-frame); margin-inline: auto;
+   The photograph is inset media inside the page gutters, so it rounds at 20px
+   and carries no shadow (DESIGN.md > Shapes). The carousel no longer bleeds off
+   the right edge as the old rails did: it is framed, it always shows a whole
+   number of cards, and its arrows move it one card at a time — so no card is
+   ever left cut by an edge, at rest or after a click. */
+.vd-shelf {
+  /* How far the carousel rides up over the photograph — DERIVED, not picked.
+     The arrows sit on the middle of the thumbnails, so the overlap is set to
+     leave the top of each arrow 4px below the photograph's foot: the tops of
+     the pictures still lie over the image, the arrows never do, and the card
+     titles land on canvas. --vd-thumb-h is measured onto the shelf by
+     videos.js, so this holds at every card width. */
+  --vd-overlap: max(1rem, calc(var(--vd-thumb-h, 180px) / 2 - var(--vd-arrow) / 2 - 4px));
+  --vd-per: 3;                                   /* cards in view */
+  --vd-card-gap: clamp(1rem, 1.8vw, 1.5rem);
+  --vd-arrow: 56px;                              /* DESIGN.md's round control */
+  max-width: var(--vd-frame);
+  margin: 0 auto clamp(4rem, 7vw, 6.5rem);
   padding: 0 var(--vd-pad);
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 1rem; margin-bottom: clamp(1rem, 1.6vw, 1.35rem);
+}
+.vd-shelf:last-child { margin-bottom: 0; }
+
+.vd-stage {
+  position: relative; overflow: hidden; isolation: isolate;
+  height: clamp(26rem, 42vw, 38rem);
+  border-radius: var(--radius-card);
+  background: var(--ink);
+}
+.vd-stage-media { position: absolute; inset: 0; z-index: -2; }
+.vd-stage-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform-origin: 50% 50%; will-change: transform;
+}
+/* Two stops of Ink rising from the foot, dense where the heading is and gone
+   by two-thirds of the way up, so the photograph above stays untouched. The
+   RV Questions plate puts a white trailer side directly behind the heading;
+   this is measured against that one, the brightest of the seven. */
+.vd-stage-scrim {
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to top,
+    rgba(15,11,9,0.86) 0%, rgba(15,11,9,0.55) 40%, rgba(15,11,9,0) 70%);
+}
+/* Low on the left, and lifted clear of the band the carousel covers. The
+   heading and its "See all" read as one unit, the link directly beneath. */
+.vd-stage-head {
+  position: absolute; left: 0; right: 0;
+  bottom: calc(var(--vd-overlap) + clamp(1rem, 2vw, 1.75rem));
+  padding: 0 clamp(1.5rem, 3.5vw, 3rem);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;
 }
 .vd-shelf-h {
-  margin: 0;
+  margin: 0; max-width: 16ch;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
-  font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 800; line-height: 1; letter-spacing: -0.02em;
+  color: #fff; text-wrap: balance;
 }
-.vd-shelf-tools { display: flex; align-items: center; gap: 1rem; flex: none; }
+/* A text link on the photograph, not a pill — it is the quieter of the two
+   ways into the topic (the chip row above is the other). 44px tall for a
+   finger; the underline carries the affordance. */
 .vd-shelf-all {
+  flex: none; min-height: 44px;
+  display: inline-flex; align-items: center;
   border: none; background: none; padding: 0; cursor: pointer;
-  font-size: 0.8rem; font-weight: 600; color: var(--blue-dark);
-  white-space: nowrap;
-  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+  font-size: 0.85rem; font-weight: 600; color: #fff; white-space: nowrap;
+  text-decoration: underline; text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(255,255,255,0.5); text-underline-offset: 5px;
+  transition: text-decoration-color 0.2s;
 }
-.vd-shelf-all:hover { border-bottom-color: var(--blue-dark); }
-.vd-shelf-all:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
+.vd-shelf-all:hover { text-decoration-color: #fff; }
+.vd-shelf-all:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 3px; }
 
-.vd-arrows { display: flex; gap: 0.4rem; }
+/* ---------- The carousel ----------
+   Three columns: an arrow, the rail, an arrow. The arrows sit OUTSIDE the rail
+   so they never lie over a card, and they are dropped to the middle of the
+   thumbnails by --vd-thumb-h, which videos.js measures. */
+.vd-carousel {
+  position: relative; z-index: 1;
+  margin-top: calc(-1 * var(--vd-overlap));
+  padding: 0 clamp(0.75rem, 2.6vw, 2.25rem);
+  display: grid;
+  grid-template-columns: var(--vd-arrow) minmax(0, 1fr) var(--vd-arrow);
+  column-gap: clamp(0.6rem, 1.4vw, 1.25rem);
+  align-items: start;
+}
 .vd-arrow {
-  width: 34px; height: 34px; border-radius: 50%;
+  width: var(--vd-arrow); height: var(--vd-arrow); border-radius: 50%;
+  margin-top: calc(8px + var(--vd-thumb-h, 180px) / 2 - var(--vd-arrow) / 2);
   display: grid; place-items: center;
-  border: 1.5px solid var(--warm-gray); background: var(--white);
+  border: 1px solid var(--hairline);
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1), 0 6px 24px rgba(15,11,9,0.08);
   color: var(--text-dark); cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  transition: background 0.15s var(--ease-out), border-color 0.15s var(--ease-out),
+              color 0.15s var(--ease-out), opacity 0.2s;
 }
 .vd-arrow:hover:not(:disabled) { background: var(--blue); border-color: var(--blue); color: #fff; }
+/* Dimmed at either end, never hidden — DESIGN.md's round control. */
 .vd-arrow:disabled { opacity: 0.35; cursor: default; }
 .vd-arrow:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-/* A rail with nothing to scroll has nothing for the arrows to say. */
-.vd-shelf.is-static .vd-arrows { display: none; }
 
+/* The rail is the scroller. Each card is an exact share of its width, so the
+   view holds --vd-per whole cards and every snap stop is a card boundary.
+   Padding top and bottom only: horizontal padding would move the snap stops
+   off those boundaries. The bottom padding is room for the thumbnail shadow,
+   which the scroller would otherwise clip. */
 .vd-rail {
-  /* Lines the first card up with the shelf title above it, whatever the
-     viewport does: at or below the frame it is just the page gutter, and above
-     it, the gutter plus half the slack either side of the frame.
-
-     PADDING, NOT A NEGATIVE MARGIN. Chrome counts the scrollbar inside 100vw,
-     so negating it overshoots the edge and puts a horizontal scrollbar on the
-     whole page — the trap testimonials.css records against .tm-rev-body. The
-     old margin-right here escaped the container's own gutter but stopped at the
-     1440 frame, so on a wide screen the rail ended in mid-air rather than
-     running off the edge.
-
-     scroll-padding-left matches, so a snapped card stops under the title rather
-     than jammed against the viewport edge. */
-  --vd-rail-inset: max(var(--vd-pad), calc((100vw - var(--vd-frame)) / 2 + var(--vd-pad)));
   list-style: none; margin: 0;
-  padding: 6px var(--vd-pad) 6px var(--vd-rail-inset);
-  scroll-padding-left: var(--vd-rail-inset);
-  display: flex; gap: clamp(1.25rem, 2.2vw, 2rem);
-  overflow-x: auto;
+  padding: 8px 0 24px;
+  display: flex; gap: var(--vd-card-gap);
+  overflow-x: auto; overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  /* The rail is the scroller, so it clips the other axis: the card's hover
-     lift on the thumbnail is inside its own rounded box and safe, but the 6px
-     of padding above is what keeps a focus ring from being shaved. */
 }
 .vd-rail::-webkit-scrollbar { display: none; }
-/* Same card the grid uses, given a width — the grid's three columns are a
-   fraction of the frame, and a rail has no columns to be a fraction of. */
 .vd-rail .vd-card {
-  flex: 0 0 clamp(260px, 30vw, 400px);
+  flex: 0 0 calc((100% - var(--vd-card-gap) * (var(--vd-per) - 1)) / var(--vd-per));
+  min-width: 0;
   scroll-snap-align: start;
+}
+/* A thumbnail lying over a photograph needs an edge to lift from it. The
+   negative spread keeps the shadow under the card rather than out to its
+   sides, where the rail's edge would cut it. */
+.vd-rail .vd-thumb { box-shadow: 0 8px 16px -10px rgba(15,11,9,0.42); }
+/* Inside the card, not around it: the rail clips anything drawn outside. */
+.vd-rail .vd-card-btn:focus-visible { outline-offset: -2px; }
+
+@media (max-width: 1023px) {
+  .vd-shelf { --vd-per: 2; }
+}
+@media (max-width: 639px) {
+  .vd-shelf { --vd-per: 1; --vd-arrow: 44px; }
+  .vd-stage { height: clamp(22rem, 100vw, 26rem); }
+  .vd-carousel { padding: 0; column-gap: 0.5rem; }
 }
 
 .vd-empty { margin: clamp(3rem, 6vw, 5rem) 0; text-align: center; font-size: 1.05rem; color: var(--text-mid); }
@@ -356,16 +421,14 @@ body.vd-playing { overflow: hidden; }
       rgba(15,11,9,0.97) 100%);
   }
   .vd-grid { grid-template-columns: minmax(0, 1fr); }
-  /* The arrows are a second way to do what the finger already does, and they
-     charge a row of height to say it. Same call as the floorplans rails. */
-  .vd-shelf .vd-arrows { display: none; }
-  .vd-rail .vd-card { flex: 0 0 min(78vw, 320px); }
   .vd-player-x { top: -3rem; }
   .vd-player-foot { flex-direction: column; gap: 0.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .vd-thumb-img, .vd-play, .vd-cat, .vd-card-model { transition: none; }
   .vd-card-btn:hover .vd-thumb-img { transform: none; }
+  .vd-stage-img { will-change: auto; }
+  .vd-arrow, .vd-shelf-all { transition: none; }
   /* Zero travel. videos.js reads this and returns before it binds anything, so
      there is one code path rather than a second one for stillness — and the
      overhang collapses with it, leaving the plate exactly in its frame. */
