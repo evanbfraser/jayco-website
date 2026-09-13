@@ -116,35 +116,118 @@
 }
 
 /* ---------- The switch ----------
-   A segmented control, centred, with the two options sharing one track. NOT
-   index.html's .cs-group, which looks related and is an accordion — see the
-   note in jayco-difference.js.
+   A JAYCO-BLUE PANEL, the page's idiom for what matters most (the PDI panel,
+   the Value Tool). The client asked for more emphasis here on 2026-09-13: this
+   one choice drives the feature panels AND Inside the wall, which has no
+   switch of its own.
 
-   The track is the affordance: two pills floating on canvas would read as two
-   buttons, where one track split in half reads as a choice between two states,
-   which is what it is. */
-.jd-switch { padding: clamp(2.5rem, 5vw, 4rem) 0 0; text-align: center; }
-.jd-switch-label {
-  display: block; margin-bottom: 1rem;
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--text-mid);
+   Inside it, the same segmented control — two options sharing one track, which
+   reads as a choice between two states rather than two buttons. The track is
+   --blue-dark so the unchosen option's white type stays well clear of 4.5:1
+   (a white tint over the blue would pull it under); the chosen option is a
+   white pill with blue-dark type. NOT index.html's .cs-group, which looks
+   related and is an accordion — see the note in jayco-difference.js. */
+.jd-switch { padding: clamp(2.5rem, 5vw, 4rem) 0 0; }
+.jd-switch-panel {
+  /* position: relative so jayco-difference.js can read the heading's and the
+     tabs' offsets against the panel when it builds the morph. */
+  position: relative;
+  background: var(--blue); border-radius: 32px;
+  padding: clamp(1.75rem, 3.4vw, 2.75rem) clamp(1.5rem, 3.4vw, 3rem);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1.25rem 2.5rem;
 }
+.jd-switch-text { flex: 1 1 22rem; min-width: 0; }
+.jd-switch-h {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: #fff;
+}
+.jd-switch-b { margin: 0; max-width: 46ch; font-size: 0.98rem; line-height: 1.65; color: #fff; }
 .jd-tabs {
-  display: inline-flex; gap: 0.35rem;
-  padding: 0.35rem;
-  background: var(--surface); border-radius: var(--radius-btn);
+  display: inline-flex; gap: 0.4rem;
+  padding: 0.4rem;
+  background: var(--blue-dark); border-radius: var(--radius-btn);
 }
 .jd-tab {
   appearance: none; border: none; cursor: pointer;
-  padding: 0.7rem 1.7rem;
+  min-height: 48px; padding: 0.8rem 2.1rem;
   border-radius: var(--radius-btn);
-  background: none; color: var(--text-mid);
-  font-size: 0.88rem; font-weight: 600; letter-spacing: 0.01em;
+  background: none; color: #fff;
+  font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em;
   transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out);
 }
-.jd-tab:hover { color: var(--text-dark); }
-.jd-tab.is-on { background: var(--blue); color: #fff; }
-.jd-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.jd-tab:hover { background: rgba(255,255,255,0.12); }
+.jd-tab.is-on { background: #fff; color: var(--blue-dark); }
+.jd-tab:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- The switch, stuck ----------
+   Once the blue panel has scrolled up under the header, a small version of the
+   switch pins just below the header for as long as the choice still changes
+   what is on screen — the feature panels and Inside the wall — and leaves
+   before the PDI band. jayco-difference.js measures the header, writes
+   --jd-stick-top, and toggles .is-on.
+
+   A COPY, NOT THE TABLIST MOVED. Reparenting the real tabs into this bar would
+   drop keyboard focus mid-scroll and leave a hole in the blue panel. The copy
+   is a group of aria-pressed buttons that select() keeps in step, and while it
+   is hidden, visibility takes it out of the tab order and the accessibility
+   tree — the visibility change is delayed until the fade has finished.
+
+   The same pieces, smaller: a blue ring around the --blue-dark track, a white
+   pill for the chosen option.
+
+   ABOVE THE HEADER (1001 over its 1000), though the two never overlap. The
+   header's own scrim — .site-header::before in style.css — reaches 220% of its
+   height down the page, and at a lower z-index the bar sat inside that band,
+   which greyed the white pill. The phone menu (998) is full-screen, and the bar
+   would float over it, so body.menu-open hides it below. */
+.jd-sticky {
+  position: fixed; left: 0; right: 0; z-index: 1001;
+  top: var(--jd-stick-top, 96px);
+  display: flex; justify-content: center;
+  padding: 0 var(--jd-pad);
+  pointer-events: none;
+  opacity: 0; visibility: hidden; transform: translateY(-10px);
+  transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out), visibility 0s linear 0.25s;
+}
+.jd-sticky.is-on {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out), visibility 0s;
+}
+body.menu-open .jd-sticky { opacity: 0; visibility: hidden; }
+/* The hand-off from the morph to this bar happens in one frame, so the fade
+   and the drop-in are switched off for it. jayco-difference.js sets the class
+   only for that toggle. */
+.jd-sticky.jd-sticky--instant,
+.jd-sticky.jd-sticky--instant.is-on { transition: none; transform: none; }
+
+/* ---------- The morph ----------
+   The blue panel shrinking into the bar as it scrolls under the header. A
+   decorative copy drawn over the page for the length of the transition only;
+   jayco-difference.js lays the box out at the panel's size and clips it toward
+   the bar, and moves and scales the tabs, frame by frame from the scroll
+   position. Same layer as the bar, over the header's scrim. */
+.jd-morph { position: fixed; top: 0; left: 0; z-index: 1001; pointer-events: none; visibility: hidden; }
+.jd-morph.is-on { visibility: visible; }
+body.menu-open .jd-morph { visibility: hidden; }
+.jd-morph-box { position: fixed; background: var(--blue); overflow: hidden; will-change: clip-path; }
+.jd-morph-text, .jd-morph-tabs { position: absolute; left: 0; top: 0; margin: 0; }
+.jd-morph-tabs { transform-origin: 0 0; will-change: transform; }
+/* Share any width the copy is given, so a track eased a few pixels wider or
+   narrower than its content never shows an empty end. */
+.jd-morph-tabs .jd-tab { flex: 1 1 auto; transition: none; }
+.jd-sticky-bar {
+  position: relative; /* the morph's target: its tabs are measured against it */
+  pointer-events: auto;
+  padding: 0.3rem;
+  background: var(--blue); border-radius: var(--radius-btn);
+  box-shadow: 0 10px 28px rgba(15,11,9,0.2);
+}
+.jd-sticky .jd-tabs { padding: 0.3rem; gap: 0.3rem; }
+.jd-sticky .jd-tab { min-height: 40px; padding: 0.5rem 1.5rem; font-size: 0.92rem; }
 
 /* ---------- Panels ---------- */
 /* padding-TOP only. The element also carries .jd-inner, which sets the page
@@ -295,6 +378,49 @@
   margin: 0;
   font-size: 0.92rem; line-height: 1.7; color: var(--text-mid);
 }
+/* The proof figure, between the icon and the name. OPTIONAL — a card gets one
+   only where Jayco publishes a figure for that feature; the rest keep the name
+   and the sentence rather than a number invented to match. */
+.jd-callout-stat { margin: 0 0 0.85rem; }
+.jd-callout-fig {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.3vw, 2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--blue-dark); font-variant-numeric: tabular-nums;
+}
+.jd-callout-cap {
+  display: block; margin-top: 0.3rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; line-height: 1.4;
+  text-transform: uppercase; color: var(--text-mid);
+}
+
+/* PDI figures, on the blue panel — solid white for the reason given there. */
+.jd-pdi-stats {
+  list-style: none; margin: 1.5rem 0 0; padding: 1.25rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.4);
+  display: flex; flex-wrap: wrap; gap: 1.25rem 2.5rem;
+}
+.jd-pdi-stats li { max-width: 17rem; }
+.jd-pdi-stat-fig {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+  color: #fff; font-variant-numeric: tabular-nums;
+}
+.jd-pdi-stat-cap { display: block; margin-top: 0.4rem; font-size: 0.88rem; line-height: 1.5; color: #fff; }
+.jd-pdi-more {
+  display: inline-block; margin-top: 1.25rem;
+  font-weight: 600; color: #fff;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.jd-pdi-more:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* The four material tests reuse the reasons grid; this is only the gap above.
+   Two classes, because .jd-reason-grid is declared further down with margin: 0
+   and would otherwise win on source order. */
+.jd-reason-grid.jd-tests { margin-top: clamp(1.75rem, 3.4vw, 2.5rem); }
 
 .jd-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
 
@@ -393,8 +519,35 @@
   font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.78; color: var(--text-mid);
 }
 
-/* ---------- Proof strip ---------- */
-.jd-proof { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+/* ---------- Shared section heading ----------
+   The new fact sections all open the same way: a label, a heading at the
+   engineering band's size, and a lead at the intro's measure. One set of
+   classes rather than five copies of .jd-eng-h. */
+.jd-sec-head { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.jd-h2 {
+  margin: 0.5rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
+  color: var(--text-dark);
+}
+.jd-lead {
+  margin: 0; max-width: var(--measure-wide);
+  font-size: clamp(1rem, 1.35vw, 1.12rem); line-height: 1.75; color: var(--text-mid);
+}
+/* A text link out to the page that tells the whole story of a section. */
+.jd-more {
+  display: inline-block; margin-top: 1.25rem;
+  font-weight: 600; color: var(--blue-dark);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.jd-more:hover { color: var(--text-dark); }
+
+/* ---------- By the numbers ----------
+   The proof strip, MOVED TO THE TOP and grown from three figures to six. The
+   client asked for the facts to lead, so the numbers now come straight after
+   the intro instead of after twenty feature cards. Three across, two rows. */
+.jd-proof { padding: clamp(3.5rem, 7vw, 5.5rem) 0 0; }
 .jd-proof-grid {
   list-style: none; margin: 0; padding: 0;
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -408,22 +561,162 @@
 .jd-proof-fig {
   display: block; margin-bottom: 0.5rem;
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-size: clamp(2.1rem, 4.4vw, 3.4rem);
   font-weight: 800; letter-spacing: -0.02em; line-height: 1;
-  color: #fff;
+  color: #fff; font-variant-numeric: tabular-nums;
 }
 .jd-proof-cap { display: block; font-size: 0.88rem; line-height: 1.5; color: #fff; }
-.jd-awards { margin-top: clamp(1.5rem, 3vw, 2.25rem); }
-.jd-awards-h {
-  margin: 0 0 0.4rem;
+
+/* ---------- Inside the wall ----------
+   A factory photograph beside a numbered list, one panel per kind of RV. No
+   switch here: the panel follows the choice in the blue switch at the top.
+   The photographs are real coaches on the line, not diagrams, so nothing is
+   pinned onto them. */
+.jd-cut { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-cut-grid {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem); align-items: start;
+}
+.jd-cut-fig { margin: 0; }
+/* Held at 3:2 whatever the source, so both panels stand the same height and
+   switching between them does not move the list beside the picture. */
+.jd-cut-img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 3 / 2; object-fit: cover;
+  border-radius: var(--radius-card);
+}
+.jd-cut-list { list-style: none; margin: 0; padding: 0; }
+.jd-cut-item {
+  display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.35rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.jd-cut-item:last-child { border-bottom: 1px solid var(--hairline); }
+.jd-cut-n {
+  display: grid; place-items: center;
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 800;
+}
+.jd-cut-where {
+  display: block; margin-bottom: 0.2rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--blue-dark);
+}
+.jd-cut-name {
+  margin: 0 0 0.35rem;
   font-family: var(--font-display);
-  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2;
+  font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
   color: var(--text-dark);
 }
-.jd-awards-b {
-  margin: 0; max-width: var(--measure-wide);
-  font-size: 0.98rem; line-height: 1.75; color: var(--text-mid);
+.jd-cut-body { margin: 0; font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
+
+/* ---------- The warranty ladder ----------
+   Every term Jayco and its suppliers put in writing, shortest to longest, as a
+   bar. Jayco's own two rungs take the brighter blue; the suppliers' take the
+   dark one. The bar is the scale — LIFETIME is drawn full width, and the years
+   are a share of 28 so that 25 years visibly falls short of it. */
+.jd-war { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-ladder { list-style: none; margin: 0; padding: 0; }
+.jd-rung {
+  display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr) 5.5rem;
+  gap: 0.5rem clamp(1rem, 2vw, 1.5rem); align-items: center;
+  padding: 0.85rem 0; border-top: 1px solid var(--hairline);
 }
+.jd-rung:last-child { border-bottom: 1px solid var(--hairline); }
+.jd-rung-what { font-size: 0.95rem; font-weight: 600; line-height: 1.35; color: var(--text-dark); }
+.jd-rung-who { display: block; margin-top: 0.15rem; font-size: 0.82rem; font-weight: 400; color: var(--text-mid); }
+.jd-rung-track { height: 0.7rem; border-radius: 999px; background: var(--surface); overflow: hidden; }
+.jd-rung-bar { display: block; height: 100%; width: var(--w); border-radius: 999px; background: var(--blue-dark); }
+.jd-rung.is-jayco .jd-rung-bar { background: var(--blue); }
+.jd-rung-term {
+  text-align: right;
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 800;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.jd-war-note { margin: 1rem 0 0; font-size: 0.82rem; line-height: 1.6; color: var(--text-mid); }
+.jd-war-note a { color: var(--blue-dark); }
+.jd-road {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem clamp(1.25rem, 3vw, 2.5rem); align-items: center;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.35rem, 2.6vw, 2rem);
+}
+.jd-road-fig {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4vw, 3rem); font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1; color: var(--blue-dark);
+}
+.jd-road-b { margin: 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-mid); }
+.jd-road-b strong { color: var(--text-dark); }
+
+/* ---------- A record, not a promise ----------
+   Milestones across the top, the awards panel under them. The milestones use
+   the reasons' blue rule so the two numbered rows on the page read as a set. */
+.jd-record { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.jd-miles {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+.jd-mile { border-top: 2px solid var(--blue); padding-top: 1rem; }
+.jd-mile-when {
+  display: block; margin-bottom: 0.45rem;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
+  color: var(--blue-dark); font-variant-numeric: tabular-nums;
+}
+.jd-mile-fig {
+  display: block; margin-bottom: 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.7rem); font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1.05; color: var(--text-dark);
+}
+.jd-mile-body { margin: 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-mid); }
+
+.jd-honors {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(1.25rem, 3vw, 3rem); align-items: center;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+.jd-honors-h {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1.15; color: var(--text-dark);
+}
+.jd-honors-list { list-style: none; margin: 0; padding: 0; font-size: 0.95rem; line-height: 1.65; color: var(--text-mid); }
+.jd-honors-list li + li { margin-top: 0.45rem; }
+.jd-honors-list strong { color: var(--text-dark); }
+/* The marks stand on the panel as supplied — transparent, with no tile, frame
+   or padding of their own (client request, 2026-09-13). Two by two beside the
+   list; the sources are 480x323, so the width sets the size and height follows. */
+.jd-badge-row {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 170px));
+  gap: 1rem clamp(1rem, 2vw, 1.75rem); align-items: center;
+}
+.jd-badge-row img { display: block; width: 100%; height: auto; }
+
+/* ---------- Owners and dealers ----------
+   Figure-and-sentence, copied from .ab-stat in about.css (restated, not
+   shared, per the house rule). It sits over the two CTAs it is evidence for. */
+.jd-owners {
+  list-style: none; margin: 0 0 clamp(2rem, 4vw, 3rem); padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+.jd-owner { border-top: 2px solid var(--blue); padding-top: 1.1rem; }
+.jd-owner-fig {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
+  font-weight: 800; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.jd-owner-cap { display: block; margin-top: 0.7rem; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
 
 /* ---------- Value Tool CTA ----------
    Jayco blue, and every piece of type on it is SOLID WHITE — the same rule the
@@ -513,8 +806,15 @@
 @media (max-width: 1023px) {
   .jd-reason-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .jd-cta-grid { grid-template-columns: minmax(0, 1fr); }
+  .jd-miles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* The drawing goes above its list rather than squeezing beside it. */
+  .jd-cut-grid { grid-template-columns: minmax(0, 1fr); }
+  .jd-honors { grid-template-columns: minmax(0, 1fr); }
+  /* Under the list now rather than beside it, so there is room for one row. */
+  .jd-badge-row { grid-template-columns: repeat(4, minmax(0, 170px)); }
 }
 @media (max-width: 900px) {
+  .jd-proof-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .jd-row-media { aspect-ratio: 4 / 3; max-height: none; }
   /* Two across at tablet, whatever the row's own count is. */
   .jd-cards, .jd-cards[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -539,13 +839,28 @@
   .jd-cards, .jd-cards[data-n="4"] { grid-template-columns: minmax(0, 1fr); }
   .jd-tabs { display: flex; width: 100%; }
   .jd-tab { flex: 1 1 0; min-height: 44px; padding: 0.7rem 0.9rem; }
+  /* The stuck bar spans the gutter-to-gutter width on a phone, and keeps the
+     44px touch target the big switch has. */
+  .jd-sticky-bar { width: 100%; }
+  .jd-sticky .jd-tab { min-height: 44px; padding: 0.55rem 0.9rem; }
   /* Two columns of this at 390px leaves about 165px a card, which is too narrow
      for a three-line paragraph. One column, and the numbers keep the order. */
   .jd-reason-grid { grid-template-columns: minmax(0, 1fr); }
   .jd-proof-grid { grid-template-columns: minmax(0, 1fr); }
+  .jd-miles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jd-owners { grid-template-columns: minmax(0, 1fr); }
+  .jd-road { grid-template-columns: minmax(0, 1fr); }
+  .jd-badge-row { grid-template-columns: repeat(2, minmax(0, 170px)); }
+  /* The bar drops to its own line under the name and the term, full width —
+     at 390px there is no room for three columns and a readable bar. */
+  .jd-rung { grid-template-columns: minmax(0, 1fr) auto; }
+  .jd-rung-term { grid-column: 2; grid-row: 1; }
+  .jd-rung-track { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .jd-tab { transition: none; }
+  .jd-tab, .jd-sticky, .jd-sticky.is-on { transition: none; }
+  .jd-sticky { transform: none; }
+  .jd-morph { display: none; }
   /* Zero travel, so initParallax() returns before it binds anything. */
   .jd-page { --jd-drift: 0%; }
 }

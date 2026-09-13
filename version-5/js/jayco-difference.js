@@ -76,9 +76,10 @@
      its own viewBox, drawn with fill rather than stroke. icon() below reads
      the type and wraps each accordingly.
 
-     NINETEEN OF THE TWENTY FEATURES NOW HAVE A SUPPLIED ICON. The one that
-     does not is NuvoH2O water filtration, which keeps its line art and is
-     therefore the only card on the page drawn in the lighter style.
+     EVERY FEATURE BUT ONE HAS A SUPPLIED ICON. NuvoH2O water filtration keeps
+     its line art and is the only card drawn in the lighter style. 'temp'
+     (Climate Shield) and 'starlink' were supplied on 2026-09-13; the 4-Star
+     Handling Package reuses 'tow'.
 
      'brake' IS A SEPARATE KEY FROM 'light'. The two used to share one;
      brake lighting and JaySMART interior lighting have their own icons now
@@ -101,6 +102,8 @@
     lock: { vb: '0 0 37.9 56.4', d: '<path d="M33.3,20.6H7.6v-5.8c0-6.3,5.1-11.3,11.3-11.3s11.3,5.1,11.3,11.3.8,1.7,1.7,1.7,1.7-.8,1.7-1.7c0-8.2-6.6-14.8-14.8-14.8S4.2,6.6,4.2,14.8v5.9c-2.3.3-4.2,2.2-4.2,4.6v26.5c0,2.6,2.1,4.7,4.7,4.7h28.6c2.6,0,4.7-2.1,4.7-4.7v-26.5c0-2.6-2.1-4.7-4.7-4.7ZM34.5,25.3v26.5c0,.7-.5,1.2-1.2,1.2H4.7c-.7,0-1.2-.5-1.2-1.2v-26.5c0-.7.5-1.2,1.2-1.2h28.6c.7,0,1.2.5,1.2,1.2ZM19,32.6c-2.9,0-5.3,2.4-5.3,5.3s1.5,4.3,3.6,5v2.8c0,1,.8,1.7,1.7,1.7s1.7-.8,1.7-1.7v-2.8c2.1-.7,3.6-2.8,3.6-5s-2.4-5.3-5.3-5.3ZM20.8,37.9c0,1-.8,1.9-1.9,1.9s-1.9-.8-1.9-1.9.8-1.9,1.9-1.9,1.9.8,1.9,1.9Z"/>' },
     bunk: { vb: '0 0 76.7 62.3', d: '<path d="M75.3,0c-.8,0-1.4.6-1.4,1.4v6h-9.4V1.4C64.4.6,63.8,0,63,0s-1.4.6-1.4,1.4v11.4H23.6c-.7-3.7-3.9-6.3-7.6-6.3h-5.8V1.4c0-.8-.6-1.4-1.4-1.4H1.4C.6,0,0,.6,0,1.4v59.5c0,.8.6,1.4,1.4,1.4h7.3c.8,0,1.4-.6,1.4-1.4v-1.3s0-22.4,0-22.4h0v-14.8h51.4v38.4c0,.8.6,1.4,1.4,1.4s1.4-.6,1.4-1.4v-6h9.4s0,6,0,6c0,.8.6,1.4,1.4,1.4s1.4-.6,1.4-1.4V1.4C76.7.6,76.1,0,75.3,0ZM64.4,16.4v-6h9.4v6h-9.4ZM64.4,25.3v-6h9.4v6h-9.4ZM64.4,34.2v-6h9.4v6h-9.4ZM64.4,43.1v-6h9.4v6h-9.4ZM73.9,46v6h-9.4v-6h9.4ZM10.2,9.4h5.8c2.2,0,4,1.4,4.7,3.4h-10.5v-3.4ZM10.2,19.6v-3.9h51.4v3.9H10.2ZM7.3,2.9v56.6H2.9V2.9h4.4Z"/>' },
     water: '<path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/>',
+    temp: { vb: '0 0 36.4 68.7', d: '<path d="M6.4,53.9c0,4.7,3.8,8.5,8.4,8.5s8.4-3.8,8.4-8.5-2.9-7.6-6.9-8.3v-26c0-.4-.2-.8-.5-1.1-.3-.3-.7-.5-1.1-.5h0c-.4,0-.8.2-1.1.5-.3.3-.5.7-.5,1.1v26c-3.9.7-6.9,4.2-6.9,8.3ZM9.5,53.9c0-3,2.4-5.4,5.3-5.4s5.3,2.4,5.3,5.4-2.4,5.4-5.3,5.4-5.3-2.4-5.3-5.4ZM25.8,19.6c-.3-.3-.5-.7-.5-1.1,0-.4.2-.8.5-1.1.2-.2.4-.3.6-.4h0c0,0,.5,0,.5,0h4.9s0,0,0,0c.4,0,.8.2,1.1.5.3.3.5.7.5,1.1s-.2.8-.5,1.1c-.3.3-.7.5-1.1.5h-4.9c-.4,0-.8-.2-1.1-.5ZM25.8,13.8c-.3-.3-.5-.7-.5-1.1,0-.4.2-.8.5-1.1.3-.3.7-.5,1.1-.5h7.9c.4,0,.8.2,1.1.5.3.3.5.7.5,1.1,0,.9-.7,1.5-1.6,1.6h-7.9c-.4,0-.8-.2-1.1-.5ZM36.4,24.3c0,.4-.2.8-.5,1.1-.3.3-.7.5-1.1.5h-7.9c-.4,0-.8-.2-1.1-.5-.3-.3-.5-.7-.5-1.1,0-.4.2-.8.5-1.1.3-.3.7-.5,1.1-.5h7.9c.9,0,1.6.7,1.6,1.6ZM25.8,31.2c-.3-.3-.5-.7-.5-1.1,0-.4.2-.8.5-1.1.3-.3.7-.5,1.1-.5h4.9c.5,0,.8.2,1.1.5.3.3.5.7.5,1.1s-.2.8-.5,1.1c-.3.3-.7.5-1.1.5h-4.9c-.4,0-.8-.2-1.1-.5ZM35.9,34.7c.3.3.5.7.5,1.1,0,.9-.7,1.5-1.6,1.6h-7.9c-.4,0-.8-.2-1.1-.5-.3-.3-.5-.7-.5-1.1,0-.4.2-.8.5-1.1.3-.3.7-.5,1.1-.5h7.9c.4,0,.8.2,1.1.5ZM22.3,41V7.5c0-4.2-3.4-7.5-7.5-7.5s-7.5,3.4-7.5,7.5v33.5c-4.5,2.7-7.3,7.5-7.3,12.8,0,8.2,6.6,14.9,14.8,14.9s14.8-6.7,14.8-14.9-2.8-10.2-7.3-12.8ZM10.3,42.4s0,0,0-.1c0,0,0-.2,0-.2V7.5c0-2.5,1.9-4.4,4.4-4.4h.2c2.4,0,4.2,2,4.2,4.4v34.5c0,0,0,.1,0,.1,0,0,0,0,0,0,0,0,0,.2,0,.2,0,.1,0,.2.1.3h0c0,.2.1.3.2.4h0c0,.2.2.2.2.2,0,0,0,0,0,0h.1c4,2.1,6.5,6.1,6.5,10.6,0,6.5-5.2,11.8-11.7,11.8s-11.7-5.3-11.7-11.8c0-4.5,2.5-8.5,6.4-10.5l1.9-.9h-1.1Z"/>' },
+    starlink: { vb: '0 0 55.1 68.9', d: '<path d="M21.9,13c.4,0,.7.2.9.5.2.3.3.7.3,1,0,.4-.2.7-.5.9-.3.2-.7.3-1,.3-1.4-.2-2.8.2-3.9,1.1-1.1.9-1.8,2.1-2,3.6,0,.7-.7,1.2-1.4,1.2s-.1,0-.2,0c-.3,0-.7-.2-.9-.5-.2-.3-.3-.7-.3-1,.2-2.1,1.3-4.1,3-5.4,1.7-1.3,3.8-2,5.9-1.7ZM23.8,8.1c0-.4,0-.7-.3-1-.2-.3-.6-.5-.9-.5-3.8-.4-7.7.7-10.7,3.1-3,2.4-5,5.9-5.4,9.8,0,.4,0,.7.3,1,.2.3.6.5.9.5,0,0,.1,0,.2,0,.7,0,1.3-.5,1.4-1.2.4-3.1,1.9-5.9,4.4-7.9,2.5-2,5.5-2.9,8.7-2.5.4,0,.7,0,1-.3.3-.2.5-.6.5-.9ZM2.8,19c.5-4.8,2.9-9.2,6.8-12.2,3.8-3,8.6-4.4,13.4-3.9.4,0,.7,0,1-.3.3-.2.5-.6.5-.9,0-.4,0-.7-.3-1-.2-.3-.6-.5-.9-.5-5.6-.6-11.1,1-15.5,4.5C3.4,8.1.6,13.1,0,18.7c0,.4,0,.7.3,1,.2.3.6.5.9.5,0,0,0,0,0,0h.1c.7,0,1.3-.5,1.4-1.2ZM55.1,12.5h0c0,.1,0,.1,0,.2,0,0,0,0,0,0,0,.1,0,.3,0,.4,0,0,0,0,0,0-.2.4-4.8,9.4-18.5,19.3-1.8,1.3-3.5,2.4-5,3.4v16.6l20.9,6.2c.4.1.7.3.8.7s.2.7.1,1.1c-.2.6-.7,1-1.3,1s-.3,0-.4,0l-21.1-6.2-12.2,13.4c-.3.3-.6.5-1,.5s-.7-.1-.9-.4c-.6-.5-.6-1.4,0-2l9.4-10.3-18.8,5.6c-.7.2-1.5-.2-1.7-.9-.2-.7.2-1.5.9-1.7l22.6-6.8v-15c-5,2.7-8.1,3.3-9.9,3.3s-1.4-.1-1.5-.2l-14.1-2.3c-.6,0-1-.5-1.1-1.1-.1-.5,0-1.1.5-1.4L36.8,11.3c.2-.2.5-.3.8-.3h16.1c0,0,0,.1,0,.1h0s0,0,0,0c0,0,0,0,0,0,.2,0,.3,0,.4,0,0,0,0,0,.1,0,0,0,0,0,0,0,.1,0,.2.1.3.3,0,0,0,0,0,0,0,0,0,0,0,0,.1.2.2.3.2.4h0c0,.2,0,.3,0,.4h0ZM22.8,37.1c3.3-1.2,7.4-3.5,12.1-6.9h0c4.8-3.5,9-7.3,12.4-11.2l-24.5,18.1ZM49.3,13.9s0,0,0,0h-10.9c-.2,0-.4,0-.6.1L7.2,35.9s0,0,0,0c0,0,0,0,0,0l9.4,1.5c.4,0,.9,0,1.2-.3l31.5-23.3s0,0,0-.1Z"/>' },
   };
 
   const icon = (key) => {
@@ -124,6 +127,8 @@
      this page now depends on a scroll effect running at all. */
   const callout = (f) => `<li class="jd-callout">
       <span class="jd-callout-icon">${icon(f.icon)}</span>
+      ${f.stat ? `<p class="jd-callout-stat"><span class="jd-callout-fig">${esc(f.stat.fig)}</span>
+        <span class="jd-callout-cap">${esc(f.stat.cap)}</span></p>` : ''}
       <div class="jd-callout-text">
         <h3 class="jd-callout-name">${esc(f.name)}</h3>
         <p class="jd-callout-body">${esc(f.body)}</p>
@@ -162,10 +167,83 @@
             aria-controls="jd-panel-${esc(g.id)}" tabindex="${i ? '-1' : '0'}"
             data-group="${esc(g.id)}">${esc(g.label)}</button>`).join('');
 
+  /* ---------- The fact sections ----------
+     Each list is drawn into its own container, and skipped if the page does not
+     have that container — so a section can be cut from the markup without
+     touching this file. */
+  const fill = (id, list, tpl) => {
+    const el = document.getElementById(id);
+    if (el && list) el.innerHTML = list.map(tpl).join('');
+  };
+
+  fill('jd-proof-grid', DATA.stats, (s) => `<li class="jd-proof-stat">
+      <span class="jd-proof-fig">${esc(s.fig)}</span>
+      <span class="jd-proof-cap">${esc(s.cap)}</span>
+    </li>`);
+
+  /* Inside the wall: one panel per kind of RV — a factory photograph beside its
+     numbered list. No switch of its own; selectCut(), called from the main
+     switch's select(), shows the one that matches. */
+  const cutRoot = document.getElementById('jd-cut-panels');
+  const hasCut = !!(cutRoot && DATA.cutaways);
+  if (hasCut) {
+    const cutImg = (c, w) => `../assets/jayco-difference/web/${esc(c.img)}-${w}.webp`;
+    cutRoot.innerHTML = DATA.cutaways.map((c, i) => `
+      <div class="jd-cut-panel" id="jd-cut-panel-${esc(c.id)}"${i ? ' hidden' : ''}>
+        <div class="jd-cut-grid">
+          <figure class="jd-cut-fig">
+            <img class="jd-cut-img" src="${cutImg(c, 1200)}"
+                 srcset="${cutImg(c, 800)} 800w, ${cutImg(c, 1200)} 1200w"
+                 sizes="(max-width: 1023px) 92vw, 48vw" width="1200" height="801"
+                 alt="${esc(c.alt)}" loading="lazy" decoding="async" />
+          </figure>
+          <ol class="jd-cut-list" role="list">${c.layers.map((l, n) => `<li class="jd-cut-item">
+              <span class="jd-cut-n" aria-hidden="true">${n + 1}</span>
+              <div>
+                <span class="jd-cut-where">${esc(l.where)}</span>
+                <h3 class="jd-cut-name">${esc(l.name)}</h3>
+                <p class="jd-cut-body">${esc(l.body)}</p>
+              </div>
+            </li>`).join('')}</ol>
+        </div>
+      </div>`).join('');
+  }
+
+  /* Years as a share of 28, so 25 years visibly stops short of the lifetime
+     rung drawn at full width. */
+  const LADDER_SCALE = 28;
+  fill('jd-ladder', DATA.warranties, (w) => {
+    const pct = w.years ? Math.round((w.years / LADDER_SCALE) * 100) : 100;
+    const term = w.years ? `${w.years} years` : 'Lifetime';
+    return `<li class="jd-rung${w.jayco ? ' is-jayco' : ''}">
+      <span class="jd-rung-what">${esc(w.what)}<span class="jd-rung-who">${esc(w.who)}</span></span>
+      <span class="jd-rung-track" aria-hidden="true"><span class="jd-rung-bar" style="--w:${pct}%"></span></span>
+      <span class="jd-rung-term">${term}</span>
+    </li>`;
+  });
+
+  fill('jd-miles', DATA.milestones, (m) => `<li class="jd-mile">
+      <span class="jd-mile-when">${esc(m.when)}</span>
+      <span class="jd-mile-fig">${esc(m.fig)}</span>
+      <p class="jd-mile-body">${esc(m.body)}</p>
+    </li>`);
+
+  fill('jd-owners', DATA.community, (c) => `<li class="jd-owner">
+      <span class="jd-owner-fig">${esc(c.fig)}</span>
+      <span class="jd-owner-cap">${esc(c.cap)}</span>
+    </li>`);
+
+  fill('jd-badges', DATA.badges, (b) => `<li><img src="../assets/jayco-difference/web/${esc(b.file)}"
+      alt="${esc(b.alt)}" width="480" height="323" loading="lazy" decoding="async" /></li>`);
+
   /* ---------- The switch ---------- */
   const tabs = () => $$('#jd-tabs .jd-tab');
 
-  function select(id, focus) {
+  /* `fromBar` is true when the choice came from the stuck bar — the reader is
+     somewhere down the page, not at the switch, so keepPlace() decides where
+     they should land once the panels have swapped. */
+  function select(id, focus, fromBar) {
+    const place = fromBar ? readPlace() : null;
     DATA.groups.forEach((g) => {
       const on = g.id === id;
       const tab = $('#jd-tab-' + g.id);
@@ -175,6 +253,9 @@
       $('#jd-panel-' + g.id).hidden = !on;
     });
     if (focus) $('#jd-tab-' + id).focus();
+    if (hasCut && DATA.cutaways.some((c) => c.id === id)) selectCut(id);
+    syncBar(id);
+    if (place) keepPlace(place);
     /* The panel that just opened has never been measured — its rows had no
        layout while it was hidden, so every parallax trigger in it was computed
        against a zero-height box. The panels are different heights too, so the
@@ -189,19 +270,250 @@
 
   /* Arrow keys move between tabs, Home and End jump to the ends — the roving
      tabindex above is what keeps the group a single tab stop. */
+  /* Which tab an arrow, Home or End key moves to, or -1. */
+  const nextTab = (e, list) => {
+    const i = list.indexOf(document.activeElement);
+    if (i < 0) return -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') return (i + 1) % list.length;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') return (i - 1 + list.length) % list.length;
+    if (e.key === 'Home') return 0;
+    if (e.key === 'End') return list.length - 1;
+    return -1;
+  };
+
   $('#jd-tabs').addEventListener('keydown', (e) => {
     const list = tabs();
-    const i = list.indexOf(document.activeElement);
-    if (i < 0) return;
-    let next = -1;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % list.length;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + list.length) % list.length;
-    if (e.key === 'Home') next = 0;
-    if (e.key === 'End') next = list.length - 1;
+    const next = nextTab(e, list);
     if (next < 0) return;
     e.preventDefault();
     select(list[next].dataset.group, true);
   });
+
+  /* ---------- Inside the wall follows the switch ----------
+     The construction section has no switch of its own (client, 2026-09-13):
+     the reader chooses towable or motorized once, at the top, and this panel
+     follows. select() calls this and refreshes the scroll triggers itself. */
+  function selectCut(id) {
+    DATA.cutaways.forEach((c) => {
+      document.getElementById('jd-cut-panel-' + c.id).hidden = c.id !== id;
+    });
+  }
+
+  /* ---------- The switch, stuck ----------
+     A small copy of the switch pinned under the header while the blue panel is
+     up out of view and the reader has not yet scrolled past the last section
+     the choice changes — Inside the wall, or the feature panels if that
+     section is ever cut. The why of a copy rather than the tablist moved is in
+     jayco-difference.css. */
+  const bar = document.getElementById('jd-sticky');
+  const barOpts = document.getElementById('jd-sticky-opts');
+  const switchPanel = $('.jd-switch-panel');
+  const siteHeader = document.getElementById('site-header');
+  const lastChoiceSection = $('.jd-cut') || root;
+  const hasBar = !!(bar && barOpts && switchPanel);
+  const BAR_GAP = 10;
+
+  function syncBar(id) {
+    if (!hasBar) return;
+    $$('.jd-tab', barOpts).forEach((b) => {
+      const on = b.dataset.group === id;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    /* The morph copies the big tabs, so it has to be re-copied to show the
+       option that is chosen now. */
+    buildMorph();
+  }
+
+  /* The bar sits at the header's bottom edge plus a gap. MEASURED, not written
+     down: the header shrinks after the first 60px of scroll and is a different
+     height on a phone. offsetHeight still reads while the bar is hidden,
+     because it is hidden with visibility, which keeps its box. */
+  const barTop = () => (siteHeader ? siteHeader.getBoundingClientRect().bottom : 0) + BAR_GAP;
+  const barLine = () => barTop() + bar.offsetHeight;
+
+  /* Where the reader is when they switch from the bar. Inside the feature
+     panels, the new choice should start from the top of its own list. Below
+     them, whatever is on screen should stay put, even though the panels above
+     it have just changed height. */
+  function readPlace() {
+    if (!hasBar) return null;
+    if (root.getBoundingClientRect().bottom > barLine()) return { to: 'list' };
+    return { to: 'keep', top: lastChoiceSection.getBoundingClientRect().top };
+  }
+
+  /* Immediate, and through Lenis when it is running — a native scrollTo under
+     Lenis is animated back to Lenis' own target on the next frame. */
+  function scrollToY(y) {
+    const lenis = window.__jaycoLenis;
+    if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+    else window.scrollTo(0, y);
+  }
+
+  function keepPlace(place) {
+    if (place.to === 'list') {
+      const head = $('.jd-panel:not([hidden]) .jd-panel-head', root) || root;
+      scrollToY(window.scrollY + head.getBoundingClientRect().top - barLine() - 24);
+    } else {
+      scrollToY(window.scrollY + lastChoiceSection.getBoundingClientRect().top - place.top);
+    }
+  }
+
+  /* ---------- The morph ----------
+     The full switch does not just vanish while a small one appears. As the
+     blue panel reaches the header it pins there and shrinks into the bar over
+     the next stretch of scroll, scrubbed by the scroll position, so it runs
+     backwards on the way up.
+
+     It is drawn on #jd-morph: a decorative copy (aria-hidden, inert) of the
+     panel's heading and tabs. The copy's box is laid out at the panel's full
+     size and CLIPPED down toward the bar's rectangle, and the tabs travel and
+     scale by transform — clip-path and transforms only, so nothing on the page
+     reflows per frame. The real panel is hidden while the copy stands in for
+     it, and the real bar takes over at the end. Every rectangle is measured
+     off the live elements, so the same code serves the desktop pill and the
+     full-width phone bar.
+
+     Reduced motion skips all of it: the bar appears once the panel has gone. */
+  const morph = document.getElementById('jd-morph');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+  const PANEL_RADIUS = 32; /* .jd-switch-panel's border-radius */
+  let morphBox = null;
+  let morphText = null;
+  let morphTabs = null;
+  let lastP = 0;
+
+  /* A copy nothing can reach: ids, roles, aria and tab stops stripped, inside a
+     layer that is itself aria-hidden and inert. */
+  function buildMorph() {
+    if (!morph || !hasBar) return;
+    const strip = (el) => {
+      [el, ...el.querySelectorAll('*')].forEach((n) => {
+        [...n.attributes].forEach((a) => {
+          if (a.name === 'id' || a.name === 'role' || a.name.startsWith('aria-')) n.removeAttribute(a.name);
+        });
+        if (n.tagName === 'BUTTON') n.tabIndex = -1;
+      });
+      return el;
+    };
+    morphText = strip($('.jd-switch-text', switchPanel).cloneNode(true));
+    morphTabs = strip($('#jd-tabs').cloneNode(true));
+    morphText.classList.add('jd-morph-text');
+    morphTabs.classList.add('jd-morph-tabs');
+    morphBox = document.createElement('div');
+    morphBox.className = 'jd-morph-box';
+    morphBox.append(morphText, morphTabs);
+    morph.replaceChildren(morphBox);
+  }
+
+  /* All reads, once per frame, before any write. offset* values ignore
+     transforms, so the bar measures true even mid-fade; .jd-switch-panel and
+     .jd-sticky-bar are position: relative so those offsets are local to them. */
+  function measure() {
+    const tabs = $('#jd-tabs');
+    const text = $('.jd-switch-text', switchPanel);
+    const barEl = barOpts.parentElement;
+    const pr = switchPanel.getBoundingClientRect();
+    return {
+      top: barTop(),
+      panelTop: pr.top,
+      panelBottom: pr.bottom,
+      A: { x: pr.left, w: switchPanel.offsetWidth, h: switchPanel.offsetHeight },
+      text: { x: text.offsetLeft, y: text.offsetTop, w: text.offsetWidth },
+      tA: { x: tabs.offsetLeft, y: tabs.offsetTop, w: tabs.offsetWidth, h: tabs.offsetHeight },
+      B: { x: barEl.offsetLeft, w: barEl.offsetWidth, h: barEl.offsetHeight },
+      tB: { x: barOpts.offsetLeft, y: barOpts.offsetTop, w: barOpts.offsetWidth, h: barOpts.offsetHeight },
+      lastBottom: lastChoiceSection.getBoundingClientRect().bottom,
+    };
+  }
+
+  /* t = 0 is the panel as it stands; t = 1 is exactly the bar. The tabs scale
+     by HEIGHT so the track lands at the bar's height, and their unscaled width
+     is eased toward the width that scale turns into the bar's. */
+  function paint(m, t) {
+    const clipR = Math.max(m.A.x + m.A.w - m.B.x - m.B.w, 0);
+    const clipB = Math.max(m.A.h - m.B.h, 0);
+    const clipL = Math.max(m.B.x - m.A.x, 0);
+    morphBox.style.cssText =
+      `left:${m.A.x}px;top:${m.top}px;width:${m.A.w}px;height:${m.A.h}px;` +
+      `clip-path:inset(0px ${lerp(0, clipR, t)}px ${lerp(0, clipB, t)}px ${lerp(0, clipL, t)}px ` +
+      `round ${lerp(PANEL_RADIUS, m.B.h / 2, t)}px)`;
+    /* The heading rides in with the box's left edge rather than being sliced
+       by it, and is gone a quarter of the way through. */
+    morphText.style.cssText =
+      `left:${m.text.x + lerp(0, clipL, t)}px;top:${m.text.y}px;width:${m.text.w}px;` +
+      `opacity:${Math.max(0, 1 - t / 0.25)}`;
+    const k = m.tB.h / m.tA.h;
+    const x = lerp(m.tA.x, m.B.x - m.A.x + m.tB.x, t);
+    const y = lerp(m.tA.y, m.tB.y, t);
+    morphTabs.style.cssText =
+      `width:${lerp(m.tA.w, m.tB.w / k, t)}px;transform:translate(${x}px,${y}px) scale(${lerp(1, k, t)})`;
+  }
+
+  function updateBar() {
+    const m = measure();
+    bar.style.setProperty('--jd-stick-top', m.top + 'px');
+    const line = m.top + m.B.h;
+    const inRange = m.lastBottom > line;
+
+    if (reduceMotion.matches || !morphBox) {
+      switchPanel.style.visibility = '';
+      if (morph) morph.classList.remove('is-on');
+      bar.classList.remove('jd-sticky--instant');
+      bar.classList.toggle('is-on', m.panelBottom < line && inRange);
+      return;
+    }
+
+    /* 0 as the panel's top edge reaches the bar's top line, 1 a span later —
+       most of the panel's own height, within sensible bounds. */
+    const span = Math.min(Math.max(m.A.h * 0.8, 140), 240);
+    const raw = (m.top - m.panelTop) / span;
+    const p = Math.min(Math.max(raw, 0), 1);
+    const morphing = p > 0 && p < 1 && inRange;
+
+    switchPanel.style.visibility = raw > 0 ? 'hidden' : '';
+    morph.classList.toggle('is-on', morphing);
+    if (morphing) paint(m, easeInOut(p));
+
+    /* The hand-off between the copy and the real bar must be instant, or the
+       bar's fade would open a gap. Leaving past Inside the wall still fades. */
+    const on = p >= 1 && inRange;
+    if (on !== bar.classList.contains('is-on')) {
+      bar.classList.toggle('jd-sticky--instant', (lastP >= 1) !== (p >= 1));
+      bar.classList.toggle('is-on', on);
+    }
+    lastP = p;
+  }
+
+  if (hasBar) {
+    barOpts.innerHTML = DATA.groups.map((g, i) => `
+      <button type="button" class="jd-tab${i ? '' : ' is-on'}"
+              aria-pressed="${i ? 'false' : 'true'}"
+              data-group="${esc(g.id)}">${esc(g.label)}</button>`).join('');
+    barOpts.addEventListener('click', (e) => {
+      const t = e.target.closest('.jd-tab');
+      if (t) select(t.dataset.group, false, true);
+    });
+    /* One measurement per frame at most, however fast the scroll events come. */
+    let queued = false;
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; updateBar(); });
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    /* The header animates its padding for about half a second when it
+       compacts, and the scroll that triggered it may be the last one — so the
+       bar re-measures when that animation ends, or it would be left sitting
+       where the taller header's bottom edge used to be. */
+    if (siteHeader) siteHeader.addEventListener('transitionend', schedule);
+    if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', schedule);
+    buildMorph();
+    updateBar();
+  }
 
   /* ---------- Parallax ----------
      The hero plate, scrubbed across its own pass — ease 'none' and scrub true,

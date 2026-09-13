@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/jayco-difference.css?v=v5-jd-16" />
+  <link rel="stylesheet" href="css/jayco-difference.css?v=v5-jd-23" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -119,7 +119,13 @@
        EVERY FEATURE AND FIGURE BELOW IS JAYCO'S OWN, harvested from those three
        pages on 2026-09-07. The lists, their names and their marks live in
        js/jayco-difference-data.js with the provenance written out; nothing on
-       this page is a claim this site invented. -->
+       this page is a claim this site invented.
+
+       THE FACT SECTIONS WERE ADDED ON 2026-09-13 at the client's request for
+       more emphasis on hard numbers — By the numbers, the cross-section, the
+       warranty ladder, the record and the owners figures. Each figure was
+       re-read on jayco.com that day, and the data file names the page it came
+       from. -->
   <main class="jd" id="jayco-difference">
 
     <section class="jd-hero">
@@ -150,6 +156,19 @@
           lineup — in the materials, engineering, technology, testing and support that go into
           every RV — and the point of all of it is the same: that the trips are
           <strong>safer, easier and longer lasting</strong>.</p>
+      </div>
+    </section>
+
+    <!-- By the numbers. The client asked for the facts to lead, so the figures
+         come straight after the intro rather than after twenty feature cards.
+         Drawn by jayco-difference.js from DATA.stats. -->
+    <section class="jd-proof" aria-labelledby="jd-proof-h">
+      <div class="jd-inner">
+        <div class="jd-sec-head">
+          <span class="section-label">By the numbers</span>
+          <h2 class="jd-h2" id="jd-proof-h">The difference, counted.</h2>
+        </div>
+        <ul class="jd-proof-grid" id="jd-proof-grid" role="list"><!-- built by jayco-difference.js --></ul>
       </div>
     </section>
 
@@ -191,16 +210,60 @@
 
     <!-- The switch. Two lists, one at a time — the panels and the tabs are both
          built by jayco-difference.js from the data file, so adding a feature is
-         a data-only change. -->
+         a data-only change.
+
+         A BLUE PANEL, for emphasis the client asked for on 2026-09-13: this one
+         choice drives both the feature panels below and Inside the wall, which
+         has no switch of its own. The heading names the tablist. -->
     <section class="jd-switch" aria-labelledby="jd-switch-label">
       <div class="jd-inner">
-        <span class="jd-switch-label" id="jd-switch-label">Select towable or motorized</span>
-        <div class="jd-tabs" id="jd-tabs" role="tablist"
-             aria-labelledby="jd-switch-label"><!-- built by jayco-difference.js --></div>
+        <div class="jd-switch-panel">
+          <div class="jd-switch-text">
+            <h2 class="jd-switch-h" id="jd-switch-label">Towable or motorized?</h2>
+            <p class="jd-switch-b">Choose one, and the features and construction below show what
+              that kind of Jayco gets.</p>
+          </div>
+          <div class="jd-tabs" id="jd-tabs" role="tablist"
+               aria-labelledby="jd-switch-label"><!-- built by jayco-difference.js --></div>
+        </div>
       </div>
     </section>
 
+    <!-- The switch, small and stuck below the header once the blue panel above
+         has scrolled away — for as long as the choice changes what is on screen
+         (the feature panels and Inside the wall). A kept-in-step copy, not the
+         tablist moved; see the note in jayco-difference.css. -->
+    <div class="jd-sticky" id="jd-sticky">
+      <div class="jd-sticky-bar">
+        <div class="jd-tabs" id="jd-sticky-opts" role="group"
+             aria-label="Towable or motorized"><!-- built by jayco-difference.js --></div>
+      </div>
+    </div>
+
+    <!-- The morph: a decorative copy of the blue panel that shrinks into the
+         stuck bar as the panel scrolls under the header. Hidden from assistive
+         tech and unreachable; the real controls are the two above. -->
+    <div class="jd-morph" id="jd-morph" aria-hidden="true" inert></div>
+
     <div class="jd-groups" id="jd-groups"><!-- both panels built by jayco-difference.js --></div>
+
+    <!-- Inside the wall. This page keeps saying the difference is in the parts
+         you cannot see, so this is the one place they are shown: a client-
+         supplied photograph of each kind of coach on the line, beside what goes
+         into it. It has no switch of its own: it follows the Towables /
+         Motorized choice at the top of the page. Both panels are built by
+         jayco-difference.js from DATA.cutaways. -->
+    <section class="jd-cut" aria-labelledby="jd-cut-h">
+      <div class="jd-inner">
+        <div class="jd-sec-head">
+          <span class="section-label">Construction</span>
+          <h2 class="jd-h2" id="jd-cut-h">Inside the wall.</h2>
+          <p class="jd-lead">By the time you walk through a Jayco, the roof, the laminate and the frame
+            are closed up behind the finish. On the line, before they are, this is what goes in.</p>
+        </div>
+        <div id="jd-cut-panels"><!-- both panels built by jayco-difference.js --></div>
+      </div>
+    </section>
 
     <!-- 100% PDI. This was a stat in the strip and a line in the FAQ, which is
          thin treatment for the one process that touches every coach Jayco
@@ -227,7 +290,41 @@
               <li>Structural integrity</li>
               <li>Operational systems</li>
             </ul>
+            <!-- The two facility figures are pdi.html's, harvested there. -->
+            <ul class="jd-pdi-stats" role="list">
+              <li><span class="jd-pdi-stat-fig">70,000</span>
+                <span class="jd-pdi-stat-cap">Approximate square feet of Middlebury facility that exists
+                  only to inspect</span></li>
+              <li><span class="jd-pdi-stat-fig">4</span>
+                <span class="jd-pdi-stat-cap">Inspection lines running at the same time</span></li>
+            </ul>
+            <a class="jd-pdi-more" href="pdi.html">See the full inspection</a>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The warranty ladder. "Backed Better" is reason 04, and until now its
+         evidence was one figure. These are the terms Jayco and its supplier
+         partners publish at jayco.com/about/warranty/, drawn by
+         jayco-difference.js from DATA.warranties. -->
+    <section class="jd-war" aria-labelledby="jd-war-h">
+      <div class="jd-inner">
+        <div class="jd-sec-head">
+          <span class="section-label">Warranty</span>
+          <h2 class="jd-h2" id="jd-war-h">Backed for years.<br>Some of it for life.</h2>
+          <p class="jd-lead">Jayco&rsquo;s own 2+3 is where the coverage starts. Its supplier partners
+            put their own warranties on top — from three years on the flooring to a lifetime on
+            the wheels.</p>
+        </div>
+        <ul class="jd-ladder" id="jd-ladder" role="list"><!-- built by jayco-difference.js --></ul>
+        <p class="jd-war-note">Supplier components vary by model, and each term is the supplier&rsquo;s
+          own. The <a href="#">complete warranty terms</a> say what applies to a particular coach.</p>
+        <div class="jd-road">
+          <span class="jd-road-fig">45,000+</span>
+          <p class="jd-road-b"><strong>Roadside assistance vehicles, 24/7/365, with no membership
+            dues.</strong> New Jayco towables with Goodyear tires include the Tredit Advantage
+            Program — towing, tire changes, lockouts, jump-starts and fuel delivery.</p>
         </div>
       </div>
     </section>
@@ -240,47 +337,70 @@
         <div class="jd-eng-text">
           <span class="section-label">Research and development</span>
           <h2 class="jd-eng-h" id="jd-eng-h">Designed here.<br>Tested here.<br>Improved here.</h2>
-          <p class="jd-eng-b">Jayco's in-house engineering teams continually test materials,
-            construction techniques, ride quality, safety systems and new technologies — using
-            what they learn on the road to improve what comes off the line. It is the reason the
-            list above changes from one model year to the next rather than staying still.</p>
+          <p class="jd-eng-b">Jayco puts what it calls the industry&rsquo;s largest team of engineers
+            between an idea and the line — testing materials, construction techniques, ride
+            quality, safety systems and new technologies, and using what they learn on the road to
+            improve what gets built. Even a common change goes through it. A new floor covering has
+            to clear four tests before it is used:</p>
         </div>
+        <!-- The four tests from jayco.com/about/r&d/, on the reasons grid. -->
+        <ul class="jd-reason-grid jd-tests" role="list">
+          <li class="jd-reason">
+            <span class="jd-reason-k">01</span>
+            <h3 class="jd-reason-h">Temperature</h3>
+            <p class="jd-reason-b">Tested for cold-cracking.</p>
+          </li>
+          <li class="jd-reason">
+            <span class="jd-reason-k">02</span>
+            <h3 class="jd-reason-h">Adhesive</h3>
+            <p class="jd-reason-b">Checked to make sure the product adheres properly.</p>
+          </li>
+          <li class="jd-reason">
+            <span class="jd-reason-k">03</span>
+            <h3 class="jd-reason-h">Durability</h3>
+            <p class="jd-reason-b">Tested for how it holds up in use.</p>
+          </li>
+          <li class="jd-reason">
+            <span class="jd-reason-k">04</span>
+            <h3 class="jd-reason-h">Repair</h3>
+            <p class="jd-reason-b">The proper repair process is identified before it ships.</p>
+          </li>
+        </ul>
+        <a class="jd-more" href="rd.html">How Jayco develops a new RV</a>
       </div>
     </section>
 
-    <!-- The proof strip, lifted out of the blue value panel where it used to
-         sit. THE ROOF FIGURE IS GONE FROM IT: 50% more roof load is a Magnum
-         Truss claim, which is standard on fifth wheels and travel trailers and
-         has no motorized equivalent — so it read as a brand statistic on a page
-         that covers both. It still stands where it belongs, on the Magnum Truss
-         card in the Towables tab. Since 1968 replaces it, which is true of
-         every coach Jayco has ever shipped. -->
-    <section class="jd-proof" aria-labelledby="jd-proof-h">
+    <!-- A record, not a promise. The three-figure proof strip that stood here
+         moved to the top of the page as By the numbers, and its one-line awards
+         mention becomes the panel below. Milestones are from
+         jayco.com/about/history/; the award counts from /about/r&d/awards/; the
+         four badge marks were supplied by the client and sit on the panel as
+         transparent images, with no tile behind them. -->
+    <section class="jd-record" aria-labelledby="jd-record-h">
       <div class="jd-inner">
-        <h2 class="sr-only" id="jd-proof-h">The difference in three figures</h2>
-        <ul class="jd-proof-grid" role="list">
-          <li class="jd-proof-stat">
-            <span class="jd-proof-fig">2 + 3</span>
-            <span class="jd-proof-cap">Two-year limited warranty, plus three years of structural
-              protection</span>
-          </li>
-          <li class="jd-proof-stat">
-            <span class="jd-proof-fig">100%</span>
-            <span class="jd-proof-cap">Every Jayco receives a dedicated pre-delivery
-              inspection</span>
-          </li>
-          <li class="jd-proof-stat">
-            <span class="jd-proof-fig">Since 1968</span>
-            <span class="jd-proof-cap">Decades of RV engineering and manufacturing
-              experience</span>
-          </li>
-        </ul>
-        <!-- Third-party validation, deliberately one line rather than a section
-             of its own: it is evidence for the claims above, not a claim. -->
-        <div class="jd-awards">
-          <h3 class="jd-awards-h">Recognized by the people who know RVs.</h3>
-          <p class="jd-awards-b">Jayco continues to earn industry recognition for product quality,
-            dealer satisfaction, warranty and support.</p>
+        <div class="jd-sec-head">
+          <span class="section-label">Since 1968</span>
+          <h2 class="jd-h2" id="jd-record-h">A record, not a promise.</h2>
+        </div>
+        <ul class="jd-miles" id="jd-miles" role="list"><!-- built by jayco-difference.js --></ul>
+        <a class="jd-more" href="our-story.html">Read the whole story</a>
+        <div class="jd-honors">
+          <div>
+            <h3 class="jd-honors-h">Recognized by the people who know RVs.</h3>
+            <ul class="jd-honors-list">
+              <li><strong>103 RVDA DSI Gold Circle awards</strong> for dealer satisfaction</li>
+              <li><strong>Dealer Satisfaction Index awards</strong> for both Towables and Motorized,
+                every year from 2023 to 2026</li>
+              <li><strong>RV of the Year 2026</strong> from RV News, for the Jay Feather Air SL 15TBSL
+                and the Jay Flight SLX 265MWS</li>
+              <li><strong>Must-See RV 2026</strong> from RV Business, for the Jay Flight SLX Sport
+                130BH</li>
+              <li><strong>Six Reader&rsquo;s Choice Golds</strong> in both 2025 and 2026, including
+                Favorite Travel Trailer, Class B and Class C</li>
+            </ul>
+            <a class="jd-more" href="awards.html">See every award</a>
+          </div>
+          <ul class="jd-badge-row" id="jd-badges" role="list"><!-- built by jayco-difference.js --></ul>
         </div>
       </div>
     </section>
@@ -300,6 +420,8 @@
          and this is the one place that is the literal subject. -->
     <section class="jd-ends" aria-label="Next steps">
       <div class="jd-inner">
+        <!-- Owners and dealers, in figures — evidence for the two cards under it. -->
+        <ul class="jd-owners" id="jd-owners" role="list"><!-- built by jayco-difference.js --></ul>
         <div class="jd-cta-grid">
           <article class="jd-cta">
             <img class="jd-cta-img"
@@ -313,8 +435,8 @@
             <div class="jd-cta-body">
               <span class="section-label">After the sale</span>
               <h2 class="jd-cta-h">The difference continues after you drive away.</h2>
-              <p>An established network of authorized dealers and service centers across North
-                America, with trained technicians and support long after purchase.</p>
+              <p>Hundreds of authorized dealers and service centers across North America, trained
+                every year through Jayco Masters, with support long after purchase.</p>
               <a class="btn-primary" href="dealers.html">Find a Jayco Dealer</a>
             </div>
           </article>
@@ -365,9 +487,9 @@
          app.js binds .faq-question on DOMContentLoaded, so this is markup and
          nothing else.
 
-         jayco.com's own Difference page carries no FAQ. These five are written
-         from the facts on the three pages this one draws from, and none of them
-         states anything the cards above do not. -->
+         jayco.com's own Difference page carries no FAQ. These eight are written
+         from the facts on the pages this one draws from, and none of them states
+         anything the sections above do not. -->
     <section class="faq-section" id="faq">
       <div class="faq-inner">
         <div class="faq-header">
@@ -396,8 +518,9 @@
             </button>
             <div class="faq-answer">
               <p>Most of it is standard, and the cards say so where it is not. JAYCOMMAND,
-                JaySMART and the second interior scheme are on select models; NuvoH2O is
-                available on select Eagle, North Point, Pinnacle and Seismic. Solar is the
+                JaySMART, Climate Shield, the 4-Star Handling Package and the second interior
+                scheme are on select models; NuvoH2O is available on select Eagle, North Point,
+                Pinnacle and Seismic; Starlink is standard on the 2026 Seneca XT. Solar is the
                 in-between case — every RV leaves the line at least solar-prepped, with the full
                 Overlander systems available on top.</p>
             </div>
@@ -424,6 +547,44 @@
               <p>Jayco's name for its pre-delivery inspection — the check every RV goes through
                 before it is handed over, rather than a sample off the line. It is the last of the
                 processes this page is about, and the one you never see.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How strong is a Jayco roof?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>The Magnum Truss&trade; Roof System is standard on every Jayco travel trailer and
+                fifth wheel, and in testing it withstood 4,500 pounds — 50 percent more than
+                competitors&rsquo; roofs. Jayco calls it the strongest roof in the business. The
+                figure is for those towables, where the Magnum Truss is fitted.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What temperatures is Climate Shield built for?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>As high as 100&deg;F and as low as 0&deg;F. On the Eagle that means a fully
+                enclosed, heated underbelly, a 35,000 BTU furnace, double-layer fibreglass
+                insulation in the ceiling and floor, and a double-sided radiant barrier through the
+                roof, floor and front cap. It is on select models, so check the
+                <a href="brochures.html">brochure</a> for the one you are looking at.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What is covered beyond Jayco&rsquo;s own 2+3?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer">
+              <p>Jayco&rsquo;s supplier partners carry their own warranties on top of it: three years
+                on Congoleum flooring and Onan generators, five on Dexter axles, six on Goodyear
+                tires, ten on the Samsung refrigerator compressor, twenty on Dicor roofing,
+                twenty-five on Huber floor decking and a lifetime on Tredit aluminium wheels.
+                Which components a coach has depends on the model.</p>
             </div>
           </div>
           <div class="faq-item">
@@ -597,8 +758,8 @@
 
   <!-- No models-data.js and no build-data.js: this page names features, not
        floorplans, and reads nothing out of the lineup. -->
-  <script src="js/jayco-difference-data.js?v=v5-jd-7"></script>
-  <script src="js/jayco-difference.js?v=v5-jd-10"></script>
+  <script src="js/jayco-difference-data.js?v=v5-jd-11"></script>
+  <script src="js/jayco-difference.js?v=v5-jd-18"></script>
   <script src="js/app.js?v=v5-core-6"></script>
 </body>
 </html>
