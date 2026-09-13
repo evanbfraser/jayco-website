@@ -4,7 +4,7 @@
    Shared by compare.html and floorplans.html, so the two pages draw ONE table
    rather than two copies that drift apart. This file is markup only: it turns
    a list of plans into the table. Each page owns where it goes and how it opens
-   — below the grid on the compare page, in an overlay on the floorplans page.
+   — a modal over the page on both, #cmp-modal and #fpc-cmp.
 
    Ported from version-4's renderSpecs(): a label column plus one column per
    plan, rows unioned across the columns so a spec one plan publishes and
@@ -93,5 +93,22 @@ window.JAYCO_COMPARE_TABLE = (function () {
       </div>`;
   }
 
-  return { html: html };
+  /* The plan header pins directly under the "Side by side" title, so it needs
+     the title's height — which moves with the viewport (the title is a clamp)
+     and with late fonts. Measured onto the pane itself rather than the root, and
+     watched rather than read once. Call after the table is on screen: a hidden
+     head measures 0. One table at a time per page, so one observer. */
+  let ro = null;
+  function pin(root) {
+    if (ro) { ro.disconnect(); ro = null; }
+    const pane = root && root.querySelector('.cmp-table-scroll');
+    const head = pane && pane.querySelector('.cmp-view-head');
+    if (!head) return;
+    const set = () => pane.style.setProperty('--cmp-view-head-h',
+      Math.round(head.getBoundingClientRect().height) + 'px');
+    set();
+    if (window.ResizeObserver) { ro = new ResizeObserver(set); ro.observe(head); }
+  }
+
+  return { html: html, pin: pin };
 }());

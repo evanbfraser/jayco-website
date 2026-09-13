@@ -640,6 +640,7 @@
     if (cols.length < 2 || !window.JAYCO_COMPARE_TABLE) return;
     $('#fpc-cmp-body').innerHTML = window.JAYCO_COMPARE_TABLE.html(cols);
     show($('#fpc-cmp'), $('#fpc-cmp-x'), src);
+    window.JAYCO_COMPARE_TABLE.pin($('#fpc-cmp'));   // only measures once shown
     const pane = $('#fpc-cmp .cmp-table-scroll');
     if (pane) { pane.scrollTop = 0; pane.scrollLeft = 0; }
   }
@@ -1225,7 +1226,7 @@
     $('#fpc-trigger').addEventListener('click', () => setPanel(!panelOpen()));
     $('#fpc-panel-x').addEventListener('click', () => setPanel(false));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && panelOpen() && $('#fpc-modal').hidden && $('#fpc-zoom').hidden) {
+      if (e.key === 'Escape' && panelOpen() && !anyOpen()) {
         e.stopPropagation();
         setPanel(false);
       }

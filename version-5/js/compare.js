@@ -504,11 +504,6 @@
     const hdr = $('#site-header');
     document.documentElement.style.setProperty('--cmp-chart-top',
       Math.round(hdr ? hdr.getBoundingClientRect().height : 68) + 'px');
-    /* "Side by side" pins under the bar, so it costs the pane its height too.
-       Zero when the comparison has not been opened. */
-    const head = $('.cmp-view-head');
-    document.documentElement.style.setProperty(
-      '--cmp-view-head-h', head ? Math.round(head.getBoundingClientRect().height) + 'px' : '0px');
   }
 
   function renderTray() {
@@ -556,21 +551,49 @@
     }
     syncURL();
     paintPicks(); renderTray();
-    if (!$('#cmp-view').hidden) renderCompare();
     refresh();
   }
 
   /* ---------- Compare table ----------
      Drawn by js/compare-table.js, which floorplans.html shares, so the two
      pages show one table rather than two copies that drift. This page owns
-     where it goes (#cmp-view, below the grid) and when it shows. */
-  function renderCompare() {
+     where it goes — a modal over the grid, as floorplans.js's openCompare()
+     does — and when it shows.
+
+     Built fresh on every open so it is always the tray's current picks. The
+     tray sits under the scrim while it is open, so the picks cannot change
+     behind it and nothing needs re-rendering in place. */
+  let lastFocus = null;
+  const modalOpen = () => !$('#cmp-modal').hidden;
+
+  function openCompare(src) {
     const cols = state.picked.map((k) => ROWS.find((x) => x.key === k)).filter(Boolean);
-    const view = $('#cmp-view');
-    if (cols.length < 2 || !window.JAYCO_COMPARE_TABLE) { view.hidden = true; view.innerHTML = ''; return; }
-    view.hidden = false;
-    view.innerHTML = window.JAYCO_COMPARE_TABLE.html(cols);
-    measureChart();   // the head only exists now, and the pane is sized against it
+    if (cols.length < 2 || !window.JAYCO_COMPARE_TABLE) return;
+    if (panelOpen()) setPanel(false);
+    lastFocus = src || document.activeElement;
+    $('#cmp-view').innerHTML = window.JAYCO_COMPARE_TABLE.html(cols);
+    $('#cmp-modal').hidden = false;
+    document.body.classList.add('cmp-modal-on');
+    /* Lenis keeps scrolling the window under a fixed overlay whatever overflow
+       says, so it is stopped rather than trusted. */
+    const l = window.__jaycoLenis;
+    if (l && l.stop) l.stop();
+    window.JAYCO_COMPARE_TABLE.pin($('#cmp-modal'));   // only measures once shown
+    const pane = $('#cmp-modal .cmp-table-scroll');
+    if (pane) { pane.scrollTop = 0; pane.scrollLeft = 0; }
+    $('#cmp-modal-x').focus();
+  }
+
+  function closeCompare() {
+    if (!modalOpen()) return;
+    $('#cmp-modal').hidden = true;
+    $('#cmp-view').innerHTML = '';
+    document.body.classList.remove('cmp-modal-on');
+    const l = window.__jaycoLenis;
+    if (l && l.start) l.start();
+    /* back to the Compare button, not the top of a 181-card page */
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    lastFocus = null;
   }
 
   /* ---------- URL ----------
@@ -655,10 +678,14 @@
     });
   }
 
-  /* The sheet covers the page, so the tab cycle has to stay inside it. */
+  /* The sheet and the comparison modal both cover the page, so the tab cycle
+     has to stay inside whichever is up. The modal wins: opening it closes the
+     panel. */
   function trapTab(e) {
-    if (e.key !== 'Tab' || !panelOpen() || !sheetMode()) return;
-    const d = $('#cmp-panel');
+    if (e.key !== 'Tab') return;
+    const d = modalOpen() ? $('#cmp-modal')
+      : (panelOpen() && sheetMode() ? $('#cmp-panel') : null);
+    if (!d) return;
     const f = Array.from(d.querySelectorAll(FOCUSABLE)).filter((el) => el.offsetParent !== null);
     if (!f.length) return;
     const first = f[0], last = f[f.length - 1];
@@ -696,7 +723,13 @@
     $('#cmp-trigger').addEventListener('click', () => setPanel(!panelOpen()));
     $('#cmp-panel-x').addEventListener('click', () => setPanel(false));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && panelOpen()) setPanel(false);
+      if (e.key !== 'Escape') return;
+      if (modalOpen()) closeCompare();
+      else if (panelOpen()) setPanel(false);
+    });
+    $('#cmp-modal-x').addEventListener('click', closeCompare);
+    $('#cmp-modal').addEventListener('click', (e) => {
+      if (e.target.dataset.close) closeCompare();
     });
 
     $('#cmp-filters').addEventListener('click', (e) => {
@@ -766,51 +799,11 @@
       const x = e.target.closest('[data-drop]');
       if (x) { pick(x.dataset.drop); return; }
       if (e.target.closest('#cmp-tray-clear')) {
-        state.picked = []; syncURL(); renderGrid(); renderTray();
-        $('#cmp-view').hidden = true; $('#cmp-view').innerHTML = ''; refresh(); return;
+        state.picked = []; syncURL(); renderGrid(); renderTray(); refresh(); return;
       }
-      if (e.target.closest('#cmp-tray-go')) { renderCompare(); refresh(); scrollToView(); }
+      const go = e.target.closest('#cmp-tray-go');
+      if (go && !go.disabled) openCompare(go);
     });
-  }
-
-  function scrollToView() {
-    const v = $('#cmp-view');
-    if (v.hidden) return;
-    const lenis = window.__jaycoLenis;
-    /* Land the chart clear of the sticky results bar rather than a fixed 90px.
-       The bar is what "Side by side" used to disappear behind, and its height
-       moves with the viewport — so ask for the measured value. */
-    const pane = $('.cmp-table-scroll', v) || v;
-    const clear = parseFloat(getComputedStyle(document.documentElement)
-      .getPropertyValue('--cmp-chart-top')) || 90;
-    const y = pane.getBoundingClientRect().top + window.pageYOffset - clear - 8;
-    if (lenis && lenis.scrollTo) lenis.scrollTo(y, { immediate: false });
-    else window.scrollTo({ top: y, behavior: 'smooth' });
-  }
-
-  /* The arrival jump from the floorplans page's tray. Not scrollToView(): that
-     one animates, which is right for a button pressed a screen away and wrong
-     for a page that has just loaded 40,000px above its target. Lenis caches the
-     scroll limit, so it is told the document's real height first (as toTop()
-     does) — otherwise the jump is clamped short of the table. */
-  function jumpToView() {
-    const v = $('#cmp-view');
-    if (v.hidden) return;
-    /* The whole view, "Side by side" heading included, landed clear of the
-       floating filter bar — measured, since the bar is fixed over the page and
-       its bottom edge, not the site header's, is what hides the heading. */
-    const bar = $('#cmp-bar');
-    const clear = bar && getComputedStyle(bar).position !== 'static'
-      ? bar.getBoundingClientRect().bottom + 16
-      : (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cmp-chart-top')) || 90) + 8;
-    const lenis = window.__jaycoLenis;
-    if (lenis && lenis.resize) lenis.resize();
-    const y = v.getBoundingClientRect().top + window.pageYOffset - clear;
-    if (lenis && lenis.scrollTo) {
-      lenis.scrollTo(y, { immediate: true, force: true });
-    } else {
-      window.scrollTo(0, y);
-    }
   }
 
   const toggle = (set, v) => (set.has(v) ? set.delete(v) : set.add(v));
@@ -824,19 +817,16 @@
   paintFilters();
   renderGrid();
   renderTray();
-  if (state.picked.length >= 2) renderCompare();
   wire();
-  /* Arriving from the floorplans page's compare tray (?view=1): the table is
-     already built above, but it sits below all 181 cards — take the reader
-     straight to it. After load, so the grid's images have their height and the
-     target is where it will stay. */
+  /* ?view=1 with two or more picks opens the comparison on arrival — the link
+     the floorplans page's tray used to send before it grew its own overlay,
+     kept so a saved one still lands on the table. After load, because app.js
+     creates Lenis after this file runs and the modal has to stop it. */
   const arrivedToView = state.picked.length >= 2 &&
     new URLSearchParams(window.location.search).has('view');
   window.addEventListener('load', () => {
     refresh(); measureTray();
-    /* Jump, then re-align twice: late fonts and the grid's images can still move
-       the table after load, and a landing that drifts off it is no landing. */
-    if (arrivedToView) { jumpToView(); setTimeout(jumpToView, 500); setTimeout(jumpToView, 1400); }
+    if (arrivedToView) openCompare($('#cmp-tray-go'));
   }, { once: true });
   window.addEventListener('resize', measureTray);
 }());

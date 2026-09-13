@@ -608,15 +608,55 @@ body.cmp-sheet-on { overflow: hidden; }
 .compare-page.has-tray .hero-chat-btn { bottom: calc(var(--cmp-tray-h, 5rem) + 1rem); }
 .compare-page.has-tray .cmp { padding-bottom: calc(var(--cmp-tray-h, 5rem) + 3rem); }
 
-/* ---------- Compare table ----------
+/* ---------- Compare table, in a modal ----------
    The table itself — every .cmp-table / .cmp-col / .cmp-view rule, and its
    phone behaviour — lives in css/compare-table.css, shared with floorplans.html.
-   What stays here is where this page puts it: below the grid, ruled off. */
-.cmp-table-wrap {
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-  padding-top: clamp(1.5rem, 3vw, 2.5rem);
-  border-top: 1px solid var(--warm-gray);
+   What stays here is where this page puts it: a panel over the grid.
+
+   Ported from floorplans.css .fpc-overlay / .fpc-scrim / .fpc-cmp-panel, so the
+   two pages open the same comparison the same way. The table is the one thing
+   that scrolls, which keeps its title — and on a phone its plan header and
+   label column — pinned inside it. z-index 1100 clears the site header (1000). */
+body.cmp-modal-on { overflow: hidden; }
+.cmp-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  display: grid; place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
 }
+.cmp-scrim {
+  position: absolute; inset: 0;
+  background: rgba(15,11,9,0.6); backdrop-filter: blur(3px);
+}
+.cmp-modal-panel {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  width: min(1200px, 100%); max-height: min(88vh, 900px);
+  background: var(--canvas); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.cmp-modal-body {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+}
+/* compare-table.css bounds the pane against this page's header and tray on a
+   phone; in here the panel is the bound, so the pane simply fills it. */
+.cmp-overlay .cmp-table-scroll {
+  flex: 1 1 auto; min-height: 0; max-height: none;
+  overflow: auto; margin-top: 0; overscroll-behavior: contain;
+}
+.cmp-overlay .cmp-view-head {
+  position: sticky; top: 0; left: 0; z-index: 7;
+  background: var(--canvas); padding-bottom: 0.6rem;
+}
+/* above the pinned title, which would otherwise paint over it */
+.cmp-modal-x {
+  position: absolute; top: 0.85rem; right: 0.85rem; z-index: 10;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--hairline); background: rgba(255,255,255,0.92);
+  color: var(--text-dark); font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.cmp-modal-x:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
 /* ---------- Responsive ---------- */
 /* ---------- Under 1024: the same mechanism, a phone's geometry ----------

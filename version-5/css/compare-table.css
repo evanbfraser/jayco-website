@@ -3,8 +3,8 @@
    ---------------------------------------------------
    Moved out of compare.css so floorplans.html can draw the same table (see
    js/compare-table.js). Loaded by compare.html and floorplans.html. Where each
-   page PUTS the table stays in that page's own stylesheet — .cmp-table-wrap in
-   compare.css, .fpc-cmp in floorplans.css.
+   page PUTS the table stays in that page's own stylesheet — .cmp-overlay in
+   compare.css, .fpc-cmp in floorplans.css. Both are modals.
    =================================================== */
 
 /* ---------- Compare table ----------
@@ -26,6 +26,21 @@
   border-bottom: 1px solid var(--hairline); vertical-align: top;
 }
 .cmp-table thead th { vertical-align: bottom; padding-bottom: 1.2rem; }
+
+/* The plan header — images, name, price — rides the top of the pane at every
+   width, so a column never loses its name forty rows down. Both pages show the
+   table in a modal whose pane is the vertical scroller, so `top` resolves
+   against the pane, directly under the pinned "Side by side" title.
+   --cmp-view-head-h is that title's height, measured onto the pane by
+   JAYCO_COMPARE_TABLE.pin(). A hairline by box-shadow, not border: a collapsed
+   border stays behind in the table when its cell sticks. */
+.cmp-table thead th {
+  position: sticky;
+  top: var(--cmp-view-head-h, 3rem);
+  z-index: 3;
+  background: var(--canvas);
+  box-shadow: 0 1px 0 var(--hairline);
+}
 /* Same two-block treatment as the card, so the table header reads as the same
    object the user picked from the grid. */
 /* Unlike the grid card, the table header is not a card — the column already is
@@ -132,16 +147,9 @@
   .cmp-table-scroll:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
   .cmp-table { width: auto; min-width: 100%; }
 
-  /* The plan header rides the top of the screen so you never lose track of which
-     column you are reading once the specs get long. */
-  .cmp-table thead th {
-    position: sticky;
-    top: var(--cmp-view-head-h, 3rem); /* directly under the pinned title */
-    z-index: 3;
-    background: var(--canvas);
-    box-shadow: 0 1px 0 var(--hairline);
-  }
-  .cmp-table thead th.cmp-key { z-index: 4; }   /* the corner sits above both */
+  /* The plan header pins at every width (see the base rule); here the corner
+     also has to sit above the pinned label column. */
+  .cmp-table thead th.cmp-key { z-index: 4; }
 
   /* Pinned so a row never loses its label while the plans slide past it. */
   .cmp-table th.cmp-key,
