@@ -496,54 +496,168 @@
 .aw-filter[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
 .aw-filter:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
-/* One award per row: what it is, who gave it, and what won it. A table would be
-   right if every row had the same shape, and they do not — plenty are awarded
-   to the brand rather than to a coach — so the product cell is allowed to be
-   empty and the row still reads. */
+/* Awards as cards, four across on a desktop. Each card is the same three facts
+   — what the award is, what won it, who gave it — under the awarding body's own
+   mark. The product line is allowed to be empty-of-a-coach (plenty are awarded
+   to the brand) and the card still reads, because the note carries the category.
+
+   A year's FEATURED awards (a `photo` in awards-data.js) lead it as photograph
+   cards two columns wide, each beside two plain cards and staggered right,
+   left, right — about.js interleaves them so reading order matches the screen.
+
+   EVERY CARD IS ONE SIZE. grid-auto-rows: 1fr makes every row of a year as tall
+   as its tallest, so a card whose award name wraps to two lines does not stand
+   taller than its neighbours, and a photograph is exactly two plain cards
+   wide and one tall. */
 .aw-list { list-style: none; margin: clamp(1.25rem, 2.4vw, 1.75rem) 0 0; padding: 0; }
-.aw-year { margin: clamp(2.25rem, 4vw, 3.25rem) 0 0; }
-.aw-year:first-child { margin-top: clamp(1.25rem, 2.4vw, 1.75rem); }
+.aw-year { margin: clamp(3rem, 5.5vw, 4.75rem) 0 0; }
+.aw-year:first-child { margin-top: clamp(1.75rem, 3vw, 2.5rem); }
 .aw-year-h {
-  margin: 0 0 0.5rem;
+  margin: 0 0 clamp(1rem, 1.8vw, 1.35rem);
   font-family: var(--font-display);
   font-size: clamp(1.7rem, 2.6vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em;
   color: var(--text-dark); font-variant-numeric: tabular-nums;
 }
-.aw-row {
-  display: grid;
-  grid-template-columns: 9.75rem minmax(0, 12rem) minmax(0, 1fr) minmax(0, 9rem);
-  gap: clamp(0.6rem, 2vw, 2rem);
-  padding: clamp(1rem, 1.8vw, 1.35rem) 0;
-  border-top: 1px solid var(--hairline);
-  /* CENTRED, not baseline. The mark is now taller than the three text cells put
-     together, and baseline alignment would hang the award name off the top of
-     it with the rest of the row floating. Centring is what makes the mark and
-     the line of text read as one row rather than two stacked things. */
-  align-items: center;
+.aw-cards {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: clamp(0.9rem, 1.6vw, 1.5rem);
 }
-/* A FIXED SQUARE, and the mark fits inside it. These are 63 different marks
-   from seven awarding bodies — medallions, wordmarks, wide banners — and left
-   to size themselves they would end at 63 different heights and the award names
-   beside them would stop lining up. max-width/max-height with auto on both axes
-   scales the long edge and leaves the short one alone, so nothing is stretched
-   and nothing is cropped.
 
-   The files are 480px on their long edge, which is a shade over 2x this box —
-   they were stored at 240 when the box was a third of this size, and re-exported
-   at native when it grew rather than being scaled up into softness. */
-.aw-row-badge {
-  width: 9.75rem; aspect-ratio: 1;
-  display: grid; place-items: center;
+/* The grid cell is the <li>; the card inside it is the link. The cell is a flex
+   box so the card fills the row's height, and the photograph's two-column span
+   belongs to the cell, since the cell is what the grid places. */
+.aw-item { display: flex; min-width: 0; }
+.aw-item--photo { grid-column: span 2; }
+
+/* White, not Surface: the marks are cut out on transparency and several carry
+   their own white field (the DSI seal), which would print as a white disc on a
+   grey card. A Dune hairline is the edge.
+
+   Every card links out, so every card answers the pointer — but it does not
+   move: a soft outer glow lifts it in place, and the same glow plus the blue
+   ring marks keyboard focus. The photograph cards answer with the zoom below
+   instead. */
+.aw-card {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--warm-gray); border-radius: var(--radius-card);
+  overflow: hidden;
+  color: inherit; text-decoration: none;
+  transition: box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
 }
-.aw-row-badge img {
+.aw-card:not(.aw-card--photo):hover,
+.aw-card:not(.aw-card--photo):focus-visible {
+  border-color: rgba(15,11,9,0.16);
+  box-shadow: 0 0 0 1px rgba(15,11,9,0.04), 0 0 32px rgba(15,11,9,0.14);
+}
+a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* A FIXED 3:2 WELL, and the mark fits inside it. These are 63 marks from seven
+   awarding bodies — medallions, wordmarks, wide banners — and left to size
+   themselves they would sit at 63 different heights and the award names under
+   them would stop lining up across a row. The files are 480x323, the same 3:2,
+   so a medallion lands the same size in every card. */
+.aw-card-badge {
+  display: grid; place-items: center;
+  aspect-ratio: 3 / 2;
+  padding: clamp(0.75rem, 1.4vw, 1.25rem);
+}
+.aw-card-badge img,
+.aw-photo-badge img {
   max-width: 100%; max-height: 100%;
   width: auto; height: auto; display: block;
 }
-.aw-list .aw-year:last-child .aw-row:last-child { border-bottom: 1px solid var(--hairline); }
-.aw-row-award { font-family: var(--font-display); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
-.aw-row-what { font-size: 0.95rem; line-height: 1.6; color: var(--text-mid); }
-.aw-row-what b { color: var(--text-dark); font-weight: 600; }
-.aw-row-by { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue-dark); }
+/* The body takes the slack, and the awarding body is pushed to its foot, so
+   "RV NEWS" sits on one line across a row of cards whose names wrap
+   differently. */
+.aw-card-body {
+  flex: 1 1 auto;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 1.05rem 1.2rem 1.2rem;
+  border-top: 1px solid var(--hairline);
+}
+.aw-card-award {
+  font-family: var(--font-display); font-size: 1.15rem; font-weight: 700;
+  line-height: 1.2; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.aw-card-what { font-size: 0.9rem; line-height: 1.55; color: var(--text-mid); }
+.aw-card-what b { color: var(--text-dark); font-weight: 600; }
+/* Muted, not blue. Blue is rationed to actions and the one live filter; on
+   sixty-odd cards it would be the loudest thing on the page and mean nothing. */
+.aw-card-by {
+  margin-top: auto; padding-top: 0.55rem;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+
+/* ---------- The featured award, on its photograph ----------
+   Inset media, so 20px and no shadow (DESIGN.md > Shapes). The text never sits
+   on the raw photograph: a two-stop Ink scrim rises from the foot, dense where
+   the words are and gone by the middle, so the coach above stays untouched.
+   No height of its own: it takes the row's, which the plain cards set, so it
+   is never taller than they are. */
+.aw-card--photo {
+  position: relative;
+  justify-content: flex-end;
+  border: 0; background: var(--ink);
+  isolation: isolate;
+}
+.aw-photo {
+  position: absolute; inset: 0; z-index: -2;
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.9s var(--ease-out);
+}
+/* A slight push into the photograph — DESIGN.md's media-card hover, at the
+   bottom of its 1.03–1.1 range. The card's overflow:hidden and 20px corner hold
+   the edge still while the picture moves inside it. */
+.aw-card--photo:hover .aw-photo,
+.aw-card--photo:focus-visible .aw-photo { transform: scale(1.05); }
+
+/* ---------- The cards arriving ----------
+   about.js arms the list and adds .is-in to each card as it scrolls into view,
+   with --aw-delay staggering the cards that arrive together. A short rise on
+   the site's --ease-out, once, never reversed — the same handoff .ab-rise gives
+   the copy, a little further and a little slower because a card is a larger
+   object than a line of text. The photograph also settles back from a slight
+   push as its card lands; its own 0.9s transition carries that, and the hover
+   zoom picks up from the resting scale afterwards. */
+.aw-armed .aw-rise { opacity: 0; transform: translateY(28px); }
+.aw-armed .aw-rise.is-in {
+  opacity: 1; transform: none;
+  transition: opacity 0.6s var(--ease-out) var(--aw-delay, 0ms),
+              transform 0.8s var(--ease-out) var(--aw-delay, 0ms);
+}
+.aw-armed .aw-rise:not(.is-in) .aw-photo { transform: scale(1.08); }
+.aw-photo-scrim {
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to top,
+    rgba(15,11,9,0.84) 0%, rgba(15,11,9,0.5) 34%, rgba(15,11,9,0) 64%);
+}
+.aw-photo-body {
+  display: flex; align-items: flex-end;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  padding: clamp(1.25rem, 2.4vw, 2.25rem);
+}
+/* Same 3:2 box as the plain card's well, larger. The marks are opaque seals
+   and read on the dark foot as they are; the drop shadow only separates a gold
+   edge from a bright patch of sky or sunset behind it. */
+.aw-photo-badge {
+  flex: none; width: clamp(6.5rem, 9vw, 9rem); aspect-ratio: 3 / 2;
+  display: grid; place-items: center;
+}
+.aw-photo-badge img { filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35)); }
+.aw-photo-text { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; padding-bottom: 0.2rem; }
+.aw-card--photo .aw-card-award {
+  font-size: clamp(1.35rem, 2vw, 1.9rem); font-weight: 800;
+  line-height: 1.05; letter-spacing: -0.02em; color: #fff;
+  text-wrap: balance;
+}
+/* Tinted from the ground rather than grey — DESIGN.md > Colors. */
+.aw-card--photo .aw-card-what { font-size: 1rem; color: rgba(255,255,255,0.86); }
+.aw-card--photo .aw-card-what b { color: #fff; }
+.aw-card--photo .aw-card-by { margin-top: 0.2rem; padding-top: 0; color: rgba(255,255,255,0.78); }
 
 /* ===================================================
    Safety & JaySMART  (.sf-page)
@@ -614,10 +728,6 @@
 
 @media (max-width: 1024px) {
   .rd-teams { grid-template-columns: 1fr; }
-  .aw-row { grid-template-columns: 8.25rem minmax(0, 10rem) minmax(0, 1fr); }
-  .aw-row-badge { width: 8.25rem; }
-  /* The body sits under the two text cells, clear of the mark's column. */
-  .aw-row-by { grid-column: 2 / -1; }
 }
 
 @media (max-width: 900px) {
@@ -633,19 +743,37 @@
   .ab-hero { height: clamp(460px, 68vh, 620px); }
   .ab-step { grid-template-columns: 2rem minmax(0, 1fr); gap: 0.9rem; }
   .pdi-ramp-row { grid-template-columns: 1fr; gap: 0.5rem; }
-  /* One column on a phone, and the mark leads the row rather than sitting in a
-     column of its own that would cost a third of the width. */
-  .aw-row { grid-template-columns: 1fr; gap: 0.35rem; }
-  /* LEFT, with the text, not centred. Stacked there is no row to centre the
-     mark against — it sits above the copy rather than beside it — and a centred
-     mark over three left-ranged lines reads as a stray object. Same left edge
-     as the award name keeps the two as one unit reading down the page. */
-  .aw-row-badge { width: 7.5rem; justify-self: start; margin-bottom: 0.35rem; }
-  .aw-row-by { grid-column: auto; }
   .rd-innov-row { grid-template-columns: 1fr; gap: 0.35rem; }
   .rd-innov-when { padding-top: 0; }
   .sol-spec-row { flex-direction: column; gap: 0.35rem; }
   .sol-spec-v { text-align: left; }
+}
+
+/* ---------- The award cards, narrowing ----------
+   Four across holds down to 1024, where DESIGN.md turns two columns into one.
+   There is no three-across step: the stagger is two cards and a two-column
+   photograph, and in three columns that row cannot be built without a hole.
+   At 1024 it is two across, so the photograph fills its row and the two cards
+   it was paired with share the next — the order holds, only the stagger goes.
+   Under 560 a card is one column and turns on its side — mark left, words
+   right — because thirteen cards stacked at full 3:2 height is a very long
+   2026. Rows go back to `auto` there: at one column, 1fr would make every card
+   as tall as a photograph. */
+@media (max-width: 1024px) {
+  .aw-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .aw-cards { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  /* One height for every plain card here too, set as a floor: rows are `auto`
+     at one column, so without it a one-line award name makes a shorter card. */
+  .aw-card { flex-direction: row; min-height: 8.5rem; }
+  .aw-card-badge { flex: 0 0 7.25rem; aspect-ratio: auto; padding: 0.75rem; }
+  .aw-card-body { border-top: 0; border-left: 1px solid var(--hairline); padding: 0.95rem 1rem 1rem; }
+  /* The photograph card keeps its column: badge over words, both left. */
+  .aw-item--photo { grid-column: auto; }
+  .aw-card--photo { flex-direction: column; min-height: 25rem; }
+  .aw-photo-body { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .aw-photo-badge { width: 7.5rem; }
 }
 
 /* prefers-reduced-motion kills the whole animation layer, and every section
@@ -657,4 +785,11 @@
   .ab-armed .ab-rise { opacity: 1; transform: none; transition: none; }
   .pdi-ramp-fill { transition: none; }
   .sf-lamp { transition: none; }
+  /* The zoom is motion; the glow is not, so the plain cards keep theirs. */
+  .aw-photo { transition: none; }
+  .aw-card--photo:hover .aw-photo,
+  .aw-card--photo:focus-visible .aw-photo { transform: none; }
+  /* about.js never arms the list under this query; this is the belt to that. */
+  .aw-armed .aw-rise,
+  .aw-armed .aw-rise:not(.is-in) .aw-photo { opacity: 1; transform: none; transition: none; }
 }

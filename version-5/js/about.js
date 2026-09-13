@@ -139,21 +139,128 @@
 
        lazy on all of them: 63 marks, and a filtered view renders only one
        year's worth, so most are never in the viewport at all. */
-    const badge = (row) => (row.badge
-      ? '<span class="aw-row-badge">' +
+    const badge = (row, cls) => (row.badge
+      ? '<span class="' + cls + '">' +
           '<img src="../assets/awards/badges/' + esc(row.badge) + '" alt="" ' +
           'loading="lazy" decoding="async" />' +
         '</span>'
-      : '<span class="aw-row-badge" aria-hidden="true"></span>');
+      : '<span class="' + cls + '" aria-hidden="true"></span>');
 
-    const rowHTML = (row) => (
-      '<li class="aw-row">' +
-        badge(row) +
-        '<span class="aw-row-award">' + esc(row.award) + '</span>' +
-        '<span class="aw-row-what">' + what(row) + '</span>' +
-        '<span class="aw-row-by">' + esc(row.by) + '</span>' +
+    /* The text is the same three lines on both kinds of card, in the same
+       order, so a featured award reads exactly like the plain one beside it. */
+    const text = (row) => (
+      '<span class="aw-card-award">' + esc(row.award) + '</span>' +
+      '<span class="aw-card-what">' + what(row) + '</span>' +
+      '<span class="aw-card-by">' + esc(row.by) + '</span>'
+    );
+
+    /* Every card is a link, to wherever Jayco's own awards page sends it — the
+       winning coach, the lineup, or the article announcing the award — and it
+       leaves the site the same way theirs does, in a new tab. The accessible
+       name is set outright: read from the content it would be the photograph's
+       description, then the award, then its category and body, run together
+       with no pauses. A row with no href still renders, as a plain block. */
+    const label = (row) => [row.award, row.what, row.note, row.by].filter(Boolean).join(', ') +
+      ' (opens in a new tab)';
+
+    const link = (row, cls, inner) => (row.href
+      ? '<a class="' + cls + '" href="' + esc(row.href) + '" target="_blank" rel="noopener noreferrer" ' +
+          'aria-label="' + esc(label(row)) + '">' + inner + '</a>'
+      : '<div class="' + cls + '">' + inner + '</div>');
+
+    const cardHTML = (row) => (
+      '<li class="aw-item aw-rise">' +
+        link(row, 'aw-card',
+          badge(row, 'aw-card-badge') +
+          '<span class="aw-card-body">' + text(row) + '</span>') +
       '</li>'
     );
+
+    /* A featured award: the client's photograph, with the awarding body's mark
+       and the award's name laid over it on a two-stop scrim (DESIGN.md > Media
+       card — text never sits on the raw photograph). */
+    const photoHTML = (row) => {
+      const p = row.photo, base = '../assets/awards/web/' + esc(p.file);
+      return '<li class="aw-item aw-item--photo aw-rise">' +
+        link(row, 'aw-card aw-card--photo',
+          '<img class="aw-photo" src="' + base + '-1600.webp" ' +
+            'srcset="' + base + '-1000.webp 1000w, ' + base + '-1600.webp 1600w" ' +
+            'sizes="(max-width: 1024px) 92vw, 45vw" ' +
+            'style="object-position: ' + esc(p.focus || '50% 50%') + '" ' +
+            'alt="' + esc(p.alt) + '" loading="lazy" decoding="async" />' +
+          '<span class="aw-photo-scrim" aria-hidden="true"></span>' +
+          '<span class="aw-photo-body">' +
+            badge(row, 'aw-photo-badge') +
+            '<span class="aw-photo-text">' + text(row) + '</span>' +
+          '</span>') +
+      '</li>';
+    };
+
+    /* Featured awards lead their year, each a two-column photograph sharing its
+       row with two plain cards, and they STAGGER: the first photograph takes the
+       right half of its row, the next the left, and so on — card, card, photo /
+       photo, card, card / card, card, photo — then the rest four across.
+       Interleaved HERE rather than placed by the grid, so the reading order a
+       screen reader and the Tab key follow is the order on screen. The rest keep
+       Jayco's own order. */
+    function ordered(rows) {
+      const photos = rows.filter((r) => r.photo);
+      const rest = rows.filter((r) => !r.photo);
+      const out = [];
+      let k = 0;
+      photos.forEach((p, i) => {
+        const pair = rest.slice(k, k + 2);
+        k += pair.length;
+        if (i % 2 === 0) out.push(...pair, p);
+        else out.push(p, ...pair);
+      });
+      return out.concat(rest.slice(k));
+    }
+
+    const rowHTML = (row) => (row.photo ? photoHTML(row) : cardHTML(row));
+
+    /* ---- The cards arriving ----
+       Each card rises into place the first time it scrolls into view, and does
+       not reverse. Cards that arrive together — a row coming up from the foot
+       of the screen — are staggered by reading order, top then left, capped so
+       the last of a batch is never more than half a second behind the first.
+
+       Not .ab-rise: that list is collected once at boot, and these cards are
+       rebuilt every time the year filter changes. So the observer lives here
+       and arm() re-observes whatever render() just drew — which also means a
+       filter click brings its cards in the same way a scroll does.
+
+       Same safety as .ab-rise: the hidden state exists only under .aw-armed,
+       set below, so a reader whose JS dies sees every card. Under
+       prefers-reduced-motion the list is never armed at all. */
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let io = null;
+    if (!still && 'IntersectionObserver' in window) {
+      list.classList.add('aw-armed');
+      io = new IntersectionObserver((entries) => {
+        const pos = (el) => el.getBoundingClientRect();
+        entries
+          .filter((e) => e.isIntersecting)
+          .map((e) => e.target)
+          .sort((a, b) => (pos(a).top - pos(b).top) || (pos(a).left - pos(b).left))
+          .forEach((el, i) => {
+            el.style.setProperty('--aw-delay', Math.min(i, 7) * 70 + 'ms');
+            el.classList.add('is-in');
+            io.unobserve(el);
+          });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.12 });
+    }
+
+    function arm() {
+      if (!io) return;
+      io.disconnect();   // the cards it was watching were just replaced
+      $$('.aw-rise', list).forEach((el) => {
+        /* Already scrolled past — a reader who landed lower down the page.
+           Shown, not animated: there is no one watching it arrive. */
+        if (el.getBoundingClientRect().bottom < 0) el.classList.add('is-in');
+        else io.observe(el);
+      });
+    }
 
     const total = DATA.years.reduce((n, y) => n + y.rows.length, 0);
     let shown = null;   /* null = every year */
@@ -163,9 +270,11 @@
       list.innerHTML = years.map((y) => (
         '<li class="aw-year">' +
           '<h3 class="aw-year-h">' + y.year + '</h3>' +
-          '<ul class="aw-rows">' + y.rows.map(rowHTML).join('') + '</ul>' +
+          '<ul class="aw-cards">' + ordered(y.rows).map(rowHTML).join('') + '</ul>' +
         '</li>'
       )).join('');
+
+      arm();
 
       /* #aw-count is .sr-only: it is no longer printed on the page, and exists so
          that changing the filter is announced to a screen reader. The pressed pill
