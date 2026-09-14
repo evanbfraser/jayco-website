@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/about.css?v=v5-ab-15" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -129,68 +129,102 @@
        package section saying exactly that. PRODUCT.md: do not invent a spec to
        fill a layout — request it.
 
-       ECOADVANTAGE is Jayco's own name for its sustainable manufacturing
-       programme (jayco.com/about/r&d/). Jayco publishes the name and not the
-       detail, so this page does the same. -->
+       ECOADVANTAGE, Jayco's sustainability initiative, is set out in the
+       Sustainability section from jayco.com/about/r&d/sustainability/ (read
+       2026-09-13): its introduction, its seven goal areas and the three
+       green-RVing articles it points to. See the note on that section. -->
   <main class="ab" id="solar">
 
     <section class="ab-hero">
       <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-13 as
+             assets/jayco-sustainability-hero.jpg, served from the hero-v2 WebP pair.
+             The star-trails photograph it replaced still carries the video band. -->
         <img class="ab-hero-img"
-             src="../assets/solar/web/hero-1800.webp"
-             srcset="../assets/solar/web/hero-1200.webp 1200w,
-                     ../assets/solar/web/hero-1800.webp 1800w"
+             src="../assets/solar/web/hero-v2-1800.webp"
+             srcset="../assets/solar/web/hero-v2-1200.webp 1200w,
+                     ../assets/solar/web/hero-v2-1800.webp 1800w"
              sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A lit Jayco travel trailer alone in the desert under star trails" />
+             alt="A Jayco camper van parked with its awning out beside a river in an autumn forest" />
       </div>
       <div class="ab-hero-overlay" aria-hidden="true"></div>
       <div class="ab-hero-content">
         <span class="ab-hero-eyebrow">Sustainability &amp; Overlander Packages</span>
-        <h1 class="ab-hero-heading">No hookup. No generator. No hurry.</h1>
-        <p class="ab-hero-tagline">Every Jayco towable leaves the line either solar-prepped or with a
-          complete system already fitted. This is what that buys you.</p>
+        <h1 class="ab-hero-heading">Off the grid, and easier on it.</h1>
+        <p class="ab-hero-tagline">Overlander solar keeps a Jayco going far from any hookup, and
+          EcoAdvantage&trade; builds it with less waste, less water and less energy.</p>
       </div>
     </section>
 
     <section class="ab-intro">
       <div class="ab-inner">
         <p class="ab-intro-body ab-rise">The good sites are the ones with nothing at them. No power
-          pedestal, no water spigot, no neighbour thirty feet away — and, for most people, no way to
+          pedestal, no water spigot, no neighbor thirty feet away — and, for most people, no way to
           stay more than a night or two. Solar is what turns that into a week.</p>
-        <p class="ab-intro-body ab-rise">Jayco calls its solar programme Overlander, and it is not an
-          aftermarket bracket on the roof. The panels, the controller and the wiring are specified
-          with the coach, fitted on the line, and covered by the same warranty as everything else on
-          it.</p>
+        <p class="ab-intro-body ab-rise">Those places are also the reason to look after them. So
+          Jayco works on both ends: power from the roof, so you can stay out longer on less, and
+          EcoAdvantage&trade; in the plants, so every coach is built with less waste, less
+          freshwater and less energy than the one before.</p>
+        <!-- The page is two chapters. These jump to each opener; initChapters()
+             in js/about.js scrolls smoothly and clears the fixed header. -->
+        <ol class="ab-chapters ab-rise">
+          <li><a class="ab-chapter-link" href="#solar">
+            <span class="ab-chapter-n">01</span>
+            <span class="ab-chapter-t">Solar<span class="ab-chapter-s">Overlander packages</span></span>
+          </a></li>
+          <li><a class="ab-chapter-link" href="#sustainability">
+            <span class="ab-chapter-n">02</span>
+            <span class="ab-chapter-t">Sustainability<span class="ab-chapter-s">EcoAdvantage&trade;</span></span>
+          </a></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Chapter 01: Solar =====
+         The chapter opener: a numbered divider, then a large feature photograph
+         with the chapter headline (.ab-feature.is-chapter). The photograph is
+         client photography, supplied 2026-09-13 as assets/jayco-solar.jpg and
+         served as assets/solar/web/solar-v2-*.webp — three roof panels in frame. -->
+    <section class="ab-sec ab-chapter" id="solar" aria-labelledby="sol-solar-h">
+      <div class="ab-inner">
+        <div class="ab-chapter-mark ab-rise"><span class="ab-chapter-n">01</span> Solar</div>
+        <div class="ab-cta-band ab-feature is-chapter ab-rise">
+          <div class="ab-cta-media">
+            <img class="ab-cta-img"
+                 src="../assets/solar/web/solar-v2-1800.webp"
+                 srcset="../assets/solar/web/solar-v2-1200.webp 1200w,
+                         ../assets/solar/web/solar-v2-1800.webp 1800w"
+                 sizes="(max-width: 1440px) 92vw, 1270px"
+                 width="1800" height="1350" loading="lazy" decoding="async"
+                 style="object-position: 55% 42%"
+                 alt="An aerial view of a Jayco travel trailer at a wooded campsite with three solar panels on its roof, a family at the picnic table beside it" />
+          </div>
+          <div class="ab-cta-scrim" aria-hidden="true"></div>
+          <div class="ab-cta-body">
+            <span class="section-label">Overlander Packages</span>
+            <h2 class="ab-cta-h" id="sol-solar-h">Power from the roof.</h2>
+            <p>Overlander is Jayco's solar program, and it is not an aftermarket bracket on the roof.
+              The panels, the controller and the wiring are specified with the coach, fitted on the
+              line, and covered by the same warranty as everything else on it.</p>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ===== About solar power ===== -->
-    <section class="ab-band" aria-labelledby="sol-how-h">
+    <section class="ab-sec" aria-labelledby="sol-how-h">
       <div class="ab-inner">
-        <div class="ab-band-grid">
-          <div class="ab-band-media-wrap ab-rise">
-            <div class="ab-band-media">
-              <img class="ab-band-img"
-                   src="../assets/solar/web/about-1200.webp"
-                   srcset="../assets/solar/web/about-800.webp 800w,
-                           ../assets/solar/web/about-1200.webp 1200w"
-                   sizes="(max-width: 900px) 92vw, 46vw"
-                   width="1200" height="800" loading="lazy" decoding="async"
-                   alt="A Jayco Eagle travel trailer from above, awning out, roof equipment visible" />
-            </div>
-          </div>
-          <div class="ab-band-copy ab-rise">
-            <span class="section-label">How it works</span>
-            <h2 class="section-heading dark" id="sol-how-h">The roof charges the batteries.</h2>
-            <p>That is the whole idea. Panels on the roof collect what the sun gives them, a
-              controller regulates it, and the batteries hold it until you want it. Nothing is
-              powered directly by the sun — everything is powered by the batteries, and the panels
-              are what keeps putting charge back.</p>
-            <p>Which is why the battery matters as much as the panel. Jayco recommends lithium: it
-              lasts longer, tolerates being run down further, and weighs less for the same usable
-              capacity.</p>
-          </div>
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">How it works</span>
+          <h2 class="section-heading dark" id="sol-how-h">The roof charges the batteries.</h2>
+          <p class="ab-sec-lead">That is the whole idea. Panels on the roof collect what the sun gives
+            them, a controller regulates it, and the batteries hold it until you want it. Nothing is
+            powered directly by the sun — everything is powered by the batteries, and the panels are
+            what keeps putting charge back.</p>
+          <p class="ab-sec-lead">Which is why the battery matters as much as the panel. Jayco
+            recommends lithium: it lasts longer, tolerates being run down further, and weighs less for
+            the same usable capacity.</p>
         </div>
       </div>
     </section>
@@ -311,11 +345,7 @@
           </div>
         </div>
 
-        <p class="ab-note ab-rise">The Overlander range goes beyond these two. Jayco publishes a full
-          specification for Overlander 1 and Overlander 2 on
-          <a href="https://www.jayco.com/solar/" target="_blank" rel="noopener">jayco.com/solar</a>
-          and does not publish the contents of the packages above them, so this page does not state
-          them either — a guessed wattage is worse than a gap. A
+        <p class="ab-note ab-rise">The Overlander range goes beyond these two. A
           <a href="dealers.html">dealer</a> can tell you what is fitted to a particular coach, and
           <a href="build-price.html">Build &amp; Price</a> shows what a given floorplan can be
           ordered with.</p>
@@ -323,49 +353,163 @@
     </section>
 
     <!-- ===== Video =====
-         THE FILM IS NOT IN THIS REPO. Jayco publishes a solar explainer on its
-         own channel and this points at the page carrying it rather than
-         standing in an unrelated Jayco video. Supply the asset and this block
-         becomes a scrubbed <video> like the one on new-to-rving.html. -->
-    <section class="ab-band is-flip" aria-labelledby="sol-vid-h">
-      <div class="ab-inner">
-        <div class="ab-band-grid">
-          <div class="ab-band-media-wrap ab-rise">
-            <div class="ab-band-media">
-              <img class="ab-band-img"
-                   src="../assets/solar/web/hero-1200.webp"
-                   sizes="(max-width: 900px) 92vw, 46vw"
-                   width="1200" height="800" loading="lazy" decoding="async"
-                   alt="Star trails wheeling above a lit Jayco trailer in the desert" />
-            </div>
-          </div>
-          <div class="ab-band-copy ab-rise">
-            <span class="section-label">Watch it</span>
-            <h2 class="section-heading dark" id="sol-vid-h">Solar, explained properly.</h2>
-            <p>Jayco walks through a full system on its own channel — where the panels sit, what the
-              controller is doing, and how the batteries and a generator work together when the
-              weather stops cooperating.</p>
-            <a class="btn-primary" href="https://www.jayco.com/solar/" target="_blank" rel="noopener">Watch the Explainer</a>
-          </div>
-        </div>
+         Jayco's own Overland Solar Packages film — the video embedded on
+         jayco.com/solar/ (youtube.com/watch?v=uPKyMCjXr2I, 1:41). The shared
+         .ab-watch band, as on pdi.html: the photograph starts centred and opens as
+         it scrolls, then the headline and the play button arrive. The play button
+         is a YouTube link; initPlayer() in js/about.js opens it in the #ab-player
+         dialog at the foot of this page instead, and with no script it simply goes
+         to YouTube. -->
+    <section class="ab-watch" aria-labelledby="sol-vid-h">
+      <div class="ab-watch-stage">
+        <img class="ab-watch-img"
+             src="../assets/solar/web/hero-1800.webp"
+             srcset="../assets/solar/web/hero-1200.webp 1200w,
+                     ../assets/solar/web/hero-1800.webp 1800w"
+             sizes="(max-width: 900px) 92vw, 88vw"
+             width="1800" height="1200" loading="lazy" decoding="async"
+             alt="Star trails wheeling above a lit Jayco trailer in the desert" />
+        <div class="ab-watch-scrim" aria-hidden="true"></div>
+      </div>
+      <div class="ab-watch-content">
+        <h2 class="ab-watch-h" id="sol-vid-h">Solar, explained properly.</h2>
+        <a class="ab-watch-play" href="https://www.youtube.com/watch?v=uPKyMCjXr2I"
+           data-yt="uPKyMCjXr2I" data-yt-title="Overland Solar Packages" target="_blank" rel="noopener">
+          <span class="ab-watch-play-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
+          </span>
+          <span class="ab-watch-play-txt">Watch the video · 1:41</span>
+        </a>
       </div>
     </section>
 
-    <!-- ===== Sustainability ===== -->
-    <section class="ab-sec ab-tail" aria-labelledby="sol-eco-h">
+    <!-- ===== Sustainability: EcoAdvantage™ =====
+         From jayco.com/about/r&d/sustainability/, read 2026-09-13: the
+         EcoAdvantage™ introduction, its seven goal areas in Jayco's order, and
+         the three green-RVing articles that page points to, which are already in
+         this site's blog. Jayco's wording, lightly edited, in Jayco's voice.
+         The photograph is client photography, supplied 2026-09-13 as
+         assets/jayco-sustainability-image.jpg and served as
+         assets/solar/web/eco-v2-*.webp. The page also embeds a video
+         (youtube.com/watch?v=hkcJoCzTclE) that YouTube reports as unavailable,
+         so there is no play button here; add one with data-yt if it returns. -->
+    <section class="ab-sec ab-tail ab-chapter" id="sustainability" aria-labelledby="sol-eco-h">
       <div class="ab-inner">
-        <div class="ab-sec-head ab-rise">
-          <span class="section-label">Sustainability</span>
-          <h2 class="section-heading dark" id="sol-eco-h">Beyond the roof.</h2>
-          <p class="ab-sec-lead">Solar is the part of this you can see. Jayco's name for what
-            happens on the manufacturing side is EcoAdvantage&trade;.</p>
+        <div class="ab-chapter-mark ab-rise"><span class="ab-chapter-n">02</span> Sustainability</div>
+        <div class="ab-cta-band ab-feature is-chapter ab-rise">
+          <div class="ab-cta-media">
+            <img class="ab-cta-img"
+                 src="../assets/solar/web/eco-v2-1800.webp"
+                 srcset="../assets/solar/web/eco-v2-1200.webp 1200w,
+                         ../assets/solar/web/eco-v2-1800.webp 1800w"
+                 sizes="(max-width: 1440px) 92vw, 1270px"
+                 width="1800" height="1169" loading="lazy" decoding="async"
+                 style="object-position: 60% 55%"
+                 alt="A Jayco camper van parked on a riverbank in an autumn forest, its side door open and two camp chairs beside it" />
+          </div>
+          <div class="ab-cta-scrim" aria-hidden="true"></div>
+          <div class="ab-cta-body">
+            <span class="section-label">EcoAdvantage&trade;</span>
+            <h2 class="ab-cta-h" id="sol-eco-h">Protecting the places we go.</h2>
+            <p>Through smart sustainability efforts, Jayco is finding ways to build better RVs with less
+              waste and more renewable resources. It is a journey, and it will not happen overnight —
+              but after more than 50 years of building for family fun, caring for the planet is one of
+              the best ways to keep that fun possible.</p>
+          </div>
         </div>
-        <p class="ab-note ab-rise">EcoAdvantage&trade; is Jayco's own programme name for its
-          sustainable manufacturing practices, published on
-          <a href="https://www.jayco.com/about/r&amp;d/" target="_blank" rel="noopener">jayco.com/about/r&amp;d</a>.
-          What sits under the name — the practices, the measures, the targets — is not published, and
-          this page will not describe a programme it cannot cite. Supply the detail and it belongs
-          here, next to the panels.</p>
+
+        <div class="sol-eco-head ab-rise">
+          <h3 class="sol-eco-h3">Ambitious goals, impactful results.</h3>
+          <p class="ab-sec-lead">EcoAdvantage&trade; is one of the RV industry's most admired
+            sustainability initiatives — and as an industry leader, Jayco keeps setting the bar high
+            for its own practices.</p>
+        </div>
+        <ul class="sol-goals ab-rise">
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Landfill-free efforts</h4>
+            <p>Relocated recycling bins, ongoing employee education and work with suppliers to reduce packaging, all toward becoming landfill-free.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Reduced freshwater use</h4>
+            <p>Ongoing work to cut freshwater use across Jayco&rsquo;s facilities. Recycled water is used in all quality control testing.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Sustainable materials</h4>
+            <p>Partners who share these values help Jayco reuse materials, improve packaging and source more sustainable components.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Less energy consumption</h4>
+            <p>Facility upgrades and modernized production processes, with a commitment to using less energy in every plant.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Raising awareness</h4>
+            <p>Dialogue and education, so RV owners, suppliers and competitors recognize the importance of these practices and the good they do for the environment.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Streamlined processes</h4>
+            <p>Standardized processes that reduce energy use, increase efficiency and limit production waste.</p>
+          </li>
+          <li class="sol-goal">
+            <h4 class="sol-goal-name">Reduced product weights</h4>
+            <p>A commitment to building lighter products, for better fuel economy on the road.</p>
+          </li>
+        </ul>
+
+        <div class="sol-eco-head ab-rise">
+          <h3 class="sol-eco-h3">Making your next RV trip more green.</h3>
+          <p class="ab-sec-lead">Jayco builds for people who love and respect the great outdoors. A few
+            favorite ways to care for nature while you enjoy your RV.</p>
+        </div>
+        <ul class="sol-tips ab-rise">
+          <li class="sol-tip">
+            <a class="sol-tip-link" href="blog-post.html?post=23-eco-friendly-rv-tips">
+              <span class="sol-tip-media">
+                <img src="../assets/blog/web/23-eco-friendly-rv-tips-1000.webp"
+                     srcset="../assets/blog/web/23-eco-friendly-rv-tips-400.webp 400w,
+                             ../assets/blog/web/23-eco-friendly-rv-tips-1000.webp 1000w"
+                     sizes="(max-width: 700px) 92vw, 30vw" loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="sol-tip-body">
+                <h4 class="sol-tip-name">23 Eco-Friendly Tips for RVing</h4>
+                <span class="sol-tip-txt">RVing can be quite eco-friendly and can even help lower your travel carbon footprint. Tips for going green on your next trip.</span>
+                <span class="sol-tip-more" aria-hidden="true">Read the article</span>
+              </span>
+            </a>
+          </li>
+          <li class="sol-tip">
+            <a class="sol-tip-link" href="blog-post.html?post=conserve-conserve-conserve">
+              <span class="sol-tip-media">
+                <img src="../assets/blog/web/conserve-conserve-conserve-1000.webp"
+                     srcset="../assets/blog/web/conserve-conserve-conserve-400.webp 400w,
+                             ../assets/blog/web/conserve-conserve-conserve-1000.webp 1000w"
+                     sizes="(max-width: 700px) 92vw, 30vw" loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="sol-tip-body">
+                <h4 class="sol-tip-name">Conserve, Conserve, Conserve</h4>
+                <span class="sol-tip-txt">Three tips to help you conserve, conserve, conserve on your next RV trip.</span>
+                <span class="sol-tip-more" aria-hidden="true">Read the article</span>
+              </span>
+            </a>
+          </li>
+          <li class="sol-tip">
+            <a class="sol-tip-link" href="blog-post.html?post=bug-spray-alternatives">
+              <span class="sol-tip-media">
+                <img src="../assets/blog/web/bug-spray-alternatives-1000.webp"
+                     srcset="../assets/blog/web/bug-spray-alternatives-400.webp 400w,
+                             ../assets/blog/web/bug-spray-alternatives-1000.webp 1000w"
+                     sizes="(max-width: 700px) 92vw, 30vw" loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="sol-tip-body">
+                <h4 class="sol-tip-name">Bug Spray Alternatives</h4>
+                <span class="sol-tip-txt">Environmentally friendly, cost-effective ways to keep bugs at bay without reaching for a can of chemical spray.</span>
+                <span class="sol-tip-more" aria-hidden="true">Read the article</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="ab-note ab-rise">See how Jayco develops and tests what goes into every coach on
+          <a href="rd.html">Research &amp; Development</a>.</p>
       </div>
     </section>
 
@@ -432,8 +576,8 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>For four days of rain, or for air conditioning, yes. Jayco's own position is that
-                the two work together rather than one replacing the other — solar carries the
+              <p>For four days of rain, or for air conditioning, yes. The two work
+                together rather than one replacing the other — solar carries the
                 ordinary load and the generator covers the exception.</p>
             </div>
           </div>
@@ -442,6 +586,29 @@
     </section>
 
   </main>
+
+  <!-- On-page video player, opened by initPlayer() in js/about.js from any
+       [data-yt] link on this page. Ported from #vd-player on videos.html. -->
+  <div class="ab-player" id="ab-player" hidden role="dialog" aria-modal="true"
+       aria-labelledby="ab-player-title">
+    <div class="ab-player-scrim" data-ab-close="1"></div>
+    <div class="ab-player-panel">
+      <button type="button" class="ab-player-x" id="ab-player-x" data-ab-close="1" aria-label="Close the video">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="ab-player-frame" id="ab-player-frame"><!-- iframe injected on open --></div>
+      <div class="ab-player-foot">
+        <h2 class="ab-player-title" id="ab-player-title" tabindex="-1"></h2>
+        <a class="ab-player-out" id="ab-player-out" target="_blank" rel="noopener noreferrer">
+          Watch on YouTube
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-inner">
@@ -593,7 +760,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/about.js?v=v5-ab-5"></script>
-  <script src="js/app.js?v=v5-core-6"></script>
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>
