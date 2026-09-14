@@ -146,6 +146,24 @@
         ],
         "createdAt": "2026-09-12T23:44:45.634Z",
         "reason": "Claude reviewed: .vd-stage and .vd-hero clip on purpose to hold a zooming/parallax photograph inside its frame; they contain no tooltip, menu or popover"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "version-5/our-story.html"
+        ],
+        "createdAt": "2026-09-13T19:23:01.110Z",
+        "reason": "Claude: the flagged flush child of section.os-time is .os-topo, an aria-hidden decorative topographic background layer (inset: 0, no text) that is meant to cover the whole band; verified in Chrome 2026-09-13"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "version-5/visit-us.html"
+        ],
+        "createdAt": "2026-09-14T16:05:56.345Z",
+        "reason": "Claude verified 2026-09-14: the only raster at opacity 0 on this page is the loader logo, faded out after load by design"
       }
     ]
   }
