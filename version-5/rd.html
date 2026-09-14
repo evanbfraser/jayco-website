@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/about.css?v=v5-ab-15" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -129,20 +129,22 @@
        are not sharpened into years this page cannot source.
 
        NO SECOND TIMELINE. our-story.html already owns the horizontal,
-       opt-in timeline on this site and links to it from here. A reprise of it
+       opt-in timeline on this site (linked from the footer). A reprise of it
        on this page would be a repeat rather than a design, so the innovations
-       read down as a list. See .rd-innov in css/about.css. -->
+       sit in a grid of cards, in date order. See .rd-innov in css/about.css. -->
   <main class="ab" id="rd">
 
     <section class="ab-hero">
       <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-13 as assets/jayco-r&d-hero.jpg
+             and served from the hero-v2 WebP pair. -->
         <img class="ab-hero-img"
-             src="../assets/rd/web/hero-1800.webp"
-             srcset="../assets/rd/web/hero-1200.webp 1200w,
-                     ../assets/rd/web/hero-1800.webp 1800w"
+             src="../assets/rd/web/hero-v2-1800.webp"
+             srcset="../assets/rd/web/hero-v2-1200.webp 1200w,
+                     ../assets/rd/web/hero-v2-1800.webp 1800w"
              sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="The finished interior of a Jayco coach, kitchen and lounge, lit at dusk" />
+             alt="A person pressing the touchscreen control panel mounted on the wall inside a Jayco coach" />
       </div>
       <div class="ab-hero-overlay" aria-hidden="true"></div>
       <div class="ab-hero-content">
@@ -187,7 +189,7 @@
           <div class="rd-team">
             <span class="rd-team-n">Team two</span>
             <h3 class="rd-team-h">In-house engineers</h3>
-            <p class="rd-team-b">Jayco describes it as the industry's largest engineering team, and
+            <p class="rd-team-b">Jayco has the industry's largest engineering team, and
               it works on integration as much as invention — how a change lands in the models that
               exist now, and the ones already drawn for two years' time. Their question is:
               <em>will it work, and what does it break?</em></p>
@@ -204,89 +206,96 @@
       </div>
     </section>
 
-    <!-- ===== The proving ground ===== -->
-    <section class="ab-band" aria-labelledby="rd-prove-h">
+    <!-- ===== The proving ground =====
+         The photograph spans the width of the cards under it, with the section's
+         label, headline and lead on it. Built on the closing CTA band (.ab-cta-band), so it takes that
+         band's scrim, its rounded inset and its parallax drift in about.js.
+         .ab-feature only sets the size. -->
+    <section class="ab-sec" aria-labelledby="rd-prove-h">
       <div class="ab-inner">
-        <div class="ab-band-grid">
-          <div class="ab-band-media-wrap ab-rise">
-            <div class="ab-band-media">
-              <img class="ab-band-img"
-                   src="../assets/rd/web/proving-1200.webp"
-                   srcset="../assets/rd/web/proving-800.webp 800w,
-                           ../assets/rd/web/proving-1200.webp 1200w"
-                   sizes="(max-width: 900px) 92vw, 46vw"
-                   width="1200" height="800" loading="lazy" decoding="async"
-                   alt="A Jayco technician working on wiring beneath a coach on the line" />
-            </div>
+        <div class="ab-cta-band ab-feature ab-rise">
+          <div class="ab-cta-media">
+            <img class="ab-cta-img"
+                 src="../assets/rd/web/proving-1200.webp"
+                 srcset="../assets/rd/web/proving-800.webp 800w,
+                         ../assets/rd/web/proving-1200.webp 1200w"
+                 sizes="(max-width: 1440px) 92vw, 1270px"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="A Jayco technician working on wiring beneath a coach on the line" />
           </div>
-          <div class="ab-band-copy ab-rise">
+          <div class="ab-cta-scrim" aria-hidden="true"></div>
+          <div class="ab-cta-body">
             <span class="section-label">The proving ground</span>
-            <h2 class="section-heading dark" id="rd-prove-h">What it takes to change a floor.</h2>
-            <p>Jayco's own worked example is a new linoleum. It sounds like a decision a designer
-              makes on a Tuesday. It is five tests, and the last one is not about the material at
-              all.</p>
+            <h2 class="ab-cta-h" id="rd-prove-h">What it takes to change a floor.</h2>
+            <p>Take a new linoleum. It sounds like a decision a designer makes on a Tuesday. It is
+              five tests, and the last one is not about the material at all.</p>
           </div>
         </div>
-        <div class="ab-inner">
-          <ol class="ab-steps ab-rise">
-            <li class="ab-step">
-              <div>
-                <h3 class="ab-step-name">Temperature</h3>
-                <p class="ab-step-body">Taken cold, and watched for cracking. A floor that is fine in
-                  Indiana in June and splits in Montana in February has not passed anything.</p>
-              </div>
+        <!-- The five tests as numbered cards, in the order a change has to clear
+             them. Still an <ol>: the sequence is the content. -->
+          <ol class="rd-proof ab-rise">
+            <li class="rd-proof-card">
+              <h3 class="rd-proof-name">Temperature</h3>
+              <p class="rd-proof-body">Taken cold, and watched for cracking. A floor that is fine in
+                Indiana in June and splits in Montana in February has not passed anything.</p>
             </li>
-            <li class="ab-step">
-              <div>
-                <h3 class="ab-step-name">Adhesive</h3>
-                <p class="ab-step-body">The material is one half of the question; what sticks it down
-                  is the other. The adhesive is applied and verified as its own step rather than
-                  assumed to work.</p>
-              </div>
+            <li class="rd-proof-card">
+              <h3 class="rd-proof-name">Adhesive</h3>
+              <p class="rd-proof-body">The material is one half of the question; what sticks it down
+                is the other. The adhesive is applied and verified as its own step rather than
+                assumed to work.</p>
             </li>
-            <li class="ab-step">
-              <div>
-                <h3 class="ab-step-name">Durability</h3>
-                <p class="ab-step-body">Wear, over the life a coach actually has — which includes
-                  grit walked in from campsites and furniture moved across it on slides.</p>
-              </div>
+            <li class="rd-proof-card">
+              <h3 class="rd-proof-name">Durability</h3>
+              <p class="rd-proof-body">Wear, over the life a coach actually has — which includes
+                grit walked in from campsites and furniture moved across it on slides.</p>
             </li>
-            <li class="ab-step">
-              <div>
-                <h3 class="ab-step-name">Repair</h3>
-                <p class="ab-step-body">The step most processes skip. Before it is approved, there
-                  has to be a known way to fix it — because a material a dealer cannot repair is a
-                  material that gets replaced whole, at somebody's cost.</p>
-              </div>
+            <li class="rd-proof-card">
+              <h3 class="rd-proof-name">Repair</h3>
+              <p class="rd-proof-body">The step most processes skip. Before it is approved, there
+                has to be a known way to fix it — because a material a dealer cannot repair is a
+                material that gets replaced whole, at somebody's cost.</p>
             </li>
-            <li class="ab-step">
-              <div>
-                <h3 class="ab-step-name">Production sign-off</h3>
-                <p class="ab-step-body">Production has to be confident it can build with it reliably.
-                  Until they are, it does not go in — which is the line operators' veto, exercised.</p>
-              </div>
+            <li class="rd-proof-card">
+              <h3 class="rd-proof-name">Production sign-off</h3>
+              <p class="rd-proof-body">Production has to be confident it can build with it reliably.
+                Until they are, it does not go in — which is the line operators' veto, exercised.</p>
             </li>
           </ol>
-          <blockquote class="ab-quote ab-rise">
+          <blockquote class="ab-quote is-blue ab-rise">
             <span class="ab-quote-mark" aria-hidden="true">&ldquo;</span>
             <p class="ab-quote-text">While RVers may take notice of inventive interiors like Modern
               Farmhouse, interior design is just one piece of the much larger process behind
               improving Jayco RVs each year.</p>
             <cite class="ab-quote-by">Stacy Stewart, Senior Designer, Jayco</cite>
           </blockquote>
-        </div>
       </div>
     </section>
 
     <!-- ===== Signature innovations ===== -->
     <section class="ab-sec" aria-labelledby="rd-innov-h">
       <div class="ab-inner">
-        <div class="ab-sec-head ab-rise">
-          <span class="section-label">Signature innovations</span>
-          <h2 class="section-heading dark" id="rd-innov-h">What has come<br>out of it.</h2>
-          <p class="ab-sec-lead">Nine things Jayco claims as its own, from a crank lifter Lloyd
-            Bontrager built in the 1960s to a ramp door you open with your voice. Dated the way Jayco
-            dates them.</p>
+        <!-- Same feature photograph as the proving ground: client photography,
+             supplied 2026-09-13 as assets/jayco-r&d-innovations.jpg and served
+             from the innovations WebP pair. -->
+        <div class="ab-cta-band ab-feature ab-rise">
+          <div class="ab-cta-media">
+            <img class="ab-cta-img"
+                 src="../assets/rd/web/innovations-1800.webp"
+                 srcset="../assets/rd/web/innovations-1200.webp 1200w,
+                         ../assets/rd/web/innovations-1800.webp 1800w"
+                 sizes="(max-width: 1440px) 92vw, 1270px"
+                 width="1800" height="1013" loading="lazy" decoding="async"
+                 style="object-position: 74% 50%"
+                 alt="An aerial view of a Jayco Eagle fifth wheel camped under trees with its awnings out, two people standing by a bench" />
+          </div>
+          <div class="ab-cta-scrim" aria-hidden="true"></div>
+          <div class="ab-cta-body">
+            <span class="section-label">Signature innovations</span>
+            <h2 class="ab-cta-h" id="rd-innov-h">What has come out of it.</h2>
+            <p>Nine Jayco innovations, from a crank lifter Lloyd Bontrager built in the 1960s to a
+              ramp door you open with your voice.</p>
+          </div>
         </div>
         <ul class="rd-innov ab-rise">
           <li class="rd-innov-row">
@@ -367,8 +376,6 @@
             </div>
           </li>
         </ul>
-        <p class="ab-note ab-rise">The full history, decade by decade — including the parts that were
-          not commercial victories — is on <a href="our-story.html">Our Story</a>.</p>
       </div>
     </section>
 
@@ -432,10 +439,10 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>Jayco describes the process as running on a model-year cadence, with all three
-                groups signing off before anything goes into production. Even relatively common
-                changes go through the full testing sequence — the linoleum example above is Jayco's
-                own, and it is not an unusually thorough case.</p>
+              <p>The process runs on a model-year cadence, with all three groups signing off
+                before anything goes into production. Even relatively common changes go through
+                the full testing sequence — the linoleum example above is not an unusually
+                thorough case.</p>
             </div>
           </div>
           <div class="faq-item">
@@ -444,7 +451,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>The dealer network is the route Jayco itself names — dealers and the sales team are
+              <p>Start with a dealer — dealers and the sales team are
                 one of the three groups that feed the process, and what they pass on is what people
                 asked for in a showroom. <a href="dealers.html">Find a Dealer</a> is where that
                 starts.</p>
@@ -456,22 +463,11 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>Jayco's own name for its sustainable manufacturing practices. Jayco publishes the
-                name and not the detail behind it, so neither this page nor
-                <a href="solar.html">Sustainability &amp; Overlander Packages</a> describes what sits
-                under it — a programme we cannot cite is not one we will summarise.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              <span>Is the engineering team really the industry's largest?</span>
-              <span class="faq-icon" aria-hidden="true"></span>
-            </button>
-            <div class="faq-answer">
-              <p>That is Jayco's own claim, stated on its R&amp;D page, and it is repeated here as a
-                claim rather than as a verified count — Jayco does not publish the number and neither
-                does the comparison. The testing sequence above is the part of it you can actually
-                check against a finished coach.</p>
+              <p>EcoAdvantage&trade; is Jayco's sustainability initiative: working toward
+                landfill-free plants, cutting freshwater use (recycled water runs all quality control
+                testing), sourcing more sustainable materials, using less energy, streamlining
+                production and building lighter products for better fuel economy. The full picture is
+                on <a href="solar.html#sustainability">Sustainability &amp; Overlander Packages</a>.</p>
             </div>
           </div>
           <div class="faq-item">
@@ -641,7 +637,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/about.js?v=v5-ab-5"></script>
-  <script src="js/app.js?v=v5-core-6"></script>
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>
