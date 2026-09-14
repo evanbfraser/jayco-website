@@ -30,13 +30,14 @@
 }
 .os-hero-img { width: 100%; height: 100%; object-fit: cover; }
 /* DEEPER THAN THE SITEWIDE STEP BELOW THE MIDPOINT, and only below it. The top
-   30% is untouched at rgba(...,0), so the archive montage still reads in full
-   colour where the eye lands first.
+   30% is untouched at rgba(...,0), so the photograph still reads in full colour
+   where the eye lands first.
 
-   Why this plate needs it: it is a montage of scanned photographs, and scanned
-   photographs come on white — so the ground behind the copy is far brighter
-   than a photograph's would be. Measured per line on the shared ramp, the
-   eyebrow came out at 3.4:1 against its 4.5 bar. The stops below carry it.
+   Why this plate needs it. The stops were set against the archive montage that
+   used to be the hero, whose eyebrow measured 3.4:1 on the shared ramp. The
+   factory-floor plate that replaced it on 2026-09-13 is as light where the copy
+   stands — pale concrete and white wall panels in the lower left — so they are
+   kept. Re-measure if the plate changes again.
    value-tool.css, manuals.css and jayco-difference.css make the same local
    deepening on the same reasoning; none of them touches the shared token. */
 .os-hero-overlay {
@@ -79,6 +80,97 @@
 }
 .os-intro-body strong { color: var(--text-dark); }
 
+/* ---------- The story band ----------
+   PORTED FROM .tp-feat-band IN type.css, and named there: one photograph that
+   opens out as it scrolls in, with its line arriving over it. Here it is the
+   archive montage that used to be the hero, set above the timeline.
+
+   IT OPENS TO THE PAGE FRAME, NOT TO THE WINDOW'S EDGES. type.css's band ends
+   full bleed; this one stops on the same frame and gutter as the page's copy
+   and the CTA cards below, and keeps its rounded corners the whole way, and it
+   stands clear of the blue timeline with section spacing under it rather than
+   running into it (client, 2026-09-13).
+
+   --exp is the hinge. initBand() sets it on .os-band, so the stage's clip and
+   the line both read the same value: 1 is inset deep inside the frame, 0 is
+   the frame itself. It DEFAULTS TO 0, so with no JS, under reduced motion, or
+   on a phone (where initBand() does not expand it) the band simply rests at the
+   frame — which is also where the scrub ends. The inset is well deeper than the
+   gutter so the growth is the movement you watch.
+
+   The band is shorter than type.css's. This plate is 2.6:1, and a taller band
+   crops away most of its width; at 70vh most of the then-and-now split
+   survives. */
+.os-band {
+  --exp: 0;
+  --exp-y: clamp(2rem, 8vh, 6rem);
+  --exp-x: clamp(2.5rem, 12vw, 11rem);
+  position: relative;
+  /* The content width of .os-inner: the frame, less a gutter each side. */
+  width: calc(min(100%, var(--os-frame)) - 2 * var(--os-pad));
+  height: clamp(440px, 70vh, 720px);
+  margin: clamp(3.5rem, 7vw, 6rem) auto clamp(3rem, 6vw, 5rem);
+}
+.os-band-stage {
+  /* Headroom above and below the photograph for the drift, so the parallax can
+     never expose an edge. initBand() moves it 7% of its own height each way,
+     which is 8.4% of the stage — inside the 10% given here. */
+  --os-band-drift: 10%;
+  position: absolute; inset: 0;
+  overflow: hidden;
+  background: var(--surface);
+  clip-path: inset(
+    calc(var(--exp) * var(--exp-y))
+    calc(var(--exp) * var(--exp-x))
+    round var(--radius-card)
+  );
+  will-change: clip-path;
+}
+.os-band-img {
+  position: absolute; left: 0;
+  top: calc(-1 * var(--os-band-drift));
+  width: 100%; height: calc(100% + 2 * var(--os-band-drift));
+  object-fit: cover;
+  will-change: transform;
+}
+/* Bottom-left weighted, because that is where the line stands — over the white
+   tablecloth of the archive half, the brightest thing in the frame. The long
+   ramp up from the bottom carries the heading's height; the one from the left
+   deepens the corner it starts in. The upper right, the colour half's hills
+   and water, keeps its light. */
+.os-band-scrim {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to top,   rgba(15,11,9,0.74) 0%, rgba(15,11,9,0.52) 32%, rgba(15,11,9,0.14) 56%, rgba(15,11,9,0) 70%),
+    linear-gradient(to right, rgba(15,11,9,0.32) 0%, rgba(15,11,9,0) 55%);
+}
+/* Outside the stage, so the clip crops the photograph and never the type. On
+   the photograph's own inner padding, and CARRIED BY THE HINGE: the transform
+   moves it in with the clip's left and bottom edges, so the line always stands
+   the same distance inside the visible photograph however far open the band
+   is, and never on the page beside it. A transform, not animated padding, so a
+   frame of scrolling costs no layout. */
+.os-band-content {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: flex-end;
+  padding: clamp(1.5rem, 5vh, 3.25rem) clamp(1.5rem, 3.5vw, 3.25rem);
+  transform: translate(calc(var(--exp) * var(--exp-x)), calc(-1 * var(--exp) * var(--exp-y)));
+  pointer-events: none;
+}
+/* 10.5ch, measured against the line in this face at this weight: "has a story."
+   fits and "Every model has" does not, so it breaks as "Every model / has a
+   story." rather than leaving "story." alone on a second line, as 13ch did. */
+.os-band-h {
+  margin: 0; max-width: 10.5ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.2rem);  /* type.css's feature-band step */
+  font-weight: 800; line-height: 0.96; letter-spacing: -0.02em;
+  color: #fff;
+}
+/* inline-block so each word can rise on its own; the spaces between the spans
+   are ordinary text, so the line still wraps and reads as one sentence. */
+.os-band-w { display: inline-block; will-change: transform, opacity; }
+
 /* ---------- Timeline ----------
    PORTED FROM .build-journey IN version-3's style.css — a topographic ground,
    a route drawn across it and a lit dot travelling the route. That page used it
@@ -109,6 +201,9 @@
   background: var(--blue);
   padding: clamp(4rem, 8vw, 7rem) 0 clamp(5rem, 9vw, 8rem);
 }
+/* A DIRECT CHILD OF .os-time, in the HTML. It used to be drawn by our-story.js
+   inside the rail's track, so inset: 0 filled the track alone and the heading
+   sat on plain blue above the map. Here it covers the whole blue band. */
 .os-topo {
   position: absolute; inset: 0; z-index: 0;
   background-image: url('../../assets/topography-map-tile.svg');
@@ -131,25 +226,53 @@
 }
 
 /* THE RAIL. A horizontal scroller and nothing more — the page is never pinned
-   and the vertical scroll is never touched. The run stops at the end of each
-   decade and asks whether to carry on; .os-ask is that question. */
+   and the vertical scroll is never touched. Every decade is on it from the
+   start; the reader scrolls it end to end at their own pace.
+
+   NO SCROLL SNAP. It used to be x proximity, and the snap pulling the rail onto
+   the nearest card after every swipe is what read as the scroll jumping
+   (client, 2026-09-13). The rail now stops exactly where the gesture leaves it;
+   only the arrows land on a card edge, and they glide there.
+
+   overscroll-behavior-x: contain keeps a swipe past either end on the rail —
+   without it a trackpad carries on into the browser's back and forward gesture
+   and the page itself lurches.
+
+   THE END OF THE RAIL IS BUILT, NOT LEFT TO THE ENGINE. On an iPhone the rail
+   kept sliding into empty space after 2021 (client, 2026-09-13), where Chrome
+   stopped on the last card. The row's width had been left to two things the
+   engines do not agree on: the intrinsic (max-content) width of a flex row
+   whose cards were sized only by flex-basis, and whether a scroller's right
+   padding is added after content that overflows it. Neither is relied on now.
+   Each card carries an explicit width equal to its basis (.os-item), which is
+   what every engine sums for the row's width, and the gutter after the last
+   card is a spacer inside the list (.os-list::after) with the rail's right
+   padding at zero. The far end is the last card plus one page gutter,
+   identically in every engine. */
 .os-track { position: relative; z-index: 1; }
 .os-rail {
   position: relative;
   overflow-x: auto; overflow-y: hidden;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-  padding: clamp(1.5rem, 3vw, 2.5rem) var(--os-pad) clamp(2rem, 4vw, 3rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem) 0 clamp(2rem, 4vw, 3rem) var(--os-pad);
 }
 .os-rail::-webkit-scrollbar { display: none; }
 .os-rail:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
 .os-list {
+  --os-gap: clamp(1rem, 2vw, 1.75rem);
   list-style: none; margin: 0; padding: 0;
   display: flex; align-items: stretch;
-  gap: clamp(1rem, 2vw, 1.75rem);
+  gap: var(--os-gap);
   width: max-content;
   position: relative; z-index: 2;
+}
+/* The gutter after the last card: one page gutter, less the gap the row
+   already puts in front of this spacer. */
+.os-list::after {
+  content: '';
+  flex: 0 0 max(0px, calc(var(--os-pad) - var(--os-gap)));
 }
 
 /* The route crosses the rail behind the cards, and scrolls with them. */
@@ -182,7 +305,6 @@
 /* The decade, standing on its side between one run and the next. */
 .os-era {
   flex: 0 0 auto; display: flex; align-items: center;
-  scroll-snap-align: start;
 }
 .os-era-tag {
   display: inline-block;
@@ -196,10 +318,26 @@
   white-space: nowrap;
 }
 
+/* An explicit width equal to the flex basis — see THE END OF THE RAIL above.
+   The basis alone keeps each card this wide on screen everywhere, but it is the
+   width that every engine uses when it works out how wide the whole row is. */
 .os-item {
-  flex: 0 0 clamp(260px, 26vw, 340px);
-  display: flex; scroll-snap-align: start;
+  --os-card-w: clamp(260px, 26vw, 340px);
+  flex: 0 0 var(--os-card-w);
+  width: var(--os-card-w);
+  display: flex;
 }
+
+/* ARRIVALS. our-story.js puts every entry and decade tag in the waiting state
+   and an IntersectionObserver takes it off as each one comes into view, up the
+   page or along the rail, with a stagger for those that cross together. The
+   class is only ever added by the script, so without it (or under reduced
+   motion, where the script never adds it) every card simply stands. The rail's
+   bottom padding is deeper than the rise, so nothing is clipped on the way in. */
+.os-item, .os-era {
+  transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+}
+.os-item.is-waiting, .os-era.is-waiting { opacity: 0; transform: translateY(28px); }
 .os-card {
   display: flex; flex-direction: column; width: 100%;
   background: var(--white); border-radius: var(--radius-card);
@@ -235,48 +373,6 @@
 .os-item.is-big .os-head,
 .os-item.is-big .os-body { color: #fff; }
 
-/* THE ASK. The card that does not assume the reader wants the next fifty
-   years. It names what is coming rather than saying "more", because a decade
-   is a reason to carry on and "more" is not. */
-.os-ask {
-  flex: 0 0 clamp(260px, 26vw, 340px);
-  display: flex; scroll-snap-align: start;
-}
-.os-ask-in {
-  display: flex; flex-direction: column; justify-content: center;
-  width: 100%; padding: clamp(1.5rem, 2.6vw, 2rem);
-  border: 2px dashed rgba(255,255,255,0.55);
-  border-radius: var(--radius-card);
-  /* Deep enough to be a ground rather than a tint. At 0.08 the contour map and
-     the route showed straight through the card and crossed its heading; this
-     sits the question on something solid without making it a third card style
-     competing with the entries. */
-  background: var(--blue-dark);
-}
-.os-ask-k {
-  display: block; margin-bottom: 0.5rem;
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em;
-  text-transform: uppercase; color: #fff;
-}
-.os-ask-h {
-  margin: 0 0 0.5rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4vw, 3rem);
-  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
-  color: #fff;
-}
-.os-ask-b { margin: 0 0 1.25rem; font-size: 0.92rem; line-height: 1.65; color: #fff; }
-/* A Jayco blue pill on a Jayco blue ground is a label with no button behind it,
-   so the primary inverts here, keeping style.css's hover wipe. */
-.os-ask .btn-primary {
-  align-self: flex-start;
-  background: linear-gradient(to right, var(--canvas) 50%, #fff 50%);
-  background-size: 200% 100%; background-position: 100% 0;
-  color: var(--blue-dark);
-}
-.os-ask .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
-.os-ask .btn-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-
 /* Where you are, and the two controls. Under the rail, because a control on the
    cards would read as part of them. */
 .os-nav {
@@ -298,21 +394,32 @@
 .os-arrow:hover { background: #fff; border-color: #fff; color: var(--blue-dark); }
 .os-arrow:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
-/* ---------- CTA ---------- */
+/* ---------- The two ways on ----------
+   PORTED FROM .jd-cta IN jayco-difference.css, which ported it from .tvd-cta
+   in tow-vs-drive.css — the site's two-up photograph CTA. Restated per the
+   house rule and renamed to this page's prefix. The history ends on two places
+   to go next: what all of it produced, and the town it happened in.
+
+   The min-height is what makes the pair a matched set: the two photographs are
+   different shapes, so without it the cards would stand at different heights
+   and object-fit would have nothing to crop into. */
 .os-cta { padding: clamp(4rem, 8vw, 7rem) 0 0; }
-.os-cta-band {
+.os-cta-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.os-cta-card {
   position: relative; isolation: isolate;
   display: flex; flex-direction: column; justify-content: flex-end;
-  min-height: clamp(425px, 40vw, 560px);
+  min-height: clamp(360px, 34vw, 480px);
   border-radius: var(--radius-card); overflow: hidden;
 }
-.os-cta-media { position: absolute; inset: 0; z-index: 0; }
 .os-cta-img {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; z-index: 0;
   width: 100%; height: 100%; object-fit: cover; display: block;
   transition: transform 0.6s var(--ease-out);
 }
-.os-cta-band:hover .os-cta-img { transform: scale(1.04); }
+.os-cta-card:hover .os-cta-img { transform: scale(1.04); }
 /* The sitewide rule: bottom-weighted, top untouched. */
 .os-cta-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
 .os-cta-body { position: relative; z-index: 2; padding: clamp(1.5rem, 2.8vw, 2.25rem); color: #fff; }
@@ -328,16 +435,24 @@
   margin: 0 0 1.5rem; max-width: 46ch;
   font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.88);
 }
+/* .btn-secondary-light is a DARK-text button on a hairline border — the "light"
+   in the name is the ground it was drawn for. On a scrimmed photograph it has
+   to be inverted, exactly as jayco-difference.css inverts it. */
+.os-cta .btn-secondary-light { border-color: rgba(255,255,255,0.55); color: #fff; }
+.os-cta .btn-secondary-light:hover { border-color: #fff; background: #fff; color: var(--text-dark); }
 
 .os-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .os-cta-grid { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 900px) {
   /* The rail stays a rail. A horizontal scroller is BETTER on a phone than on a
      desktop — it is a swipe rather than a drag — so nothing here collapses to a
      column. Only the card narrows, and the arrows stay because they are also
      the affordance that says the rail moves. */
-  .os-item, .os-ask { flex-basis: min(78vw, 320px); }
+  .os-item { --os-card-w: min(78vw, 320px); }
   .os-nav-at { font-size: 0.8rem; }
 }
 @media (max-width: 768px) {
@@ -347,10 +462,13 @@
      bigger share of the frame, so the ramp has to start sooner — which is
      exactly what the card step is. */
   .os-hero-overlay { background: var(--scrim-card); }
+  /* Shorter on a phone: the plate is 2.6:1, and a tall band inside the gutters
+     would show little more than the camper's middle. */
+  .os-band { height: clamp(300px, 48svh, 460px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .os-card-img, .os-cta-img { transition: none; }
-  .os-card:hover .os-card-img, .os-cta-band:hover .os-cta-img { transform: none; }
+  .os-card:hover .os-card-img, .os-cta-card:hover .os-cta-img { transform: none; }
   /* The fill is set to full by the JS under this, and zero travel means the
      parallax returns before it binds anything. */
   .os-page { --os-drift: 0%; }

@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/our-story.css?v=v5-os-8" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
+  <link rel="stylesheet" href="css/our-story.css?v=v5-os-13" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -125,13 +125,16 @@
 
     <section class="os-hero">
       <div class="os-hero-media">
+        <!-- Client photography, supplied 2026-09-13 as assets/jayco-our-story-hero.jpg
+             and served from the hero-v2 WebP pair. The archive montage that stood
+             here now opens the timeline, in .os-band below. -->
         <img class="os-hero-img"
-             src="../assets/our-story/web/hero-1800.webp"
-             srcset="../assets/our-story/web/hero-1200.webp 1200w,
-                     ../assets/our-story/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="690"
+             src="../assets/our-story/web/hero-v2-1800.webp"
+             srcset="../assets/our-story/web/hero-v2-1200.webp 1200w,
+                     ../assets/our-story/web/hero-v2-1800.webp 1800w"
+             sizes="100vw" width="1800" height="1202"
              fetchpriority="high" decoding="async"
-             alt="A montage of Jayco RVs and family photographs from across the company&#39;s history" />
+             alt="Looking down the length of the Jayco production floor: travel trailer wall frames on the line and crew working among yellow gantries" />
       </div>
       <div class="os-hero-overlay" aria-hidden="true"></div>
       <div class="os-hero-content">
@@ -148,17 +151,42 @@
           Indiana around a lifter system he had designed himself, and his wife Bertha helped him
           sell it. <strong>One hundred and thirty-two people bought one that first year.</strong>
           What follows is what happened next — the products, the plants, the people, and the year
-          the family lost its founder and kept going. It is Jayco&rsquo;s own account, dated as
-          Jayco dates it.</p>
+          the family lost its founder and kept going.</p>
+      </div>
+    </section>
+
+    <!-- The story band. The plate that used to be this page's hero — the same
+         lakeside pop-up camper then and now — opening out to the page frame as
+         it scrolls in (never to the window's edges), with its line arriving word
+         by word in the bottom-left corner, and spaced clear of the timeline.
+         PORTED FROM .tp-feat-band on type.html; our-story.js initBand() drives
+         it. With no JS or reduced motion it rests at the page frame with the
+         line in place. The words are separate spans only so they can
+         arrive one at a time; the heading still reads as one sentence. -->
+    <section class="os-band" aria-labelledby="os-band-h">
+      <div class="os-band-stage">
+        <img class="os-band-img"
+             src="../assets/our-story/web/hero-1800.webp"
+             srcset="../assets/our-story/web/hero-1200.webp 1200w,
+                     ../assets/our-story/web/hero-1800.webp 1800w"
+             sizes="100vw" width="1800" height="690" loading="lazy" decoding="async"
+             alt="A Jayco pop-up camper beside a lake, the left half an archive black-and-white photograph of a family picnic and the right half the same scene in color today, a father and son fishing from the shore" />
+        <div class="os-band-scrim" aria-hidden="true"></div>
+      </div>
+      <div class="os-band-content">
+        <h2 class="os-band-h" id="os-band-h"><span class="os-band-w">Every</span> <span class="os-band-w">model</span> <span class="os-band-w">has</span> <span class="os-band-w">a</span> <span class="os-band-w">story.</span></h2>
       </div>
     </section>
 
     <section class="os-time" aria-labelledby="os-time-h">
+      <!-- The topographic ground, a direct child of the section so it covers the
+           whole blue band. our-story.js sizes its tile to a whole pixel. -->
+      <div class="os-topo" aria-hidden="true"></div>
       <div class="os-inner">
         <div class="os-sec-head">
           <span class="section-label">The timeline</span>
           <h2 class="section-heading dark" id="os-time-h">Year<br>by year.</h2>
-          <p class="os-sec-lead">Thirty moments from Jayco&rsquo;s own history, in the order they
+          <p class="os-sec-lead">Thirty moments from Jayco&rsquo;s history, in the order they
             happened.</p>
         </div>
       </div>
@@ -168,26 +196,48 @@
       <div class="os-track" id="os-track"><!-- built by our-story.js --></div>
     </section>
 
-    <section class="os-cta" aria-labelledby="os-cta-h">
+    <!-- The two ways on, side by side: what the history produced, and the town it
+         happened in. The site's two-up photograph CTA (.jd-cta on
+         jayco-difference.html). The Visit Us copy states only what visit-us.html
+         does — free tours two mornings a week, the outdoor showroom, and Jayco on
+         the same street since 1968 — and uses that page's own hero plate. -->
+    <section class="os-cta" aria-label="Next steps">
       <div class="os-inner">
-        <div class="os-cta-band">
-          <div class="os-cta-media">
+        <div class="os-cta-grid">
+          <article class="os-cta-card">
             <img class="os-cta-img"
                  src="../assets/jayco-difference/web/tow-1-1200.webp"
                  srcset="../assets/jayco-difference/web/tow-1-800.webp 800w,
                          ../assets/jayco-difference/web/tow-1-1200.webp 1200w"
-                 sizes="(max-width: 1023px) 92vw, 88vw"
+                 sizes="(max-width: 1023px) 92vw, 46vw"
                  width="1200" height="600" loading="lazy" decoding="async"
                  alt="Travel trailers on the Jayco assembly line, staff fitting them out" />
-          </div>
-          <div class="os-cta-scrim" aria-hidden="true"></div>
-          <div class="os-cta-body">
-            <span class="section-label">Still true</span>
-            <h2 class="os-cta-h" id="os-cta-h">What came out of all that.</h2>
-            <p>Fifty-eight years of building the same thing in the same town leaves marks — in the
-              roof, the frame, the warranty and the inspection every coach still gets.</p>
-            <a class="btn-primary" href="jayco-difference.html">The Jayco Difference</a>
-          </div>
+            <div class="os-cta-scrim" aria-hidden="true"></div>
+            <div class="os-cta-body">
+              <span class="section-label">Still true</span>
+              <h2 class="os-cta-h">What came out of all that.</h2>
+              <p>Fifty-eight years of building the same thing in the same town leaves marks — in the
+                roof, the frame, the warranty and the inspection every coach still gets.</p>
+              <a class="btn-primary" href="jayco-difference.html">The Jayco Difference</a>
+            </div>
+          </article>
+          <article class="os-cta-card">
+            <img class="os-cta-img"
+                 src="../assets/visit-us/web/hero-1200.webp"
+                 srcset="../assets/visit-us/web/hero-1200.webp 1200w,
+                         ../assets/visit-us/web/hero-1800.webp 1800w"
+                 sizes="(max-width: 1023px) 92vw, 46vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="An aerial view of rows of Jayco RVs parked outside a long low building" />
+            <div class="os-cta-scrim" aria-hidden="true"></div>
+            <div class="os-cta-body">
+              <span class="section-label">Middlebury, Indiana</span>
+              <h2 class="os-cta-h">See where it happened.</h2>
+              <p>Jayco has been on the same street since 1968. Free factory tours run two mornings a
+                week, with an outdoor showroom of current models next door.</p>
+              <a class="btn-secondary-light" href="visit-us.html">Visit Us</a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -416,8 +466,8 @@
 
   <!-- No lineup data: this page is history, and every date and photograph in
        it comes from js/our-story-data.js with its provenance written out. -->
-  <script src="js/our-story-data.js?v=v5-os-1"></script>
-  <script src="js/our-story.js?v=v5-os-10"></script>
-  <script src="js/app.js?v=v5-core-6"></script>
+  <script src="js/our-story-data.js?v=v5-os-2"></script>
+  <script src="js/our-story.js?v=v5-os-14"></script>
+  <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>

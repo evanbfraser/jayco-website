@@ -6,9 +6,12 @@
 
      • the hero plate drifts, the way every hero on this
        site drifts;
-     • the spine fills as you move down the run, so the
-       page reports how far through the history you are;
-     • each entry arrives once, as it reaches you.
+     • the route fills and its dot travels as the rail
+       scrolls, so the page reports how far through the
+       history you are;
+     • each entry arrives once, as it comes into view;
+     • the photograph above the timeline opens out as it
+       scrolls in, and its line arrives word by word.
 
    THE ARRIVALS ARE AN INTERSECTIONOBSERVER, NOT A
    SCROLLTRIGGER PER CARD. Thirty triggers would each
@@ -18,10 +21,6 @@
    observer measures at the moment of crossing instead,
    and the stagger comes free: entries that cross
    together are one callback.
-
-   THE SPINE IS THE ONE SCRUBBED THING, because it is
-   the one thing that has to track the scrollbar rather
-   than fire once.
    =================================================== */
 (function () {
   const DATA = window.JAYCO_STORY;
@@ -34,23 +33,22 @@
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ---------- Build ----------
-     A HORIZONTAL RAIL THE READER OPTS THROUGH, and nothing about it is forced.
-     The page is never pinned and the vertical scroll is never hijacked: the
-     rail is an ordinary horizontal scroller, and the run stops at the end of
-     each decade with a card that ASKS whether to carry on. Say no and you have
-     read the 1960s and moved on; say yes and the next decade is appended and
-     the rail takes you to it.
+     A HORIZONTAL RAIL CARRYING THE WHOLE HISTORY, and nothing about it is
+     forced. The page is never pinned and the vertical scroll is never hijacked:
+     the rail is an ordinary horizontal scroller — swipe, trackpad, arrow keys or
+     the two buttons under it — and the reader moves along it at their own pace.
 
-     That is the whole point of the pattern. A scroll-jacked timeline decides
-     for the reader how long they are going to spend on a company's history.
-     This one lets them decide, a decade at a time. */
+     EVERY DECADE IS ON THE RAIL FROM THE START. It used to stop at the end of
+     each decade on a card asking whether to carry on, and append the next one
+     on a yes. The client asked for those cards to go on 2026-09-13, so the run
+     is 1968 to 2021 in one piece, with the decade tags as the only breaks. */
   const ERAS = [];
   DATA.forEach((m) => {
     if (!ERAS.length || ERAS[ERAS.length - 1].name !== m.era) ERAS.push({ name: m.era, items: [] });
     ERAS[ERAS.length - 1].items.push(m);
   });
-
-  let shown = 1;                       /* how many decades have been asked for */
+  const FIRST = DATA[0].year;
+  const LAST = DATA[DATA.length - 1].year;
 
   const card = (m, i) => `
     <li class="os-item${m.big ? ' is-big' : ''}" data-i="${i}">
@@ -67,31 +65,12 @@
       </article>
     </li>`;
 
-  /* The ask. It names what comes next rather than saying "more", because
-     "the 1980s" is a reason to carry on and "more" is not. */
-  const ask = (next) => `
-    <li class="os-ask">
-      <div class="os-ask-in">
-        <span class="os-ask-k">That is the ${esc(ERAS[shown - 1].name)}</span>
-        <h3 class="os-ask-h">Keep going?</h3>
-        <p class="os-ask-b">${esc(next.items.length)} more from the ${esc(next.name)}.</p>
-        <button type="button" class="btn-primary os-ask-go">Continue to the ${esc(next.name)}</button>
-      </div>
-    </li>`;
-
-  const end = () => `
-    <li class="os-ask is-end">
-      <div class="os-ask-in">
-        <span class="os-ask-k">2021</span>
-        <h3 class="os-ask-h">That is all of it.</h3>
-        <p class="os-ask-b">Fifty-eight years, from a folding camper to four divisions.</p>
-        <a class="btn-primary" href="jayco-difference.html">What came out of it</a>
-      </div>
-    </li>`;
+  const ARROW = (d) => `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+      aria-hidden="true"><path d="${d < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}"/></svg>`;
 
   function render() {
-    let html = '<div class="os-topo" aria-hidden="true"></div>'
-      + '<div class="os-rail" id="os-rail" tabindex="0" role="region"'
+    let html = '<div class="os-rail" id="os-rail" tabindex="0" role="region"'
       + ' aria-label="Jayco history, scroll sideways">'
       + '<svg class="os-route" id="os-route" aria-hidden="true">'
       +   '<path class="os-route-base" id="os-route-base"/>'
@@ -100,11 +79,10 @@
       + '<span class="os-dot" id="os-dot" aria-hidden="true"></span>'
       + '<ol class="os-list" id="os-list">';
     let n = 0;
-    ERAS.slice(0, shown).forEach((era) => {
-      html += `<li class="os-era"><span class="os-era-tag">${esc(era.name)}</span></li>`;
+    ERAS.forEach((era) => {
+      html += `<li class="os-era" data-era="${esc(era.name)}"><span class="os-era-tag">${esc(era.name)}</span></li>`;
       era.items.forEach((m) => { html += card(m, n++); });
     });
-    html += (shown < ERAS.length ? ask(ERAS[shown]) : end());
     track.innerHTML = html + '</ol></div>'
       + '<div class="os-nav">'
       +   '<span class="os-nav-at" id="os-nav-at" role="status" aria-live="polite"></span>'
@@ -115,11 +93,10 @@
       + '</div>';
   }
 
-  const ARROW = (d) => `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-      aria-hidden="true"><path d="${d < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}"/></svg>`;
-
   /* ---------- The topographic ground ----------
+     .os-topo is in the HTML, a direct child of the blue section, so it covers
+     the whole band — heading and all — rather than only the rail.
+
      The tile height is pinned to a WHOLE PIXEL. Left to CSS, background-size:
      100% auto gives a fractional height, and a repeated background on a
      fractional boundary blends its anti-aliased edge row on every repeat, which
@@ -175,16 +152,12 @@
     const next = () => FACTORS[(fi++) % FACTORS.length];
 
     const pts = [[0, mid]];
-    /* THE ROUTE STOPS AT THE LAST ENTRY, not at the ask. The ask is the
-       question at the end of the road, not another place on it — and running
-       the line and the lit dot through a translucent card put both straight
-       across its heading. */
     $$('.os-item, .os-era', list).forEach((el) => {
       const cx = el.offsetLeft + el.offsetWidth / 2;
       pts.push([cx - el.offsetWidth * 0.3, mid + next() * A]);
       pts.push([cx, mid + next() * A * 0.5]);
     });
-    /* End where the entries end, so the dot never lands on the question. */
+    /* End where the entries end. */
     const last = $$('.os-item', list).pop();
     pts.push([last ? last.offsetLeft + last.offsetWidth : W, mid]);
 
@@ -212,70 +185,130 @@
        content travels left by the same scroll, so the dot sweeps across the
        visible rail rather than running off it. */
     dot.style.transform = 'translate(' + (pt.x - 9) + 'px,' + (pt.y - 9) + 'px)';
+
+    /* The decade the reader is in: the last decade tag at or left of a line a
+       third of the way across the rail. Written only when it changes, because
+       the status is a live region and would otherwise announce on every frame. */
     const at = $('#os-nav-at');
     if (at) {
-      const eras = ERAS.slice(0, shown).map((e) => e.name);
-      at.textContent = eras.length === ERAS.length
-        ? 'All ' + DATA.length + ' moments, 1968 to 2021'
-        : eras[0] + (eras.length > 1 ? '\u2013' + eras[eras.length - 1] : '') + ' so far';
+      const look = rail.scrollLeft + rail.clientWidth * 0.35;
+      let era = ERAS[0].name;
+      $$('.os-era', rail).forEach((el) => { if (el.offsetLeft <= look) era = el.dataset.era; });
+      const text = 'The ' + era + ' · ' + DATA.length + ' moments, ' + FIRST + ' to ' + LAST;
+      if (at.textContent !== text) at.textContent = text;
     }
   }
 
   /* ---------- Arrivals ----------
-     Newly appended entries only. Anything already read keeps its place. */
-  function arrive(els) {
-    if (!els.length) return;
-    if (typeof gsap === 'undefined'
-        || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    gsap.from(els, { opacity: 0, y: 22, duration: 0.5, ease: 'power2.out',
-                     stagger: 0.06, clearProps: 'all' });
+     Every entry, and each decade tag, arrives once as it comes into view —
+     whether that is the section scrolling up the page or the rail scrolling
+     sideways. ONE observer against the viewport covers both, because an
+     observer's intersection is clipped by every scrolling ancestor: a card
+     still past the rail's right edge does not count as visible until the rail
+     brings it in. Entries crossing in the same callback stagger.
+
+     The waiting state is only ever set here, so with no JavaScript, no
+     IntersectionObserver or reduced motion, every card simply stands. */
+  function initArrivals() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    const els = $$('.os-item, .os-era', track);
+    els.forEach((el) => el.classList.add('is-waiting'));
+    const io = new IntersectionObserver((entries) => {
+      let k = 0;
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        io.unobserve(el);
+        el.style.transitionDelay = Math.min(k++ * 80, 400) + 'ms';
+        el.classList.remove('is-waiting');
+        el.addEventListener('transitionend', () => { el.style.transitionDelay = ''; }, { once: true });
+      });
+    /* A low threshold, so a card peeking in at the rail's edge comes in rather
+       than standing as an empty sliver — on a phone the rail shows little more
+       than one card, and an edge of the next is usually in view. */
+    }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+    els.forEach((el) => io.observe(el));
   }
 
-  /* ---------- Wiring ----------
-     THE CLICK DELEGATION IS BOUND ONCE, on the track, which survives every
-     re-render. Binding it per render stacked a listener each time: one press of
-     Continue then fired two, three, four handlers, shown ran past the end of
-     the decade list and the next press threw on ERAS[shown - 1]. The rail
-     element itself IS replaced by render(), so only its scroll listener is
-     re-attached — that one is bound to the new node each time. */
-  let railQueued = 0;
-  function wireRail() {
+  /* ---------- Wiring ---------- */
+  function wire() {
     const rail = $('#os-rail');
     if (!rail) return;
-    rail.addEventListener('scroll', () => {
-      if (railQueued) return;
-      railQueued = requestAnimationFrame(() => { railQueued = 0; placeDot(); });
-    }, { passive: true });
-  }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  function wireOnce() {
+    let queued = 0;
+    rail.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = requestAnimationFrame(() => { queued = 0; placeDot(); });
+    }, { passive: true });
+
+    /* SIDEWAYS GESTURES BELONG TO THE RAIL. Lenis listens for wheel events on
+       the window and cancels them to run its own smooth scroll — including a
+       trackpad swipe across the rail, whose small vertical component was
+       enough for Lenis to take it, so the rail's native sideways scroll kept
+       being cut off mid-gesture. That tug-of-war is the other half of the
+       jumping. A mostly-horizontal wheel event now stops here, before it
+       reaches Lenis, and the browser scrolls the rail natively; a mostly
+       vertical one carries on up and scrolls the page as it always has. */
+    rail.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.stopPropagation();
+    }, { passive: true });
+
+    /* ---- The arrows glide ----
+       An eased scroll the page runs itself rather than scrollBy's smooth
+       behaviour, which differs by browser and used to fight the snap. Each
+       press lands on the card or decade tag nearest a screen's-width step,
+       measured from where the last glide was headed so quick presses add up,
+       and the target is clamped to the rail's ends — so a glide never stops
+       part-way into a card or runs past the last one. Any hand on the rail
+       (a wheel, a touch, a press) cancels a glide in flight. */
+    let glide = null;
+    const stopGlide = () => { if (glide) { cancelAnimationFrame(glide.raf); glide = null; } };
+    const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    function glideTo(target) {
+      const max = rail.scrollWidth - rail.clientWidth;
+      target = Math.max(0, Math.min(max, Math.round(target)));
+      stopGlide();
+      const from = rail.scrollLeft;
+      const dist = target - from;
+      if (Math.abs(dist) < 1) return;
+      if (reduce.matches) { rail.scrollLeft = target; return; }
+      const dur = Math.min(950, Math.max(480, Math.abs(dist) * 0.55));
+      const t0 = performance.now();
+      glide = { target: target, raf: 0 };
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / dur);
+        rail.scrollLeft = from + dist * easeInOut(t);
+        if (t < 1) glide.raf = requestAnimationFrame(step);
+        else glide = null;
+      };
+      glide.raf = requestAnimationFrame(step);
+    }
+
+    ['wheel', 'touchstart', 'pointerdown'].forEach((type) => {
+      rail.addEventListener(type, stopGlide, { passive: true });
+    });
+
     track.addEventListener('click', (e) => {
-      const go = e.target.closest('.os-ask-go');
-      if (go) {
-        if (shown >= ERAS.length) return;      /* nothing left to ask for */
-        const rail0 = $('#os-rail');
-        const from = rail0 ? rail0.scrollLeft : 0;
-        const added = ERAS[shown].items.length;
-        shown += 1;
-        render();
-        const r = $('#os-rail');
-        r.scrollLeft = from;                   /* stay where they were */
-        sizeTopo();                            /* render() replaced .os-topo */
-        buildRoute();
-        wireRail();                            /* new node, new scroll listener */
-        /* Take them to the decade they asked for, by their own scroll. */
-        const era = $$('.os-era', r)[shown - 1];
-        if (era) r.scrollTo({ left: Math.max(0, era.offsetLeft - 24), behavior: 'smooth' });
-        arrive($$('.os-item', r).slice(-added));
-        return;
-      }
       const arrow = e.target.closest('.os-arrow');
-      if (arrow) {
-        const rail = $('#os-rail');
-        if (!rail) return;
-        const step = Math.round(rail.clientWidth * 0.8) * (Number(arrow.dataset.dir) || 1);
-        rail.scrollBy({ left: step, behavior: 'smooth' });
-      }
+      if (!arrow) return;
+      const dir = Number(arrow.dataset.dir) || 1;
+      const base = glide ? glide.target : rail.scrollLeft;
+      const raw = base + dir * rail.clientWidth * 0.8;
+      /* Stops are every card's and every decade tag's left edge, in the rail's
+         own scroll coordinates: offsetLeft is taken against the list, which
+         starts at scrollLeft 0 inside the rail's padding, so an edge at
+         offsetLeft lines up with the gutter at exactly that scroll. */
+      let best = raw, bestD = Infinity;
+      $$('.os-item, .os-era', rail).forEach((el) => {
+        const x = el.offsetLeft;
+        if ((x - base) * dir <= 1) return;          /* only stops in the direction of travel */
+        const d = Math.abs(x - raw);
+        if (d < bestD) { bestD = d; best = x; }
+      });
+      glideTo(best);
     });
   }
 
@@ -294,16 +327,87 @@
     });
   }
 
+  /* ---------- The story band ----------
+     PORTED FROM initFeatureBands() IN type-page.js, and named there. The
+     photograph above the timeline opens out to the page frame as it scrolls
+     in, drifting inside its frame, and "Every model has a story." arrives word
+     by word in its bottom-left corner — all scrubbed, so it runs backwards on
+     the way up.
+
+     --exp is set on the band, where the stage's clip and the line's position
+     both read it, and rests at 0: the page frame, never the window's edges. The
+     expansion is desktop-only for the reason type-page.js gives: a band that is
+     already nearly the width of a phone has no growth worth watching. The words
+     arrive at every width. Under reduced motion none of it binds, and the
+     matchMedia cleanup puts every inline style back if that setting changes. */
+  function initBand() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    const band = $('.os-band');
+    const stage = band && $('.os-band-stage', band);
+    if (!stage) return;
+    const img = $('.os-band-img', band);
+    const words = $$('.os-band-w', band);
+    const wide = window.matchMedia('(min-width: 861px)');
+
+    const clamp01 = (n) => Math.max(0, Math.min(1, n));
+    /* power2.out, spread across the scroll — type-page.js's expansion curve. */
+    const glide = (p, a, b) => { const t = clamp01((p - a) / (b - a)); return 1 - Math.pow(1 - t, 2); };
+    /* power3.out, quick off the mark and settling — its arrival curve. */
+    const ramp = (p, a, b) => { const t = clamp01((p - a) / (b - a)); return 1 - Math.pow(1 - t, 3); };
+    /* Percent of the image's own height, each way; see --os-band-drift. */
+    const DRIFT = 7;
+
+    gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+      function paint(p) {
+        band.style.setProperty('--exp', wide.matches ? String(1 - glide(p, 0, 0.9)) : '0');
+        /* Each word starts a little after the one before, and the first does
+           not start until the frame has mostly opened, so the line lands on the
+           photograph rather than on the page beside it. */
+        words.forEach((w, i) => {
+          const h = ramp(p, 0.42 + i * 0.06, 0.74 + i * 0.06);
+          w.style.opacity = String(h);
+          w.style.transform = 'translateY(' + ((1 - h) * 0.5).toFixed(3) + 'em)';
+        });
+      }
+      function drift(p) {
+        if (img) img.style.transform = 'translate3d(0,' + ((p - 0.5) * -2 * DRIFT).toFixed(3) + '%,0)';
+      }
+
+      /* From the band's top at the bottom of the window to its top 15% of the
+         way down: short of the very top, so the last of the movement is still
+         above the fold rather than finishing out of sight. */
+      const st = ScrollTrigger.create({
+        trigger: band, start: 'top bottom', end: 'top 15%', scrub: true,
+        onUpdate(self) { paint(self.progress); },
+        onRefresh(self) { paint(self.progress); },
+      });
+      const dt = ScrollTrigger.create({
+        trigger: band, start: 'top bottom', end: 'bottom top', scrub: true,
+        onUpdate(self) { drift(self.progress); },
+        onRefresh(self) { drift(self.progress); },
+      });
+      /* onUpdate does not fire at progress 0, so paint the first frame now. */
+      paint(st.progress);
+      drift(dt.progress);
+
+      return () => {
+        band.style.removeProperty('--exp');
+        words.forEach((w) => { w.style.opacity = ''; w.style.transform = ''; });
+        if (img) img.style.transform = '';
+      };
+    });
+  }
+
   /* ---------- Boot ----------
      The rail is built immediately, not on the animation handoff. It is the
      content of the section, not an effect on it: with GSAP blocked or slow the
-     reader still gets a timeline they can scroll and continue through, and only
-     the hero drift and the arrival stagger are lost. */
+     reader still gets a timeline they can scroll, and only the hero drift is
+     lost. */
   render();
-  wireOnce();
-  wireRail();
+  wire();
   sizeTopo();
   buildRoute();
+  initArrivals();
 
   let rt = null;
   window.addEventListener('resize', () => {
@@ -312,5 +416,5 @@
   });
   window.addEventListener('load', () => { sizeTopo(); buildRoute(); }, { once: true });
 
-  document.addEventListener('jayco:animations-ready', initParallax, { once: true });
+  document.addEventListener('jayco:animations-ready', () => { initParallax(); initBand(); }, { once: true });
 }());
