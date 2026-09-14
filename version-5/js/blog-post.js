@@ -120,7 +120,7 @@
   }
 
   const s = document.createElement('script');
-  s.src = 'js/blog/' + encodeURIComponent(post.slug) + '.js?v=v5-bl-1';
+  s.src = 'js/blog/' + encodeURIComponent(post.slug) + '.js?v=v5-bl-2';
   s.onload = () => {
     const art = window.JAYCO_BLOG_ARTICLE;
     if (art && art.slug === post.slug && art.html) render(art.html);
