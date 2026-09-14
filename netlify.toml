@@ -155,3 +155,37 @@
   from = "/value-tool"
   to = "/version-5/value-tool.html"
   status = 302
+
+# The About pages (2026-09-14). Same exact-path, 302 rules as the set above.
+# /blog-post and /blog-category are left out on purpose: each needs a query
+# parameter to show anything, so a bare short path would open an empty page.
+
+[[redirects]]
+  from = "/our-story"
+  to = "/version-5/our-story.html"
+  status = 302
+
+[[redirects]]
+  from = "/pdi"
+  to = "/version-5/pdi.html"
+  status = 302
+
+[[redirects]]
+  from = "/rd"
+  to = "/version-5/rd.html"
+  status = 302
+
+[[redirects]]
+  from = "/safety"
+  to = "/version-5/safety.html"
+  status = 302
+
+[[redirects]]
+  from = "/sustainability"
+  to = "/version-5/solar.html"
+  status = 302
+
+[[redirects]]
+  from = "/visit-us"
+  to = "/version-5/visit-us.html"
+  status = 302
