@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/about.css?v=v5-ab-15" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -126,20 +126,24 @@
 
        THE ONE AUTHORED MOTION MOMENT is the ramp in "New Standards": three
        dated rules that fill to the share of the lineup being inspected at each
-       date. The bar is the claim, not a decoration beside it. Everything else
-       on the page uses the shared quiet handoff — arriving copy, drifting
-       media. See js/about.js. -->
+       date. The bar is the claim, not a decoration beside it. The only other
+       authored moments are the tick that draws on each "What gets checked"
+       card and the "Watch it" photograph opening from the centre.
+       Everything else on the page uses the shared quiet handoff — arriving
+       copy, drifting media. See js/about.js. -->
   <main class="ab" id="pdi">
 
     <section class="ab-hero">
       <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-13 as assets/jayco-pdi-hero.jpg
+             and served from the hero-v2 WebP pair. -->
         <img class="ab-hero-img"
-             src="../assets/pdi/web/hero-1800.webp"
-             srcset="../assets/pdi/web/hero-1200.webp 1200w,
-                     ../assets/pdi/web/hero-1800.webp 1800w"
-             sizes="100vw" width="1800" height="1200"
+             src="../assets/pdi/web/hero-v2-1800.webp"
+             srcset="../assets/pdi/web/hero-v2-1200.webp 1200w,
+                     ../assets/pdi/web/hero-v2-1800.webp 1800w"
+             sizes="100vw" width="1800" height="1202"
              fetchpriority="high" decoding="async"
-             alt="Travel trailers in a row on a Jayco line, technicians working alongside them" />
+             alt="A Jayco inspector connecting a hookup at the back of a Swift camper van on the inspection line" />
       </div>
       <div class="ab-hero-overlay" aria-hidden="true"></div>
       <div class="ab-hero-content">
@@ -180,7 +184,7 @@
             <span class="pdi-ramp-when">Jan 2019</span>
             <div>
               <div class="pdi-ramp-bar"><div class="pdi-ramp-fill"></div></div>
-              <p class="pdi-ramp-note">The programme starts. One dedicated facility, and a share of
+              <p class="pdi-ramp-note">The program starts. One dedicated facility, and a share of
                 the lineup going through it.</p>
             </div>
           </li>
@@ -249,20 +253,24 @@
       <div class="ab-inner">
         <div class="ab-band-grid">
           <div class="ab-band-media-wrap ab-rise">
+            <!-- Client photography, supplied 2026-09-13 as assets/jayco-pdi-inspection.jpg.
+                 The source is 2:1 in a 3:2 frame, so it is held right of centre and high, to keep
+                 the lettering and bird in view and the white backdrop out of the corner. -->
             <div class="ab-band-media">
               <img class="ab-band-img"
-                   src="../assets/pdi/web/check-1200.webp"
-                   srcset="../assets/pdi/web/check-800.webp 800w,
-                           ../assets/pdi/web/check-1200.webp 1200w"
+                   src="../assets/pdi/web/inspection-1200.webp"
+                   srcset="../assets/pdi/web/inspection-800.webp 800w,
+                           ../assets/pdi/web/inspection-1200.webp 1200w"
                    sizes="(max-width: 900px) 92vw, 46vw"
-                   width="1200" height="800" loading="lazy" decoding="async"
-                   alt="A technician reaching into an overhead service compartment inside a coach" />
+                   width="1200" height="600" loading="lazy" decoding="async"
+                   style="object-position: 62% 30%"
+                   alt="The front cap and door side of a white Jayco travel trailer" />
             </div>
           </div>
           <div class="ab-band-copy ab-rise">
             <span class="section-label">The inspection</span>
             <h2 class="section-heading dark" id="pdi-det-h">It starts at the door-side corner.</h2>
-            <p>And it works round the coach from there, in the same order every time. An inspection
+            <p>And it works around the coach from there, in the same order every time. An inspection
               with a route does not depend on the inspector remembering what they have already
               looked at — which is the difference between a checklist and a walk-through.</p>
             <p>Each unit is checked twice over, in effect: the audits and quality checks that happen
@@ -281,50 +289,62 @@
             appearance. The last one is not an afterthought — a scuff you would have noticed on the
             lot is a warranty visit that never happens.</p>
         </div>
-        <ul class="ab-list ab-rise">
-          <li class="ab-item">
-            <h3 class="ab-item-name">Measurements</h3>
-            <p class="ab-item-body">Dimensions verified against the drawing rather than eyeballed.
+        <!-- One card per area, each ticked off as it arrives: about.js (initChecks)
+             adds .is-in and the mark draws itself. The ticks are shown from the
+             start when the script never runs or motion is reduced. -->
+        <ul class="pdi-checks">
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Measurements</h3>
+            <p class="pdi-check-body">Dimensions verified against the drawing rather than eyeballed.
               A slide that is a quarter-inch out closes for years before it does not.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Electronics</h3>
-            <p class="ab-item-body">Every powered thing switched on and watched: lighting, displays,
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Electronics</h3>
+            <p class="pdi-check-body">Every powered thing switched on and watched: lighting, displays,
               controls, the monitor panel, and anything that answers to an app.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Components</h3>
-            <p class="ab-item-body">The right part, in the right place, in the right specification —
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Components</h3>
+            <p class="pdi-check-body">The right part, in the right place, in the right specification —
               checked against the build sheet for that unit, not against the model.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Plumbing</h3>
-            <p class="ab-item-body">Fresh, grey and black systems run and pressure-checked. Water
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Plumbing</h3>
+            <p class="pdi-check-body">Fresh, gray and black systems run and pressure-checked. Water
               finds a fault faster than any inspector, so it is used to.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Heating and cooling</h3>
-            <p class="ab-item-body">The HVAC brought up and held, both directions, with the airflow
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Heating and cooling</h3>
+            <p class="pdi-check-body">The HVAC brought up and held, both directions, with the airflow
               followed to each register rather than judged at the unit.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Safety devices</h3>
-            <p class="ab-item-body">The detection and safety equipment fitted to the coach, tested
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Safety devices</h3>
+            <p class="pdi-check-body">The detection and safety equipment fitted to the coach, tested
               rather than counted.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Structure</h3>
-            <p class="ab-item-body">Roof, walls and flooring — the parts that are expensive to reach
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Structure</h3>
+            <p class="pdi-check-body">Roof, walls and flooring — the parts that are expensive to reach
               later and cheap to catch here.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">A road test</h3>
-            <p class="ab-item-body">Motorized coaches are driven, so the operational systems are
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">A road test</h3>
+            <p class="pdi-check-body">Motorized coaches are driven, so the operational systems are
               judged moving rather than parked.</p>
           </li>
-          <li class="ab-item">
-            <h3 class="ab-item-name">Cosmetics</h3>
-            <p class="ab-item-body">Fit, finish and surfaces, to the standard a buyer will hold it
+          <li class="pdi-check">
+            <svg class="pdi-check-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="20"/><path d="M12.5 20.5l5 5L28 15" pathLength="1"/></svg>
+            <h3 class="pdi-check-name">Cosmetics</h3>
+            <p class="pdi-check-body">Fit, finish and surfaces, to the standard a buyer will hold it
               to on the lot rather than to the standard a factory would accept.</p>
           </li>
         </ul>
@@ -334,32 +354,34 @@
     <!-- ===== Video =====
          THE FILM IS NOT IN THIS REPO. Jayco publishes a walk-through of the
          inspection process on its own site and this points at it rather than
-         standing in a Jayco video that is not the one. Supply the asset and
-         this block becomes a scrubbed <video> like the one on
-         new-to-rving.html — the markup is the same shape. -->
-    <section class="ab-band" aria-labelledby="pdi-vid-h">
-      <div class="ab-inner">
-        <div class="ab-band-grid">
-          <div class="ab-band-media-wrap ab-rise">
-            <div class="ab-band-media">
-              <img class="ab-band-img"
-                   src="../assets/pdi/web/finish-1200.webp"
-                   srcset="../assets/pdi/web/finish-800.webp 800w,
-                           ../assets/pdi/web/finish-1200.webp 1200w"
-                   sizes="(max-width: 900px) 92vw, 46vw"
-                   width="1200" height="800" loading="lazy" decoding="async"
-                   alt="The finished interior of a Jayco coach, lit and made up" />
-            </div>
-          </div>
-          <div class="ab-band-copy ab-rise">
-            <span class="section-label">Watch it</span>
-            <h2 class="section-heading dark" id="pdi-vid-h">The whole walk, start to finish.</h2>
-            <p>Jayco films the inspection process end to end — the route round the coach, the
-              systems being run, and what happens when something is found. It runs on Jayco's own
-              site.</p>
-            <a class="btn-primary" href="https://www.jaycofamily.com/PDI/" target="_blank" rel="noopener">Watch the Inspection</a>
-          </div>
-        </div>
+         standing in a Jayco video that is not the one, so the play button opens
+         jaycofamily.com/PDI/ in a new tab.
+
+         THE PHOTOGRAPH STARTS CENTRED AND OPENS ON SCROLL. about.js (initWatch)
+         scrubs --exp from 1 (inset deep inside the frame) to 0 (the frame), the
+         same hinge as .os-band on our-story.html, and adds .is-open once the
+         frame has finished opening: that is when the headline and the play
+         button arrive. With no GSAP or under reduced motion --exp stays 0 and
+         the copy is simply there. -->
+    <section class="ab-watch" aria-labelledby="pdi-vid-h">
+      <div class="ab-watch-stage">
+        <img class="ab-watch-img"
+             src="../assets/pdi/web/finish-1200.webp"
+             srcset="../assets/pdi/web/finish-800.webp 800w,
+                     ../assets/pdi/web/finish-1200.webp 1200w"
+             sizes="(max-width: 900px) 92vw, 88vw"
+             width="1200" height="800" loading="lazy" decoding="async"
+             alt="The finished interior of a Jayco coach, lit and made up" />
+        <div class="ab-watch-scrim" aria-hidden="true"></div>
+      </div>
+      <div class="ab-watch-content">
+        <h2 class="ab-watch-h" id="pdi-vid-h">The whole walk, start to finish.</h2>
+        <a class="ab-watch-play" href="https://www.jaycofamily.com/PDI/" target="_blank" rel="noopener">
+          <span class="ab-watch-play-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
+          </span>
+          <span class="ab-watch-play-txt">Watch the inspection<span class="sr-only"> on jaycofamily.com (opens in a new tab)</span></span>
+        </a>
       </div>
     </section>
 
@@ -369,31 +391,37 @@
          the head of this file. PRODUCT.md is explicit that this repo has no
          testimonials and must not invent any; a sourced quotation from a named
          executive is the opposite of that, and it is the reason this section
-         exists rather than a paragraph of writing put in his mouth. -->
+         exists rather than a paragraph of writing put in his mouth.
+
+         THE PORTRAIT is client-supplied (assets/ken walters.jpeg, 2026-09-13),
+         served as assets/pdi/web/ken-walters-480.webp. It is a <figure> around
+         the quotation rather than an image inside the <blockquote>, because a
+         blockquote holds only what is quoted — the photograph and the attribution
+         are about the quotation, not part of it. -->
     <section class="ab-sec ab-tail" aria-labelledby="pdi-ken-h">
       <div class="ab-inner">
         <div class="ab-sec-head ab-rise">
           <span class="section-label">From the CEO</span>
           <h2 class="section-heading dark" id="pdi-ken-h">Why it was<br>worth doing.</h2>
         </div>
-        <blockquote class="ab-quote ab-rise">
-          <span class="ab-quote-mark" aria-hidden="true">&ldquo;</span>
-          <p class="ab-quote-text">Achieving 100% of our units being PDIed has been a true team
-            effort.</p>
-          <p class="ab-quote-text">We know the critical importance of optimizing quality and reducing
-            RECT. These are areas we have committed to focusing our time and investments to further
-            support our dealer partners, reducing their costs and positively impacting the overall
-            customer experience.</p>
-          <cite class="ab-quote-by">Ken Walters, President &amp; CEO, Jayco, Inc.</cite>
-        </blockquote>
-        <p class="ab-note ab-rise">RECT is the industry's shorthand for repair event cycle time —
-          how long a coach sits at a dealer waiting on a warranty repair. It is the number a
-          pre-delivery inspection is really aimed at, because a fault found in Middlebury is not a
-          fault found in someone's holiday. The dates, the facility and both quotations above are
-          Jayco's own, from
-          <a href="https://www.jayco.com/newsroom/100-percent-pdi/" target="_blank" rel="noopener">jayco.com</a>
-          and <a href="https://www.jaycofamily.com/PDI/" target="_blank" rel="noopener">jaycofamily.com</a>,
-          harvested 7 September 2026.</p>
+        <figure class="ab-quote has-portrait ab-rise">
+          <img class="ab-quote-portrait"
+               src="../assets/pdi/web/ken-walters-480.webp"
+               width="480" height="480" loading="lazy" decoding="async"
+               alt="Portrait of Ken Walters" />
+          <div class="ab-quote-body">
+            <span class="ab-quote-mark" aria-hidden="true">&ldquo;</span>
+            <blockquote>
+              <p class="ab-quote-text">Achieving 100% of our units being PDIed has been a true team
+                effort.</p>
+              <p class="ab-quote-text">We know the critical importance of optimizing quality and reducing
+                RECT. These are areas we have committed to focusing our time and investments to further
+                support our dealer partners, reducing their costs and positively impacting the overall
+                customer experience.</p>
+            </blockquote>
+            <figcaption class="ab-quote-by">Ken Walters, President &amp; CEO, Jayco, Inc.</figcaption>
+          </div>
+        </figure>
       </div>
     </section>
 
@@ -623,7 +651,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/about.js?v=v5-ab-5"></script>
-  <script src="js/app.js?v=v5-core-6"></script>
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>
