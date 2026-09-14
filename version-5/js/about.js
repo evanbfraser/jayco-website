@@ -112,6 +112,88 @@
   }
 
   /* ---------------------------------------------------
+     100% PDI — what gets checked
+     Each card rises as it scrolls in and its blue tick
+     draws itself, staggered across the cards that arrive
+     together. Same safety as .ab-rise: the hidden state
+     exists only under .pdi-armed, which is never set
+     under prefers-reduced-motion or without an observer.
+     --------------------------------------------------- */
+  function initChecks() {
+    const list = $('.pdi-checks');
+    if (!list) return;
+    const cards = $$('.pdi-check', list);
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!cards.length || still || !('IntersectionObserver' in window)) return;
+    list.classList.add('pdi-armed');
+
+    const io = new IntersectionObserver((entries) => {
+      const arriving = [];
+      entries.forEach((e) => {
+        if (e.isIntersecting) { arriving.push(e); return; }
+        /* Already scrolled past (a reload mid-page, an anchor jump): show it
+           ticked, with no delay, rather than leave it hidden above the fold. */
+        if (e.boundingClientRect.bottom < 0) {
+          e.target.style.setProperty('--pdi-delay', '0ms');
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      });
+      arriving
+        .sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top) ||
+                        (a.boundingClientRect.left - b.boundingClientRect.left))
+        .forEach((e, i) => {
+          e.target.style.setProperty('--pdi-delay', (i * 120) + 'ms');
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.2 });
+
+    cards.forEach((el) => io.observe(el));
+  }
+
+  /* ---------------------------------------------------
+     Watch it (pdi.html, solar.html)
+     The photograph starts centred, inset inside the page
+     frame, and opens to the frame as it scrolls up;
+     --exp is the hinge the stylesheet reads, as on
+     our-story.js's band. Once it has opened, .is-open
+     brings in the headline and the play button. Scrubbed,
+     so scrolling back closes it again.
+     --------------------------------------------------- */
+  function initWatch() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    const bands = $$('.ab-watch');
+    if (!bands.length) return;
+    const clamp01 = (n) => Math.max(0, Math.min(1, n));
+    /* power2.out across the scroll, the band's expansion curve. */
+    const glide = (p) => 1 - Math.pow(1 - clamp01(p), 2);
+
+    gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+      const undo = bands.map((band) => {
+        band.classList.add('is-armed');
+        const paint = (p) => {
+          band.style.setProperty('--exp', String(1 - glide(p)));
+          band.classList.toggle('is-open', p >= 0.9);
+        };
+        /* From the band's top near the foot of the window to its centre at the
+           centre of the window: fully open while all of it is on screen. */
+        const st = ScrollTrigger.create({
+          trigger: band, start: 'top 90%', end: 'center center', scrub: true,
+          onUpdate(self) { paint(self.progress); },
+          onRefresh(self) { paint(self.progress); },
+        });
+        paint(st.progress);
+        return () => {
+          band.classList.remove('is-armed', 'is-open');
+          band.style.removeProperty('--exp');
+        };
+      });
+      return () => undo.forEach((fn) => fn());
+    });
+  }
+
+  /* ---------------------------------------------------
      Award-Winning RVs — the list and its filter
      --------------------------------------------------- */
   function initAwards() {
@@ -283,7 +365,7 @@
       const count = $('#aw-count');
       if (count) {
         count.textContent = shown === null
-          ? 'All ' + total + ' awards Jayco lists, ' +
+          ? 'All ' + total + ' Jayco awards, ' +
             DATA.years[DATA.years.length - 1].year + ' to ' + DATA.years[0].year + '.'
           : n + (n === 1 ? ' award' : ' awards') + ' in ' + shown + '.';
       }
@@ -316,8 +398,10 @@
      Safety — the JaySMART demonstration
      The page's one authored motion moment. A lighting
      system can only really be explained by showing it,
-     so this plays each of the four signals on a drawing
-     of the back of a trailer.
+     so this plays each of the four signals on a night
+     scene of a trailer in perspective — the rear, the
+     side and the front cap — with the light each lamp
+     throws on the trailer and the ground.
 
      LEGIBLE STOPPED. Every signal has a sentence under
      it saying what it does, and the buttons are the
@@ -332,14 +416,11 @@
     if (!rig) return;
     const say  = $('.sf-signal-say', rig);
     const btns = $$('.sf-sig-btn', rig);
-    const lamps = {
-      brakeL: $('#sf-brake-l', rig), brakeR: $('#sf-brake-r', rig),
-      turnL:  $('#sf-turn-l', rig),  turnR:  $('#sf-turn-r', rig),
-      markL:  $('#sf-mark-l', rig),  markR:  $('#sf-mark-r', rig),
-      reverse: $('#sf-reverse', rig),
-    };
-    const all = Object.keys(lamps).map((k) => lamps[k]).filter(Boolean);
-    if (!all.length || !btns.length) return;
+    /* Every lamp group, and every pool or wash of light it throws, carries
+       data-g: the circuit it is on. A frame names the circuits that are fully
+       lit and the ones at running-light level; everything else is dark. */
+    const parts = $$('[data-g]', rig);
+    if (!parts.length || !btns.length) return;
 
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -347,50 +428,61 @@
        change can never leave a second interval running behind the first —
        which is the bug that makes a demo like this drift out of phase. */
     let timer = null;
-    const stop = () => { if (timer) { clearInterval(timer); clearTimeout(timer); timer = null; } };
-    const set  = (on) => all.forEach((el) => el.classList.toggle('is-off', on.indexOf(el) === -1));
+    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+    const show = (frame) => parts.forEach((el) => {
+      const g = el.getAttribute('data-g');
+      const on = frame.on.indexOf(g) !== -1;
+      el.classList.toggle('is-on', on);
+      el.classList.toggle('is-dim', !on && frame.dim.indexOf(g) !== -1);
+    });
+
+    /* The roofline, side and front markers are running lights: at night they
+       are already on before any signal is given. */
+    const RUNNING = ['roof', 'side', 'front'];
+    const IDLE = { on: [], dim: RUNNING };
+    const DARK = { on: [], dim: [] };
+
+    /* Alternate the lit and unlit frames every `ms`. Given `times`, stop after
+       that many flashes and hold the lit frame. Under reduced motion there is
+       no flashing: the lit frame is simply held. */
+    const flash = (lit, unlit, ms, times) => {
+      show(lit);
+      if (still) return;
+      let n = 0;
+      timer = setInterval(() => {
+        n += 1;
+        if (times && n >= times * 2 - 1) { stop(); show(lit); return; }
+        show(n % 2 ? unlit : lit);
+      }, ms);
+    };
 
     /* Jayco's own descriptions of what each signal does. JaySMART stands for
-       Safety Markers And Reverse Travel. */
+       Safety Markers And Reverse Travel. The trailer is seen from its left, so
+       a turn is drawn to that side: the rear strip on that corner, the side
+       markers and the front cap. */
     const MODES = {
       brake: {
         say: 'Brake. The rear SMART lights flash three times, then hold steady — so the driver behind you sees the stop before they see the trailer.',
-        run: () => {
-          const on = [lamps.brakeL, lamps.brakeR, lamps.markL, lamps.markR];
-          if (still) { set(on); return; }
-          let n = 0;
-          set([]);
-          timer = setInterval(() => {
-            n += 1;
-            if (n > 6) { stop(); set(on); return; }   /* three flashes, then held */
-            set(n % 2 ? on : [lamps.markL, lamps.markR]);
-          }, 220);
-        },
+        run: () => flash(
+          { on: ['roof', 'strip-l', 'strip-r', 'brake', 'pool-red', 'wash-red'], dim: [] },
+          IDLE, 220, 3),
       },
       turn: {
         say: 'Turn. The rear, side and front SMART lights flash together on the side you are turning to, so a long trailer signals along its whole length.',
-        run: () => {
-          const on = [lamps.turnR, lamps.markL, lamps.markR];
-          if (still) { set(on); return; }
-          let lit = false;
-          timer = setInterval(() => {
-            lit = !lit;
-            set(lit ? on : [lamps.markL, lamps.markR]);
-          }, 420);
-        },
+        run: () => flash(
+          { on: ['strip-r', 'side', 'front', 'pool-side', 'pool-front', 'wash-side', 'wash-front'], dim: ['roof'] },
+          { on: [], dim: ['roof'] }, 420),
       },
       hazard: {
         say: 'Hazard. Every SMART light flashes in unison — the trailer reads as one object rather than a set of unrelated lamps.',
-        run: () => {
-          const on = [lamps.turnL, lamps.turnR, lamps.brakeL, lamps.brakeR, lamps.markL, lamps.markR];
-          if (still) { set(on); return; }
-          let lit = false;
-          timer = setInterval(() => { lit = !lit; set(lit ? on : []); }, 480);
-        },
+        run: () => flash(
+          { on: ['roof', 'strip-l', 'strip-r', 'brake', 'side', 'front',
+                 'pool-red', 'pool-side', 'pool-front', 'wash-red', 'wash-side', 'wash-front'], dim: [] },
+          DARK, 480),
       },
       reverse: {
-        say: 'Reverse. The reverse lamp and the markers come on together, which is the difference between backing into a site you can see and one you cannot.',
-        run: () => set([lamps.reverse, lamps.markL, lamps.markR]),
+        say: 'Reverse. The reverse lamps and the markers come on together, which is the difference between backing into a site you can see and one you cannot.',
+        run: () => show({ on: ['rev-top', 'rev-low', 'pool-white', 'wash-white'], dim: RUNNING }),
       },
     };
 
@@ -431,45 +523,46 @@
 
   /* ---------------------------------------------------
      Visit Us — one pin on one map
-     Leaflet is loaded by visit-us.html only. The dealer
-     locator owns the multi-marker map; this borrows the
-     library and nothing else, because there is exactly
-     one address to show.
+     Leaflet on OpenStreetMap's own tiles, tinted toward
+     the palette by a filter on the tile pane (about.css),
+     with a Jayco-blue pin carrying the white logo. No key
+     and no account. Leaflet is loaded by visit-us.html
+     only; dealers.js owns the multi-marker locator.
      --------------------------------------------------- */
+  const VU_POPUP = '<b>Jayco Visitors Center</b><br>903 S. Main Street<br>Middlebury, IN 46540';
+
   function initMap() {
     const el = $('#vu-map');
-    if (!el) return;
-    if (typeof L === 'undefined') return;   /* offline or blocked: the address above still reads */
+    if (!el || typeof L === 'undefined') return;   /* offline or blocked: the address above still reads */
 
     const lat = parseFloat(el.getAttribute('data-lat'));
     const lng = parseFloat(el.getAttribute('data-lng'));
     if (!isFinite(lat) || !isFinite(lng)) return;
 
     const map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true })
-      .setView([lat, lng], 14);
+      .setView([lat, lng], 15);
 
-    /* OpenStreetMap's own tiles, because they are the ones that still render
-       without a key.
-
-       CARTO NOW REQUIRES ONE. Both of its free styles — light_all, which
-       dealers.js uses, and rastertiles/voyager — answer an unkeyed request with
-       HTTP 200 and a valid PNG that has "API KEY REQUIRED" printed diagonally
-       across it. Nothing errors, nothing logs, and the only place it shows up
-       is in the picture, which is why it survived until somebody looked at a
-       screenshot. dealers.html is still on light_all and still watermarked;
-       this same swap fixes it.
-
-       FOR PRODUCTION, BUY TILES. OSM's tile policy is for modest use and asks
-       for a real User-Agent; a Jayco-branded site should be on a keyed provider
-       with a style that matches the palette, not on the volunteer servers. */
+    /* OpenStreetMap's own tiles, because they still render without a key. CARTO's
+       free styles now answer an unkeyed request with HTTP 200 and a PNG that has
+       "API KEY REQUIRED" printed across it — nothing errors, it only shows in the
+       picture. FOR PRODUCTION, BUY TILES: OSM's tile policy is for modest use,
+       and a Jayco site belongs on a keyed provider, not the volunteer servers. */
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    L.circleMarker([lat, lng], {
-      radius: 10, weight: 3, color: '#FFFFFF', fillColor: '#007AC2', fillOpacity: 1,
-    }).addTo(map).bindPopup('<b>Jayco Visitors Center</b><br>903 S. Main Street<br>Middlebury, IN 46540');
+    /* A teardrop drawn in CSS (.vu-pin-head), point down, with the logo upright
+       inside it. The icon box is exactly the drop, so anchoring on its bottom
+       centre puts the tip on the address. */
+    L.marker([lat, lng], {
+      title: 'Jayco Visitors Center',
+      icon: L.divIcon({
+        className: 'vu-pin',
+        html: '<span class="vu-pin-head"><img src="../assets/jayco-logo-white.svg" alt="" width="36" height="24"></span>',
+        iconSize: [56, 68], iconAnchor: [28, 68], popupAnchor: [0, -62],
+      }),
+    }).addTo(map).bindPopup(VU_POPUP);
   }
 
   /* ---------------------------------------------------
@@ -505,6 +598,109 @@
   }
 
   /* ---------------------------------------------------
+     Chapter links (solar.html)
+     The intro's links to each chapter. With Lenis running,
+     a native anchor jump would fight it, so the scroll goes
+     through Lenis, offset for the fixed header; the hash is
+     still written to the URL. Without Lenis the browser's
+     own jump and scroll-margin-top do the same job.
+     --------------------------------------------------- */
+  function initChapters() {
+    const links = $$('.ab-chapter-link');
+    if (!links.length) return;
+    links.forEach((a) => a.addEventListener('click', (e) => {
+      const target = document.getElementById(a.getAttribute('href').slice(1));
+      const l = window.__jaycoLenis;
+      if (!target || !l || !l.scrollTo) return;
+      e.preventDefault();
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* A number, not the element: Lenis resolves an element target against
+         its own animated scroll, which is stale when the page arrived at the
+         links by a native scroll. The divider, not the section, lands under
+         the header, so the section's top padding does not leave a gap. */
+      const mark = $('.ab-chapter-mark', target) || target;
+      const y = mark.getBoundingClientRect().top + window.scrollY - 96;
+      l.scrollTo(Math.max(0, y), { immediate: still });
+      history.replaceState(null, '', '#' + target.id);
+    }));
+  }
+
+  /* ---------------------------------------------------
+     Video player
+     Any [data-yt] link opens the page's #ab-player dialog
+     and plays that YouTube video in it; without the
+     script the link is just a link to YouTube. Manners
+     ported from videos.js: the iframe is injected on open
+     and removed on close (hiding it would leave the film
+     playing), Lenis is stopped while it is open, Tab is
+     held inside it, Escape and the scrim close it, and
+     focus goes back to the button that opened it. A
+     modified click (new tab) is left alone.
+     --------------------------------------------------- */
+  function initPlayer() {
+    const dlg = $('#ab-player');
+    if (!dlg) return;
+    const frame = $('#ab-player-frame', dlg);
+    const title = $('#ab-player-title', dlg);
+    const out = $('#ab-player-out', dlg);
+    const FOCUSABLE = 'a[href],button:not([disabled]),iframe,[tabindex]:not([tabindex="-1"])';
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let lastFocus = null;
+    const isOpen = () => !dlg.hidden;
+
+    function play(id, name, from) {
+      lastFocus = from || document.activeElement;
+      /* youtube-nocookie, and autoplay because the click WAS the play. */
+      frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
+        '?autoplay=1&rel=0" title="' + esc(name) + '" frameborder="0" allow="accelerometer; ' +
+        'autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+        'referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+      title.textContent = name;
+      out.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(id);
+      out.setAttribute('aria-label', 'Watch "' + name + '" on YouTube — opens in a new tab');
+      dlg.hidden = false;
+      document.body.classList.add('ab-playing');
+      const l = window.__jaycoLenis;
+      if (l && l.stop) l.stop();
+      $('#ab-player-x', dlg).focus();
+    }
+
+    function close() {
+      if (!isOpen()) return;
+      frame.innerHTML = '';
+      dlg.hidden = true;
+      document.body.classList.remove('ab-playing');
+      const l = window.__jaycoLenis;
+      if (l && l.start) l.start();
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+      lastFocus = null;
+    }
+
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-yt]');
+      if (link) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        play(link.getAttribute('data-yt'), link.getAttribute('data-yt-title') || 'Video', link);
+        return;
+      }
+      if (isOpen() && e.target.closest('[data-ab-close]')) close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!isOpen()) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      if (e.key !== 'Tab') return;
+      const f = $$(FOCUSABLE, dlg).filter((el) => el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (!dlg.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  /* ---------------------------------------------------
      Boot
      The content parts run on DOM ready; only the motion
      waits for app.js to hand over.
@@ -514,11 +710,17 @@
     initSignal();
     initMap();
     initRamp();
+    initChecks();
+    initPlayer();
+    initChapters();
     initRise();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 
-  document.addEventListener('jayco:animations-ready', initParallax, { once: true });
+  document.addEventListener('jayco:animations-ready', () => {
+    initParallax();
+    initWatch();
+  }, { once: true });
 }());

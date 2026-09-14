@@ -161,13 +161,96 @@
     rgba(15,11,9,0.97) 100%);
 }
 
+/* Safety: the rig comes head-on up the right of the frame, and the copy sits
+   over the hillside and the road on the left. The overcast sky is the bright
+   part, so the scrim is bottom-weighted like the shared one with a light pull
+   from the left; the coach itself is kept clear. */
+.sf-page .ab-hero-overlay {
+  background:
+    linear-gradient(to bottom,
+      rgba(15,11,9,0.18) 0%,
+      rgba(15,11,9,0.12) 30%,
+      rgba(15,11,9,0.5) 58%,
+      rgba(15,11,9,0.82) 100%),
+    linear-gradient(to right, rgba(15,11,9,0.4) 0%, rgba(15,11,9,0.12) 45%, rgba(15,11,9,0) 65%);
+}
+
+/* R&D: the photograph's brightest area is the textured wall behind the copy,
+   so the scrim darkens from the left as well as from the foot. The frame is
+   held left of centre so the hand on the touchscreen stays in view on a phone,
+   where the crop is narrow. */
+.rd-page .ab-hero-overlay {
+  background:
+    linear-gradient(to bottom,
+      rgba(15,11,9,0.28) 0%,
+      rgba(15,11,9,0.22) 28%,
+      rgba(15,11,9,0.62) 56%,
+      rgba(15,11,9,0.88) 100%),
+    linear-gradient(to right, rgba(15,11,9,0.5) 0%, rgba(15,11,9,0) 65%);
+}
+.rd-page .ab-hero-img { object-position: 30% 50%; }
+/* Solar: the camper-van photograph (2026-09-13). The old star-trails hero
+   needed a near-black ramp; this one is a colourful autumn scene, so the scrim
+   is light — a short ramp from the foot and a pull from the left, where the copy
+   sits — and the right of the frame keeps its colour. */
 .sol-page .ab-hero-overlay {
-  background: linear-gradient(to bottom,
-    rgba(15,11,9,0) 0%,
-    rgba(15,11,9,0) 30%,
-    rgba(15,11,9,0.64) 56%,
-    rgba(15,11,9,0.86) 78%,
-    rgba(15,11,9,0.96) 100%);
+  background:
+    linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0) 45%,
+      rgba(15,11,9,0.32) 68%,
+      rgba(15,11,9,0.62) 100%),
+    linear-gradient(to right, rgba(15,11,9,0.42) 0%, rgba(15,11,9,0.16) 40%, rgba(15,11,9,0) 62%);
+}
+/* With the scrim this light, a soft shadow behind the type does the rest of
+   the work over the bright canopy, rather than darkening the photograph again.
+   The same device .news-cta-content uses in style.css. */
+.sol-page .ab-hero-content { text-shadow: 0 1px 2px rgba(15,11,9,0.35), 0 2px 22px rgba(15,11,9,0.5); }
+/* On a phone the copy spans the width, so the left pull stops helping and the
+   foot of the frame does the work. */
+@media (max-width: 768px) {
+  .sol-page .ab-hero-overlay {
+    background: linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0.08) 35%,
+      rgba(15,11,9,0.45) 58%,
+      rgba(15,11,9,0.72) 100%);
+  }
+}
+
+/* Visit Us: the factory floor (2026-09-14). The whole frame is bright — white
+   wall panels, lit concrete, fluorescent roof — so the sitewide ramp left the
+   eyebrow on a panel at 4.2:1 and the heading on the floor at 1.9:1 on a short
+   laptop. The ramp starts higher and a pull from the left carries the copy
+   column; the assembly line on the right keeps its colour.
+
+   LIGHTENED ON REQUEST (2026-09-14). The first version measured 8:1 and up
+   under every line and read heavy; this one gives back about half of that
+   headroom, and a soft shadow behind the type (the .sol-page device) does the
+   rest over the bright panels. IF YOU CHANGE THE PHOTOGRAPH, RE-MEASURE AT
+   SEVERAL VIEWPORT HEIGHTS. */
+.vu-page .ab-hero-overlay {
+  background:
+    linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0) 28%,
+      rgba(15,11,9,0.26) 46%,
+      rgba(15,11,9,0.52) 66%,
+      rgba(15,11,9,0.7) 100%),
+    linear-gradient(to right, rgba(15,11,9,0.4) 0%, rgba(15,11,9,0.2) 42%, rgba(15,11,9,0) 66%);
+}
+.vu-page .ab-hero-content { text-shadow: 0 1px 2px rgba(15,11,9,0.3), 0 2px 18px rgba(15,11,9,0.4); }
+/* On a phone the copy spans the width, so the left pull stops helping and the
+   foot of the frame does the work. */
+@media (max-width: 768px) {
+  .vu-page .ab-hero-overlay {
+    background: linear-gradient(to bottom,
+      rgba(15,11,9,0) 0%,
+      rgba(15,11,9,0.04) 28%,
+      rgba(15,11,9,0.36) 46%,
+      rgba(15,11,9,0.6) 66%,
+      rgba(15,11,9,0.76) 100%);
+  }
 }
 
 /* ---------- Section rhythm ----------
@@ -280,6 +363,130 @@
 }
 .ab-step-body { margin: 0; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); max-width: 66ch; }
 
+/* ---------- Feature photograph (rd.html, solar.html) ----------
+   A section that opens on a photograph the width of the content beneath it,
+   with the label, headline and lead set on it: the proving ground and signature
+   innovations on rd.html, EcoAdvantage on solar.html. It is
+   the closing CTA band (.ab-cta-band) — same inset, radius, bottom scrim and
+   parallax — made taller and given a section-sized headline. The lead sits on
+   the photograph under the headline; with no button after it, it drops the
+   CTA band's bottom margin. */
+/* Two classes, not one: .ab-cta-band sets its own min-height further down this
+   file, and at equal specificity the later rule would win. */
+.ab-cta-band.ab-feature { min-height: clamp(380px, 42vw, 580px); }
+.ab-feature .ab-cta-h { font-size: clamp(2.2rem, 4.4vw, 4rem); line-height: 0.98; max-width: 16ch; }
+.ab-feature .ab-cta-body > p { margin: 1rem 0 0; }
+/* With a lead on the picture the type block is taller than a CTA's, so the
+   scrim has to reach further up than --scrim-card does, and stay deep at the
+   foot where the lead is. The top of the photograph is still left clear. */
+.ab-feature .ab-cta-scrim {
+  background: linear-gradient(to top,
+    rgba(15,11,9,0.88) 0%,
+    rgba(15,11,9,0.72) 35%,
+    rgba(15,11,9,0.3) 65%,
+    rgba(15,11,9,0) 90%);
+}
+/* On a phone the label, the headline and four lines of lead would otherwise
+   climb into the bright top of the frame (the innovations roof is white), so
+   the band gets taller and the type stays in the dark foot of the scrim. */
+@media (max-width: 600px) {
+  .ab-cta-band.ab-feature { min-height: 540px; }
+}
+
+/* ---------- Chapters (solar.html) ----------
+   A page in two parts. Each part opens with a numbered divider — a rule across
+   the frame with the chapter number and name — and a taller feature photograph
+   with a larger headline. The intro carries a link to each. */
+.ab-chapter { padding-top: clamp(5rem, 10vw, 8.5rem); scroll-margin-top: 72px; }
+.ab-chapter-mark {
+  display: flex; align-items: baseline; gap: 0.9rem;
+  margin: 0 0 clamp(1.25rem, 2.5vw, 1.75rem); padding-top: clamp(1rem, 2vw, 1.4rem);
+  border-top: 2px solid var(--text-dark);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem); font-weight: 800; letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.ab-chapter-n { color: var(--blue); font-variant-numeric: tabular-nums; }
+.ab-cta-band.ab-feature.is-chapter { min-height: clamp(460px, 54vw, 720px); }
+.ab-feature.is-chapter .ab-cta-h { font-size: clamp(2.6rem, 6vw, 5.4rem); line-height: 0.95; }
+.ab-chapters {
+  list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem); max-width: 56rem;
+}
+.ab-chapter-link {
+  display: flex; align-items: baseline; gap: 1rem; height: 100%;
+  padding: clamp(1.1rem, 1.8vw, 1.4rem) clamp(1.2rem, 2vw, 1.6rem);
+  background: var(--surface); border-radius: var(--radius-card);
+  color: var(--text-dark); text-decoration: none;
+  transition: background 0.25s var(--ease-out);
+}
+.ab-chapter-link:hover { background: var(--surface-hover); }
+.ab-chapter-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.ab-chapter-link .ab-chapter-n { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; }
+.ab-chapter-t { display: flex; flex-direction: column; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.ab-chapter-s { margin-top: 0.2rem; font-family: var(--font-body); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; color: var(--text-mid); }
+@media (max-width: 600px) {
+  .ab-cta-band.ab-feature.is-chapter { min-height: 580px; }
+  /* On a phone the label, headline and lead climb well up the photograph,
+     into bright canopy on the sustainability picture, so the scrim reaches
+     higher and stays deeper. */
+  .ab-feature.is-chapter .ab-cta-scrim {
+    background: linear-gradient(to top,
+      rgba(15,11,9,0.9) 0%, rgba(15,11,9,0.82) 45%, rgba(15,11,9,0.5) 72%, rgba(15,11,9,0) 95%);
+  }
+  .ab-chapters { grid-template-columns: 1fr; }
+}
+
+/* ---------- The proving ground (rd.html) ----------
+   The five tests as numbered cards on Surface: three over two on a wide screen,
+   on a six-track grid so the second row's two cards share the full width
+   rather than leaving a hole. Five across made each card too narrow for its
+   paragraph. Two across on tablets, where the fifth card spans the row, and one
+   column on phones. The number is a CSS counter, so the <ol> stays the source
+   of order. */
+.rd-proof {
+  list-style: none; counter-reset: rdproof;
+  margin: clamp(1.75rem, 3.5vw, 2.75rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem);
+}
+.rd-proof-card {
+  counter-increment: rdproof;
+  grid-column: span 2;
+  min-width: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(1.4rem, 2vw, 1.75rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.rd-proof-card::before {
+  content: counter(rdproof, decimal-leading-zero);
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 2.6vw, 2.4rem); font-weight: 800; line-height: 1;
+  letter-spacing: -0.02em; color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.rd-proof-name {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.rd-proof-body { margin: 0.55rem 0 0; font-size: 0.93rem; line-height: 1.7; color: var(--text-mid); }
+
+.rd-proof-card:nth-child(n+4) { grid-column: span 3; }
+
+@media (max-width: 1180px) {
+  .rd-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rd-proof-card,
+  .rd-proof-card:nth-child(n+4) { grid-column: auto; }
+  .rd-proof-card:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .rd-proof { grid-template-columns: 1fr; }
+}
+
 /* ---------- Pull quote ----------
    Used once, on the PDI page, for the two things Jayco's own CEO is on record
    saying about the programme. Not a testimonial component: this site has no
@@ -304,6 +511,43 @@
   display: block; margin-top: 1.6rem;
   font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--text-mid);
+}
+/* On Jayco Blue (rd.html). Every part goes to solid white: white on --blue
+   measures 4.60:1 — past AA with no headroom — so the attribution is not
+   dimmed the way it is on Surface, and the mark is white rather than blue on
+   blue. */
+.ab-quote.is-blue { background: var(--blue); }
+.ab-quote.is-blue .ab-quote-mark,
+.ab-quote.is-blue .ab-quote-text,
+.ab-quote.is-blue .ab-quote-by { color: #fff; }
+
+/* With the speaker's portrait (PDI, Ken Walters). A modifier, so rd.html's
+   plain quote is untouched. The photograph sits beside his words on the same
+   panel rather than as a separate card: it answers "who said this" at a glance,
+   and the name under the quote says it in words. Inset media, so it rounds at
+   the card radius (DESIGN.md, Shapes). The panel is a <figure> here, so the
+   UA margins on figure and blockquote are cleared. */
+.ab-quote.has-portrait {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 3.5rem);
+  align-items: center;
+  margin-inline: 0;
+}
+.ab-quote-portrait {
+  display: block;
+  width: 100%; height: auto; aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-card);
+  background: var(--surface-hover);
+}
+.ab-quote-body { min-width: 0; }
+.ab-quote-body blockquote { margin: 0; }
+/* On a phone the portrait steps above the quote, smaller, so the words keep the
+   full width of the panel. */
+@media (max-width: 768px) {
+  .ab-quote.has-portrait { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .ab-quote-portrait { width: 112px; }
 }
 
 /* ---------- Closing CTA band ----------
@@ -404,6 +648,216 @@
 .pdi-where-place { display: block; font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
 .pdi-where-txt { display: block; margin-top: 0.45rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-mid); }
 
+/* What gets checked. Nine cards on Surface, three across, each with a blue
+   tick in a white disc. about.js arms the list and adds .is-in as each card
+   scrolls in: the card rises, the disc lands, then the tick draws itself —
+   staggered by --pdi-delay across the cards that arrive together. Unarmed
+   (no script, reduced motion) the ticks are simply there. */
+.pdi-checks {
+  list-style: none; margin: clamp(1.75rem, 3.5vw, 2.75rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.6vw, 1.25rem);
+}
+.pdi-check {
+  min-width: 0;
+  padding: clamp(1.4rem, 2.2vw, 1.9rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.pdi-check-mark { display: block; width: 2.75rem; height: 2.75rem; overflow: visible; }
+.pdi-check-mark circle { fill: #fff; }
+.pdi-check-mark path {
+  fill: none; stroke: var(--blue); stroke-width: 3;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.pdi-check-name {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.pdi-check-body { margin: 0.55rem 0 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-mid); }
+
+.pdi-armed .pdi-check { opacity: 0; transform: translateY(24px); }
+.pdi-armed .pdi-check-mark circle { transform: scale(0.4); transform-box: fill-box; transform-origin: center; }
+.pdi-armed .pdi-check-mark path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.pdi-armed .pdi-check.is-in {
+  opacity: 1; transform: none;
+  transition: opacity 0.55s var(--ease-out) var(--pdi-delay, 0ms),
+              transform 0.7s var(--ease-out) var(--pdi-delay, 0ms);
+}
+.pdi-armed .pdi-check.is-in .pdi-check-mark circle {
+  transform: none;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--pdi-delay, 0ms) + 200ms);
+}
+.pdi-armed .pdi-check.is-in .pdi-check-mark path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.45s var(--ease-out) calc(var(--pdi-delay, 0ms) + 480ms);
+}
+
+/* Watch it (pdi.html, solar.html). The photograph starts centred and opens to
+   the page frame as it scrolls up, then the headline and the play button
+   arrive over it. --exp is
+   the hinge, the same construction as .os-band on our-story.css: about.js
+   scrubs it from 1 (inset deep inside the frame) to 0 (the frame itself). It
+   DEFAULTS TO 0, so with no GSAP or under reduced motion the band rests open
+   with its copy showing. Clip-path and transform only, so a frame of
+   scrolling costs no layout. It opens to the frame, not the window, and keeps
+   its rounded corners the whole way. */
+.ab-watch {
+  --exp: 0;
+  --exp-y: clamp(2rem, 9vh, 5.5rem);
+  --exp-x: clamp(2rem, 17vw, 17rem);
+  position: relative;
+  /* The content width of .ab-inner: the frame, less a gutter each side. */
+  width: calc(min(100%, var(--ab-frame)) - 2 * var(--ab-pad));
+  height: clamp(460px, 78vh, 760px);
+  margin: clamp(3.5rem, 7vw, 6rem) auto 0;
+}
+.ab-watch-stage {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  background: var(--surface);
+  clip-path: inset(
+    calc(var(--exp) * var(--exp-y))
+    calc(var(--exp) * var(--exp-x))
+    round var(--radius-card)
+  );
+  will-change: clip-path;
+}
+/* A little push while it is closed, settling to 1 as it opens. */
+.ab-watch-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(calc(1 + var(--exp) * 0.12));
+  will-change: transform;
+}
+.ab-watch-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(15,11,9,0.38) 0%, rgba(15,11,9,0.68) 100%);
+}
+.ab-watch-content {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+  padding: 1.5rem clamp(1.5rem, 6vw, 5rem);
+  text-align: center;
+}
+.ab-watch-h {
+  margin: 0; max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5.2vw, 4.8rem);
+  font-weight: 800; line-height: 0.98; letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: balance;
+}
+.ab-watch-play {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.85rem;
+  color: #fff; text-decoration: none;
+  border-radius: 12px;
+}
+.ab-watch-play:focus-visible { outline: 2px solid #fff; outline-offset: 8px; }
+.ab-watch-play-ico {
+  width: clamp(68px, 7vw, 88px); height: clamp(68px, 7vw, 88px);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--blue);
+  transition: background 0.25s var(--ease-out), transform 0.3s var(--ease-out);
+}
+/* No nudge here: the path is drawn with its centroid on the viewBox centre
+   (x = 12), which is where a triangle looks centred. Its box sits a little
+   right of centre on purpose. */
+.ab-watch-play-ico svg { display: block; width: 40%; height: 40%; fill: #fff; }
+.ab-watch-play:hover .ab-watch-play-ico,
+.ab-watch-play:focus-visible .ab-watch-play-ico { background: var(--blue-dark); transform: scale(1.08); }
+.ab-watch-play-txt { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em; }
+
+/* Armed by about.js: the scrim and the copy wait for .is-open, which lands
+   once the frame has finished opening, and leave again if it closes. Hidden
+   copy is also visibility:hidden, so the play button is never an invisible
+   tab stop or click target. */
+.ab-watch.is-armed .ab-watch-scrim { opacity: 0; transition: opacity 0.5s var(--ease-out); }
+.ab-watch.is-armed .ab-watch-h,
+.ab-watch.is-armed .ab-watch-play {
+  opacity: 0; transform: translateY(22px); visibility: hidden;
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out), visibility 0s linear 0.35s;
+}
+.ab-watch.is-armed.is-open .ab-watch-scrim { opacity: 1; }
+.ab-watch.is-armed.is-open .ab-watch-h,
+.ab-watch.is-armed.is-open .ab-watch-play {
+  opacity: 1; transform: none; visibility: visible;
+  transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out), visibility 0s;
+}
+.ab-watch.is-armed.is-open .ab-watch-play { transition-delay: 0.18s, 0.18s, 0s; }
+
+@media (max-width: 768px) {
+  .ab-watch {
+    --exp-y: 1.75rem;
+    --exp-x: 7vw;
+    height: clamp(420px, 72svh, 600px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-watch-img { transform: none; }
+  .ab-watch-play-ico { transition: none; }
+}
+
+/* ---------- Video player (.ab-player) ----------
+   Ported from .vd-player in videos.css, renamed. A dialog over a dark scrim with
+   a 16:9 frame the iframe is injected into on open and removed from on close.
+   Opened by initPlayer() in about.js from any [data-yt] link, which is an
+   ordinary YouTube link when the script does not run. */
+.ab-player {
+  position: fixed; inset: 0; z-index: 1100;
+  display: grid; place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+.ab-player-scrim { position: absolute; inset: 0; background: rgba(15,11,9,0.86); backdrop-filter: blur(4px); }
+.ab-player-panel { position: relative; z-index: 1; width: min(1100px, 100%); }
+.ab-player-x {
+  position: absolute; top: -3.25rem; right: 0;
+  width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px); color: #fff; cursor: pointer;
+  transition: background 0.25s;
+}
+.ab-player-x:hover { background: rgba(255,255,255,0.24); }
+.ab-player-x:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.ab-player-frame { aspect-ratio: 16 / 9; background: #000; border-radius: var(--radius-card); overflow: hidden; }
+.ab-player-frame iframe { width: 100%; height: 100%; display: block; border: 0; }
+.ab-player-foot {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1.5rem; margin-top: 1rem;
+}
+.ab-player-title { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.35; color: #fff; }
+.ab-player-title:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+.ab-player-out {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; font-weight: 600; color: #fff; text-decoration: none;
+  border-bottom: 1.5px solid rgba(255,255,255,0.5); transition: border-color 0.2s;
+}
+.ab-player-out:hover { border-bottom-color: #fff; }
+.ab-player-out:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+body.ab-playing { overflow: hidden; }
+@media (max-width: 768px) {
+  .ab-player-x { top: -3rem; }
+  .ab-player-foot { flex-direction: column; gap: 0.5rem; }
+}
+
+@media (max-width: 1024px) {
+  .pdi-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .pdi-checks { grid-template-columns: 1fr; }
+}
+/* about.js never arms the list under this query; this is the belt to that. */
+@media (prefers-reduced-motion: reduce) {
+  .pdi-armed .pdi-check,
+  .pdi-armed .pdi-check-mark circle { opacity: 1; transform: none; transition: none; }
+  .pdi-armed .pdi-check-mark path { stroke-dashoffset: 0; transition: none; }
+}
+
 /* ===================================================
    Visit Us  (.vu-page)
    =================================================== */
@@ -419,16 +873,41 @@
 .vu-fact-v a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.14s var(--ease-out); }
 .vu-fact-v a:hover { border-bottom-color: var(--blue); }
 
-/* Leaflet, the same library and the same tile source the dealer locator uses —
-   dealers.js owns that setup and this borrows nothing from it but the CDN. One
-   marker, because there is one address. */
+/* Leaflet on OpenStreetMap. One marker, because there is one address. */
 .vu-map {
   margin: clamp(1.75rem, 3.5vw, 2.5rem) 0 0;
   height: clamp(300px, 42vw, 460px);
   border-radius: var(--radius-card); overflow: hidden;
   background: var(--surface);
 }
-.vu-map .leaflet-container { height: 100%; width: 100%; background: var(--off-white); font-family: var(--font-body); }
+/* Compound, not descendant: Leaflet adds .leaflet-container to #vu-map itself,
+   so `.vu-map .leaflet-container` never matched and the popup fell back to
+   Leaflet's Helvetica. */
+.vu-map.leaflet-container { background: var(--off-white); font-family: var(--font-body); }
+/* The tint goes on the TILE PANE only, never the container: the pin and popup sit
+   in sibling panes and keep true Jayco blue. dealers.css does the same. OSM's
+   standard style is colourful — orange roads, green parks, pink land use — so
+   saturation comes down until those read as pale neutrals and the water is left
+   faintly blue. */
+.vu-map .leaflet-tile-pane { filter: saturate(0.3) contrast(0.94) brightness(1.04); }
+
+/* The Visitors Center pin. A square rounded on three corners and turned 45°
+   makes a teardrop whose sharp corner points down; the logo turns back upright.
+   No `position` on .vu-pin: Leaflet positions .leaflet-marker-icon absolutely
+   and a declared position here would drop the pin into normal flow (see .dl-pin
+   in dealers.css). The shadow is a drop-shadow on the unrotated icon, so it
+   falls straight down rather than turning with the drop. */
+.vu-pin { background: none; border: 0; filter: drop-shadow(0 4px 8px rgba(15,11,9,0.35)); }
+.vu-pin-head {
+  position: absolute; left: 0; top: 0;
+  display: grid; place-items: center;
+  width: 56px; height: 56px;
+  background: var(--blue);
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+}
+.vu-pin-head img { width: 36px; height: auto; transform: rotate(45deg); }
 
 /* A tour: what it is, when it runs, and how to book. Two of them, side by side,
    each on its own photograph. */
@@ -447,12 +926,60 @@
 }
 .vu-tour-name { margin: 0.9rem 0 0; font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark); }
 .vu-tour-body { margin: 0.8rem 0 1.5rem; font-size: 0.98rem; line-height: 1.75; color: var(--text-mid); }
-.vu-tour .btn-primary { align-self: flex-start; margin-top: auto; }
+/* Registration, one Wufoo form per month, three months listed at a time. Outline
+   pills rather than blue: six blue buttons across the two tours would be six
+   emphases on one screen, and DESIGN.md rations blue to one. margin-top: auto
+   pins the row to the foot of the card, so both tours' buttons line up. */
+.vu-register { margin-top: auto; }
+/* The FAQ links here. A plain anchor jump puts the heading at the very top of the
+   window, under the fixed header and with its "Book a tour" label cut off, so it
+   stops short by the header plus the label. */
+#vu-tours-h { scroll-margin-top: 9.5rem; }
+@media (max-width: 768px) { #vu-tours-h { scroll-margin-top: 7.5rem; } }
+.vu-register-k { display: block; margin-bottom: 0.75rem; font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
+.vu-register-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+/* The hover fill is parked exactly one pill-width to the left, and at the
+   fractional widths these short labels give, a pixel of the navy showed as a dark
+   tick on the pill's left edge. Parking it 1% further fixes that only with
+   no-repeat: the background tiles, so the next copy would slide 1% in from the
+   right instead. */
+.vu-register-list .btn-secondary-light { display: inline-flex; align-items: center; min-height: 44px; padding: 0.7rem 1.5rem; background-repeat: no-repeat; background-position: 101% 0; }
+.vu-register-list .btn-secondary-light:hover { background-position: 0% 0; }
+/* Three months on one row on a phone. */
+@media (max-width: 560px) {
+  .vu-register-list { gap: 0.45rem; }
+  .vu-register-list .btn-secondary-light { padding: 0.7rem 1.05rem; }
+}
 
-/* The rules Jayco sets on the tour, stated as rules rather than buried. */
-.vu-rules { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; display: grid; gap: 0.85rem; }
+/* The rules Jayco sets on the tour, stated as rules rather than buried: a Surface
+   panel under the two tours, two columns on a desktop so no line runs the width
+   of the frame, one on a phone. */
+.vu-rules {
+  list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 3.4vw, 2.75rem);
+  background: var(--surface); border-radius: var(--radius-card);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem clamp(1.5rem, 4vw, 3.5rem);
+}
 .vu-rule { position: relative; padding-left: 1.6rem; font-size: 0.98rem; line-height: 1.7; color: var(--text-mid); }
 .vu-rule::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+/* --blue-dark, not --blue: base blue on Surface is under AA for body text, and
+   blue-dark measures 5.4:1 there. */
+.vu-rule a { color: var(--blue-dark); font-weight: 600; border-bottom: 1.5px solid transparent; transition: border-color 0.14s var(--ease-out); }
+.vu-rule a:hover { border-bottom-color: var(--blue-dark); }
+@media (max-width: 768px) {
+  .vu-rules { grid-template-columns: 1fr; }
+}
+
+/* Links inside the FAQ answers. The shared component in style.css leaves them the
+   colour of the answer text, so "local Jayco dealer" read as plain prose. Scoped
+   to this page: blue-dark on the white answer card is 7.3:1, and the underline
+   means the link does not rely on colour alone. */
+.vu-page .faq-answer a {
+  color: var(--blue-dark); font-weight: 600;
+  text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px;
+}
+.vu-page .faq-answer a:hover { color: var(--blue); }
 
 /* ===================================================
    Sustainability & Overlander  (.sol-page)
@@ -474,6 +1001,77 @@
 .sol-fit { margin: 1.4rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
 .sol-fit b { color: var(--text-dark); font-weight: 700; }
 .sol-fit + .sol-fit { margin-top: 0.7rem; }
+
+/* EcoAdvantage™ — jayco.com/about/r&d/sustainability/. Under the feature
+   photograph, two sub-sections: the seven goal areas as cards on Surface, and
+   the three green-RVing articles Jayco points to, as linked cards with their
+   blog photographs. Seven goals sit four over three on a twelve-track grid so
+   the second row fills the width; two across on tablets, where the seventh
+   spans the row; one column on phones. */
+.sol-eco-head { margin: clamp(2.75rem, 5vw, 4rem) 0 0; }
+.sol-eco-h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.sol-eco-head .ab-sec-lead { margin-top: 0.75rem; }
+.sol-goals {
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem);
+}
+.sol-goal {
+  grid-column: span 3; min-width: 0;
+  padding: clamp(1.4rem, 2vw, 1.75rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.sol-goal:nth-child(n+5) { grid-column: span 4; }
+.sol-goal-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.sol-goal p { margin: 0.55rem 0 0; font-size: 0.93rem; line-height: 1.7; color: var(--text-mid); }
+.sol-tips {
+  list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem);
+}
+.sol-tip { min-width: 0; }
+.sol-tip-link {
+  display: flex; flex-direction: column; height: 100%;
+  background: var(--surface); border-radius: var(--radius-card); overflow: hidden;
+  color: inherit; text-decoration: none;
+  transition: background 0.25s var(--ease-out);
+}
+.sol-tip-link:hover { background: var(--surface-hover); }
+.sol-tip-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.sol-tip-media { display: block; position: relative; aspect-ratio: 3 / 2; overflow: hidden; background: var(--surface-hover); }
+.sol-tip-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease-out); }
+.sol-tip-link:hover .sol-tip-media img { transform: scale(1.05); }
+.sol-tip-body { display: flex; flex-direction: column; flex: 1; padding: clamp(1.2rem, 1.8vw, 1.6rem); }
+.sol-tip-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.sol-tip-txt { margin: 0.55rem 0 0; font-size: 0.93rem; line-height: 1.7; color: var(--text-mid); }
+.sol-tip-more { margin-top: auto; padding-top: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--blue-dark); }
+@media (max-width: 1024px) {
+  .sol-goals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sol-goal, .sol-goal:nth-child(n+5) { grid-column: auto; }
+  .sol-goal:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .sol-goals, .sol-tips { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sol-tip-media img { transition: none; }
+  .sol-tip-link:hover .sol-tip-media img { transform: none; }
+}
 
 /* ===================================================
    Award-Winning RVs  (.aw-page)
@@ -665,18 +1263,39 @@ a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
 /* THE PAGE'S ONE AUTHORED MOTION MOMENT. JaySMART is a lighting system, and a
    lighting system is a thing you can only really explain by showing it, so this
-   draws a trailer from behind and plays each of the four signals on it. The
-   buttons are real controls: the demo is legible stopped, and under
-   prefers-reduced-motion the flashing never starts and the lit state is held. */
+   is a night scene of a trailer — rear, side and front cap, in perspective — that
+   plays each of the four signals, with the light each lamp throws on the
+   trailer and the ground. The scene fills the top of the panel edge to edge;
+   the buttons and the sentence sit under it. The buttons are real controls: the
+   demo is legible stopped, and under prefers-reduced-motion the flashing never
+   starts and the lit state is held.
+
+   A LAMP IS THREE LAYERS. .sf-lens (the unlit lamp) is always drawn, so the
+   layout reads even when dark; .sf-core and .sf-glow are the light. A circuit is
+   .is-on (full), .is-dim (running-light level, for the markers) or neither. The
+   .sf-fx pools and washes only switch fully on or off. */
 .sf-signal {
   margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
   background: var(--band-navy); border-radius: var(--radius-card);
-  padding: clamp(1.75rem, 3.4vw, 3rem);
+  overflow: hidden;
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
 }
-.sf-signal-stage { display: block; width: 100%; max-width: 640px; margin: 0 auto; }
-.sf-lamp { transition: opacity 0.1s linear; }
-.sf-lamp.is-off { opacity: 0.16; }
-.sf-signal-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+/* 11:5 rather than the drawing's 2:1, so on a wide panel the scene is not taller
+   than a screen; the slice crops a little sky and ground, never the trailer. On
+   a phone it goes to 16:10, which crops the sides instead and keeps the rear,
+   the side and the front cap. */
+.sf-signal-stage { display: block; width: 100%; height: auto; aspect-ratio: 11 / 5; background: #02080d; }
+.sf-l .sf-core, .sf-l .sf-glow, .sf-fx { opacity: 0; transition: opacity 90ms linear; }
+.sf-l.is-dim .sf-core { opacity: 0.7; }
+.sf-l.is-dim .sf-glow { opacity: 0.28; }
+.sf-l.is-on .sf-core, .sf-l.is-on .sf-glow, .sf-fx.is-on { opacity: 1; }
+@media (max-width: 600px) {
+  .sf-signal-stage { aspect-ratio: 16 / 10; }
+}
+.sf-signal-controls {
+  display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center;
+  margin-top: clamp(1.5rem, 3vw, 2.25rem); padding-inline: clamp(1rem, 3vw, 2rem);
+}
 .sf-sig-btn {
   display: inline-flex; align-items: center; min-height: 44px;
   padding: 0.6rem 1.3rem; border-radius: var(--radius-btn);
@@ -689,6 +1308,7 @@ a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 .sf-sig-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .sf-signal-say {
   margin: clamp(1.25rem, 2.4vw, 1.75rem) auto 0; max-width: 54ch; text-align: center;
+  padding-inline: clamp(1rem, 3vw, 2rem);
   font-size: 0.98rem; line-height: 1.7; color: #fff;
 }
 
@@ -704,20 +1324,80 @@ a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 .rd-team-h { margin: 0 0 0.7rem; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
 .rd-team-b { margin: 0; font-size: 0.95rem; line-height: 1.72; color: var(--text-mid); }
 
-/* Dated innovations. A year, a name, a line — read down, not scrolled sideways.
-   our-story.html already owns the horizontal timeline on this site and a second
-   one here would be a reprise, not a design. */
-.rd-innov { list-style: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding: 0; }
-.rd-innov-row {
-  display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
-  gap: clamp(0.6rem, 3vw, 3rem);
-  padding: clamp(1.2rem, 2.2vw, 1.7rem) 0;
-  border-top: 1px solid var(--hairline);
+/* Dated innovations, as cards on Surface in date order — the same card as the
+   proving ground above, with the era where that one has its number. Three
+   across; two on tablets, where the ninth card spans the row rather than
+   leaving a hole; one on phones. Still a grid that reads left to right and
+   down, not a second horizontal timeline: our-story.html owns that. */
+.rd-innov {
+  list-style: none; margin: clamp(1.75rem, 3.5vw, 2.75rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem);
 }
-.rd-innov > .rd-innov-row:last-child { border-bottom: 1px solid var(--hairline); }
-.rd-innov-when { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-dark); padding-top: 0.3rem; }
-.rd-innov-name { margin: 0 0 0.5rem; font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-dark); }
-.rd-innov-body { margin: 0; font-size: 0.95rem; line-height: 1.75; color: var(--text-mid); max-width: 66ch; }
+.rd-innov-row {
+  min-width: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(1.4rem, 2vw, 1.75rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.rd-innov-when {
+  display: block;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.rd-innov-name {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.rd-innov-body { margin: 0.55rem 0 0; font-size: 0.93rem; line-height: 1.7; color: var(--text-mid); }
+
+@media (max-width: 1024px) {
+  .rd-innov { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rd-innov-row:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .rd-innov { grid-template-columns: 1fr; }
+}
+
+/* ---------- Safety feature cards (safety.html) ----------
+   On the road and Built into it: each feature as a card with its photograph on
+   top, on Surface. Four across on a wide screen, two by two on tablets, one
+   column on phones. The photographs are jayco.com's own feature pictures
+   (assets/value-tool/web, 4:3), cropped to a 3:2 window so the four cards in a
+   row share one image height whatever the source. Inset media rounds with its
+   card: the card clips, the image stays square. */
+.sf-cards {
+  list-style: none; margin: clamp(1.75rem, 3.5vw, 2.75rem) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.4vw, 1.25rem);
+}
+.sf-card {
+  min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--surface); border-radius: var(--radius-card);
+  overflow: hidden;
+}
+/* The image is taken out of flow so its own intrinsic height (the handling
+   package picture is 800×642, the rest 4:3) cannot stretch the 3:2 frame. */
+.sf-card-media { position: relative; aspect-ratio: 3 / 2; overflow: hidden; background: var(--surface-hover); }
+.sf-card-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.sf-card-body { padding: clamp(1.2rem, 1.8vw, 1.6rem); }
+.sf-card-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25;
+  color: var(--text-dark);
+}
+.sf-card-body > p { margin: 0.55rem 0 0; font-size: 0.93rem; line-height: 1.7; color: var(--text-mid); }
+
+@media (max-width: 1100px) {
+  .sf-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .sf-cards { grid-template-columns: 1fr; }
+}
 
 /* ===================================================
    Breakpoints
@@ -743,8 +1423,6 @@ a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
   .ab-hero { height: clamp(460px, 68vh, 620px); }
   .ab-step { grid-template-columns: 2rem minmax(0, 1fr); gap: 0.9rem; }
   .pdi-ramp-row { grid-template-columns: 1fr; gap: 0.5rem; }
-  .rd-innov-row { grid-template-columns: 1fr; gap: 0.35rem; }
-  .rd-innov-when { padding-top: 0; }
   .sol-spec-row { flex-direction: column; gap: 0.35rem; }
   .sol-spec-v { text-align: left; }
 }
@@ -784,7 +1462,7 @@ a.aw-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
   .ab-page { --ab-drift: 0%; }
   .ab-armed .ab-rise { opacity: 1; transform: none; transition: none; }
   .pdi-ramp-fill { transition: none; }
-  .sf-lamp { transition: none; }
+  .sf-l .sf-core, .sf-l .sf-glow, .sf-fx { transition: none; }
   /* The zoom is motion; the glow is not, so the plain cards keep theirs. */
   .aw-photo { transition: none; }
   .aw-card--photo:hover .aw-photo,
