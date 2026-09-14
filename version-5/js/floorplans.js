@@ -322,7 +322,7 @@
     /* Should the harvested feature file ever go missing, Slide-out still needs
        somewhere to live: it is our own field and does not depend on it. */
     const layoutBody = (groups || `<div class="fpc-chips">${chip('slide', '1', 'Slide-out')}</div>`) +
-      `<p class="fpc-facet-hint">Jayco's own floorplan data. Chips combine — a plan has to have all of them.</p>`;
+      `<p class="fpc-facet-hint">Chips combine — a plan has to have all of them.</p>`;
 
     const sleepsBody =
       `<div class="fpc-chips">${SLEEPS.map((n) => chip('sleeps', n, n === 10 ? '10+' : String(n))).join('')}</div>
@@ -951,7 +951,7 @@
   }
 
   function specTable(r) {
-    if (!r.specs) return '<p class="fpc-modal-nospec">Jayco has not published a specification sheet for this floorplan yet.</p>';
+    if (!r.specs) return '<p class="fpc-modal-nospec">The specification sheet for this floorplan is coming soon.</p>';
     return Object.keys(r.specs).map((group) => {
       /* Jayco's sheets store straight quotes; prettyLen sets them as primes so a
          value in this table matches the same figure in the line above it. No
@@ -1379,12 +1379,38 @@
     });
   }
 
+  /* ---------- ?plan= deep link ----------
+     Site search sends a floorplan here as floorplans.html?plan=<model>__<plan>,
+     the catalog's own row key. The page brings that card into view — scrolling
+     to its model's row and along the row to it, whichever element is the
+     scroller at this width — and marks it for a moment.
+
+     Deliberately NOT a pick: ?c= puts plans in the compare tray, and a reader
+     who only wanted to look at one should not arrive with it already picked.
+     Run once the page's scroll layer is live, so the jump lands and stays. */
+  function focusPlan() {
+    const key = new URLSearchParams(window.location.search).get('plan');
+    if (!key || !ROWS.some((r) => r.key === key)) return;
+    const btn = $$('.fpc-details').find((b) => b.dataset.key === key);
+    const target = btn && btn.closest('.fpc-card');
+    if (!target) return;
+    let done = false;
+    const go = () => {
+      if (done) return;
+      done = true;
+      target.scrollIntoView({ block: 'center', inline: 'center', behavior: 'auto' });
+      target.classList.add('is-found');
+      setTimeout(() => target.classList.remove('is-found'), 2800);
+    };
+    document.addEventListener('jayco:animations-ready', () => requestAnimationFrame(go), { once: true });
+  }
+
   /* ---------- Boot ---------- */
   if (!ROWS.length || !SECTIONS.length) return;
 
   $('#fpc-sub').textContent =
     ROWS.length + ' floorplans across ' + SECTIONS.length +
-    " models, with Jayco's own drawings and published specifications.";
+    " models, with drawings and full specifications.";
 
   renderFacets();
   renderJump();
@@ -1395,6 +1421,7 @@
   applyFilters();
   renderTray();
   initSpy();
+  focusPlan();
 
   /* A rail measured before its drawings land measures wrong, so every rail is
      re-read once the page has actually loaded. */

@@ -634,7 +634,7 @@
     if (!code) return { view: { lat: HOME.lat, lng: HOME.lng, zoom: HOME.zoom }, msg: '' };
     const rows = ALL.filter((d) => d.country === code && hasPos(d));
     if (!rows.length) {
-      return { view: null, msg: 'Jayco has not published a map location for this dealer, so it is listed without a pin.' };
+      return { view: null, msg: 'This dealer is listed without a map pin.' };
     }
     const c = centroid(rows);
     const zoom = code === 'US' || code === 'CA' ? 4 : 9;
@@ -1079,6 +1079,18 @@
     } else {
       note('We could not narrow that to one model, so this is every Jayco dealer.');
     }
+  }
+
+  /* ---------- ?q= deep link ----------
+     Site search hands a dealer off as its "City, ST" — the same text a reader
+     would type into the field — so the page puts it there and runs its own
+     search on it. An exact city anchors the list there and sorts dealers by
+     distance from it. Safe before the map exists: runSearch() only sets state and
+     re-renders the list, and the map reads that state when it loads. */
+  const wantedQuery = (new URLSearchParams(window.location.search).get('q') || '').trim();
+  if (wantedQuery) {
+    $('#dl-input').value = wantedQuery;
+    runSearch();
   }
 
   renderResults();

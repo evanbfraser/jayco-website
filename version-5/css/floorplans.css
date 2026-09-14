@@ -624,6 +624,13 @@
 .fpc-card.is-comparing .fpc-pick { border-color: var(--blue); color: var(--blue); }
 .fpc-card.is-comparing .fpc-pick-box { background: var(--blue); border-color: var(--blue); }
 .fpc-card.is-comparing .fpc-well { border-color: var(--blue); }
+/* Arrived from site search (floorplans.html?plan=, floorplans.js focusPlan):
+   the blue ring on the drawing for a moment, so the eye finds the card. */
+.fpc-card.is-found .fpc-well {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue);
+  transition: box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+}
 
 /* ---------- Compare tray ----------
    compare.css .cmp-tray, ported: pinned to the bottom, the picks as slots, the

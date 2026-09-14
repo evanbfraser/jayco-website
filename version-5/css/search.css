@@ -1,0 +1,312 @@
+/* ===================================================
+   Jayco — Site search panel
+   ---------------------------------------------------
+   Loaded with js/search.js the first time search opens
+   (app.js loadSearch()). Everything here is scoped under
+   .gs. The two buttons that open it live in the header
+   and are on screen before this file is, so they are
+   styled in style.css.
+
+   DESIGN.md throughout: canvas ground, one type family at
+   honest weights, the input as the system draws it (white,
+   14px, blue focus ring), pills for every action, the
+   hairline for rows, and blue rationed to the active
+   filter, the focus ring and a trace under matched words.
+   =================================================== */
+
+.gs {
+  position: fixed;
+  inset: 0;
+  /* Over the header (1000), the Jayco Difference page's stuck switch bar and its
+     morph (1001) and the phone menu (998); under the custom cursor (9999), which
+     has to stay visible over it. */
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  background: var(--canvas);
+  color: var(--text-dark);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.26s var(--ease-out), transform 0.26s var(--ease-out);
+}
+.gs[hidden] { display: none; }
+.gs.is-open { opacity: 1; transform: none; }
+body.gs-open { overflow: hidden; }
+
+.gs-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* One spine for the panel: heading, field and results share a left edge,
+   capped so a result line never runs the width of a wide screen. The page
+   gutter holds at every width. */
+.gs-frame { width: 100%; max-width: 1240px; margin: 0 auto; padding-inline: var(--page-pad); }
+
+/* ---------- Head ---------- */
+.gs-head { flex: none; border-bottom: 1px solid var(--hairline); }
+.gs-head-in { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 88px; }
+.gs-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+}
+.gs-close {
+  flex: none;
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1px solid var(--hairline);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.gs-close:hover { background: var(--surface); border-color: transparent; }
+.gs-close:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.gs-body {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3rem, 6vw, 5rem);
+}
+
+/* ---------- The field ----------
+   DESIGN.md's input is white with no border at rest. On canvas a borderless
+   white field reads as nothing at all, so it keeps a hairline and a soft lift
+   until focus replaces both with the blue ring. */
+.gs-form { position: relative; }
+.gs-form-icon {
+  position: absolute; left: 1.2rem; top: 50%;
+  transform: translateY(-50%);
+  display: flex; color: var(--text-mid);
+  pointer-events: none;
+}
+.gs-input {
+  width: 100%; margin: 0;
+  -webkit-appearance: none; appearance: none;
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);   /* 16px and up, so iOS does not zoom on focus */
+  font-weight: 500;
+  color: var(--text-dark);
+  background: var(--white);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 1.05rem 3.4rem 1.05rem 3.5rem;
+  box-shadow: 0 4px 16px rgba(15,11,9,0.06);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.gs-input::placeholder { color: var(--text-mid); opacity: 1; }
+.gs-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--blue), 0 4px 16px rgba(15,11,9,0.06);
+}
+.gs-input::-webkit-search-cancel-button,
+.gs-input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.gs-clear {
+  position: absolute; right: 0.55rem; top: 50%;
+  transform: translateY(-50%);
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border: none; border-radius: 50%;
+  background: none; color: var(--text-mid);
+  cursor: pointer;
+}
+.gs-clear[hidden] { display: none; }
+.gs-clear:hover { background: var(--surface); color: var(--text-dark); }
+.gs-clear:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* ---------- Layout ----------
+   Filters in a column beside the results. Before anything is typed there is
+   nothing to filter, so the column goes and popular searches take the width. */
+.gs-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 230px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+.gs-layout.is-idle { grid-template-columns: minmax(0, 1fr); }
+.gs-layout.is-idle .gs-side,
+.gs-layout.is-idle .gs-status { display: none; }
+
+.gs-side-h,
+.gs-sec-h {
+  margin: 0 0 0.9rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.gs-filters { display: flex; flex-direction: column; gap: 0.3rem; }
+.gs-filter {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%; margin: 0;
+  padding: 0.65rem 1rem;
+  border: none; border-radius: var(--radius-btn);
+  background: none; color: var(--text-dark);
+  font-family: var(--font-body); font-size: 0.95rem; font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.gs-filter:hover { background: var(--surface); }
+.gs-filter:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+/* The active filter is DESIGN.md's floating-nav active item: a blue-tinted pill
+   with blue-deep type. */
+.gs-filter[aria-pressed="true"] { background: rgba(0,122,194,0.1); color: var(--blue-dark); font-weight: 700; }
+.gs-filter-n { font-size: 0.82rem; font-weight: 500; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.gs-filter[aria-pressed="true"] .gs-filter-n { color: var(--blue-dark); }
+.gs-filter:disabled { cursor: default; opacity: 0.5; }
+.gs-filter:disabled:hover { background: none; }
+
+/* ---------- Results ---------- */
+.gs-status { margin: 0 0 1rem; min-height: 1.5em; font-size: 1rem; line-height: 1.5; color: var(--text-mid); }
+
+.gs-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
+.gs-list[hidden] { display: none; }
+.gs-item { border-bottom: 1px solid var(--hairline); }
+.gs-link {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  margin: 0 -0.75rem;
+  padding: 0.9rem 0.75rem;
+  border-radius: 14px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.gs-link:hover { background: var(--surface); }
+.gs-link:focus-visible { outline: none; background: var(--surface); box-shadow: inset 0 0 0 2px var(--blue); }
+
+/* Inset media rounds at the card radius whatever its size (DESIGN.md, Shapes). */
+.gs-thumb {
+  position: relative;
+  display: grid; place-items: center;
+  width: 120px; aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text-mid);
+}
+.gs-link:hover .gs-thumb,
+.gs-link:focus-visible .gs-thumb { background: var(--surface-hover); }
+.gs-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Cut-out renders, floorplan drawings and document covers are shown whole. */
+.gs-thumb.is-contain img { object-fit: contain; padding: 0.35rem; }
+.gs-thumb.is-icon svg { opacity: 0.75; }
+
+.gs-text { min-width: 0; }
+.gs-type {
+  display: block; margin-bottom: 0.2rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.gs-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  font-weight: 700; letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--text-dark);
+  overflow-wrap: anywhere;
+}
+/* The matched words carry a trace of blue under them rather than a highlighter
+   fill — the one place blue appears in a result. */
+.gs-name mark { background: none; color: inherit; box-shadow: inset 0 -0.32em 0 rgba(0,122,194,0.18); }
+.gs-meta { display: block; margin-top: 0.25rem; font-size: 0.9rem; line-height: 1.5; color: var(--text-mid); }
+.gs-go { display: flex; color: var(--text-mid); transition: transform 0.15s var(--ease-out), color 0.15s; }
+.gs-link:hover .gs-go { color: var(--blue-dark); transform: translateX(2px); }
+
+.gs-more-wrap { display: flex; justify-content: center; margin-top: clamp(1.5rem, 3vw, 2rem); }
+.gs-more-wrap[hidden] { display: none; }
+
+/* ---------- Nothing found ---------- */
+.gs-empty[hidden] { display: none; }
+.gs-empty-b { margin: 0 0 1.25rem; max-width: 52ch; font-size: 1rem; line-height: 1.7; color: var(--text-mid); }
+
+/* ---------- Before anything is typed ---------- */
+.gs-idle[hidden] { display: none; }
+.gs-idle {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 6rem);
+}
+.gs-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.gs-chip {
+  margin: 0;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-btn);
+  background: var(--white);
+  color: var(--text-dark);
+  font-family: var(--font-body); font-size: 0.95rem; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.gs-chip:hover { background: var(--surface); border-color: transparent; }
+.gs-chip:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.gs-quick { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
+.gs-quick li { border-bottom: 1px solid var(--hairline); }
+.gs-quick-link {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.95rem 0.25rem;
+  color: var(--text-dark);
+  font-size: 1rem; font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.gs-quick-link svg { color: var(--text-mid); transition: transform 0.15s var(--ease-out), color 0.15s; }
+.gs-quick-link:hover { color: var(--blue-dark); }
+.gs-quick-link:hover svg { color: var(--blue-dark); transform: translateX(2px); }
+.gs-quick-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 8px; }
+
+/* ---------- Narrower ---------- */
+@media (max-width: 900px) {
+  /* The filters stop being a column beside the results and become one row of
+     pills above them that scrolls sideways — so on a phone the first result is
+     still near the top of the screen, not under a grid of filter boxes. The row
+     bleeds through the gutter so it reads as scrollable. Empty groups drop out
+     of it rather than stand disabled, because a short row matters more here. */
+  .gs-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .gs-side { margin-inline: calc(-1 * var(--page-pad)); }
+  .gs-side-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .gs-filters {
+    flex-direction: row; gap: 0.4rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding: 0.15rem var(--page-pad) 0.35rem;
+  }
+  .gs-filters::-webkit-scrollbar { display: none; }
+  .gs-filter {
+    flex: none; width: auto;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid var(--hairline);
+    background: var(--white);
+    font-size: 0.9rem;
+  }
+  .gs-filter[aria-pressed="true"] { border-color: transparent; }
+  .gs-filter:disabled { display: none; }
+  .gs-idle { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+@media (max-width: 600px) {
+  .gs-head-in { min-height: 68px; }
+  .gs-close { width: 44px; height: 44px; }
+  .gs-form-icon { left: 1rem; }
+  .gs-input { font-size: 1.05rem; padding-left: 3.1rem; }
+  .gs-link { grid-template-columns: 84px minmax(0, 1fr); gap: 0.9rem; margin: 0 -0.5rem; padding: 0.8rem 0.5rem; }
+  .gs-thumb { width: 84px; }
+  .gs-go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs { transition: none; transform: none; }
+  .gs-go, .gs-quick-link svg { transition: none; }
+}

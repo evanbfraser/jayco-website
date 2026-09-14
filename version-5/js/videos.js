@@ -449,6 +449,21 @@
   wire();
   applyFilter();
   booted = true;
+
+  /* ---------- ?v= deep link ----------
+     Site search sends a video here as videos.html?v=<YouTube id>, and the page
+     opens it in its own player. Lenis does not exist yet at this point — app.js
+     creates it once the loader has gone — so it is stopped again as soon as it
+     does, or the page would scroll under the open player. A browser may still
+     hold the sound until the reader presses play; the player is open either way. */
+  const wantedVideo = new URLSearchParams(window.location.search).get('v');
+  if (wantedVideo && DATA.items.some((x) => x.id === wantedVideo)) {
+    play(wantedVideo, null);
+    document.addEventListener('jayco:animations-ready', () => {
+      const l = window.__jaycoLenis;
+      if (open() && l && l.stop) l.stop();
+    }, { once: true });
+  }
   /* A rail measured before its thumbnails land measures wrong. */
   window.addEventListener('load', syncRails, { once: true });
 }());

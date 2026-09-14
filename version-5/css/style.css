@@ -354,6 +354,29 @@ body:not([data-header="solid"]) .site-header::before {
 }
 .nav-search-btn:hover { color: #fff; }
 
+/* The same search below 1280px, beside the hamburger — injected by app.js
+   initSearch(), because at that width .header-nav (and the button in it) is
+   display:none. It takes the hamburger's margin-left: auto (see the 1279px block)
+   so the two sit together on the right. The panel it opens is css/search.css. */
+.gs-trigger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.gs-trigger:hover { background: rgba(255,255,255,0.12); }
+.gs-trigger:focus-visible,
+.nav-search-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 50%; }
+
 .hamburger {
   display: none;
   flex-direction: column;
@@ -2888,6 +2911,8 @@ body:not([data-header="solid"]) .site-header::before {
   /* retire the old slide-in drawer — the full-screen menu replaces it */
   .header-nav { display: none; }
   .hamburger { display: flex; }
+  .gs-trigger { display: flex; }
+  .gs-trigger + .hamburger { margin-left: 0.25rem; }
   .mobile-menu { display: flex; }
   /* lock background scroll while the menu is open */
   body.menu-open { overflow: hidden; }

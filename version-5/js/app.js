@@ -230,6 +230,95 @@
     });
   }
 
+  /* ---------- Site search ----------
+     The header's search button on every page, a matching button beside the
+     hamburger below 1280px (where the header's actions are folded away), and
+     "/" or Ctrl/Cmd+K from the keyboard. The panel itself — js/search.js,
+     css/search.css and the generated js/search-index.js — is NOT loaded with the
+     page. It arrives the first time a reader reaches for search, or hovers a
+     search button, so thirty pages do not each carry a site's worth of titles
+     most readers never search.
+
+     Bound at boot rather than in initAnimations(), so search works even if the
+     animation libraries never arrive. Bump SEARCH_VERSION whenever search.js,
+     search.css or the index is rebuilt. */
+  const SEARCH_VERSION = 'v5-search-7';
+  const SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+  let searchLoading = null;
+
+  function loadSearch() {
+    if (window.JAYCO_SEARCH_UI) return Promise.resolve(window.JAYCO_SEARCH_UI);
+    if (searchLoading) return searchLoading;
+    window.JAYCO_SEARCH_VERSION = SEARCH_VERSION;
+    searchLoading = new Promise((resolve, reject) => {
+      /* The stylesheet first, and the panel is not shown until it has landed,
+         so it never appears unstyled for a frame. */
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'css/search.css?v=' + SEARCH_VERSION;
+      const cssReady = new Promise((done) => { css.onload = done; css.onerror = done; });
+      document.head.appendChild(css);
+      const js = document.createElement('script');
+      js.src = 'js/search.js?v=' + SEARCH_VERSION;
+      js.onload = () => cssReady.then(() => {
+        if (window.JAYCO_SEARCH_UI) resolve(window.JAYCO_SEARCH_UI);
+        else { searchLoading = null; reject(new Error('search did not start')); }
+      });
+      js.onerror = () => { searchLoading = null; reject(new Error('search failed to load')); };
+      document.body.appendChild(js);
+    });
+    return searchLoading;
+  }
+
+  function openSearch(from) {
+    /* Search opened from inside the phone menu's reach closes the menu first,
+       through its own toggle, so its state and aria stay in step. */
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && burger && menu.classList.contains('open')) burger.click();
+    loadSearch().then((ui) => ui.open(from)).catch(() => {});
+  }
+
+  function initSearch() {
+    const burger = document.getElementById('hamburger');
+    if (burger && !document.querySelector('.gs-trigger')) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gs-trigger';
+      b.setAttribute('aria-label', 'Search');
+      b.innerHTML = SEARCH_ICON;
+      burger.parentNode.insertBefore(b, burger);
+    }
+    const TRIGGERS = '.nav-search-btn, .gs-trigger';
+    const warm = () => loadSearch().then((ui) => ui.warm()).catch(() => {});
+    document.querySelectorAll(TRIGGERS).forEach((b) => {
+      b.setAttribute('aria-haspopup', 'dialog');
+      b.addEventListener('pointerenter', warm, { once: true });
+      b.addEventListener('focus', warm, { once: true });
+    });
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest(TRIGGERS);
+      if (!b) return;
+      e.preventDefault();
+      openSearch(b);
+    });
+    /* "/" and Ctrl/Cmd+K — the two a keyboard reader tries first. "/" never
+       fires while they are typing into a field of their own. */
+    document.addEventListener('keydown', (e) => {
+      if (document.body.classList.contains('gs-open')) return;
+      const t = e.target;
+      const inField = t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+      const k = (e.key || '').toLowerCase();
+      if ((k === '/' && !inField && !e.metaKey && !e.ctrlKey && !e.altKey) ||
+          (k === 'k' && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        openSearch(document.activeElement);
+      }
+    });
+  }
+
   /* ---------- Hero Entry Animations ---------- */
   function initHero() {
     const eyebrow  = document.querySelector('.hero-eyebrow');
@@ -1345,6 +1434,7 @@ initParallax();
   }
 
   /* ---------- Boot ---------- */
+  initSearch();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', runLoader);
   } else {
