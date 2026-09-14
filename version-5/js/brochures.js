@@ -215,7 +215,7 @@
         <p class="br-card-tagline">${esc(r.kind)}${r.langCode !== 'en' ? ' · ' + esc(r.lang) : ''}</p>
       </div>
       <a class="br-card-cta" href="${esc(r.pdf)}" target="_blank" rel="noopener"
-        aria-label="Download the ${esc(r.year + ' ' + r.name + ' ' + r.kind)} — PDF on jayco.com"
+        aria-label="Download the ${esc(r.year + ' ' + r.name + ' ' + r.kind)} (PDF)"
         >Download ${esc(r.kind)}</a>
     </li>`;
   }

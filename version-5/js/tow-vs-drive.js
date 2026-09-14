@@ -84,7 +84,7 @@
   const ROWS = [
     { label: 'Starting price',
       tow: usd(lo(side.towable.price)), mot: usd(lo(side.motorized.price)),
-      note: 'Jayco’s own “starting at” figure for the cheapest model in each group.' },
+      note: 'The “starting at” MSRP for the least expensive model in each group.' },
     { label: 'Floorplans to choose from',
       tow: String(side.towable.plans), mot: String(side.motorized.plans),
       note: 'Every published 2027 floorplan, counted.' },

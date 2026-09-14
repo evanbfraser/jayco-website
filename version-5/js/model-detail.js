@@ -1261,7 +1261,7 @@
       </div>`;
 
     const yearCell = years.length ? cell('Earlier model years',
-      r.yearsNote || `Past ${model.name} model years, on Jayco’s own site.`, `
+      r.yearsNote || `Past ${model.name} model years.`, `
         <div class="md-res-menu">
           <button type="button" class="btn-secondary-light md-res-trigger" id="md-res-trigger"
                   aria-expanded="false" aria-controls="md-res-years">
@@ -1272,7 +1272,7 @@
           </button>
           <ul class="md-res-years" id="md-res-years" data-lenis-prevent hidden>
             ${years.map((y) => `<li><a href="${esc(y.href)}" target="_blank" rel="noopener noreferrer"
-                aria-label="${y.year} ${esc(model.name)} on jayco.com — opens in a new tab">${y.year} ${esc(model.name)}</a></li>`).join('')}
+                aria-label="${y.year} ${esc(model.name)} — opens in a new tab">${y.year} ${esc(model.name)}</a></li>`).join('')}
           </ul>
         </div>`) : '';
 

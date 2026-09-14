@@ -215,7 +215,7 @@
       return `<h3 class="cmp-facet-sub">${esc(g.name)}</h3><div class="cmp-chips">${c}</div>`;
     }).join('');
     const featureBody = (groups || `<div class="cmp-chips">${chip('slide', '1', 'Slide-out', true)}</div>`) +
-      `<p class="cmp-facet-hint">Jayco's own floorplan data. Chips combine — a plan has to have all of them.</p>`;
+      `<p class="cmp-facet-hint">Chips combine — a plan has to have all of them.</p>`;
 
     $('#cmp-filters').innerHTML =
       acc('cat', 'Type of RV', `<div class="cmp-chips">${cats}</div>`) +
@@ -226,8 +226,8 @@
       acc('length', 'Length', rangeCtl('length', RANGE.length, (v) => feet(v) + ' ft')) +
       acc('weight', 'Dry weight',
         `${rangeCtl('weight', RANGE.weight, (v) => v.toLocaleString('en-US') + ' lb')}
-         <p class="cmp-facet-hint">Towables only. Jayco publishes no dry weight for any
-         motorhome, so this range never hides one — see the note in this file's header.</p>`);
+         <p class="cmp-facet-hint">Towables only. Motorhomes don't list a dry weight, so this
+         range never hides one.</p>`);
   }
 
   /* ---------- Contextual counts ----------
@@ -811,7 +811,7 @@
   /* ---------- Boot ---------- */
   if (!ROWS.length) return;
   $('#cmp-sub').textContent =
-    `${ROWS.length} floorplans across ${Object.keys(BUILD).length} models, with Jayco's own drawings and published specifications.`;
+    `${ROWS.length} floorplans across ${Object.keys(BUILD).length} models, with drawings and full specifications.`;
   readURL();
   renderFilters();
   paintFilters();

@@ -62,7 +62,7 @@
     'Magnum Truss™ Roof System':
       ['roof', 'A man standing on the roof of a Jayco fifth wheel, sweeping it clear'],
     'Stronghold VBL™ Laminated Walls':
-      ['walls', 'Two people holding up a cutaway section of a Jayco laminated wall'],
+      ['walls', 'A woman climbing the ladder on the side wall of a Jayco North Point'],
     'Custom Frames':
       ['frames', 'A bare steel Jayco trailer frame on the factory floor'],
     'The Jayco 2+3 Warranty':
@@ -83,7 +83,7 @@
     'Custom Interior Design':
       ['interior', 'The galley of a Jayco travel trailer, white cabinetry and a wood floor'],
     'The JRide® Ride and Handling Package':
-      ['jride', 'A Jayco motorhome parked in the desert, two people walking back towards it'],
+      ['jride', 'A Jayco motorhome parked in the desert, two people walking back toward it'],
     'One-Piece Seamless Front Caps':
       ['frontcap', 'A Jayco Greyhawk Class C parked on grass with its awning out'],
     '120" Windshield':
@@ -149,7 +149,7 @@
   function drawRate() {
     if (!group) return;
     $('#vt-rate-lead').textContent =
-      'Move each one towards the end that sounds like you. Leave it in the middle if you have no '
+      'Move each one toward the end that sounds like you. Leave it in the middle if you have no '
       + 'strong view — the result only reports what you actually said.';
     $('#vt-rate').innerHTML = featuresOf(group).map((f, i) => `
       <li class="vt-item">
@@ -219,7 +219,7 @@
       <div class="vt-where">
         <h3 class="vt-res-sub">Where to start looking</h3>
         <p class="vt-res-note">Every ${esc(group.id === 'towable' ? 'towable' : 'motorhome')} class
-          in the 2027 lineup, counted from the catalogue rather than typed.</p>
+          in the 2027 lineup, counted from the catalog rather than typed.</p>
         <ul class="vt-class-list" role="list">
           ${cats.map((c) => `
             <li class="vt-class">
@@ -236,7 +236,7 @@
           <span class="section-label">Your result</span>
           <h2 class="vt-res-h">You have not told it anything yet.</h2>
           <p class="vt-res-lead">Every slider is still in the middle, so there is nothing to rank.
-            Move a few towards either end and reveal it again — or read
+            Move a few toward either end and reveal it again — or read
             <a href="jayco-difference.html">the Jayco Difference</a>, which is the same list with
             the reasoning attached.</p>
         </div>${where}`;
@@ -248,7 +248,7 @@
             ? 'What you said matters most.'
             : 'What you said you could live without.'}</h2>
           <p class="vt-res-lead">${high.length
-            ? 'These are the ones you moved towards <em>spring for it</em>, in the order you '
+            ? 'These are the ones you moved toward <em>spring for it</em>, in the order you '
               + 'rated them — with what Jayco does about each, in Jayco\'s own words.'
             : 'You did not mark anything as worth paying extra for, so here is the other end of '
               + 'it: the features you were happiest to skimp on.'}</p>

@@ -430,7 +430,7 @@
     }
     return {
       href: 'dealers.html?model=' + encodeURIComponent(row.dealerFallback),
-      note: 'Jayco does not list ' + row.name + ' dealers separately, so this shows dealers who ' +
+      note: row.name + ' dealers are not listed separately, so this shows dealers who ' +
             'carry the ' + row.dealerFallback + '.',
     };
   }
@@ -509,7 +509,7 @@
   function planCard(row, entry) {
     const p = entry.plan;
     const price = p.price == null
-      ? '<span class="qz-card-price qz-card-price--tbd">Price not published yet</span>'
+      ? '<span class="qz-card-price qz-card-price--tbd">Price coming soon</span>'
       : '<span class="qz-card-price">' + money(row.basePrice + p.price) + '</span>';
     const stats = [];
     if (typeof p.sleeps === 'number') stats.push(['Sleeps', p.sleeps]);

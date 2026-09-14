@@ -515,7 +515,7 @@ window.JAYCO_QUIZ = (function () {
                      alt: 'A child on the overhead bunk of a motorhome, passing photographs down' },
       },
       question: 'How many people sleep on board?',
-      why: 'Counted in real beds, from Jayco’s published floorplans.',
+      why: 'Counted in real beds, from the floorplans.',
       options: [
         { token: 'sl-2', label: 'One or two', clarifier: 'Just you, or the two of you.',
           sets: { sleeps: 2 } },
@@ -583,7 +583,7 @@ window.JAYCO_QUIZ = (function () {
         towable:   { src: PH + 'q-s4-tow.webp',
                      alt: 'The living room of a fifth wheel — fireplace, island and a bank of windows' },
         motorized: { src: PH + 'q-s4-drive.webp',
-                     alt: 'The dinette and entertainment centre inside a motorhome' },
+                     alt: 'The dinette and entertainment center inside a motorhome' },
       },
       question: 'Where should we start on price?',
       /* The three option labels are written at runtime from the actual MSRP of
@@ -591,7 +591,7 @@ window.JAYCO_QUIZ = (function () {
          money rather than in the words value / mid / premium. See
          priceBandLabels() in quiz-score.js. Skipped when two or fewer
          candidates remain — with nothing to choose between, asking is theatre. */
-      why: 'Every figure here is Jayco’s published 2027 starting price.',
+      why: 'Every figure here is the 2027 starting price.',
       dynamic: 'priceBands',
       options: [
         { token: 'bd-low', label: 'The lower end', sets: { budget: 0 } },

@@ -536,7 +536,7 @@
     /* The list is the SELECTED plan's, so say which — otherwise switching
        floorplans silently changes what is on offer here. */
     const scope = fp && fp.optionIds
-      ? `Options Jayco lists for the ${fp.name}. Required packages are priced into every build of this plan.`
+      ? `Options for the ${fp.name}. Required packages are priced into every build of this plan.`
       : 'Select any upgrades — your price updates instantly.';
 
     /* Everything selectable comes first; the spec sheet sits underneath as
@@ -545,7 +545,7 @@
        an empty heading above nothing. */
     const choices = pkgs && pkgs.length
       ? `<div class="pkg-list">${cards}</div>`
-      : `<p class="step-note">Jayco has not published an option list for the ${fp ? fp.name : 'this plan'} yet.</p>`;
+      : `<p class="step-note">The option list for the ${fp ? fp.name : 'this plan'} is coming soon.</p>`;
 
     return `<div class="step-head"><h2>Packages &amp; Options</h2><p>${scope}</p></div>
       ${choices}
@@ -562,7 +562,7 @@
     if (!specs) {
       return `<section class="spec-sheet">
         <h3 class="spec-sheet-head">Full specifications</h3>
-        <p class="step-note">Jayco has not published specifications for the ${fp ? fp.name : 'selected plan'} yet.</p>
+        <p class="step-note">Specifications for the ${fp ? fp.name : 'selected plan'} are coming soon.</p>
       </section>`;
     }
     const groups = Object.keys(specs).map((g) => {

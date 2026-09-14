@@ -119,7 +119,7 @@ window.JAYCO_TYPE = (function () {
       label: 'The Fifth Wheel Life',
       heading: 'The most home<br>you can tow.',
       body: [
-        'A fifth wheel hitches inside the bed of a pickup rather than behind its bumper. That one change is what lets a towable stand two storeys at the front, run 45 feet long, and still track behind the truck like it belongs there.',
+        'A fifth wheel hitches inside the bed of a pickup rather than behind its bumper. That one change is what lets a towable stand two stories at the front, run 45 feet long, and still track behind the truck like it belongs there.',
         /* Every figure here is checked against models-data.js / build-data.js.
            It was written against version-4's numbers and went stale when the
            2027 specs were recomputed from the real 181 floorplans: the Eagle

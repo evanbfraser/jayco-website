@@ -228,7 +228,7 @@
           ${esc(r.typesText)}</p>
       </div>
       <a class="mn-card-cta" href="${esc(r.pdf)}" target="_blank" rel="noopener"
-        aria-label="Download the ${esc(r.yearsText + ' ' + r.name)} as a PDF (opens on jayco.com)"
+        aria-label="Download the ${esc(r.yearsText + ' ' + r.name)} as a PDF (opens in a new tab)"
         >Download PDF</a>
     </li>`;
   }

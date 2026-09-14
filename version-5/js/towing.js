@@ -227,8 +227,8 @@
        no denominator is the part of a tool like this people misread. */
     $('#tc-sub').textContent = on.length
       ? 'Measured against ' + lbs(capacity) + ' loaded, not dry, across ' + ROWS.length +
-        ' Jayco towables with published weights. ' + noRating +
-        ' more have no published rating yet; ' + motorized +
+        ' Jayco towables with listed weights. ' + noRating +
+        ' more do not have a rating listed yet; ' + motorized +
         ' motorhome floorplans are driven rather than towed and are not counted.'
       : 'The lightest Jayco towable is ' + lbs(LIGHTEST) + ' loaded. ' + motorized +
         ' motorhome floorplans are driven rather than towed.';
@@ -495,7 +495,7 @@
       + 'hitch class, brake controller, axle ratio, altitude, or the weight of anything already '
       + 'in the truck. Any one of those can rule out a trailer listed here. Fifth wheels and toy '
       + 'haulers need a pickup with a bed and a fifth-wheel or gooseneck hitch. Weights are '
-      + "Jayco's published figures and are subject to change; options add weight. Verify against "
+      + "published figures and are subject to change; options add weight. Verify against "
       + "the trailer's own weight label and your vehicle's manual, and have a dealer confirm the "
       + 'match before purchase.', R - L).forEach((line) => { room(5); doc.text(line, L, y); y += 4; });
 

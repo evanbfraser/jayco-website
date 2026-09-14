@@ -306,7 +306,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
         blurb: 'Rear garage layout. The back of the coach is left open for bikes, boards and bins, with the bed lifting over the top of it — and the optional pop-top doubles your sleeping capacity when the weekend grows.',
         specs: [
           ['Fresh water', '21 gal'],
-          ['Grey / black', '20 / 10 gal'],
+          ['Gray / black', '20 / 10 gal'],
           ['Best for', 'Gear haulers'],
           ['Pop-top', 'Available'],
         ],
@@ -351,11 +351,11 @@ window.JAYCO_MODEL_DETAIL = (function () {
         sleepsMax: 2,
         length: '20′ 11″',
         tags: ['twin'],
-        blurb: 'The most popular Swift. Galley forward, dual twin beds aft that convert to a king, and the wet bath tucked in the rear corner — the layout for travellers who want to sleep separately and still have a bathroom.',
+        blurb: 'The most popular Swift. Galley forward, dual twin beds aft that convert to a king, and the wet bath tucked in the rear corner — the layout for travelers who want to sleep separately and still have a bathroom.',
         specs: [
           ['Fresh water', '24 gal'],
-          ['Grey / black', '13 / 12 gal'],
-          ['Best for', 'Two travellers'],
+          ['Gray / black', '13 / 12 gal'],
+          ['Best for', 'Two travelers'],
           ['Beds', 'Twins or king'],
         ],
         /* The capture ids all live in models-data.js now — see JAYCO_TOURS
@@ -503,7 +503,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
         },
         {
           group: 'Weights',
-          note: 'Under 10,000 lb loaded, so it drives on a standard licence and still tows a small trailer or a boat.',
+          note: 'Under 10,000 lb loaded, so it drives on a standard license and still tows a small trailer or a boat.',
           rows: [
             ['GVWR', '9,350 lbs', '9,350 lbs'],
             ['GCWR', '12,000 lbs', '12,000 lbs'],
@@ -512,10 +512,10 @@ window.JAYCO_MODEL_DETAIL = (function () {
         },
         {
           group: 'Capacities',
-          note: 'Enough water and fuel for a long weekend without hunting for a hookup. The 20T carries more fresh; the 20E carries more grey.',
+          note: 'Enough water and fuel for a long weekend without hunting for a hookup. The 20T carries more fresh; the 20E carries more gray.',
           rows: [
             ['Fresh water', '21 gal', '24 gal'],
-            ['Grey water', '20 gal', '13 gal'],
+            ['Gray water', '20 gal', '13 gal'],
             ['Black water', '10 gal', '12 gal'],
             ['Fuel', '24 gal', '24 gal'],
             ['Sleeping capacity', 'Up to 2 (4 with pop-top)', 'Up to 2'],
@@ -598,8 +598,8 @@ window.JAYCO_MODEL_DETAIL = (function () {
 
     faqs: [
       {
-        q: 'Do I need a special licence to drive the Swift?',
-        a: 'No. At 20 feet 11 inches on a RAM ProMaster 3500 chassis, the Swift drives on a standard driver’s licence in every US state and Canadian province — and it handles much like a large van.',
+        q: 'Do I need a special license to drive the Swift?',
+        a: 'No. At 20 feet 11 inches on a RAM ProMaster 3500 chassis, the Swift drives on a standard driver’s license in every US state and Canadian province — and it handles much like a large van.',
       },
       {
         q: 'Will it fit in a standard parking space or my garage?',
@@ -732,7 +732,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
       const black = pick(t, /black/i);
       if (dry) out.push(['Unloaded weight', dry + ' lbs']);
       if (fresh) out.push(['Fresh water', Math.round(parseFloat(fresh)) + ' gal']);
-      if (grey && black) out.push(['Grey / black', Math.round(parseFloat(grey)) + ' / ' + Math.round(parseFloat(black)) + ' gal']);
+      if (grey && black) out.push(['Gray / black', Math.round(parseFloat(grey)) + ' / ' + Math.round(parseFloat(black)) + ' gal']);
       const furn = pick(m, /furnace/i);
       if (furn) out.push(['Furnace', Number(furn).toLocaleString('en-US') + ' BTU']);
       return out;
@@ -963,7 +963,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
         name: 'Climate & power',
         items: [
           { title: '13,500 BTU Coleman® Mach',
-            body: 'The Quiet Series unit — Jayco rates it more efficient and 10% quieter than other brands.' },
+            body: 'The Quiet Series unit — more efficient and 10% quieter than other brands.' },
           { title: 'Climate Shield™',
             body: 'Jayco tests the package from 0 to 100 degrees Fahrenheit. It arrives with the Jay Sport Package.' },
           { title: 'Radiant-barrier insulation',
@@ -1023,7 +1023,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
           group: 'Tanks',
           rows: [
             ['Fresh water', '55 gal', '55 gal', '55 gal'],
-            ['Grey water', '38 gal', '76 gal', '60 gal'],
+            ['Gray water', '38 gal', '76 gal', '60 gal'],
             ['Black water', '38 gal', '38 gal', '30 gal'],
             ['Propane', '40 lbs', '40 lbs', '40 lbs'],
           ],
@@ -1154,7 +1154,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
       const awning = pick(me, /awning/i);
       if (gvwr) out.push(['GVWR', gvwr + ' lbs']);
       if (fresh) out.push(['Fresh water', Math.round(parseFloat(fresh)) + ' gal']);
-      if (grey && black) out.push(['Grey / black', Math.round(parseFloat(grey)) + ' / ' + Math.round(parseFloat(black)) + ' gal']);
+      if (grey && black) out.push(['Gray / black', Math.round(parseFloat(grey)) + ' / ' + Math.round(parseFloat(black)) + ' gal']);
       if (cargo) out.push(['Outside storage', cargo + ' cu. ft.']);
       if (awning) out.push(['Awning', awning]);
       return out;
@@ -1442,7 +1442,7 @@ window.JAYCO_MODEL_DETAIL = (function () {
           group: 'Tanks',
           rows: [
             ['Fresh water', '42 gal', '43 gal', '47 gal'],
-            ['Grey water', '41 gal', '41 gal', '41 gal'],
+            ['Gray water', '41 gal', '41 gal', '41 gal'],
             ['Black water', '31 gal', '31 gal', '31 gal'],
             ['Propane', '56 lbs', '56 lbs', '56 lbs'],
             ['Fuel', '55 gal', '55 gal', '55 gal'],
