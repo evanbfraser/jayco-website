@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=v5-core-11" />
-  <link rel="stylesheet" href="css/about.css?v=v5-ab-15" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -131,9 +131,16 @@
        "Fire, CO, and LP detection" section. Jayco's safety page names safety
        devices as a category and publishes no detector specification — no
        brands, no placement, no standard. PRODUCT.md is explicit that absences
-       must not be fabricated, so there is a note at the foot of the page
-       saying what is missing and why, rather than a section of invented
+       must not be fabricated, so a short note at the foot of the page points
+       owners to their dealer and manual rather than a section of invented
        detector copy. Supply the detail and it drops straight in.
+
+       FEATURE CARDS. "On the road" and "Built into it" are cards with
+       jayco.com's own feature photographs: seven shared with value-tool.html
+       (assets/value-tool/web, from jayco.com/value-tool/) and the handling
+       package picture from the 2027 North Point page
+       (jayco.com/uploads/rvs/sliders/4-5-star-handling.jpg, fetched
+       2026-09-13, served as assets/safety/web/handling-*.webp).
 
        THE ONE AUTHORED MOTION MOMENT is the JaySMART rig. A lighting system
        cannot really be explained in prose, so this plays each of its four
@@ -145,13 +152,16 @@
 
     <section class="ab-hero">
       <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-13 as assets/jayco-safety-hero.jpg
+             (replaced the same day) and served from the hero-v3 WebP pair — a new
+             name, so a browser holding the first version fetches this one. -->
         <img class="ab-hero-img"
-             src="../assets/safety/web/hero-1800.webp"
-             srcset="../assets/safety/web/hero-1200.webp 1200w,
-                     ../assets/safety/web/hero-1800.webp 1800w"
+             src="../assets/safety/web/hero-v3-1800.webp"
+             srcset="../assets/safety/web/hero-v3-1200.webp 1200w,
+                     ../assets/safety/web/hero-v3-1800.webp 1800w"
              sizes="100vw" width="1800" height="1200"
              fetchpriority="high" decoding="async"
-             alt="A pickup towing a Jayco travel trailer along a forest highway" />
+             alt="A Ford pickup towing a Jayco North Point fifth wheel toward the camera on a forest highway" />
       </div>
       <div class="ab-hero-overlay" aria-hidden="true"></div>
       <div class="ab-hero-content">
@@ -165,12 +175,12 @@
     <section class="ab-intro">
       <div class="ab-inner">
         <p class="ab-intro-body ab-rise">An RV is longer than what people expect to be following, and
-          it stops slower than it looks like it should. Most of what goes wrong is a misjudgement by
+          it stops slower than it looks like it should. Most of what goes wrong is a misjudgment by
           somebody else — which is why the systems below fall into two groups: the ones that keep the
           coach doing what you asked it to, and the ones that tell everyone else what it is about to
           do.</p>
         <p class="ab-intro-body ab-rise">Some of this is standard on everything. Some of it is on
-          select models. Where Jayco says select, so does this page.</p>
+          select models, and each one says which.</p>
       </div>
     </section>
 
@@ -187,41 +197,146 @@
         </div>
 
         <div class="sf-signal ab-rise">
-          <!-- A rear elevation of a trailer. Deliberately schematic: this is a
-               diagram of a lighting behaviour, not a picture of a coach, and a
-               photograph could not show a sequence at all. -->
-          <svg class="sf-signal-stage" viewBox="0 0 640 300" role="img"
-               aria-label="Diagram of the rear of a trailer showing the JaySMART lamps">
-            <rect x="92" y="40" width="456" height="212" rx="18"
-                  fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.26)" stroke-width="2" />
-            <rect x="150" y="72" width="340" height="62" rx="10" fill="rgba(255,255,255,0.06)" />
-            <rect x="112" y="258" width="416" height="14" rx="7" fill="rgba(255,255,255,0.18)" />
+          <!-- The JaySMART scene. A Jayco travel trailer at night, seen from behind
+               and to one side, so a signal can be seen running from the rear, down
+               the side, to the front cap.
 
-            <!-- Side and roofline markers. Two groups, so a turn can light one
-                 side of the trailer without the other. -->
-            <g id="sf-mark-l" class="sf-lamp">
-              <circle cx="160" cy="52" r="7" fill="#F2A03D" />
-              <circle cx="216" cy="52" r="7" fill="#F2A03D" />
-              <circle cx="272" cy="52" r="7" fill="#F2A03D" />
-              <rect x="86" y="120" width="12" height="34" rx="6" fill="#F2A03D" />
+               LAMP LAYOUT follows a 2020 Jay Flight filmed at night by an owner
+               (youtube.com/watch?v=PvsolNajrgU, a reference, not an asset) and the
+               counts given there for a JaySMART trailer: seven rear clearance
+               markers, three side markers a side, and markers on the front cap;
+               the vertical corner strips, low brake lamps and the white roofline
+               floods that come on in reverse are as filmed. It is an illustration,
+               not a drawing of any one floorplan — see the note under it.
+
+               Every lamp is a group whose data-g names the circuit it is on:
+               .sf-lens is the unlit lamp and is always drawn; .sf-core and
+               .sf-glow are the light. The pools on the ground and the washes on
+               the trailer's surfaces (.sf-fx) are the light those lamps throw.
+               initSignal() in js/about.js sets .is-on or .is-dim per circuit. -->
+          <svg class="sf-signal-stage" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid slice" role="img"
+               aria-label="Illustration of a Jayco travel trailer at night, seen from behind and to one side, with its JaySMART lamps">
+            <defs>
+              <linearGradient id="sf-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#02080d" /><stop offset="1" stop-color="#0b2233" />
+              </linearGradient>
+              <linearGradient id="sf-ground" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#08141d" /><stop offset="1" stop-color="#02060a" />
+              </linearGradient>
+              <linearGradient id="sf-side" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#1d2831" /><stop offset="1" stop-color="#2d3943" />
+              </linearGradient>
+              <radialGradient id="sf-g-red"><stop offset="0" stop-color="#ff6b57" /><stop offset="0.3" stop-color="#ff2e1f" stop-opacity="0.55" /><stop offset="1" stop-color="#ff2e1f" stop-opacity="0" /></radialGradient>
+              <radialGradient id="sf-g-amber"><stop offset="0" stop-color="#ffd27a" /><stop offset="0.3" stop-color="#ff9d1f" stop-opacity="0.55" /><stop offset="1" stop-color="#ff9d1f" stop-opacity="0" /></radialGradient>
+              <radialGradient id="sf-g-white"><stop offset="0" stop-color="#ffffff" /><stop offset="0.3" stop-color="#d8ecff" stop-opacity="0.6" /><stop offset="1" stop-color="#d8ecff" stop-opacity="0" /></radialGradient>
+              <radialGradient id="sf-p-red"><stop offset="0" stop-color="#ff3a24" stop-opacity="0.5" /><stop offset="1" stop-color="#ff3a24" stop-opacity="0" /></radialGradient>
+              <radialGradient id="sf-p-amber"><stop offset="0" stop-color="#ff9d1f" stop-opacity="0.42" /><stop offset="1" stop-color="#ff9d1f" stop-opacity="0" /></radialGradient>
+              <radialGradient id="sf-p-white"><stop offset="0" stop-color="#e6f2ff" stop-opacity="0.55" /><stop offset="1" stop-color="#e6f2ff" stop-opacity="0" /></radialGradient>
+              <!-- Kept low: in the footage the rear wall stays dark and the lamps
+                   carry it; the wash is only the light spilling onto it. -->
+              <radialGradient id="sf-w-red" cx="0.5" cy="0.15" r="0.95"><stop offset="0" stop-color="#ff3a24" stop-opacity="0.2" /><stop offset="1" stop-color="#ff3a24" stop-opacity="0.03" /></radialGradient>
+              <radialGradient id="sf-w-white" cx="0.5" cy="0.05" r="0.95"><stop offset="0" stop-color="#e6f2ff" stop-opacity="0.22" /><stop offset="1" stop-color="#e6f2ff" stop-opacity="0.02" /></radialGradient>
+              <radialGradient id="sf-w-front" cx="0.35" cy="0.35" r="0.9"><stop offset="0" stop-color="#ffb13d" stop-opacity="0.9" /><stop offset="1" stop-color="#ff7a10" stop-opacity="0.3" /></radialGradient>
+              <linearGradient id="sf-w-side" x1="0" y1="0" x2="0" y2="1"><stop offset="0.45" stop-color="#ff9d1f" stop-opacity="0" /><stop offset="1" stop-color="#ff9d1f" stop-opacity="0.32" /></linearGradient>
+            </defs>
+
+            <!-- Night: sky, the tree line on the horizon, the ground. The horizon is
+                 eye level (y 250), below the roofline, which is why the roof is not
+                 seen. The drawing is two-point perspective: the rear wall runs to a
+                 vanishing point off to the left (-900, 250) and the side wall to one
+                 off to the right (1700, 250), from the nearest corner at x 330, the
+                 tallest edge in the frame. Positions along each wall are foreshortened
+                 on those lines, and the lamps and their glows shrink with distance. -->
+            <rect width="960" height="480" fill="url(#sf-sky)" />
+            <path d="M0 250 L0 196 Q40 170 76 190 Q110 150 150 178 Q182 164 204 186 L238 190 Q270 146 310 176 Q350 160 380 184 Q430 158 470 180 Q530 166 570 184 Q620 154 670 178 Q710 168 750 186 Q810 150 860 178 Q910 164 960 184 L960 250 Z" fill="#040b11" />
+            <rect y="250" width="960" height="230" fill="url(#sf-ground)" />
+
+            <g transform="translate(-30 0)">
+              <!-- The trailer's contact shadow, and the light thrown on the ground. -->
+              <ellipse cx="580" cy="356" rx="340" ry="24" fill="#01050a" opacity="0.75" transform="rotate(-4.6 580 356)" />
+              <ellipse class="sf-fx" data-g="pool-red" cx="240" cy="404" rx="270" ry="62" fill="url(#sf-p-red)" />
+              <ellipse class="sf-fx" data-g="pool-white" cx="240" cy="412" rx="310" ry="76" fill="url(#sf-p-white)" />
+              <ellipse class="sf-fx" data-g="pool-side" cx="600" cy="368" rx="320" ry="36" fill="url(#sf-p-amber)" transform="rotate(-4.6 600 368)" />
+              <ellipse class="sf-fx" data-g="pool-front" cx="884" cy="336" rx="110" ry="22" fill="url(#sf-p-amber)" />
+
+              <!-- Tongue and jack at the front; wheels drawn before the side wall so
+                   the skirt covers their tops. -->
+              <path d="M868 312 L912 326" stroke="#0c161e" stroke-width="5" stroke-linecap="round" />
+              <path d="M904 324 L904 344" stroke="#0c161e" stroke-width="4" stroke-linecap="round" />
+              <ellipse cx="600" cy="352" rx="14" ry="24" fill="#02060a" />
+              <ellipse cx="636" cy="349" rx="13.5" ry="23" fill="#02060a" />
+              <ellipse cx="597" cy="353" rx="6" ry="10" fill="#141e26" />
+              <ellipse cx="633" cy="350" rx="5.8" ry="9.6" fill="#141e26" />
+              <path d="M330 360 L850 318 L850 326 L330 371 Z" fill="#03080c" />
+
+              <!-- Side wall, with its windows, door and graphics on the same lines. -->
+              <path d="M330 90 L850 151 L850 318 L330 360 Z" fill="url(#sf-side)" />
+              <path d="M350 262 C480 262 640 236 846 214" stroke="#3b4953" stroke-width="3" fill="none" />
+              <path d="M350 276 C480 276 640 250 846 226" stroke="#33414b" stroke-width="2" fill="none" />
+              <path d="M424 151 L572 163 L572 212 L424 207 Z" fill="#091016" />
+              <path d="M773 178 L803 181 L803 220 L773 218 Z" fill="#091016" />
+              <path d="M707 177 L741 180 L741 314 L707 316 Z" fill="#18222a" stroke="#091016" stroke-width="2" />
+              <path class="sf-fx" data-g="wash-side" d="M330 90 L850 151 L850 318 L330 360 Z" fill="url(#sf-w-side)" />
+              <path d="M330 90 L850 151" stroke="#3f4d57" stroke-width="3" />
+
+              <!-- Front cap. -->
+              <path d="M850 151 Q882 165 888 225 Q890 292 856 320 L850 318 Z" fill="#25313a" />
+              <path class="sf-fx" data-g="wash-front" d="M850 151 Q882 165 888 225 Q890 292 856 320 L850 318 Z" fill="url(#sf-w-front)" />
+
+              <!-- Rear wall: the near corner is the tallest edge, the far edge at x 170. -->
+              <path d="M330 360 L330 100 Q330 90 320 91 L180 110 Q170 111 170 121 L170 346 Z" fill="#0d171f" />
+              <path d="M315.5 123.9 L181.3 137.8 L181.3 318.2 L315.5 326.7 Z" fill="none" stroke="#18242d" stroke-width="2" />
+              <text transform="translate(246 216) matrix(0.95 -0.033 0 0.92 0 0)" text-anchor="middle"
+                    font-family="Host Grotesk, system-ui, sans-serif" font-size="20" font-weight="800"
+                    font-style="italic" fill="#1c2933">Jayco</text>
+              <path d="M170 346 L330 360 L330 371 L170 356 Z" fill="#03080c" />
+              <path d="M330 92 L330 360" stroke="#2a3640" stroke-width="2" />
+              <path class="sf-fx" data-g="wash-red" d="M330 360 L330 100 Q330 90 320 91 L180 110 Q170 111 170 121 L170 346 Z" fill="url(#sf-w-red)" />
+              <path class="sf-fx" data-g="wash-white" d="M330 360 L330 100 Q330 90 320 91 L180 110 Q170 111 170 121 L170 346 Z" fill="url(#sf-w-white)" />
+
+              <!-- Lamps. Each: glow, then the unlit lens, then the lit core. -->
+              <g class="sf-l" data-g="roof">
+                <g class="sf-glow" fill="url(#sf-g-red)"><circle cx="311.9" cy="102.2" r="16" /><circle cx="288.6" cy="105.1" r="16" /><circle cx="266.1" cy="107.8" r="15.5" /><circle cx="244.5" cy="110.4" r="15" /><circle cx="223.7" cy="113" r="15" /><circle cx="203.6" cy="115.4" r="14.5" /><circle cx="184.2" cy="117.8" r="14" /></g>
+                <g class="sf-lens" fill="#3a1511"><circle cx="311.9" cy="102.2" r="3.9" /><circle cx="288.6" cy="105.1" r="3.85" /><circle cx="266.1" cy="107.8" r="3.8" /><circle cx="244.5" cy="110.4" r="3.7" /><circle cx="223.7" cy="113" r="3.65" /><circle cx="203.6" cy="115.4" r="3.6" /><circle cx="184.2" cy="117.8" r="3.5" /></g>
+                <g class="sf-core" fill="#ff5a45"><circle cx="311.9" cy="102.2" r="3.9" /><circle cx="288.6" cy="105.1" r="3.85" /><circle cx="266.1" cy="107.8" r="3.8" /><circle cx="244.5" cy="110.4" r="3.7" /><circle cx="223.7" cy="113" r="3.65" /><circle cx="203.6" cy="115.4" r="3.6" /><circle cx="184.2" cy="117.8" r="3.5" /></g>
+              </g>
+              <g class="sf-l" data-g="rev-top">
+                <g class="sf-glow" fill="url(#sf-g-white)"><circle cx="280.6" cy="117.5" r="46" /><circle cx="210.5" cy="125.4" r="42" /></g>
+                <g class="sf-lens" fill="#1e262c"><circle cx="280.6" cy="117.5" r="5" /><circle cx="210.5" cy="125.4" r="4.5" /></g>
+                <g class="sf-core" fill="#ffffff"><circle cx="280.6" cy="117.5" r="5" /><circle cx="210.5" cy="125.4" r="4.5" /></g>
+              </g>
+              <!-- strip-r is the near corner, on the side we can see; strip-l the far one. -->
+              <g class="sf-l" data-g="strip-r">
+                <ellipse class="sf-glow" cx="324.5" cy="206" rx="16" ry="38" fill="url(#sf-g-red)" />
+                <rect class="sf-lens" x="321.5" y="187.5" width="6" height="37.6" rx="3" fill="#3a1511" />
+                <rect class="sf-core" x="321.5" y="187.5" width="6" height="37.6" rx="3" fill="#ff4a38" />
+              </g>
+              <g class="sf-l" data-g="strip-l">
+                <ellipse class="sf-glow" cx="174.5" cy="211.7" rx="14" ry="34" fill="url(#sf-g-red)" />
+                <rect class="sf-lens" x="172" y="195.2" width="5" height="33" rx="2.5" fill="#3a1511" />
+                <rect class="sf-core" x="172" y="195.2" width="5" height="33" rx="2.5" fill="#ff4a38" />
+              </g>
+              <g class="sf-l" data-g="brake">
+                <g class="sf-glow" fill="url(#sf-g-red)"><circle cx="308.3" cy="320.9" r="30" /><circle cx="187.1" cy="313.8" r="27" /></g>
+                <g class="sf-lens" fill="#3a1511"><circle cx="308.3" cy="320.9" r="7" /><circle cx="187.1" cy="313.8" r="6.2" /></g>
+                <g class="sf-core" fill="#ff3b2a"><circle cx="308.3" cy="320.9" r="7" /><circle cx="187.1" cy="313.8" r="6.2" /></g>
+              </g>
+              <g class="sf-l" data-g="rev-low">
+                <g class="sf-glow" fill="url(#sf-g-white)"><circle cx="268.9" cy="328.9" r="16" /><circle cx="221.1" cy="325.7" r="15" /></g>
+                <g class="sf-lens" fill="#1e262c"><circle cx="268.9" cy="328.9" r="3.5" /><circle cx="221.1" cy="325.7" r="3.3" /></g>
+                <g class="sf-core" fill="#f4f9ff"><circle cx="268.9" cy="328.9" r="3.5" /><circle cx="221.1" cy="325.7" r="3.3" /></g>
+              </g>
+              <g class="sf-l" data-g="side">
+                <g class="sf-glow" fill="url(#sf-g-amber)"><circle cx="394" cy="336.9" r="21" /><circle cx="651" cy="319.7" r="17" /><circle cx="824" cy="308.2" r="14" /></g>
+                <g class="sf-lens" fill="#3b2a10"><circle cx="394" cy="336.9" r="3.8" /><circle cx="651" cy="319.7" r="3.1" /><circle cx="824" cy="308.2" r="2.6" /></g>
+                <g class="sf-core" fill="#ffb13d"><circle cx="394" cy="336.9" r="3.8" /><circle cx="651" cy="319.7" r="3.1" /><circle cx="824" cy="308.2" r="2.6" /></g>
+              </g>
+              <g class="sf-l" data-g="front">
+                <g class="sf-glow" fill="url(#sf-g-amber)"><circle cx="866" cy="160" r="16" /><circle cx="884" cy="302" r="16" /></g>
+                <g class="sf-lens" fill="#3b2a10"><circle cx="866" cy="160" r="3" /><circle cx="884" cy="302" r="3" /></g>
+                <g class="sf-core" fill="#ffb13d"><circle cx="866" cy="160" r="3" /><circle cx="884" cy="302" r="3" /></g>
+              </g>
             </g>
-            <g id="sf-mark-r" class="sf-lamp">
-              <circle cx="368" cy="52" r="7" fill="#F2A03D" />
-              <circle cx="424" cy="52" r="7" fill="#F2A03D" />
-              <circle cx="480" cy="52" r="7" fill="#F2A03D" />
-              <rect x="542" y="120" width="12" height="34" rx="6" fill="#F2A03D" />
-            </g>
-
-            <!-- Left cluster: turn above, brake below. -->
-            <rect id="sf-turn-l" class="sf-lamp" x="112" y="158" width="58" height="26" rx="7" fill="#F2A03D" />
-            <rect id="sf-brake-l" class="sf-lamp" x="112" y="192" width="58" height="46" rx="8" fill="#E5382C" />
-
-            <!-- Right cluster. -->
-            <rect id="sf-turn-r" class="sf-lamp" x="470" y="158" width="58" height="26" rx="7" fill="#F2A03D" />
-            <rect id="sf-brake-r" class="sf-lamp" x="470" y="192" width="58" height="46" rx="8" fill="#E5382C" />
-
-            <!-- Reverse, centred. -->
-            <rect id="sf-reverse" class="sf-lamp" x="288" y="200" width="64" height="30" rx="7" fill="#FFFFFF" />
           </svg>
 
           <div class="sf-signal-controls" role="group" aria-label="Choose a signal to demonstrate">
@@ -233,9 +348,8 @@
           <p class="sf-signal-say" role="status"></p>
         </div>
 
-        <p class="ab-note ab-rise">JaySMART&trade; is standard on select models. The diagram above is
-          schematic — lamp positions vary by floorplan, and the behaviour is what is being shown, not
-          the layout.</p>
+        <p class="ab-note ab-rise">JaySMART&trade; is standard on select models. The illustration above
+          shows how the system behaves — lamp positions vary by floorplan.</p>
       </div>
     </section>
 
@@ -262,34 +376,69 @@
               suspension and geometry rather than electronics.</p>
           </div>
         </div>
-        <div class="ab-inner">
-          <ul class="ab-list ab-rise">
-            <li class="ab-item">
-              <h3 class="ab-item-name">JRide<sup>&reg;</sup></h3>
-              <p class="ab-item-body">The motorized ride and handling package: computer-balanced
-                driveshafts, sway and stabiliser bars, and air suspension and braking systems —
-                specified together rather than bolted on one part at a time.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">4- and 5-Star Handling Packages</h3>
-              <p class="ab-item-body">On towables: higher speed- and weight-rated tires, a rubberised
-                suspension system, and a pin box with forward and backward travel that takes the
-                shunt out of a fifth wheel before it reaches the truck.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">The third brake light</h3>
-              <p class="ab-item-body">A centre-mounted pulsing brake lamp on every motorhome, above
-                the line of sight of the car behind — the same argument as JaySMART, made once more
-                at the top of the coach.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">The 120&quot; windshield</h3>
-              <p class="ab-item-body">The largest on the market, on Class A motorhomes. It is sold as
-                a view and it works as visibility: more glass is more of the road, and the pillars
-                are further out of the way.</p>
-            </li>
-          </ul>
-        </div>
+        <!-- Feature cards; see FEATURE CARDS at the head of this file. -->
+        <ul class="sf-cards ab-rise">
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/jride-800.webp"
+                   srcset="../assets/value-tool/web/jride-500.webp 500w, ../assets/value-tool/web/jride-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="A Jayco Class A motorhome parked in the desert, two people walking back toward it" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">JRide<sup>&reg;</sup></h3>
+              <p>The motorized ride and handling package: computer-balanced driveshafts, sway and
+                stabilizer bars, and air suspension and braking systems — specified together rather
+                than bolted on one part at a time.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/safety/web/handling-800.webp"
+                   srcset="../assets/safety/web/handling-500.webp 500w, ../assets/safety/web/handling-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="642" loading="lazy" decoding="async"
+                   alt="The 5-Star Handling Package badge over a Jayco fifth wheel" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">4- and 5-Star Handling Packages</h3>
+              <p>On towables: higher speed- and weight-rated tires, a rubberized suspension system,
+                and a pin box with forward and backward travel that takes the shunt out of a fifth
+                wheel before it reaches the truck.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/brake-800.webp"
+                   srcset="../assets/value-tool/web/brake-500.webp 500w, ../assets/value-tool/web/brake-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="The back of a Jayco motorhome at dusk with its rear lights lit" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">The third brake light</h3>
+              <p>A center-mounted pulsing brake lamp on every motorhome, above the line of sight of
+                the car behind — the same argument as JaySMART, made once more at the top of the
+                coach.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/windshield-800.webp"
+                   srcset="../assets/value-tool/web/windshield-500.webp 500w, ../assets/value-tool/web/windshield-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="The view forward through the windshield of a Jayco motorhome onto desert scrub" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">The 120&quot; windshield</h3>
+              <p>The largest on the market, on Class A motorhomes. It is sold as a view and it works
+                as visibility: more glass is more of the road, and the pillars are further out of
+                the way.</p>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -334,7 +483,7 @@
                            ../assets/safety/web/build-1200.webp 1200w"
                    sizes="(max-width: 900px) 92vw, 46vw"
                    width="1200" height="800" loading="lazy" decoding="async"
-                   alt="The moulded front cap and headlight cluster of a Jayco Precept" />
+                   alt="The molded front cap and headlight cluster of a Jayco Precept" />
             </div>
           </div>
           <div class="ab-band-copy ab-rise">
@@ -344,33 +493,71 @@
               day it does everything. These are the numbers behind it.</p>
           </div>
         </div>
-        <div class="ab-inner">
-          <ul class="ab-list ab-rise">
-            <li class="ab-item">
-              <h3 class="ab-item-name">Magnum Truss&trade; Roof System</h3>
-              <p class="ab-item-body">Standard on every fifth wheel and travel trailer, and tested to
-                4,500 pounds. That is a snow load and a person walking on it, not a rain shed — and
-                it is the reason a Jayco roof is rated to be stood on.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">Stronghold VBL&trade; Laminated Walls</h3>
-              <p class="ab-item-body">Aluminium frame, fibreglass, metal backers and the interior
-                panel, vacuum-bonded into a single wall. Strength without the weight that usually
-                buys it, which matters twice on something you tow.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">Robotically welded frames</h3>
-              <p class="ab-item-body">Frames are welded by automated robotics rather than by hand.
-                The argument is not that a robot welds better than a good welder — it is that it
-                welds the same on the four hundredth frame as on the first.</p>
-            </li>
-            <li class="ab-item">
-              <h3 class="ab-item-name">One-piece seamless front caps</h3>
-              <p class="ab-item-body">A single moulded cap on motorhomes, with no seam for water or
-                road debris to work at over the years.</p>
-            </li>
-          </ul>
-        </div>
+        <!-- Feature cards. The photographs are jayco.com's own feature pictures,
+             taken from jayco.com/value-tool/ and shared with value-tool.html
+             (assets/value-tool/web). Alt text describes what each photograph
+             shows, which is not always the feature itself. -->
+        <ul class="sf-cards ab-rise">
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/roof-800.webp"
+                   srcset="../assets/value-tool/web/roof-500.webp 500w, ../assets/value-tool/web/roof-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="A man standing on the roof of a Jayco Eagle, sweeping it clear" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">Magnum Truss&trade; Roof System</h3>
+              <p>Standard on every fifth wheel and travel trailer, and tested to 4,500 pounds. That
+                is a snow load and a person walking on it, not a rain shed — and it is the reason a
+                Jayco roof is rated to be stood on.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/walls-800.webp"
+                   srcset="../assets/value-tool/web/walls-500.webp 500w, ../assets/value-tool/web/walls-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="A woman climbing the ladder on the side wall of a Jayco North Point" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">Stronghold VBL&trade; Laminated Walls</h3>
+              <p>Aluminum frame, fiberglass, metal backers and the interior panel, vacuum-bonded
+                into a single wall. Strength without the weight that usually buys it, which matters
+                twice on something you tow.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/frames-800.webp"
+                   srcset="../assets/value-tool/web/frames-500.webp 500w, ../assets/value-tool/web/frames-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="A bare black steel Jayco trailer frame on a factory floor stand" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">Robotically welded frames</h3>
+              <p>Frames are welded by automated robotics rather than by hand. The argument is not
+                that a robot welds better than a good welder — it is that it welds the same on the
+                four hundredth frame as on the first.</p>
+            </div>
+          </li>
+          <li class="sf-card">
+            <div class="sf-card-media">
+              <img class="sf-card-img" src="../assets/value-tool/web/frontcap-800.webp"
+                   srcset="../assets/value-tool/web/frontcap-500.webp 500w, ../assets/value-tool/web/frontcap-800.webp 800w"
+                   sizes="(max-width: 600px) 92vw, (max-width: 1100px) 46vw, 23vw"
+                   width="800" height="600" loading="lazy" decoding="async"
+                   alt="The front cap over the cab of a Jayco Greyhawk Class C, parked on grass" />
+            </div>
+            <div class="sf-card-body">
+              <h3 class="sf-card-name">One-piece seamless front caps</h3>
+              <p>A single molded cap on motorhomes, with no seam for water or road debris to work at
+                over the years.</p>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -437,19 +624,14 @@
       </div>
     </section>
 
-    <!-- ===== The gap, stated ===== -->
+    <!-- ===== Detection devices ===== -->
     <section class="ab-sec ab-tail">
       <div class="ab-inner">
-        <p class="ab-note ab-rise"><b>One thing this page does not tell you.</b> Jayco names safety
-          devices as a category its 100% pre-delivery inspection tests, and does not publish a
-          specification for the fire, carbon monoxide and LP detection fitted to its coaches — no
-          brands, no placement, no standard. That section is therefore missing rather than written:
-          a detector claim invented to complete a layout is the worst kind of thing to get wrong.
-          Ask a <a href="dealers.html">dealer</a> what is fitted to the coach in front of you, or
-          check the <a href="manuals.html">owner's manual</a> for that model and year, which does
-          list it. Everything else on this page is Jayco's own, from
-          <a href="https://www.jayco.com/about/safety/" target="_blank" rel="noopener">jayco.com/about/safety</a>
-          and its own journal, harvested 7 September 2026.</p>
+        <p class="ab-note ab-rise"><b>Fire, carbon monoxide and LP detection.</b> Safety devices
+          are one of the areas Jayco's 100% pre-delivery inspection tests on every coach. What is
+          fitted varies by model and year — ask a <a href="dealers.html">dealer</a> about the coach
+          in front of you, or check the <a href="manuals.html">owner's manual</a> for that model
+          and year.</p>
       </div>
     </section>
 
@@ -481,7 +663,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>The Magnum Truss&trade; roof is tested to 4,500 pounds and Jayco rates it to be
+              <p>The Magnum Truss&trade; roof is tested to 4,500 pounds and rated to be
                 walked on, which is not true of every roof in the category. Follow the access
                 instructions in your <a href="manuals.html">owner's manual</a> for the model —
                 where you step matters as much as whether you can.</p>
@@ -489,7 +671,7 @@
           </div>
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              <span>Do I need a special licence to drive one?</span>
+              <span>Do I need a special license to drive one?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
@@ -680,7 +862,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-  <script src="js/about.js?v=v5-ab-5"></script>
-  <script src="js/app.js?v=v5-core-6"></script>
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>
