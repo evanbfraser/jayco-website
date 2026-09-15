@@ -226,6 +226,10 @@
               <linearGradient id="sf-side" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0" stop-color="#1d2831" /><stop offset="1" stop-color="#2d3943" />
               </linearGradient>
+              <!-- Tread: a little lighter at its rear edge, darker where it turns under the body. -->
+              <linearGradient id="sf-tread" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#16212a" /><stop offset="1" stop-color="#0a1117" />
+              </linearGradient>
               <radialGradient id="sf-g-red"><stop offset="0" stop-color="#ff6b57" /><stop offset="0.3" stop-color="#ff2e1f" stop-opacity="0.55" /><stop offset="1" stop-color="#ff2e1f" stop-opacity="0" /></radialGradient>
               <radialGradient id="sf-g-amber"><stop offset="0" stop-color="#ffd27a" /><stop offset="0.3" stop-color="#ff9d1f" stop-opacity="0.55" /><stop offset="1" stop-color="#ff9d1f" stop-opacity="0" /></radialGradient>
               <radialGradient id="sf-g-white"><stop offset="0" stop-color="#ffffff" /><stop offset="0.3" stop-color="#d8ecff" stop-opacity="0.6" /><stop offset="1" stop-color="#d8ecff" stop-opacity="0" /></radialGradient>
@@ -263,10 +267,32 @@
                    the skirt covers their tops. -->
               <path d="M868 312 L912 326" stroke="#0c161e" stroke-width="5" stroke-linecap="round" />
               <path d="M904 324 L904 344" stroke="#0c161e" stroke-width="4" stroke-linecap="round" />
-              <ellipse cx="600" cy="352" rx="14" ry="24" fill="#02060a" />
-              <ellipse cx="636" cy="349" rx="13.5" ry="23" fill="#02060a" />
-              <ellipse cx="597" cy="353" rx="6" ry="10" fill="#141e26" />
-              <ellipse cx="633" cy="350" rx="5.8" ry="9.6" fill="#141e26" />
+              <!-- Tires are short cylinders. The outer sidewall lies in the side wall's
+                   plane; the tread runs back from it toward the rear wall's vanishing
+                   point, about 12 units here for a 9-inch tire, so the viewer behind
+                   the trailer sees a band of tread on each tire's rear edge. Front
+                   axle first so the rear tire overlaps it. The amber edge is the side
+                   marker's light catching the sidewall. -->
+              <ellipse cx="594" cy="376" rx="17" ry="3" fill="#010407" />
+              <ellipse cx="630" cy="372.3" rx="16" ry="2.8" fill="#010407" />
+              <g>
+                <path d="M636 326 L624.4 325 A13.5 23 0 0 0 624.4 371 L636 372 Z" fill="url(#sf-tread)" />
+                <path d="M632.1 325.7 A13.5 23 0 0 0 632.1 371.7 M628.3 325.3 A13.5 23 0 0 0 628.3 371.3" stroke="#0a1117" stroke-width="0.6" fill="none" />
+                <ellipse cx="636" cy="349" rx="13.5" ry="23" fill="#070d12" stroke="#131c23" stroke-width="0.8" />
+                <ellipse cx="634.5" cy="349" rx="7.7" ry="13" fill="#131c23" />
+                <ellipse cx="633.6" cy="349.5" rx="4.4" ry="7.5" fill="#0b1319" />
+                <ellipse cx="633.4" cy="349.6" rx="1.7" ry="2.9" fill="#1f2a33" />
+                <path class="sf-fx" data-g="pool-side" d="M649.5 349 A13.5 23 0 0 1 636 372" stroke="#ff9d1f" stroke-opacity="0.45" stroke-width="1.2" fill="none" />
+              </g>
+              <g>
+                <path d="M600 328 L588 327 A14 24 0 0 0 588 375 L600 376 Z" fill="url(#sf-tread)" />
+                <path d="M596 327.7 A14 24 0 0 0 596 375.7 M592 327.3 A14 24 0 0 0 592 375.3" stroke="#0a1117" stroke-width="0.6" fill="none" />
+                <ellipse cx="600" cy="352" rx="14" ry="24" fill="#070d12" stroke="#131c23" stroke-width="0.8" />
+                <ellipse cx="598.5" cy="352" rx="8" ry="13.5" fill="#131c23" />
+                <ellipse cx="597.5" cy="352.5" rx="4.6" ry="7.8" fill="#0b1319" />
+                <ellipse cx="597.3" cy="352.6" rx="1.8" ry="3" fill="#1f2a33" />
+                <path class="sf-fx" data-g="pool-side" d="M614 352 A14 24 0 0 1 600 376" stroke="#ff9d1f" stroke-opacity="0.45" stroke-width="1.2" fill="none" />
+              </g>
               <path d="M330 360 L850 318 L850 326 L330 371 Z" fill="#03080c" />
 
               <!-- Side wall, with its windows, door and graphics on the same lines. -->
