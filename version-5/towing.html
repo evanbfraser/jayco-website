@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=v5-core-12" />
-  <link rel="stylesheet" href="css/towing.css?v=v5-tc-15" />
+  <link rel="stylesheet" href="css/towing.css?v=v5-tc-16" />
   </head>
 <!-- No data-header="solid" here, unlike compare, the builder and the floorplans
      catalog. This page opens on a full-bleed photograph, so the header keeps the
@@ -350,9 +350,14 @@
                  alt="The living area of a Jayco fifth wheel, sectional sofa and kitchen beyond" />
             <div class="tc-cta-scrim" aria-hidden="true"></div>
             <div class="tc-cta-body">
-              <span class="section-label">Get a figure</span>
-              <h2 class="tc-cta-h">Ask what<br>one costs.</h2>
-              <a class="btn-secondary-light" href="request-quote.html">Request a Quote</a>
+              <span class="section-label">Ready now</span>
+              <h2 class="tc-cta-h">See what's<br>on the lot.</h2>
+              <!-- The dealer inventory page is still to be built, so this points at
+                   "#", the site's convention for a destination that does not exist
+                   yet — the same placeholder the View Inventory button on
+                   dealers.html carries, and towing.js neutralises the click the way
+                   dealers.js does there. Point the href at the page to retire both. -->
+              <a class="btn-secondary-light" href="#">View Inventory</a>
             </div>
           </article>
 
@@ -624,7 +629,7 @@
 
   <script src="js/models-data.js?v=v5-6"></script>
   <script src="js/build-data.js?v=v5-bp-19"></script>
-  <script src="js/towing.js?v=v5-tc-11"></script>
+  <script src="js/towing.js?v=v5-tc-12"></script>
   <script src="js/app.js?v=v5-core-13"></script>
 </body>
 </html>

@@ -348,12 +348,20 @@
   color: #fff; margin: 0.5rem 0 0.75rem;
 }
 /* The reader's own figure, picked out of its sentence — it is the one word in
-   the heading that changes when they move the slider. */
-/* Ink on blue at 4.1:1 — under the 4.5 body text needs, over the 3.0 large
-   text needs, and this is 800-weight at 1.6rem and up. It is the same navy the
-   marker and its pill use, so the reader's own figure is one colour wherever
-   the panel prints it. */
-#tc-reach-cap { color: var(--navy); font-variant-numeric: tabular-nums; }
+   the heading that changes when they move the slider, so it is boxed as well
+   as coloured: a white hairline outline around white text.
+
+   White on blue is 8.6:1, well clear of the 4.5 body text needs, where the
+   navy this carried before sat at 4.1:1 and leaned on its 800 weight to pass
+   as large text. The padding is in em so the box grows with the fluid heading,
+   and the negative margin keeps "Where" and "lands." at the spacing they had
+   before the box arrived. */
+#tc-reach-cap {
+  display: inline-block;
+  color: #fff; font-variant-numeric: tabular-nums;
+  border: 2px solid rgba(255,255,255,0.9); border-radius: 0.34em;
+  padding: 0.04em 0.3em; margin: 0 -0.06em;
+}
 .tc-reach-sub {
   margin: 0; max-width: 62ch;
   font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.9);

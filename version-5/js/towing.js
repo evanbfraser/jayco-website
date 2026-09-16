@@ -548,6 +548,14 @@
       goToGroup(a.dataset.jump);
     });
     wireTake();
+
+    /* The View Inventory card points at "#" until the dealer inventory page
+       exists. Without this the click sends the document to the top and Lenis
+       animates the whole way, which reads as the button misfiring rather than
+       as nothing happening — the same fix dealers.js carries for its own
+       View Inventory button. Delete it when the href points somewhere real. */
+    const inv = document.querySelector('.tc-cta a[href="#"]');
+    if (inv) inv.addEventListener('click', (e) => e.preventDefault());
   }
 
   readURL();
