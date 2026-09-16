@@ -16,15 +16,125 @@
 
   const DATA = window.JAYCO_MODEL_DETAIL || {};
   const params = new URLSearchParams(window.location.search);
-  const asked = params.get('model') || 'swift';
-  const slug = DATA[asked] ? asked : Object.keys(DATA)[0];
-  const model = DATA[slug];
-  if (!model) return;
-  // asked for a model that has no detail record yet — show the fallback, but keep
-  // the address bar honest about which one is on screen
-  if (slug !== asked && window.history && window.history.replaceState) {
-    window.history.replaceState({}, '', 'model.html?model=' + slug);
+
+  /* Two pages run this file. model.html is one model; floorplan.html is one
+     floorplan of one towable, and reuses every section the model page has —
+     the gallery, features, construction and videos are true of every plan in
+     the model — around a plan-specific hero, overview and spec sheet. */
+  const PLAN_PAGE = document.body.classList.contains('floorplan-page');
+  const ctx = PLAN_PAGE ? resolvePlanPage() : resolveModelPage();
+  if (!ctx) return;
+  const slug = ctx.slug, model = ctx.model, plan = ctx.plan || null;
+  // asked for something that has no page — show the fallback, but keep the
+  // address bar honest about which one is on screen
+  if (ctx.canonical && ctx.canonical !== ctx.asked && window.history && window.history.replaceState) {
+    window.history.replaceState({}, '', ctx.canonical);
   }
+
+  function resolveModelPage() {
+    const asked = params.get('model') || 'swift';
+    const s = DATA[asked] ? asked : Object.keys(DATA)[0];
+    if (!DATA[s]) return null;
+    return { slug: s, model: DATA[s], asked: asked, canonical: s === asked ? null : 'model.html?model=' + s };
+  }
+
+  /* ---------- Floorplan page: which model, which plan ----------
+     Every towable in models-data.js with a build-data.js record has a page per
+     floorplan — 134 of them — though only Jay Feather has a model detail
+     record. The rest get a record made here from the two libraries, so their
+     pages carry the sections that need no authored copy (hero, overview, spec
+     sheet, resources, the dealer band, the other floorplans) and drop the rest.
+     An unknown model or plan lands on Jay Feather's first plan. */
+  function resolvePlanPage() {
+    const LIB = (window.JAYCO && window.JAYCO.models) || {};
+    const CATS = (window.JAYCO && window.JAYCO.categories) || [];
+    const BUILD = window.JAYCO_BUILD || {};
+    /* the categories are named in the plural; the hero eyebrow names one coach */
+    const SINGULAR = {
+      'travel-trailers': 'Travel Trailer', destination: 'Destination Trailer',
+      'fifth-wheels': 'Fifth Wheel', 'toy-haulers': 'Toy Hauler',
+    };
+    const catOf = (s) => CATS.find((c) => LIB[s] && c.id === LIB[s].category) || null;
+    const ok = (s) => !!(LIB[s] && BUILD[s] && (BUILD[s].floorplans || []).length &&
+      (catOf(s) || {}).type === 'towable');
+
+    const askedModel = params.get('model') || '';
+    const askedPlan = (params.get('plan') || '').toLowerCase();
+    const s = ok(askedModel) ? askedModel : 'jay-feather';
+    if (!ok(s)) return null;
+
+    const lib = LIB[s], cat = catOf(s);
+    const detail = DATA[s] && !DATA[s].stub ? DATA[s] : null;
+    const all = BUILD[s].floorplans;
+    const b = all.find((p) => p.id === askedPlan) || all[0];
+
+    const rec = detail || {
+      slug: s,
+      name: lib.name,
+      year: lib.year,
+      category: lib.category,
+      categoryLabel: SINGULAR[lib.category] || cat.name,
+      priceFrom: lib.basePrice,
+      /* No footage exists for these models, and the category photograph is a
+         different coach — so the hero stands the model's own cut-out render
+         on the navy ground instead (.md-hero--render in floorplan.css). */
+      hero: { render: { src: lib.img, alt: lib.year + ' Jayco ' + lib.name } },
+      /* Jayco's one 2027 towable manual covers every trailer, and the brochure
+         form takes any model slug. Earlier years need a checked URL per model,
+         so they are left to a detail record. */
+      resources: {
+        brochure: { href: 'brochures.html?model=' + s, open: s },
+        manual: {
+          href: 'https://www.jayco.com/uploads/rvs/manuals/659-Towable-Manual---Book-2027.pdf',
+          note: 'Jayco’s 2027 towable owner’s manual, as a PDF.',
+        },
+      },
+      compare: {
+        heading: 'Not sure it’s the one?',
+        body: 'Put the ' + lib.name + ' beside the rest of the ' + cat.name.toLowerCase() +
+          ' lineup and compare length, weight, layout and price side by side.',
+        cta: { label: 'Compare ' + cat.name, href: 'compare.html' },
+      },
+    };
+
+    const url = 'floorplan.html?model=' + s + '&plan=' + b.id;
+    return {
+      slug: s,
+      model: rec,
+      plan: planOf(s, b, detail, lib),
+      asked: window.location.pathname.split('/').pop() + window.location.search,
+      canonical: s === askedModel && b.id === askedPlan ? null : url,
+    };
+  }
+
+  /* One floorplan, in the shape this page reads. The build record is the
+     source for every figure; a detail record, where there is one, adds its
+     sharper drawing export and the plan's one-line blurb. */
+  function planOf(s, b, detail, lib) {
+    const d = detail && (detail.floorplans || []).find((p) => p.id === b.id);
+    return {
+      id: b.id,
+      name: b.name,
+      price: b.price == null ? null : lib.basePrice + b.price,
+      sleeps: b.sleeps || null,
+      length: b.length ? primes(b.length) : null,
+      weight: b.weight || null,
+      image: (d && d.image) || b.img,
+      render: (detail && detail.intro && detail.intro.image && detail.intro.image.type === 'render')
+        ? detail.intro.image : { src: lib.img, alt: lib.year + ' Jayco ' + lib.name },
+      tour360: window.JAYCO_TOUR_URL ? window.JAYCO_TOUR_URL(s, b.id) : null,
+      blurb: (d && d.blurb) || '',
+      sheet: b.specs || null,
+      siblings: (window.JAYCO_BUILD[s].floorplans || []).map((p) => ({
+        id: p.id, name: p.name, img: p.img,
+        price: p.price == null ? null : lib.basePrice + p.price,
+        sleeps: p.sleeps || null, length: p.length ? primes(p.length) : null,
+      })),
+    };
+  }
+
+  /* build-data.js keeps Jayco's straight quotes; the site sets primes */
+  function primes(v) { return String(v).replace(/'/g, '′').replace(/"/g, '″'); }
 
   /* ---------- helpers ---------- */
   const $  = (sel) => document.querySelector(sel);
@@ -44,11 +154,52 @@
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
+  /* The floorplan drawing's two action glyphs, shared by the model page's
+     floorplan rail and the floorplan page's overview. */
+  const ZOOM_ICON = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
+              </svg>`;
+  const TOUR_ICON = `
+              <svg width="19" height="19" viewBox="0 0 216 216" fill="currentColor"
+                   aria-hidden="true" focusable="false">
+                <path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/>
+              </svg>`;
+
+  /* ---------- Floorplan page helpers ---------- */
+  const planHref = (id) => `floorplan.html?model=${slug}&plan=${id}`;
+  /* build.js reads &plan= and opens on the step after the floorplan, since the
+     floorplan is the thing already decided. An unpriced plan cannot be built,
+     so it opens on the floorplan grid instead. */
+  function priceHref() {
+    return plan && plan.price != null
+      ? `build-price.html?model=${slug}&plan=${plan.id}&step=exterior`
+      : `build-price.html?model=${slug}&step=floorplan`;
+  }
+  const commas = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  /* The hero's line for a plan with no authored blurb: its three numbers. */
+  function factLine() {
+    return [
+      plan.sleeps ? `Sleeps up to ${plan.sleeps}` : '',
+      plan.length ? `${plan.length} long` : '',
+      plan.weight ? `${commas(plan.weight)} lbs unloaded` : '',
+    ].filter(Boolean).join(' · ');
+  }
+  /* One value off the harvested sheet, by a pattern on its label, since the
+     labels vary a little between models ("Length" / "Exterior Length"). */
+  function sheetValue(group, re) {
+    const g = (plan && plan.sheet && plan.sheet[group]) || {};
+    const k = Object.keys(g).find((x) => re.test(x));
+    return k ? g[k] : null;
+  }
+
   /* The sticky sub-nav, declared once. renderSubnav() keeps the entries whose
      container actually survived rendering, so link order follows this table
      rather than the order the renderers happen to run in. */
   const NAV = [
     { id: 'md-intro',     label: 'Overview' },
+    { id: 'md-overview',  label: 'Floorplan' },   /* floorplan.html's own overview */
     { id: 'md-scenery',   label: 'Gallery'  },
     { id: 'md-plan',      label: 'Floorplans' },
     { id: 'md-features',  label: 'Features' },
@@ -77,7 +228,7 @@
      its top padding. Shared by the sub-nav and the hero's in-page CTA. */
   function scrollToSection(target) {
     const head = target.querySelector(
-      '.md-section-head, .md-intro-text, .faq-header, .md-scenery-band, .md-specs-inner');
+      '.md-section-head, .md-intro-text, .faq-header, .md-scenery-band, .md-specs-inner, .fp-overview-inner');
     const top = (head || target).getBoundingClientRect().top + window.scrollY - navOffset() - 16;
     if (window.__jaycoLenis) window.__jaycoLenis.scrollTo(top);
     else window.scrollTo({ top, behavior: 'smooth' });
@@ -90,9 +241,29 @@
     const stillOnly = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const media = h.video && !stillOnly
       ? `<video class="md-hero-video" src="${h.video}" poster="${h.poster || ''}" muted loop playsinline preload="auto" autoplay></video>`
-      : `<img class="md-hero-img" src="${h.poster || ''}" alt="${esc(model.name)}" />`;
+      : !h.poster && h.render
+        ? `<img class="md-hero-render" src="${h.render.src}" alt="${esc(h.render.alt)}" />`
+        : `<img class="md-hero-img" src="${h.poster || ''}" alt="${esc(model.name)}" />`;
 
-    const ctas = (h.ctas || []).map((c) =>
+    /* A floorplan page keeps the model's footage and swaps everything written
+       on top of it for the plan's own: its code, its line, its MSRP, and a
+       build that opens with this plan already chosen. */
+    const heroCtas = plan ? [
+      { label: 'Price this Floorplan', href: priceHref(), style: 'primary' },
+      { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
+    ] : (h.ctas || []);
+    /* the code on its own line: it is the name of this page, and a model name
+       and a code broken wherever the measure falls reads as one long word */
+    const heading = plan
+      ? `${esc(model.name)} <span class="fp-hero-code">${esc(plan.name)}</span>`
+      : esc(h.heading || model.name);
+    const sub = plan ? (plan.blurb || factLine()) : h.sub;
+    const price = plan
+      ? (plan.price == null ? '<p class="md-hero-price">Pricing to come</p>'
+        : `<p class="md-hero-price">Starting at <strong>${money(plan.price)}</strong></p>`)
+      : `<p class="md-hero-price">Starting at <strong>${money(model.priceFrom)}</strong></p>`;
+
+    const ctas = heroCtas.map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`
     ).join('');
 
@@ -111,9 +282,9 @@
       <div class="md-hero-overlay"></div>
       <div class="md-hero-content">
         <span class="md-hero-eyebrow">${model.year} &nbsp;·&nbsp; ${esc(model.categoryLabel)}</span>
-        <h1 class="md-hero-heading">${esc(h.heading || model.name)}</h1>
-        ${h.sub ? `<p class="md-hero-tagline">${esc(h.sub)}</p>` : ''}
-        <p class="md-hero-price">Starting at <strong>${money(model.priceFrom)}</strong></p>
+        <h1 class="md-hero-heading">${heading}</h1>
+        ${sub ? `<p class="md-hero-tagline">${esc(sub)}</p>` : ''}
+        ${price}
         <div class="md-hero-ctas">${ctas}</div>
       </div>
       <div class="scroll-indicator">
@@ -123,7 +294,9 @@
         </svg>
       </div>`);
 
-    document.title = `${model.year} ${model.name} — Jayco ${model.categoryLabel}`;
+    document.title = plan
+      ? `${model.year} ${model.name} ${plan.name} Floorplan — Jayco ${model.categoryLabel}`
+      : `${model.year} ${model.name} — Jayco ${model.categoryLabel}`;
     /* Per-model CSS hook. The intro render's width is tuned to Swift's 1.71:1
        van; a differently-proportioned render needs its own rule rather than a
        compromise that suits neither. Inert for Swift — it just gains the
@@ -131,6 +304,7 @@
        is scoped to that function. */
     const pageEl = document.querySelector('.model-page');
     if (pageEl) pageEl.dataset.model = slug;
+    if (heroEl) heroEl.classList.toggle('md-hero--render', !h.poster && !h.video && !!h.render);
   }
 
   /* ---------- Intro (carries the high-level stats) ----------
@@ -162,6 +336,102 @@
              ${i.image.inkCentre ? `data-ink-centre="${i.image.inkCentre}"` : ''} />
       </figure>` : ''}
       ${stats ? `<div class="md-stats">${stats}</div>` : ''}`);
+  }
+
+  /* ---------- Floorplan overview (floorplan.html) ----------
+     Directly under the hero: the drawing beside the coach it belongs to, so the
+     plan is read against the trailer rather than as a diagram on its own, then
+     the six numbers someone towing it is counting. Two surface panels of the
+     same height, the drawing's the wider since it carries the detail.
+
+     The drawing keeps the model page's two actions — enlarge, walk it in 3D —
+     in the same pill vocabulary, redrawn for a light panel (floorplan.css).
+
+     No control here moves to another plan: the page is about this one, and the
+     rest of the model is the rail at the foot of the page (renderOthers). */
+  function renderOverview() {
+    if (!plan || !$('#md-overview')) { drop('#md-overview'); return; }
+
+    const sibs = plan.siblings;
+    const who = `${model.name} ${plan.name}`;
+
+    /* Named, then explained — one short line under each figure. A value Jayco
+       has not published leaves its stat out rather than showing a dash. */
+    const lbs = (v) => v ? commas(String(v).replace(/,/g, '')) + ' lbs' : null;
+    const fresh = sheetValue('Tank Capacities', /fresh/i);
+    const stats = [
+      { label: 'Sleeps',          value: plan.sleeps ? 'Up to ' + plan.sleeps : null },
+      { label: 'Length',          value: plan.length },
+      { label: 'Unloaded weight', value: lbs(plan.weight), note: 'As it leaves the factory' },
+      { label: 'Hitch weight',    value: lbs(sheetValue('Weights', /hitch/i)), note: 'Dry, on the ball' },
+      { label: 'GVWR',            value: lbs(sheetValue('Weights', /gross vehicle/i)), note: 'The most it may weigh loaded' },
+      { label: 'Fresh water',     value: fresh ? Math.round(parseFloat(fresh)) + ' gal' : null },
+    ].filter((s) => s.value);
+
+    const heading = plan.sleeps && plan.length
+      ? `Sleeps ${plan.sleeps} in ${plan.length}.`
+      : `The ${plan.name}, from above.`;
+
+    /* "All floorplans" goes to the model page's floorplan rail where there is
+       one, and to this model's row in the catalog where there is not. */
+    const hasModelPage = !!(DATA[slug] && !DATA[slug].stub);
+    const allHref = hasModelPage ? `model.html?model=${slug}#md-plan` : `floorplans.html#fpc-m-${slug}`;
+
+    const r = plan.render;
+    set('#md-overview', `
+      <div class="fp-overview-inner">
+        <div class="fp-overview-head">
+          <div class="md-section-head">
+            <span class="section-label">Floorplan</span>
+            <h2 class="section-heading dark">${esc(heading)}</h2>
+            <a class="fp-all-link" href="${allHref}">All ${sibs.length} ${esc(model.name)} floorplans</a>
+          </div>
+        </div>
+
+        <div class="fp-pair">
+          <figure class="fp-pane fp-pane--plan" data-plan="${esc(plan.id)}" data-caption="${esc(who)}">
+            <div class="fp-pane-art">
+              <img class="md-plan-drawing fp-drawing" src="${plan.image}"
+                   alt="${esc(who + ' floorplan')}" decoding="async" />
+            </div>
+            <figcaption class="fp-pane-foot">
+              <span class="fp-pane-cap">Floorplan</span>
+              <span class="md-plan-tools fp-tools">
+                <button type="button" class="md-plan-tool md-plan-zoom" aria-label="Enlarge the ${esc(plan.name)} floorplan">
+                  ${ZOOM_ICON}<span class="md-plan-tool-label">Enlarge</span>
+                </button>
+                ${plan.tour360 ? `
+                <a class="md-plan-tool md-plan-tool--tour" href="${esc(plan.tour360)}" target="_blank" rel="noopener noreferrer"
+                   aria-label="View the 3D tour of the ${esc(plan.name)} floorplan — opens in a new tab">
+                  ${TOUR_ICON}<span class="md-plan-tool-label">View 3D Tour</span>
+                </a>` : `
+                <button type="button" class="md-plan-tool md-plan-tool--tour" disabled aria-disabled="true"
+                        aria-label="No 3D tour yet for the ${esc(plan.name)} floorplan">
+                  ${TOUR_ICON}<span class="md-plan-tool-label">View 3D Tour</span>
+                </button>`}
+              </span>
+            </figcaption>
+          </figure>
+          <figure class="fp-pane fp-pane--ext">
+            <div class="fp-pane-art">
+              <img class="fp-render" src="${r.src}" alt="${esc(r.alt || model.name)}" decoding="async"
+                   ${r.w && r.h ? `width="${r.w}" height="${r.h}"` : ''} />
+            </div>
+            <figcaption class="fp-pane-foot"><span class="fp-pane-cap">Exterior</span></figcaption>
+          </figure>
+        </div>
+
+        ${stats.length ? `<div class="md-stats fp-stats" style="--fp-stat-n:${stats.length}">
+          ${stats.map((s) => `
+            <div class="md-stat">
+              <span class="md-stat-value">${esc(s.value)}</span>
+              <span class="md-stat-label">${esc(s.label)}</span>
+              ${s.note ? `<span class="md-stat-note">${esc(s.note)}</span>` : ''}
+            </div>`).join('')}
+        </div>` : ''}
+      </div>`);
+
+    initZoom();
   }
 
   /* ---------- Scenery band + detail carousel ----------
@@ -522,6 +792,7 @@
   }
 
   function renderPlan() {
+    if (!$('#md-plan')) return;           /* floorplan.html has no rail */
     const plans = model.floorplans || [];
     if (!plans.length) { drop('#md-plan'); return; }
 
@@ -560,6 +831,10 @@
        say the same thing about the same plan.
        Kept as a JS comment rather than an HTML one: this template runs once per
        floorplan, and Jay Feather would ship sixteen copies of it. */
+    /* A towable's plans each have their own page (floorplan.html), so the
+       slide's second button goes there; "View All Floorplans" still sits under
+       the rail. A motorhome's plans have no page, and keep it on the slide. */
+    const planPages = isTowable() && !!(window.JAYCO_BUILD && window.JAYCO_BUILD[slug]);
     const panels = plans.map((p, i) => {
       const first = i === 0;
 
@@ -597,33 +872,23 @@
          technology announces it — where an <a> with no href is not a control any
          of them can describe. Full colour either way, which is the call already
          made on the configurator's floorplan cards. */
-      const zoomIcon = `
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
-              </svg>`;
-      const tourIcon = `
-              <svg width="19" height="19" viewBox="0 0 216 216" fill="currentColor"
-                   aria-hidden="true" focusable="false">
-                <path d="M33.8,62.1v-.4s0-13,0-13c0-8.2,6.6-14.8,14.8-14.8h13c2.1,0,3.7,1.7,3.7,3.7s-1.7,3.7-3.7,3.7h-13c-4.1,0-7.4,3.3-7.4,7.4v13c0,2.1-1.7,3.7-3.7,3.7s-3.5-1.5-3.7-3.3ZM154.3,41.4h13.4c3.9.2,7,3.4,7,7.4v13h0c0,2.1,1.7,3.7,3.7,3.7s3.7-1.7,3.7-3.7v-13c0-7.9-6.2-14.4-14.1-14.8h-.8s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7ZM150.3,133.3l-40.8,19c-1,.5-2.1.5-3.1,0l-40.8-19c-1.3-.6-2.1-1.9-2.1-3.4v-43.5c0-1.4.8-2.8,2.1-3.4l40.8-19,.4-.2c.9-.3,1.9-.3,2.8.2l40.8,19c1.3.6,2.1,1.9,2.1,3.4v43.5c0,1.4-.8,2.8-2.1,3.4ZM104.3,107.8l-33.4-15.6v35.3l33.4,15.6v-35.3ZM140,86.4l-32-14.9-32,14.9,32,14.9,32-14.9ZM145.1,92.2l-33.4,15.6v35.3l33.4-15.6v-35.3ZM61.6,174.9h-13c-4,0-7.2-3.1-7.4-7v-.4s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7s-3.7,1.7-3.7,3.7v13.7c.4,7.8,6.9,14.1,14.8,14.1h13c2.1,0,3.7-1.7,3.7-3.7s-1.7-3.7-3.7-3.7ZM178.4,150.8c-2.1,0-3.7,1.7-3.7,3.7v13.4c-.2,3.8-3.2,6.8-7,7h-.4s-13,0-13,0c-2.1,0-3.7,1.7-3.7,3.7s1.7,3.7,3.7,3.7h13.7c7.6-.4,13.7-6.5,14.1-14.1v-.8s0-13,0-13c0-2.1-1.7-3.7-3.7-3.7Z"/>
-              </svg>`;
       const stageBox = `
         <div class="md-plan-stage-box">
           ${stage}
           <div class="md-plan-tools">
             <button type="button" class="md-plan-tool md-plan-zoom" data-plan="${p.id}"
                     aria-label="Enlarge the ${esc(p.name)} floorplan">
-              ${zoomIcon}<span class="md-plan-tool-label">Enlarge</span>
+              ${ZOOM_ICON}<span class="md-plan-tool-label">Enlarge</span>
             </button>
             ${p.tour360 ? `
             <a class="md-plan-tool md-plan-tool--tour" href="${esc(p.tour360)}"
                target="_blank" rel="noopener noreferrer"
                aria-label="View the 3D tour of the ${esc(p.name)} floorplan — opens in a new tab">
-              ${tourIcon}<span class="md-plan-tool-label">View 3D Tour</span>
+              ${TOUR_ICON}<span class="md-plan-tool-label">View 3D Tour</span>
             </a>` : `
             <button type="button" class="md-plan-tool md-plan-tool--tour" disabled aria-disabled="true"
                     aria-label="No 3D tour yet for the ${esc(p.name)} floorplan">
-              ${tourIcon}<span class="md-plan-tool-label">View 3D Tour</span>
+              ${TOUR_ICON}<span class="md-plan-tool-label">View 3D Tour</span>
             </button>`}
           </div>
         </div>`;
@@ -634,7 +899,7 @@
       <div class="md-fp-slide" role="group" aria-roledescription="slide"
            aria-label="${esc(p.name)} floorplan, ${i + 1} of ${plans.length}"
            id="fp-panel-${p.id}"
-           data-plan="${p.id}">
+           data-plan="${p.id}" data-caption="${esc(model.name + ' ' + p.name)}">
         ${body}
         <div class="md-fp-info">
           <h3 class="md-fp-name">${esc(p.name)}</h3>
@@ -661,9 +926,12 @@
                drawing itself, where it is one of that component's two actions —
                see .md-plan-tools above. -->
           <div class="md-fp-ctas">
-            <a href="build-price.html?model=${slug}" class="btn-primary">Price this Floorplan</a>
-            <a href="build-price.html?model=${slug}&amp;step=floorplan"
-               class="btn-secondary-light">View All Floorplans</a>
+            <a href="${p.price == null ? `build-price.html?model=${slug}&amp;step=floorplan`
+              : `build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior`}" class="btn-primary">Price this Floorplan</a>
+            ${planPages ? `<a href="${planHref(p.id)}" class="btn-secondary-light"
+               aria-label="Floorplan details for the ${esc(p.name)}">Floorplan Details</a>`
+            : `<a href="build-price.html?model=${slug}&amp;step=floorplan"
+               class="btn-secondary-light">View All Floorplans</a>`}
           </div>
         </div>
       </div>`;
@@ -701,9 +969,54 @@
     const rail = initRail($('#md-fp-track'), $('#md-fp-prev'), $('#md-fp-next'),
       '.md-fp-slide:not([hidden])');
 
+    initZoom();
+
+    if (!showFilter) return;
+
+    /* chip filtering — a plan survives only if it matches every active chip */
+    const active = new Set();
+    const chips  = Array.from(document.querySelectorAll('.md-chip'));
+    const empty  = $('#md-fp-empty');
+
+    function applyFilters() {
+      const matches = plans.filter((p) =>
+        Array.from(active).every((id) => {
+          const f = model.floorplanFilters.find((x) => x.id === id);
+          return f ? f.match(p) : true;
+        })
+      );
+      const ids = matches.map((p) => p.id);
+      /* filters take slides out of the rail, and the rail goes back to its
+         start so the first match is the one on screen */
+      document.querySelectorAll('.md-fp-slide').forEach((s) => {
+        s.hidden = ids.indexOf(s.dataset.plan) === -1;
+      });
+      empty.hidden = ids.length > 0;
+      if (rail) rail.reset();
+      /* the tallest remaining slide sets the band's height */
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        if (chip.dataset.filter === '__clear') {
+          active.clear();
+          chips.forEach((c) => c.classList.remove('is-on'));
+        } else {
+          const id = chip.dataset.filter;
+          if (active.has(id)) { active.delete(id); chip.classList.remove('is-on'); }
+          else                { active.add(id);    chip.classList.add('is-on'); }
+        }
+        applyFilters();
+      });
+    });
+  }
+
+  function initZoom() {
     /* ---- Floorplan zoom ----
-       One modal serves every plan and reads the drawing off the slide whose
-       button opened it. It is appended to
+       One modal serves every plan and reads the drawing and its caption off
+       the [data-caption] container whose button opened it — a rail slide on
+       the model page, the drawing's pane on the floorplan page. It is appended to
        <body> rather than left inside the section: Lenis can transform a scroll
        wrapper, and position:fixed inside a transformed ancestor resolves
        against that ancestor instead of the viewport.
@@ -711,7 +1024,8 @@
        takes it out of the a11y tree and out of hit-testing, and it leaves the
        fade able to run in both directions without a timer to undo display. */
     const zoomBtns = Array.from(document.querySelectorAll('.md-plan-zoom'));
-    if (zoomBtns.length) {
+    const first = document.querySelector('[data-caption] .md-plan-drawing');
+    if (zoomBtns.length && first) {
       const modal = document.createElement('div');
       modal.className = 'md-zoom';
       modal.hidden = true;
@@ -730,9 +1044,8 @@
           <!-- seeded with the first plan so the document never carries an image
                with an empty src; openZoom overwrites both from the live drawing.
                The file is already on the page, so this costs no extra request. -->
-          <img class="md-zoom-img" src="${plans[0].image}"
-               alt="${esc(model.name + ' ' + plans[0].name + ' floorplan')}" />
-          <span class="md-zoom-caption">${esc(model.name + ' ' + plans[0].name)}</span>
+          <img class="md-zoom-img" src="${first.src}" alt="${esc(first.alt)}" />
+          <span class="md-zoom-caption"></span>
         </div>`;
       document.body.appendChild(modal);
 
@@ -744,13 +1057,12 @@
       let hideT = null;
 
       function openZoom(btn) {
-        const panel = btn && btn.closest('.md-fp-slide');
+        const panel = btn && btn.closest('[data-caption]');
         const art   = panel && panel.querySelector('.md-plan-drawing');
         if (!art) return;
-        const plan = plans.find((p) => p.id === panel.dataset.plan);
         zImg.src = art.src;
         zImg.alt = art.alt;
-        zCap.textContent = plan ? model.name + ' ' + plan.name : '';
+        zCap.textContent = panel.dataset.caption;
         returnTo = btn || null;
         clearTimeout(hideT);         /* a previous close may still be fading */
         modal.hidden = false;        /* display:flex, opacity still 0 */
@@ -792,46 +1104,6 @@
         if (e.key === 'Tab') { e.preventDefault(); zClose.focus(); }
       });
     }
-
-    if (!showFilter) return;
-
-    /* chip filtering — a plan survives only if it matches every active chip */
-    const active = new Set();
-    const chips  = Array.from(document.querySelectorAll('.md-chip'));
-    const empty  = $('#md-fp-empty');
-
-    function applyFilters() {
-      const matches = plans.filter((p) =>
-        Array.from(active).every((id) => {
-          const f = model.floorplanFilters.find((x) => x.id === id);
-          return f ? f.match(p) : true;
-        })
-      );
-      const ids = matches.map((p) => p.id);
-      /* filters take slides out of the rail, and the rail goes back to its
-         start so the first match is the one on screen */
-      document.querySelectorAll('.md-fp-slide').forEach((s) => {
-        s.hidden = ids.indexOf(s.dataset.plan) === -1;
-      });
-      empty.hidden = ids.length > 0;
-      if (rail) rail.reset();
-      /* the tallest remaining slide sets the band's height */
-      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-    }
-
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        if (chip.dataset.filter === '__clear') {
-          active.clear();
-          chips.forEach((c) => c.classList.remove('is-on'));
-        } else {
-          const id = chip.dataset.filter;
-          if (active.has(id)) { active.delete(id); chip.classList.remove('is-on'); }
-          else                { active.add(id);    chip.classList.add('is-on'); }
-        }
-        applyFilters();
-      });
-    });
   }
 
   /* ---------- Features ----------
@@ -1185,9 +1457,58 @@
     return !!cat && cat.type === 'towable';
   }
 
+  /* ---------- One floorplan's spec sheet (floorplan.html) ----------
+     The "Every number." table the model pages used to carry, given one column:
+     the plan's whole sheet as build-data.js harvested it from jayco.com. Units
+     move out of Jayco's labels ("Fresh Water Capacity (gals)") and onto the
+     figures, lengths take primes, and a plan with no published sheet falls back
+     to the three figures the build record always has. */
+  const SHEET = [
+    { from: 'Measurements', group: 'Dimensions' },
+    { from: 'Weights', group: 'Weights',
+      note: 'Unloaded vehicle weight is what leaves the factory; cargo capacity is what you may add to it.' },
+    { from: 'Tank Capacities', group: 'Tanks' },
+    { from: 'Miscellaneous', group: 'Systems' },
+  ];
+  /* sentence case, keeping the abbreviations whole */
+  function specLabel(k) {
+    const t = k.replace(/\s*\((lbs|gals)\)/gi, '').replace(/^# of /i, '')
+      .replace(/\s*BTU$/i, '').replace(/^Propane Unit/i, 'Propane').trim();
+    return (t.charAt(0).toUpperCase() + t.slice(1).toLowerCase()).replace(/\ba\/c\b/gi, 'A/C');
+  }
+  function specValue(k, v) {
+    const raw = String(v).trim();
+    const num = raw.replace(/,/g, '');
+    if (/\(lbs\)/i.test(k) && /^\d+(\.\d+)?$/.test(num)) return commas(Math.round(+num)) + ' lbs';
+    if (/\(gals\)/i.test(k) && /^\d+(\.\d+)?$/.test(num)) return Math.round(+num) + ' gal';
+    if (/btu/i.test(k) && /^\d+$/.test(num)) return commas(num) + ' BTU';
+    if (/^sleeps$/i.test(k)) return raw.replace(/^up to/i, 'Up to');
+    /* primes only on a length; a tire's load range keeps its quotation marks */
+    if (/^\d+'\s*\d*"?$/.test(raw)) return primes(raw);
+    return raw.replace(/\s*["']([A-Z])["']$/, ' “$1”');
+  }
+  function planSpecGroups() {
+    const sheet = plan.sheet || {};
+    const groups = SHEET.map((g) => ({
+      group: g.group, note: g.note,
+      rows: Object.keys(sheet[g.from] || {}).map((k) => [specLabel(k), specValue(k, sheet[g.from][k])]),
+    })).filter((g) => g.rows.length);
+    if (groups.length) return groups;
+    return [{ group: 'Summary', rows: [
+      plan.sleeps ? ['Sleeps', 'Up to ' + plan.sleeps] : null,
+      plan.length ? ['Length', plan.length] : null,
+      plan.weight ? ['Unloaded vehicle weight', commas(plan.weight) + ' lbs'] : null,
+    ].filter(Boolean) }].filter((g) => g.rows.length);
+  }
+
   function renderSpecs() {
-    const s = model.specs;
-    if (!s || !s.groups || !s.groups.length || isTowable()) { drop('#md-specs'); return; }
+    const s = plan ? {
+      heading: 'Every number.',
+      columns: [plan.name],
+      groups: planSpecGroups(),
+      footnote: `Figures are for the ${model.year} ${model.name} ${plan.name} as built, before options and dealer-installed equipment.`,
+    } : model.specs;
+    if (!s || !s.groups || !s.groups.length || (!plan && isTowable())) { drop('#md-specs'); return; }
 
     const cols = s.columns || [];
     const head = `<tr><th class="md-spec-key">Specification</th>${cols.map((c, i) =>
@@ -1333,7 +1654,18 @@
      The page's whole job is to get someone standing next to the coach, so the
      dealer ask leads the closing band and everything else sits beneath it. */
   function renderCtas() {
-    const v = model.visit;
+    /* On a floorplan page the dealer ask names the plan. The body is the
+       reason a drawing is not enough, which holds for any of them. */
+    const v = plan ? {
+      label: 'See it in person',
+      heading: `Walk through the ${plan.name} before you decide.`,
+      body: 'A drawing tells you where the bed goes. It does not tell you whether you can pass someone in the galley, or how the room feels with the slide in. Twenty minutes at a dealer settles both.',
+      ctas: [
+        { label: 'Find a Dealer', href: 'dealers.html', style: 'primary' },
+        { label: 'View Inventory', href: '#', style: 'secondary' },
+      ],
+      note: (model.visit && model.visit.note) || 'More than 300 Jayco dealers across North America.',
+    } : model.visit;
     const c = model.compare;
     if (!v && !c) { drop('#md-ctas'); return; }
 
@@ -1383,6 +1715,52 @@
         a.addEventListener('click', (e) => e.preventDefault());
       });
     }
+  }
+
+  /* ---------- The model's other floorplans (floorplan.html) ----------
+     Where the model page offers similar models, a floorplan page offers the
+     rest of its own model, since that is the decision still open. A rail of
+     drawings rather than a grid: Jay Flight has fifty-eight plans. The one on
+     screen is left out. The rail and its arrows are the video rail's. */
+  function renderOthers() {
+    const others = plan ? plan.siblings.filter((p) => p.id !== plan.id) : [];
+    if (!others.length) { drop('#fp-others'); return; }
+
+    const arrow = (dir, d) => `
+      <button type="button" class="md-video-nav" id="fp-others-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} floorplans" aria-controls="fp-others-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+
+    set('#fp-others', `
+      <div class="md-videos-inner">
+        <div class="md-videos-head">
+          <div class="md-section-head">
+            <h2 class="section-heading dark">More ${esc(model.name)} floorplans.</h2>
+          </div>
+          <div class="md-video-controls">
+            ${arrow('prev', 'M15 5l-7 7 7 7')}
+            ${arrow('next', 'M9 5l7 7-7 7')}
+          </div>
+        </div>
+      </div>
+      <ul class="md-video-track fp-others-track" id="fp-others-track" role="list">
+        ${others.map((p) => `
+          <li class="md-video fp-other">
+            <a class="fp-other-card" href="${planHref(p.id)}">
+              <span class="fp-other-art">
+                <img src="${p.img}" alt="" loading="lazy" decoding="async" />
+              </span>
+              <span class="fp-other-name">${esc(p.name)}</span>
+              <span class="fp-other-facts">${esc([
+                p.sleeps ? 'Sleeps ' + p.sleeps : '', p.length || ''].filter(Boolean).join(' · '))}</span>
+              <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'Starting at ' + money(p.price)}</span>
+            </a>
+          </li>`).join('')}
+      </ul>`);
+
+    initRail($('#fp-others-track'), $('#fp-others-prev'), $('#fp-others-next'), '.fp-other');
   }
 
   /* ---------- Similar models (from the shared models-data.js) ---------- */
@@ -1447,7 +1825,7 @@
     if (!wrap || !links) return;
 
     const model_el = $('#md-subnav-model');
-    if (model_el) model_el.textContent = `${model.year} ${model.name}`;
+    if (model_el) model_el.textContent = `${model.year} ${model.name}${plan ? ' ' + plan.name : ''}`;
 
     /* only the sections that actually rendered */
     const items = NAV.filter((n) => document.getElementById(n.id));
@@ -1565,6 +1943,7 @@
          and a tween there would strand it at opacity 0 when its tab is picked */
       '.md-feat-tabs', '.md-feat-panels',
       '.md-similar-card', '.md-cta-lead', '.md-res-panel',
+      '.fp-pair',                      /* two inset panels, not full-bleed media */
       '.md-intro-media--render',       /* a cut-out has no crop to hide a drift */
     ].join(',');
 
@@ -1790,6 +2169,7 @@
   /* ---------- Boot ---------- */
   renderHero();
   renderIntro();
+  renderOverview();
   renderScenery();
   renderPlan();
   renderFeatures();
@@ -1800,6 +2180,7 @@
   renderFaqs();
   renderCtas();
   renderSimilar();
+  renderOthers();
   renderSubnav();
   initSceneryCarousel();
   initVideoCarousel();

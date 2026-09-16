@@ -998,7 +998,16 @@
 
        Added for the model page's "View All Floorplans" button, which wants the
        floorplan grid and not the model picker. */
+    /* ?plan= preselects a floorplan — from a floorplan page's "Price this
+       Floorplan", which opens past the floorplan step. An unpriced plan cannot
+       be totalled, so it is ignored and the model's default plan stands. */
+    const want = (params.get('plan') || '').toLowerCase();
+    const fp = want && floorplansOf(model()).find((f) => f.id === want && !f.isNew);
+    if (fp) { state.floorplanId = fp.id; seedPackages(); }
+
     const step = STEPS.findIndex((st) => st.id === params.get('step'));
+    /* a plan asked for by name that does not exist opens on the grid to pick one */
+    if (want && !fp && step > 1) { state.step = 1; state.maxReached = 1; return; }
     if (step > 0) { state.step = step; state.maxReached = step; }
   }
 

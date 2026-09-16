@@ -1151,3 +1151,6 @@ body.fpc-sheet-on { overflow: hidden; }
   .fpc-rail.is-open .fpc-panel-head,
   .fpc-rail.is-open .fpc-facets .fpc-acc { transition: none; }
 }
+/* the page link, beside the compare handoff on the same line */
+.fpc-modal-page { margin-left: 1.5rem; }
+.fpc-modal-page[hidden] { display: none; }

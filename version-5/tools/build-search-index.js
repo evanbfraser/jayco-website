@@ -167,9 +167,11 @@ Object.entries(JAYCO.models).forEach(([slug, m]) => {
 });
 
 /* ---------- Floorplans ----------
-   floorplans.html?plan=<model>__<plan> — the catalog's own row key. The page
-   scrolls to that card and marks it (floorplans.js focusPlan). "BH" in a Jayco
-   floorplan code is a bunkhouse, the one code worth a synonym. */
+   A towable's plan has its own page, floorplan.html?model=<slug>&plan=<id>. A
+   motorhome's does not, so it goes to floorplans.html?plan=<model>__<plan> —
+   the catalog's own row key; that page scrolls to the card and marks it
+   (floorplans.js focusPlan). "BH" in a Jayco floorplan code is a bunkhouse,
+   the one code worth a synonym. */
 Object.entries(BUILD).forEach(([slug, b]) => {
   const m = JAYCO.models[slug];
   if (!m || !Array.isArray(b.floorplans)) return;
@@ -177,7 +179,9 @@ Object.entries(BUILD).forEach(([slug, b]) => {
   b.floorplans.forEach((f) => {
     add('floorplan', m.name + ' ' + f.name,
       [f.sleeps ? 'Sleeps ' + f.sleeps : '', f.length, c.name].filter(Boolean).join(DOT),
-      'floorplans.html?plan=' + encodeURIComponent(slug + '__' + f.id), f.img,
+      c.type === 'towable'
+        ? 'floorplan.html?model=' + encodeURIComponent(slug) + '&plan=' + encodeURIComponent(f.id)
+        : 'floorplans.html?plan=' + encodeURIComponent(slug + '__' + f.id), f.img,
       keywords('floorplan floor plan layout'), false,
       keywords(m.name, c.name, ALIAS[slug] || '',
         /bh/i.test(f.name) ? 'bunkhouse bunk bunks' : '',
@@ -295,7 +299,7 @@ DEALERS.dealers.forEach((d) => {
    as the title, so the page leads the videos and articles that merely mention
    the word. The four query-driven templates are left out — they are not pages a
    reader can arrive at without a record. */
-const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'type.html']);
+const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'floorplan.html', 'type.html']);
 const EXTRA = {
   'index.html': 'home homepage',
   'jayco-difference.html': 'warranty 2+3 construction magnum truss stronghold climate shield jride jaysmart quality features',

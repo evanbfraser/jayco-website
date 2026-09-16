@@ -71,6 +71,13 @@
   to = "/version-5/brochures.html"
   status = 302
 
+# /floorplans/jay-feather/25bh — one towable floorplan's page. Above the bare
+# /floorplans so the placeholders are not swallowed by it.
+[[redirects]]
+  from = "/floorplans/:model/:plan"
+  to = "/version-5/floorplan.html?model=:model&plan=:plan"
+  status = 302
+
 [[redirects]]
   from = "/floorplans"
   to = "/version-5/floorplans.html"

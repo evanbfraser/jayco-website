@@ -991,6 +991,9 @@
 
     $('#fpc-modal-build').href = 'build-price.html?model=' + r.modelId + '&step=floorplan';
     $('#fpc-modal-compare').href = 'compare.html?c=' + r.key;
+    const page = $('#fpc-modal-page');
+    page.hidden = r.catType !== 'towable';
+    page.href = 'floorplan.html?model=' + r.modelId + '&plan=' + r.planId;
 
     show($('#fpc-modal'), $('#fpc-modal-x'), src);
   }

@@ -1,0 +1,216 @@
+/* ===================================================
+   Jayco — Floorplan detail page
+   ---------------------------------------------------
+   floorplan.html is model.html's template in plan mode,
+   so every section it shares with the model page is
+   styled by css/model.css. This sheet is only the three
+   things the plan page adds: the overview under the
+   hero, the drawing's two actions on a light panel, and
+   the rail of the model's other floorplans.
+   =================================================== */
+
+/* The code on its own line under the model name — see renderHero. */
+.fp-hero-code { display: block; }
+
+/* ---------- Overview ----------
+   Same frame and rhythm as every contained section on the model page: the
+   1440 spine, a section step above and below, the head step under the
+   headline. */
+.fp-overview { padding: var(--md-gap-section) 0; }
+.fp-overview-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+/* The inner carries the gutter, so the head inside it must not carry it twice
+   — the correction .md-videos and .md-specs make. */
+.fp-overview .md-section-head { padding-left: 0; padding-right: 0; max-width: none; margin-bottom: 0; }
+
+.fp-overview-head { margin-bottom: var(--md-gap-head); }
+
+/* A text link, DESIGN.md's: a button here would compete with the hero's. */
+.fp-all-link {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.fp-all-link:hover { border-bottom-color: var(--blue); }
+.fp-all-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 2px; }
+
+/* ---------- The pair ----------
+   The drawing and the coach, side by side in two Surface panels of one height.
+   The drawing's is the wider: a floorplan is about twice as wide as it is deep
+   and carries the detail, where the render reads at any size. */
+.fp-pair {
+  --fp-art-h: clamp(220px, 27vw, 430px);
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+.fp-pane {
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.25rem, 2.2vw, 2rem);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.fp-pane-art {
+  flex: 1;
+  min-height: var(--fp-art-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Both are cut-outs on transparency, so neither gets a radius of its own. The
+   drawing's height cap is .md-plan-drawing's --fp-art-h, set on .fp-pair. */
+.fp-pane-art img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: var(--fp-art-h);
+  object-fit: contain;
+}
+.fp-render { max-width: 92%; }
+
+.fp-pane-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  min-height: 44px;                 /* the tool pills' height, so both feet align */
+  margin-top: 1.25rem;
+}
+.fp-pane-cap {
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* The drawing's two actions, off the model page's navy stage and onto a light
+   panel: in the flow rather than pinned to a corner, and drawn as the
+   secondary button's light variant instead of white glass. */
+.fp-tools.md-plan-tools { position: static; }
+.fp-tools .md-plan-tool {
+  border: 1.5px solid rgba(15,11,9,0.22);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--text-dark);
+}
+.fp-tools .md-plan-tool:not([disabled]):hover { background: rgba(15,11,9,0.06); transform: none; }
+.fp-tools .md-plan-tool:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- The numbers ----------
+   .md-stats, in the frame rather than carrying its own gutter. Desktop takes
+   as many columns as the plan has published figures; the model page's 1280
+   and 768 steps take over below that. */
+.fp-stats.md-stats {
+  max-width: none;
+  margin: var(--space-lg) 0 0;
+  padding: 0;
+}
+@media (min-width: 1281px) {
+  .fp-stats.md-stats { grid-template-columns: repeat(var(--fp-stat-n, 6), 1fr); }
+}
+
+/* ---------- The model's other floorplans ----------
+   The video rail's track and card sizing (.md-video-track, .md-video), with a
+   drawing in a Surface well where the thumbnail was. */
+.fp-others { padding-bottom: var(--md-gap-section); }
+.fp-other-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.fp-other-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+.fp-other-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  padding: clamp(1rem, 1.6vw, 1.5rem);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  transition: background 0.3s;
+}
+.fp-other-art img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.7s var(--ease-out);
+}
+.fp-other-card:hover .fp-other-art { background: var(--surface-hover); }
+.fp-other-card:hover .fp-other-art img { transform: scale(1.03); }
+.fp-other-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-dark);
+}
+.fp-other-facts,
+.fp-other-price {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--text-mid);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .fp-pair { grid-template-columns: 1fr; --fp-art-h: clamp(180px, 50vw, 360px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-other-art img { transition: none; }
+  .fp-other-card:hover .fp-other-art img { transform: none; }
+}
+
+/* ---------- Render hero ----------
+   For a towable with no footage of its own. The category photograph would put
+   a different coach above this one's name, so the hero is the navy ground with
+   the model's cut-out render standing right of the copy. No scrim: there is no
+   photograph to hold text off. */
+.md-hero--render { background: var(--band-navy); }
+.md-hero--render .md-hero-overlay { display: none; }
+.md-hero--render .md-hero-media {
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--md-header-h) var(--md-pad) 0;
+}
+.md-hero-render {
+  display: block;
+  width: min(56%, 920px);
+  height: auto;
+  max-height: 70%;
+  object-fit: contain;
+}
+@media (max-width: 900px) {
+  /* Above the copy and in the flow with it, not behind it: a model name like
+     "Seismic Travel Trailer Toy Hauler" runs to four lines on a phone, and a
+     render pinned to the top would sit under the eyebrow. */
+  .md-hero--render { height: auto; flex-direction: column; align-items: stretch; }
+  .md-hero--render .md-hero-media {
+    position: relative;
+    inset: auto;
+    flex: 1;
+    justify-content: center;
+    padding: calc(var(--md-header-h) + 1.5rem) var(--md-pad) 2rem;
+  }
+  .md-hero-render { width: min(100%, 560px); max-height: none; }
+}
