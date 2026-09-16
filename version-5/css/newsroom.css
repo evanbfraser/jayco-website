@@ -1,0 +1,177 @@
+/* ===================================================
+   Jayco — Newsroom
+   newsroom.html (.nwl-page), news.html (.nwd-page)
+   ---------------------------------------------------
+   Built on about.css and loaded after it. A release's
+   picture is often a logo or a product cut-out rather
+   than a photograph (news-data.js marks those
+   `graphic`): those sit whole, contained on a white
+   well, and are never cropped to fill a card. The two
+   releases with no usable picture get a quiet navy tile
+   carrying the wordmark, so the grid keeps its rhythm.
+   =================================================== */
+
+/* ---------- media, shared ---------- */
+.nw-media {
+  position: relative; display: block; overflow: hidden;
+  aspect-ratio: 3 / 2; background: var(--surface);
+}
+.nw-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease-out); }
+.nw-media.is-graphic { background: #fff; box-shadow: inset 0 0 0 1px var(--hairline); }
+.nw-media.is-graphic img { object-fit: contain; padding: 8% 10%; }
+.nw-media.is-blank { background: var(--band-navy); display: flex; align-items: center; justify-content: center; }
+/* the full-color logo, white wordmark on the navy; sized to the tile so the
+   lead and the small cards carry it at the same proportion */
+.nw-media.is-blank img.nw-blank-logo {
+  width: 34%; max-width: 220px; height: auto;
+  object-fit: contain; padding: 0;
+}
+.nw-date {
+  display: block; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mid); font-variant-numeric: tabular-nums;
+}
+
+/* ---------- lead ---------- */
+.nw-lead {
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  border-radius: var(--radius-card); overflow: hidden;
+  background: var(--surface); color: var(--text-dark);
+  transition: background 0.3s var(--ease-out);
+}
+.nw-lead .nw-media { aspect-ratio: auto; min-height: clamp(300px, 34vw, 480px); }
+.nw-lead-body { display: flex; flex-direction: column; padding: clamp(1.5rem, 3.5vw, 3.25rem); }
+.nw-lead-body .nw-date { margin-top: 0.75rem; }
+.nw-lead-h {
+  margin-top: 0.6rem; font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.04;
+}
+.nw-lead-p { margin-top: 1rem; font-size: 1rem; line-height: 1.72; color: var(--text-mid); max-width: 50ch; }
+.nw-lead-go { margin-top: auto; padding-top: 1.5rem; font-size: 0.9rem; font-weight: 600; color: var(--blue); }
+.nw-lead:hover { background: var(--surface-hover); }
+.nw-lead:hover .nw-media img { transform: scale(1.03); }
+.nw-lead:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- all news ---------- */
+.nwl-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 1rem 2rem; margin-bottom: 0.5rem;
+}
+.nwl-head .section-heading { margin: 0; }
+.nwl-years { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.nw-year {
+  min-height: 44px; padding: 0.45rem 1rem;
+  border: 0; border-radius: var(--radius-btn); background: var(--surface);
+  font-size: 0.9rem; font-weight: 600; color: var(--text-dark); font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.nw-year:hover { background: var(--surface-hover); }
+.nw-year[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.nw-year:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.nwl-count { margin: 0.9rem 0 clamp(1.25rem, 2.5vw, 1.75rem); font-size: 0.86rem; color: var(--text-mid); }
+
+.nwl-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2vw, 1.5rem);
+}
+.nw-card-link { display: flex; flex-direction: column; height: 100%; color: var(--text-dark); }
+.nw-card-link .nw-media { border-radius: var(--radius-card); }
+.nw-card-body { display: block; padding-top: 1rem; }
+.nw-card-h {
+  display: block; margin-top: 0.45rem;
+  font-family: var(--font-display); font-size: 1.14rem; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3;
+  transition: color 0.2s;
+}
+.nw-card-link:hover .nw-card-h { color: var(--blue); }
+.nw-card-link:hover .nw-media img { transform: scale(1.04); }
+.nw-card-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+
+.nwl-about {
+  padding: clamp(1.75rem, 4vw, 3rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.nwl-about-h { margin: 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+.nwl-about p { margin: 0.8rem 0 0; max-width: var(--measure-wide); font-size: 0.96rem; line-height: 1.75; color: var(--text-mid); }
+.nwl-about a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s; }
+.nwl-about a:hover { border-bottom-color: var(--blue); }
+
+/* ===================================================
+   One release (.nwd-page)
+   =================================================== */
+
+.nwd { padding-top: clamp(7rem, 12vw, 9.5rem); }
+.nwd-measure { max-width: calc(760px + 2 * var(--ab-pad)); }
+.nwd-wide { max-width: calc(1040px + 2 * var(--ab-pad)); }
+.nwd-back {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.9rem; font-weight: 500; color: var(--text-mid); transition: color 0.2s;
+}
+.nwd-back svg { transition: transform 0.25s var(--ease-out); }
+.nwd-back:hover { color: var(--blue); }
+.nwd-back:hover svg { transform: translateX(-3px); }
+.nwd-back:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.nwd-date { margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-mid); }
+.nwd-h {
+  margin: 0.7rem 0 0; font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.2vw, 3.6rem); font-weight: 900; letter-spacing: -0.015em; line-height: 1.02;
+  text-wrap: balance;
+}
+.nwd-sub { margin: 1rem 0 0; font-size: clamp(1.08rem, 1.5vw, 1.28rem); line-height: 1.55; color: var(--text-mid); }
+
+.nwd-figure { margin: clamp(2rem, 4vw, 3rem) 0 0; }
+.nwd-frame { border-radius: var(--radius-card); overflow: hidden; background: var(--surface); }
+.nwd-img { display: block; width: 100%; height: auto; }
+.nwd-frame.is-graphic { background: #fff; box-shadow: inset 0 0 0 1px var(--hairline); padding: clamp(1.5rem, 5vw, 4rem); }
+.nwd-frame.is-graphic .nwd-img { width: auto; max-width: 100%; max-height: 420px; margin: 0 auto; }
+
+.nwd-body { margin-top: clamp(2rem, 4vw, 3rem); }
+.nwd-body p, .nwd-body li { font-size: 1.06rem; line-height: 1.8; color: #3a3430; }
+.nwd-body p { margin: 0 0 1.25rem; }
+.nwd-body > p:first-child { font-size: clamp(1.12rem, 1.5vw, 1.25rem); color: var(--text-dark); }
+.nwd-dateline { font-weight: 700; color: var(--text-dark); }
+.nwd-body h2, .nwd-body h3 {
+  margin: 2.25rem 0 0.8rem; font-family: var(--font-display);
+  font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark);
+}
+.nwd-body ul, .nwd-body ol { margin: 0 0 1.25rem; padding-left: 1.25rem; }
+.nwd-body li + li { margin-top: 0.35rem; }
+.nwd-body blockquote {
+  margin: 1.75rem 0; padding: 0.25rem 0 0.25rem 1.5rem;
+  border-left: 1px solid var(--hairline);
+}
+.nwd-body blockquote p { font-family: var(--font-display); font-size: 1.2rem; font-weight: 500; line-height: 1.5; color: var(--text-dark); }
+.nwd-body figure { margin: 2rem 0; }
+.nwd-body figure img { display: block; width: 100%; height: auto; border-radius: var(--radius-card); }
+.nwd-body a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s; }
+.nwd-body a:hover { border-bottom-color: var(--blue); }
+.nwd-loading { color: var(--text-mid); }
+
+.nwd-about {
+  margin-top: clamp(2.25rem, 4vw, 3rem); padding: clamp(1.4rem, 3vw, 2rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.nwd-about-h { margin: 0; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mid); }
+.nwd-about p { margin: 0.7rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
+.nwd-about a { color: var(--blue); }
+.nwd-missing p { margin: 0.8rem 0 1.5rem; color: var(--text-mid); }
+.nwd-all {
+  font-size: 0.92rem; font-weight: 600; color: var(--blue);
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.nwd-all:hover { border-bottom-color: var(--blue); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .nwl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .nw-lead { grid-template-columns: 1fr; }
+  .nw-lead .nw-media { min-height: 0; aspect-ratio: 3 / 2; }
+}
+@media (max-width: 600px) {
+  .nwl-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nw-media img, .nwd-back svg { transition: none; }
+  .nw-lead:hover .nw-media img, .nw-card-link:hover .nw-media img { transform: none; }
+}

@@ -98,3 +98,11 @@ assets/blog/*.mp4
 # than by file so the next master dropped in the folder does not have to be
 # noticed by hand.
 assets/*.psd
+
+# The owners, events and newsroom source images: the originals pulled from
+# jayco.com and the client plates, 78 MB across the three src/ folders, of which
+# the pages load none. Each area's web/ folder beside it holds the exports the
+# site serves. Same rule as every block above.
+assets/events/src/
+assets/newsroom/src/
+assets/owners/src/

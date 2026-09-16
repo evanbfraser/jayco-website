@@ -272,7 +272,8 @@ body:not([data-header="solid"]) .site-header::before {
   display: flex;
   align-items: center;
 }
-.nav-primary li a {
+.nav-primary > li > a,
+.nav-primary .dn-trigger {
   font-family: var(--font-body);
   font-size: 0.82rem;
   font-weight: 500;
@@ -282,7 +283,8 @@ body:not([data-header="solid"]) .site-header::before {
   position: relative;
   transition: color 0.25s;
 }
-.nav-primary li a::after {
+.nav-primary > li > a::after,
+.nav-primary .dn-trigger::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -294,8 +296,346 @@ body:not([data-header="solid"]) .site-header::before {
   transform-origin: left center;
   transition: transform 0.3s var(--ease-out);
 }
-.nav-primary li a:hover { color: #fff; }
-.nav-primary li a:hover::after { transform: scaleX(1); }
+.nav-primary > li > a:hover,
+.nav-primary .dn-trigger:hover,
+.nav-primary .dn-trigger.is-open { color: #fff; }
+.nav-primary > li > a:hover::after,
+.nav-primary .dn-trigger:hover::after,
+.nav-primary .dn-trigger.is-open::after { transform: scaleX(1); }
+
+/* ---------- Desktop navigation menus ----------
+   Built by app.js initDesktopNav(): RVs opens the model drawer, the other five
+   open a dropdown. The links become buttons that keep the bar's type and its
+   blue underline, which now also marks the menu that is open. */
+.nav-primary .dn-trigger {
+  display: block;
+  background: none;
+  border: 0;
+  line-height: inherit;
+  cursor: pointer;
+}
+.nav-primary .dn-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 8px; }
+.dn-item { position: relative; }
+
+/* The bar goes solid under an open drawer, and its own scrim band, which
+   reaches well below the bar, steps aside so it does not grey the panels. */
+.site-header.dn-drawer-open { background: var(--navy) !important; }
+.site-header.dn-drawer-open::before { opacity: 0; }
+body.dn-locked { overflow: hidden; }
+
+/* ----- the dropdown ----- */
+.dn-drop {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 0.2rem;
+  min-width: 264px;
+  padding: 0.5rem;
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.18s var(--ease-out), transform 0.26s var(--ease-out);
+}
+/* bridges the gap under the link, so the pointer crossing it stays "inside" */
+.dn-drop::before { content: ''; position: absolute; left: 0; right: 0; top: -16px; height: 16px; }
+.dn-drop.is-open { opacity: 1; transform: none; }
+.dn-drop[hidden] { display: none; }
+.dn-drop-list { list-style: none; }
+.dn-drop-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.72rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-dark);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.dn-drop-link svg {
+  flex: none;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.15s, transform 0.25s var(--ease-out);
+}
+/* An off-site link shows its mark at rest, not only on hover: that it leaves
+   the site is something to know before choosing it. */
+.dn-drop-link.is-external svg { opacity: 0.5; transform: none; }
+.dn-drop-link.is-external:hover svg { opacity: 1; }
+.dn-drop-link:hover { background: rgba(15,11,9,0.05); color: var(--blue); }
+.dn-drop-link:hover svg { opacity: 1; transform: none; }
+.dn-drop-link:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+/* a page not built yet: listed, quieter, and without the arrow's promise */
+.dn-drop-link[aria-disabled="true"] { color: var(--text-mid); }
+.dn-drop-link[aria-disabled="true"]:hover { background: none; color: var(--text-mid); }
+.dn-drop-link[aria-disabled="true"] svg { display: none; }
+
+/* ----- the model drawer ----- */
+.dn-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 990;                 /* under the bar (1000), over the chat button (900) */
+  --dn-types-w: clamp(320px, 25vw, 380px);
+  --dn-models-w: clamp(540px, 42vw, 660px);
+}
+.dn-drawer[hidden] { display: none; }
+.dn-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(15,11,9,0.46);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-morph);
+}
+.dn-panels {
+  position: absolute;
+  top: var(--dn-top, 86px);
+  bottom: 0;
+  left: 0;
+  display: flex;
+  /* The panels open out of the left edge: a clip that widens, not a slide, so
+     the type list is already in its place as it is uncovered. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.55s var(--ease-morph);
+}
+.dn-drawer.is-open .dn-scrim { opacity: 1; }
+.dn-drawer.is-open .dn-panels { clip-path: inset(0 -120px 0 0); }
+
+.dn-types {
+  width: var(--dn-types-w);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem clamp(1rem, 1.6vw, 1.5rem) 1.75rem;
+  background: #fff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dn-group + .dn-group { margin-top: 1.25rem; }
+.dn-group-label {
+  display: block;
+  padding: 0.5rem 0.9rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.dn-type {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  font-family: var(--font-body);
+  text-align: left;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dn-type-text { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.dn-type-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.dn-type-meta {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.dn-type svg {
+  flex: none;
+  color: var(--text-mid);
+  opacity: 0.45;
+  transition: opacity 0.15s, transform 0.25s var(--ease-out), color 0.15s;
+}
+.dn-type:hover { background: rgba(15,11,9,0.045); }
+.dn-type:hover svg { opacity: 1; }
+.dn-type.is-on { background: var(--surface); }
+.dn-type.is-on svg { opacity: 1; color: var(--text-dark); transform: translateX(3px); }
+.dn-type:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+.dn-extras {
+  list-style: none;
+  margin-top: auto;
+  padding: 1.25rem 0.9rem 0;
+  border-top: 1px solid var(--hairline);
+  display: grid;
+  gap: 0.15rem;
+}
+.dn-group:last-of-type { margin-bottom: 1.75rem; }
+.dn-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  transition: color 0.15s;
+}
+.dn-extra svg { transition: transform 0.25s var(--ease-out); }
+.dn-extra:hover { color: var(--blue); }
+.dn-extra:hover svg { transform: translateX(3px); }
+.dn-extra:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+
+.dn-models {
+  width: var(--dn-models-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dn-models-inner {
+  flex: 1;
+  padding: 2rem clamp(1.25rem, 2.2vw, 2.25rem) 1.5rem;
+  animation: dn-arrive 0.32s var(--ease-out);
+  transition: opacity 0.12s, transform 0.12s;
+}
+.dn-models.is-swapping .dn-models-inner { opacity: 0; transform: translateY(4px); }
+@keyframes dn-arrive {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.dn-models-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.dn-models-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text-dark);
+}
+.dn-models-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--blue);
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.dn-models-all:hover { border-bottom-color: var(--blue); }
+.dn-models-all:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+
+.dn-model-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+/* Porsche's card: nothing at rest but the name, the render and its facts on
+   the panel; hover lifts a white card out from under them. */
+.dn-model {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.9rem 0.6rem 1rem;
+  border-radius: var(--radius-card);
+  color: var(--text-dark);
+  transition: background 0.2s, box-shadow 0.25s;
+}
+.dn-model-name {
+  padding: 0 0.4rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.dn-model-art {
+  display: block;
+  margin: 0.35rem 0 0.5rem;
+  aspect-ratio: 400 / 248;
+  overflow: hidden;
+}
+.dn-model-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.6s var(--ease-out);
+}
+.dn-model-foot { margin-top: auto; padding: 0 0.4rem; display: grid; gap: 0.55rem; }
+.dn-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.dn-chip {
+  padding: 0.28rem 0.62rem;
+  border-radius: var(--radius-btn);
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-dark);
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.dn-model:hover { background: #fff; box-shadow: 0 4px 24px rgba(15,11,9,0.08); }
+.dn-model:hover .dn-chip { background: var(--surface); }
+.dn-model:hover .dn-model-art img { transform: scale(1.04); }
+.dn-model:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+.dn-models-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 0.6rem;
+  padding: 1rem clamp(1.85rem, 2.8vw, 2.85rem) 1.25rem;
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.dn-foot-btn { flex: 1; text-align: center; }
+
+/* DESIGN.md's round control, standing on the scrim beside the panels */
+.dn-close {
+  position: absolute;
+  top: 1.5rem;
+  left: calc(100% + 1.5rem);
+  width: 57px;
+  height: 57px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--text-dark);
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.25s var(--ease-out);
+}
+.dn-close:hover { background: #fff; transform: scale(1.06); }
+.dn-close:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+@media (max-width: 1279px) {
+  .dn-drawer, .dn-drop { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dn-scrim, .dn-panels, .dn-drop, .dn-models-inner,
+  .dn-model-art img, .dn-type svg, .dn-drop-link svg { transition: none; animation: none; }
+  .dn-model:hover .dn-model-art img { transform: none; }
+}
 
 .nav-actions {
   display: flex;
@@ -2562,7 +2902,7 @@ body:not([data-header="solid"]) .site-header::before {
 
   .nav-right { flex-direction: column; align-items: flex-start; gap: 1.5rem; width: 100%; }
   .nav-primary { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
-  .nav-primary li a { font-size: 1rem; padding: 0.65rem 0; }
+  .nav-primary > li > a { font-size: 1rem; padding: 0.65rem 0; }
   .nav-actions { flex-direction: column; align-items: flex-start; gap: 0.75rem; width: 100%; }
   .btn-nav-filled, .btn-nav-outline {
     width: 100%; text-align: center;
@@ -2722,170 +3062,248 @@ body:not([data-header="solid"]) .site-header::before {
 }
 
 /* ==================================================================
-   MOBILE FULL-SCREEN MENU
-   Full-screen overlay that replaces the old slide-in drawer.
-   Lives below the header (z 1000) so the logo + animated X stay on top.
+   PHONE MENU
+   Below 1280px. A white sheet over the whole screen, header included, after
+   porsche.com's phone menu: a stack of screens that slide in from the right,
+   each with a bar of back arrow, name and round close. Built by app.js
+   initMobileMenu(). Display is switched on in the 1279px block below.
    ================================================================== */
 .mobile-menu {
-  display: none;   /* desktop: never shown (see @media below) */
+  display: none;
   position: fixed;
   inset: 0;
-  z-index: 998;
-  background: var(--blue);
-  flex-direction: column;
-  padding: 92px var(--page-pad) 2rem;   /* top pad clears the fixed header */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  z-index: 1002;                 /* over the header (1000): the sheet has its own close */
+  /* A whole-pixel gutter, not the site's 6vw: at 6vw a full-width pill comes out
+     a fractional width, and its sweep gradient leaves the right cap flat. */
+  --pm-pad: 1.5rem;
+  background: #fff;
+  color: var(--text-dark);
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-8px);
-  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out), visibility 0.35s;
+  transform: translateY(12px);
+  transition: opacity 0.3s var(--ease-morph), transform 0.45s var(--ease-out), visibility 0s linear 0.45s;
 }
-.mobile-menu.open { opacity: 1; visibility: visible; transform: none; }
-
-.mm-nav { display: flex; flex-direction: column; }
-
-/* Top-level rows (both the <button> for RVs and the plain links) */
-.mm-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 1rem;
-  padding: 1.15rem 0;
-  background: none;
-  border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-}
-.mm-chevron { flex: 0 0 auto; transition: transform 0.3s var(--ease-out); color: rgba(255,255,255,0.6); }
-.mm-top[aria-expanded="true"] .mm-chevron { transform: rotate(180deg); }
-
-/* Expanding panels (RVs → categories → models) */
-.mm-panel { display: none; padding: 0.5rem 0 0.75rem; }
-.mm-panel.open { display: block; animation: mmFade 0.3s var(--ease-out); }
-@keyframes mmFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-
-.mm-viewall {
-  display: block;
-  text-align: center;
-  margin: 0.5rem 0 1rem;
-  padding: 0.8rem 1rem;
-  border-radius: var(--radius-btn);
-  background: #fff;
-  color: var(--blue);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-decoration: none;
+.mobile-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s var(--ease-morph), transform 0.45s var(--ease-out), visibility 0s;
 }
 
-/* Category row inside RVs */
-.mm-cat-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 1rem;
-  padding: 0.95rem 0;
-  background: none;
-  border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.9);
-  font-family: var(--font-body);
-  font-size: 1.02rem;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-}
-.mm-cat-btn .mm-chevron { width: 16px; height: 16px; }
-
-/* Model list inside a category */
-.mm-cat-panel { display: none; padding: 0.35rem 0 0.85rem; }
-.mm-cat-panel.open { display: block; animation: mmFade 0.3s var(--ease-out); }
-
-.mm-model {
-  display: flex;
-  flex-direction: column;      /* stacked: image → name/price → buttons */
-  gap: 0.75rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.mm-model-img {
-  width: 100%;
-  height: 200px;               /* ~2× larger than the previous 152×100 thumbnail */
-  object-fit: contain;
-  object-position: center;
-}
-.mm-model-text { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-.mm-model-name {
-  font-family: var(--font-body);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #fff;
-}
-.mm-model-price {
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 400;
-  color: rgba(255,255,255,0.55);
-}
-/* two buttons on one row, 20px between them, splitting the width evenly */
-.mm-model-ctas { display: flex; gap: 20px; margin-top: 0.6rem; }
-.mm-model-cta {
-  flex: 1 1 0;
-  text-align: center;
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  padding: 0.65rem 0.5rem;
-  border-radius: var(--radius-btn);
-  text-decoration: none;
-  white-space: nowrap;
-}
-/* on the blue menu: one white outline, one solid white */
-.mm-model-discover { background: transparent; border: 1.5px solid rgba(255,255,255,0.7); color: #fff; }
-.mm-model-build    { background: #fff; color: var(--blue); }
-
-/* Footer-sourced sub-links (Find Your RV, Owners, About, …) */
-.mm-sublinks { display: flex; flex-direction: column; }
-.mm-sublink {
-  display: block;
-  padding: 0.7rem 0.25rem;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.82);
-  font-family: var(--font-body);
-  font-size: 0.98rem;
-  font-weight: 400;
-  text-decoration: none;
-}
-.mm-sublink:last-child { border-bottom: none; }
-
-.mm-actions {
+/* one screen; siblings stack in the same box and slide past each other */
+.pm-view {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  background: #fff;
+  transform: translateX(0);
+  transition: transform 0.45s var(--ease-out), opacity 0.45s var(--ease-out);
 }
-.mm-actions .btn-nav-filled,
-.mm-actions .btn-nav-outline {
-  width: 100%;
+.pm-view[hidden] { display: none; }
+.pm-view.is-right { transform: translateX(100%); }
+.pm-view.is-left  { transform: translateX(-28%); opacity: 0; }
+
+.pm-bar {
+  flex: none;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(0.75rem + env(safe-area-inset-top)) var(--pm-pad) 0.75rem;
+  min-height: 72px;
+}
+.pm-title {
+  grid-column: 2;
+  justify-self: center;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
   text-align: center;
-  padding: 0.9rem 1.25rem;
-  border-radius: var(--radius-btn);
+  outline: none;
 }
-/* solid-white on the blue menu (the default blue gradient would vanish) */
-.mm-actions .btn-nav-filled { background: #fff; color: var(--blue); }
+.pm-title--root { visibility: hidden; }  /* named for assistive tech; the list says the rest */
+.pm-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.2s var(--ease-out);
+}
+.pm-back { grid-column: 1; justify-self: start; margin-left: -10px; }
+.pm-close { grid-column: 3; justify-self: end; background: var(--surface); }
+.pm-back:active { background: rgba(15,11,9,0.06); }
+.pm-close:active { background: var(--surface-hover); transform: scale(0.94); }
+.pm-icon:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.pm-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem var(--pm-pad) 2rem;
+}
+
+/* ---- rows that open a screen ---- */
+.pm-list { list-style: none; }
+.pm-list--root { margin-top: 1rem; }
+.pm-row {
+  width: calc(100% + 1.5rem);
+  margin: 0 -0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.75rem;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  font-family: var(--font-body);
+  text-align: left;
+  color: var(--text-dark);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.pm-row-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.pm-row-label {
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.pm-list--root .pm-row-label { font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; }
+.pm-list--root .pm-row { padding: 0.95rem 0.75rem; }
+.pm-row-meta { font-size: 0.82rem; color: var(--text-mid); }
+.pm-row svg { flex: none; color: var(--text-mid); transition: transform 0.2s var(--ease-out), color 0.15s; }
+.pm-row:active { background: var(--surface); }
+.pm-row:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+.pm-group {
+  margin: 1.5rem 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.pm-group:first-child { margin-top: 0.5rem; }
+
+/* ---- page links ---- */
+.pm-links { list-style: none; }
+.pm-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 -0.75rem;
+  padding: 0.85rem 0.75rem;
+  border-radius: 14px;
+  font-size: 1.12rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-dark);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.pm-link svg { flex: none; color: var(--text-mid); transition: transform 0.2s var(--ease-out), color 0.15s; }
+.pm-link:active { background: var(--surface); }
+.pm-link:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.pm-link[aria-disabled="true"] { color: var(--text-mid); }
+.pm-link[aria-disabled="true"] svg { display: none; }
+.pm-links--quiet {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+}
+.pm-links--quiet .pm-link { font-size: 0.98rem; padding: 0.7rem 0.75rem; }
+
+/* ---- a type's models ---- */
+.pm-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.25rem 0 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--blue);
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.pm-explore:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.pm-cards { list-style: none; display: grid; gap: 0.75rem; }
+.pm-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem 1.25rem 1.25rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text-dark);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+.pm-card-name { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+.pm-card-art {
+  display: block;
+  width: min(100%, 340px);
+  margin: 0.4rem auto 0.6rem;
+  aspect-ratio: 400 / 248;
+}
+.pm-card-art img { display: block; width: 100%; height: 100%; object-fit: contain; transition: transform 0.5s var(--ease-out); }
+.pm-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.pm-chip {
+  padding: 0.3rem 0.68rem;
+  border-radius: var(--radius-btn);
+  background: #fff;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.pm-card:active { background: var(--surface-hover); }
+.pm-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ---- pinned actions ---- */
+.pm-foot {
+  flex: none;
+  padding: 0.9rem var(--pm-pad) calc(1rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--hairline);
+  background: #fff;
+}
+.pm-actions { display: grid; gap: 0.6rem; }
+.pm-action { width: 100%; text-align: center; }
+
+/* hover, for tablets and narrow desktop windows with a pointer */
+@media (hover: hover) and (pointer: fine) {
+  .pm-row:hover, .pm-link:hover { background: rgba(15,11,9,0.045); }
+  .pm-row:hover svg { color: var(--text-dark); transform: translateX(3px); }
+  .pm-link:hover { color: var(--blue); }
+  .pm-link:hover svg { color: var(--blue); transform: translateX(3px); }
+  .pm-link[aria-disabled="true"]:hover { background: none; color: var(--text-mid); }
+  .pm-back:hover { background: rgba(15,11,9,0.05); }
+  .pm-close:hover { background: var(--surface-hover); }
+  .pm-explore:hover { border-bottom-color: var(--blue); }
+  .pm-card:hover { background: var(--surface-hover); }
+  .pm-card:hover .pm-card-art img { transform: scale(1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu, .mobile-menu.open, .pm-view { transition: none; transform: none; }
+  .pm-view.is-left { opacity: 1; }
+  .pm-card-art img { transition: none; }
+}
+
 
 /* 1279, not 768, and the number is measured rather than chosen.
    All six nav links sit on the left of a centred, absolutely-positioned logo,
@@ -2913,7 +3331,7 @@ body:not([data-header="solid"]) .site-header::before {
   .hamburger { display: flex; }
   .gs-trigger { display: flex; }
   .gs-trigger + .hamburger { margin-left: 0.25rem; }
-  .mobile-menu { display: flex; }
+  .mobile-menu { display: block; }
   /* lock background scroll while the menu is open */
   body.menu-open { overflow: hidden; }
 }

@@ -56,6 +56,7 @@
   document.title = title + ' — Jayco Blog (v5)';
   $('#bl-post-h').textContent = title;
   $('#bl-post-date').textContent = post.date;
+  if (window.JAYCO_SHARE) window.JAYCO_SHARE.mount($('#bl-share'), { title });
 
   /* Every topic the post carries, not just the first: this is the one page
      with room for the full set, and they are the way back into the archive. */
@@ -117,6 +118,7 @@
     const body = $('#bl-body');
     body.innerHTML = html;
     dropRepeatedOpener(body);
+    if (window.JAYCO_SHARE) window.JAYCO_SHARE.mount($('#bl-share-end'), { title, label: 'Share this post' });
   }
 
   const s = document.createElement('script');

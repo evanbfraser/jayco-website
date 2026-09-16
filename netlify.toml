@@ -71,6 +71,54 @@
   to = "/version-5/brochures.html"
   status = 302
 
+# ---- Owners and Resources pages (2026-09-16) ----
+# The two templates first: /events/<slug> and /newsroom/<slug> must be matched
+# before the bare paths below them would be.
+[[redirects]]
+  from = "/events/:slug"
+  to = "/version-5/event.html?event=:slug"
+  status = 302
+
+[[redirects]]
+  from = "/newsroom/:slug"
+  to = "/version-5/news.html?article=:slug"
+  status = 302
+
+[[redirects]]
+  from = "/events"
+  to = "/version-5/events.html"
+  status = 302
+
+[[redirects]]
+  from = "/newsroom"
+  to = "/version-5/newsroom.html"
+  status = 302
+
+[[redirects]]
+  from = "/owner-services"
+  to = "/version-5/owner-services.html"
+  status = 302
+
+[[redirects]]
+  from = "/warranty"
+  to = "/version-5/warranty.html"
+  status = 302
+
+[[redirects]]
+  from = "/recalls"
+  to = "/version-5/recalls.html"
+  status = 302
+
+[[redirects]]
+  from = "/jayco-companion"
+  to = "/version-5/jayco-companion.html"
+  status = 302
+
+[[redirects]]
+  from = "/faqs"
+  to = "/version-5/faqs.html"
+  status = 302
+
 # /floorplans/jay-feather/25bh — one towable floorplan's page. Above the bare
 # /floorplans so the placeholders are not swallowed by it.
 [[redirects]]

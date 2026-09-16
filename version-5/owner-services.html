@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Owner Services — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-18" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
+  <link rel="stylesheet" href="css/owners.css?v=v5-ow-8" />
+  </head>
+<body class="ab-page ow-page ows-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+
+  <!-- ===== 100% PDI =====
+       Pre-delivery inspection: what it is, when it became every unit rather
+       than some of them, and what an inspector actually checks.
+
+       PROVENANCE. Every date, figure and place below is Jayco's own, harvested
+       on 2026-09-07 from two pages:
+         • jayco.com/newsroom/100-percent-pdi/  — the announcement, the
+           facility, the milestone dates, and the CEO quotation.
+         • jaycofamily.com/PDI/                 — the inspection itself and the
+           second CEO quotation.
+       Nothing is rounded and nothing is inferred. Where Jayco says
+       "approximately 70,000 square feet", so does this.
+
+       THE ONE AUTHORED MOTION MOMENT is the ramp in "New Standards": three
+       dated rules that fill to the share of the lineup being inspected at each
+       date. The bar is the claim, not a decoration beside it. The only other
+       authored moments are the tick that draws on each "What gets checked"
+       card and the "Watch it" photograph opening from the centre.
+       Everything else on the page uses the shared quiet handoff — arriving
+       copy, drifting media. See js/about.js. -->
+  <!-- Owner Services. The sitemap's "Support / Contact" page: find a service
+       center, the contact list and addresses, then the three places an owner
+       helps themselves — videos, Jayco University, manuals — and the FAQ.
+
+       PROVENANCE. Every phone number, address, department and program below is
+       jayco.com's, read 2026-09-16 from /owners-resources/owners-support/,
+       /contact-us/ and its four department pages, and the 2027 Towable Warranty
+       Guide. Jayco publishes no customer service hours, so none are given. The
+       dispute-program link is the page the warranty guide prints; the one on
+       jayco.com's support page returns 404. -->
+  <main class="ab ow" id="owner-services">
+
+    <section class="ab-hero">
+      <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-16 as
+             assets/jayco-owners-services-hero.jpg (2400x1600), exported to
+             owners/web at 1200, 1800 and 2400. -->
+        <img class="ab-hero-img"
+             src="../assets/owners/web/services-hero-v2-1800.webp"
+             srcset="../assets/owners/web/services-hero-v2-1200.webp 1200w,
+                     ../assets/owners/web/services-hero-v2-1800.webp 1800w,
+                     ../assets/owners/web/services-hero-v2-2400.webp 2400w"
+             sizes="100vw" width="2400" height="1600"
+             fetchpriority="high" decoding="async"
+             alt="A couple laughing beside a campfire in the pines, their Jayco motorhome parked behind them" />
+      </div>
+      <div class="ab-hero-overlay" aria-hidden="true"></div>
+      <div class="ab-hero-content">
+        <span class="ab-hero-eyebrow">Owner Services</span>
+        <h1 class="ab-hero-heading">Here long after the sale.</h1>
+        <p class="ab-hero-tagline">Service, parts, manuals and a person to call, for as long as
+          the Jayco is yours.</p>
+      </div>
+    </section>
+
+    <!-- ===== On this page =====
+         Straight after the hero, and sticky: it rides under the header for the
+         rest of the page, with the section in view marked (owners.js, initJump).
+         A sibling of the sections, directly in <main>, so it has the whole page
+         to stick through. -->
+    <nav class="ow-jump" id="ow-jump" aria-label="On this page">
+      <div class="ow-jump-bar">
+        <span class="ow-jump-pill" aria-hidden="true"></span>
+        <a href="#service">Find service</a>
+        <a href="#contact">Contact Jayco</a>
+        <a href="#roadside">Roadside assistance</a>
+        <a href="#learn">Manuals &amp; training</a>
+        <a href="#more">Warranty &amp; recalls</a>
+      </div>
+    </nav>
+
+    <section class="ab-intro">
+      <div class="ab-inner">
+        <p class="ab-intro-body ab-rise">Start with your dealer. Jayco authorizes its dealers to
+          handle warranty and repair decisions, so their service department is the quickest way to a
+          fix — and when a problem needs Jayco, they contact us on your behalf.</p>
+        <p class="ab-intro-body ab-rise">Behind them is Jayco Customer Service in Middlebury,
+          Indiana, by phone, by email, or by the form on this page.</p>
+      </div>
+    </section>
+
+    <!-- ===== Find a service center ===== -->
+    <section class="ab-band" id="service" aria-labelledby="ows-svc-h">
+      <div class="ab-inner">
+        <div class="ab-band-grid">
+          <div class="ab-band-media-wrap ab-rise">
+            <div class="ab-band-media">
+              <img class="ab-band-img"
+                   src="../assets/owners/web/services-dealers-1200.webp"
+                   srcset="../assets/owners/web/services-dealers-800.webp 800w,
+                           ../assets/owners/web/services-dealers-1200.webp 1200w"
+                   sizes="(max-width: 900px) 92vw, 46vw"
+                   width="1200" height="840" loading="lazy" decoding="async"
+                   alt="A Jayco dealership from above, rows of travel trailers on its lot" />
+            </div>
+          </div>
+          <div class="ab-band-copy ab-rise">
+            <span class="section-label">Service</span>
+            <h2 class="section-heading dark" id="ows-svc-h">Find a service center.</h2>
+            <p>From giving advice to selling and servicing products, Jayco dealers are the glue in the
+              family bond. A solid relationship with your local dealer is a key part of enjoying your
+              Jayco, and it is where parts and service are closest.</p>
+            <p>Every authorized dealer and service center, searchable by location — more than 300
+              across North America.</p>
+            <a class="btn-primary" href="dealers.html">Find a Dealer</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Contact list & address ===== -->
+    <section class="ab-sec" id="contact" aria-labelledby="ows-contact-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Contact</span>
+          <h2 class="section-heading dark" id="ows-contact-h">Reach the right desk.</h2>
+          <p class="ab-sec-lead">One toll-free number reaches owner support; choose the option for
+            your question. Or write to the department directly, by email or with the form below.</p>
+        </div>
+
+        <div class="ows-contact">
+          <ul class="ows-desks ab-rise" role="list">
+            <li class="ows-desk">
+              <h3 class="ows-desk-name">Towable Customer Service</h3>
+              <p class="ows-desk-for">Travel trailers, destination trailers, fifth wheels and toy haulers.</p>
+              <p class="ows-desk-line">
+                <a class="ows-tel" href="tel:+18002838267">800-283-8267</a><span class="ows-opt">Option 2</span>
+              </p>
+              <a class="ows-mail" href="mailto:service@jayco.com">service@jayco.com</a>
+            </li>
+            <li class="ows-desk">
+              <h3 class="ows-desk-name">Motorized Customer Service</h3>
+              <p class="ows-desk-for">Class A, B, C and Super C motorhomes.</p>
+              <p class="ows-desk-line">
+                <a class="ows-tel" href="tel:+18002838267">800-283-8267</a><span class="ows-opt">Option 3</span>
+              </p>
+              <a class="ows-mail" href="mailto:motorizedservice@jayco.com">motorizedservice@jayco.com</a>
+            </li>
+            <li class="ows-desk">
+              <h3 class="ows-desk-name">Parts</h3>
+              <p class="ows-desk-for">Questions about a part. Replacement parts are sold through your dealer.</p>
+              <p class="ows-desk-line">
+                <a class="ows-tel" href="tel:+18002838267">800-283-8267</a><span class="ows-opt">Option 1</span>
+              </p>
+              <a class="ows-mail" href="mailto:parts@jayco.com">parts@jayco.com</a>
+            </li>
+            <li class="ows-desk">
+              <h3 class="ows-desk-name">Sales</h3>
+              <p class="ows-desk-for">Shopping for a new Jayco.</p>
+              <p class="ows-desk-line">
+                <a class="ows-tel" href="tel:+18007852926">800-785-2926</a><span class="ows-opt">Option 3</span>
+              </p>
+              <a class="ows-mail" href="mailto:info@jayco.com">info@jayco.com</a>
+            </li>
+          </ul>
+
+          <div class="ows-mailbox ab-rise">
+            <div class="ows-addr">
+              <h3 class="ows-addr-h">Owner’s mailing address</h3>
+              <address>Jayco, Inc.<br>Attn: Owner Relations<br>903 S. Main Street<br>Middlebury, IN 46540</address>
+              <p class="ows-addr-meta">Fax 574-825-0679</p>
+            </div>
+            <div class="ows-addr">
+              <h3 class="ows-addr-h">Returning a part</h3>
+              <address>Jayco, Inc.<br>Customer Service<br>100 Bontrager Drive<br>Bldg 42 Door 4220<br>Middlebury, IN 46540</address>
+              <p class="ows-addr-meta">When Customer Service asks for the original part, it ships
+                here by UPS ground, prepaid.</p>
+            </div>
+            <div class="ows-addr">
+              <h3 class="ows-addr-h">Have your VIN ready</h3>
+              <p class="ows-addr-meta">It is on the weight sticker.</p>
+              <dl class="ows-vin">
+                <div><dt>Travel trailer, fifth wheel</dt><dd>Inside the entrance door, and on the outside roadside wall</dd></div>
+                <div><dt>Class B</dt><dd>Driver’s doorjamb</dd></div>
+                <div><dt>Class C</dt><dd>Inside the entrance door, and on the driver’s doorjamb</dd></div>
+                <div><dt>Class A</dt><dd>Inside the entrance door, and on the wall behind the driver’s seat</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Contact form =====
+             Netlify detects forms by reading this literal markup at deploy, so
+             every field it should record is here, hidden ones included. The
+             four departments are jayco.com's four contact forms, folded into one
+             with the department as its first choice; VIN is required except for
+             Sales, which is the only one of the four that does not ask for it.
+             owners.js posts it and swaps in the confirmation. -->
+        <div class="ows-form-wrap ab-rise">
+          <div class="ows-form-copy">
+            <h3 class="ows-form-h">Send a message.</h3>
+            <p>A member of the right department will look into it. Depending on the research an
+              inquiry needs, a reply can take some time.</p>
+            <p class="ows-form-small">Everything you send is confidential and for Jayco’s use only.</p>
+          </div>
+
+          <form class="ows-form" id="ows-form" name="owner-contact" method="POST"
+                data-netlify="true" netlify-honeypot="bot-field">
+            <input type="hidden" name="form-name" value="owner-contact" />
+            <p hidden><label>Leave this empty <input name="bot-field" /></label></p>
+
+            <div class="ows-field ows-field--full">
+              <label class="ows-label" for="ows-dept">Department</label>
+              <select class="ows-input" id="ows-dept" name="department" required>
+                <option value="">Choose one</option>
+                <option value="towable-service">Towable Customer Service</option>
+                <option value="motorized-service">Motorized Customer Service</option>
+                <option value="parts">Parts</option>
+                <option value="sales">Sales</option>
+              </select>
+            </div>
+            <div class="ows-field ows-field--full" id="ows-vin-field">
+              <label class="ows-label" for="ows-vin">VIN</label>
+              <input class="ows-input" id="ows-vin" name="vin" type="text" autocomplete="off"
+                     spellcheck="false" maxlength="17" placeholder="17 characters" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-first">First name</label>
+              <input class="ows-input" id="ows-first" name="first-name" type="text" required autocomplete="given-name" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-last">Last name</label>
+              <input class="ows-input" id="ows-last" name="last-name" type="text" required autocomplete="family-name" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-email">Email</label>
+              <input class="ows-input" id="ows-email" name="email" type="email" required autocomplete="email" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-phone">Phone <span class="ows-opt-label">optional</span></label>
+              <input class="ows-input" id="ows-phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-zip">ZIP or postal code</label>
+              <input class="ows-input" id="ows-zip" name="postal-code" type="text" required autocomplete="postal-code" />
+            </div>
+            <div class="ows-field">
+              <label class="ows-label" for="ows-country">Country</label>
+              <select class="ows-input" id="ows-country" name="country" required autocomplete="country">
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+              </select>
+            </div>
+            <div class="ows-field ows-field--full">
+              <label class="ows-label" for="ows-msg">Comments or questions</label>
+              <textarea class="ows-input" id="ows-msg" name="message" rows="5" required></textarea>
+            </div>
+            <div class="ows-field ows-field--full">
+              <button type="submit" class="btn-primary ows-go">Send</button>
+              <p class="ows-note" id="ows-note" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+
+          <div class="ows-done" id="ows-done" hidden>
+            <h3 class="ows-form-h" tabindex="-1" id="ows-done-h">Message received.</h3>
+            <p id="ows-done-body">It has gone to the department you chose. For anything urgent, call
+              800-283-8267.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Towable Roadside Assistance ===== -->
+    <section class="ab-band is-flip" id="roadside" aria-labelledby="ows-road-h">
+      <div class="ab-inner">
+        <div class="ab-band-grid">
+          <div class="ab-band-media-wrap ab-rise">
+            <div class="ab-band-media">
+              <img class="ab-band-img"
+                   src="../assets/owners/web/services-roadside-1200.webp"
+                   srcset="../assets/owners/web/services-roadside-800.webp 800w,
+                           ../assets/owners/web/services-roadside-1200.webp 1200w"
+                   sizes="(max-width: 900px) 92vw, 46vw"
+                   width="1200" height="732" loading="lazy" decoding="async"
+                   alt="A couple walking their dog past a fifth wheel set up in a pine forest" />
+            </div>
+          </div>
+          <div class="ab-band-copy ab-rise">
+            <span class="section-label">Towable roadside assistance</span>
+            <h2 class="section-heading dark" id="ows-road-h">Help on the road, 24/7/365.</h2>
+            <p>Every new Jayco travel trailer and fifth wheel with Goodyear<sup>&reg;</sup> tires
+              comes standard with the Tredit&trade; Advantage Program: roadside assistance powered by
+              Urgent.ly, through a network of more than 45,000 service vehicles.</p>
+            <ul class="ows-ticks">
+              <li>Towing</li><li>Tire changes</li><li>Lockout service</li>
+              <li>Jump-starts</li><li>Fuel delivery</li><li>Key replacement</li>
+            </ul>
+            <p>No membership dues, no hidden fees and no waiting on the phone. You get an up-front
+              estimate and pay only when the service is complete, through the Tredit Advantage app for
+              iPhone and Android.</p>
+            <a class="btn-secondary-light" href="https://www.tredittire.com/tredit-advantage/"
+               target="_blank" rel="noopener noreferrer">About Tredit Advantage<span class="sr-only"> (opens in a new tab)</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Videos, Jayco University, Manuals ===== -->
+    <section class="ab-sec" id="learn" aria-labelledby="ows-learn-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Do it yourself</span>
+          <h2 class="section-heading dark" id="ows-learn-h">Learn it before you need it.</h2>
+        </div>
+        <ul class="ow-trio" role="list">
+          <li class="ab-rise">
+            <a class="ow-card" href="manuals.html">
+              <span class="ow-card-media">
+                <img src="../assets/manuals/web/hero-v2-1200.webp" width="1200" height="800"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Owner’s Manuals</span>
+                <span class="ow-card-p">Download and keep a digital copy of your owner’s manual, by
+                  model year and RV type.</span>
+                <span class="ow-card-go">View manuals</span>
+              </span>
+            </a>
+          </li>
+          <li class="ab-rise">
+            <a class="ow-card" href="videos.html">
+              <span class="ow-card-media">
+                <img src="../assets/videos/web/section-questions-1200.webp" width="1200" height="800"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Video Gallery</span>
+                <span class="ow-card-p">Walkthroughs, service tips, owner stories and RV reviews.</span>
+                <span class="ow-card-go">Watch now</span>
+              </span>
+            </a>
+          </li>
+          <li class="ab-rise">
+            <a class="ow-card" href="https://www.jaycofamily.com/JFOC-University-NRVTA/"
+               target="_blank" rel="noopener noreferrer">
+              <span class="ow-card-media">
+                <img src="../assets/owners/web/services-university-1200.webp" width="1200" height="800"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Jayco University</span>
+                <span class="ow-card-p">A free online course with the National RV Training Academy:
+                  76 lessons and more than three hours of video.</span>
+                <span class="ow-card-go ow-card-go--out">Enroll at jaycofamily.com<span class="sr-only"> (opens in a new tab)</span></span>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+
+    <!-- ===== More for owners ===== -->
+    <section class="ab-sec" id="more" aria-labelledby="ows-more-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">More for owners</span>
+          <h2 class="section-heading dark" id="ows-more-h">Keep your Jayco covered.</h2>
+        </div>
+        <ul class="ow-duo" role="list">
+          <li class="ab-rise">
+            <a class="ow-card ow-card--wide" href="warranty.html">
+              <span class="ow-card-media">
+                <img src="../assets/owners/web/warranty-hero-1200.webp"
+                     srcset="../assets/owners/web/warranty-hero-1200.webp 1200w, ../assets/owners/web/warranty-hero-1800.webp 1800w"
+                     sizes="(max-width: 768px) 92vw, 46vw" width="1200" height="675"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Warranty Coverage</span>
+                <span class="ow-card-p">A 2-year limited warranty and 3 years of structural protection:
+                  what it covers, and how to get a repair.</span>
+                <span class="ow-card-go">See the coverage</span>
+              </span>
+            </a>
+          </li>
+          <li class="ab-rise">
+            <a class="ow-card ow-card--wide" href="recalls.html">
+              <span class="ow-card-media">
+                <img src="../assets/owners/web/recalls-hero-1200.webp"
+                     srcset="../assets/owners/web/recalls-hero-1200.webp 1200w, ../assets/owners/web/recalls-hero-1800.webp 1800w"
+                     sizes="(max-width: 768px) 92vw, 46vw" width="1200" height="675"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Recalls</span>
+                <span class="ow-card-p">Check your VIN for an open recall, in the United States or in
+                  Canada.</span>
+                <span class="ow-card-go">Check your VIN</span>
+              </span>
+            </a>
+          </li>
+          <li class="ab-rise">
+            <a class="ow-card ow-card--wide" href="jayco-companion.html">
+              <span class="ow-card-media">
+                <!-- A 16:9 crop of the app's own splash screen. -->
+                <img src="../assets/owners/web/card-companion-1242.webp"
+                     srcset="../assets/owners/web/card-companion-800.webp 800w, ../assets/owners/web/card-companion-1242.webp 1242w"
+                     sizes="(max-width: 768px) 92vw, 46vw" width="1242" height="699"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Jayco Companion App</span>
+                <span class="ow-card-p">Your RV’s specs, manuals and warranty, answers to your
+                  questions, and service nearby. Free for iPhone and iPad.</span>
+                <span class="ow-card-go">See the app</span>
+              </span>
+            </a>
+          </li>
+          <li class="ab-rise">
+            <a class="ow-card ow-card--wide" href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">
+              <span class="ow-card-media">
+                <!-- jayco.com's Owner's Resources banner, kept at its full
+                     1920x540: the 16:9 crop needs every pixel of its height. -->
+                <img src="../assets/owners/web/card-ownership-1920.webp" width="1920" height="540"
+                     loading="lazy" decoding="async" alt="" />
+              </span>
+              <span class="ow-card-body">
+                <span class="ow-card-h">Change of Ownership Form</span>
+                <span class="ow-card-p">Bought a Jayco used, or moved? Update the owner on file so
+                  recall notices reach you.</span>
+                <span class="ow-card-go ow-card-go--out">Open the form<span class="sr-only"> (opens in a new tab)</span></span>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="ab-note ab-rise">If you believe Jayco has not met its warranty obligations, you may
+          be eligible for the RV Warranty Dispute Program: no-cost, voluntary and independent.
+          <a href="https://www.demarsassociates.com/rv-warranty-dispute-program" target="_blank"
+             rel="noopener noreferrer">About the program</a>.</p>
+      </div>
+    </section>
+
+    <div class="ab-tail" aria-hidden="true"></div>
+
+    <!-- ===== FAQ — the "Current RV Owners" questions from js/faqs-data.js, written in at
+         build time so they read the same here and on faqs.html. Edit them there. ===== -->
+    <section class="faq-section" id="faq">
+      <div class="faq-inner">
+        <div class="faq-header">
+          <span class="section-label">Frequently Asked Questions</span>
+          <h2 class="section-heading dark">Owning a Jayco.</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Can I buy Jayco replacement parts?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Jayco does not sell replacement parts directly to Jayco owners. Your best resource for replacement parts is your local Jayco <a href="dealers.html">dealer</a>. For a question about a part, Jayco Parts is at 800-283-8267, option 1, or parts@jayco.com.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Where do I find my VIN?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>On the weight sticker. On a travel trailer or fifth wheel it is on the inside of the entrance door and on the outside roadside wall. On a Class B it is on the driver’s doorjamb; on a Class C, inside the entrance door and on the driver’s doorjamb; on a Class A, inside the entrance door and on the wall behind the driver’s seat.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>I bought a used Jayco. How do I register it?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Fill out the <a href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">Change of Ownership Form</a> (<a href="https://qrco.de/bgAriU" target="_blank" rel="noopener noreferrer">en français</a>). Federal record-keeping law requires Jayco to keep owner files, and it is how a <a href="recalls.html">recall notice</a> reaches you.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How do I de-winterize my RV?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>De-winterizing instructions can be found in your Jayco <a href="manuals.html">owner’s manual</a>. You can also find helpful resources on the Jayco Journal including this article called <a href="blog-post.html?post=the-waking-your-rv-from-winter-hibernation-checklist">The waking your RV from winter hibernation checklist</a>.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How do I winterize my RV?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Winterizing instructions can be found in your Jayco <a href="manuals.html">owner’s manual</a>. You can also find helpful resources on the Jayco Journal like this article on <a href="blog-post.html?post=rv-winterizing-tips">winterizing your RV</a>.</p></div>
+          </div>
+        </div>
+        <p class="ow-faq-more"><a href="faqs.html?topic=owners">All Current RV Owners questions</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <!-- Jayco Companion, the owner app. iPhone only: Wingmate, which had an
+               Android version too, is gone from both stores, and Companion has no
+               Google Play listing. -->
+          <a href="https://apps.apple.com/us/app/jayco-companion/id6792838188" class="footer-app-badge"
+             target="_blank" rel="noopener noreferrer" aria-label="Download Jayco Companion on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="owner-services.html">Owner Services</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
+            <li><a href="warranty.html">Warranty Coverage</a></li>
+            <li><a href="recalls.html">Recalls</a></li>
+            <li><a href="jayco-companion.html">Jayco Companion App</a></li>
+            <li><a href="https://www.jaycofamily.com/ambassadors/" target="_blank" rel="noopener noreferrer">Ambassador Program</a></li>
+            <li><a href="https://www.jaycofamily.com/JFOC-University-NRVTA/" target="_blank" rel="noopener noreferrer">Jayco University</a></li>
+            <li><a href="https://jaycostore.myshopify.com/" target="_blank" rel="noopener noreferrer">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="https://jayco.gopremierpro.com/shop/catalog" target="_blank" rel="noopener noreferrer">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
+            <li><a href="https://www.jaycofamily.com/" target="_blank" rel="noopener noreferrer">Careers</a></li>
+            <li><a href="newsroom.html">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/owners.js?v=v5-ow-3"></script>
+  <!-- The RVs menu, desktop and phone, is built from the model library. -->
+  <script src="js/models-data.js?v=v5-6"></script>
+  <script src="js/app.js?v=v5-core-21"></script>
+</body>
+</html>

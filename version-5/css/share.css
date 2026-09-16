@@ -1,0 +1,65 @@
+/* ===================================================
+   Jayco — Share row (blog-post.html, news.html)
+   Built by js/share.js. Quiet round Surface buttons that
+   go dark on hover; blue is kept for the focus ring.
+   =================================================== */
+
+.share {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+}
+.share[hidden] { display: none; }
+.share-label {
+  font-size: 0.85rem; font-weight: 600; color: var(--text-dark);
+}
+.share-list {
+  display: flex; gap: 0.5rem;
+  margin: 0; padding: 0; list-style: none;
+}
+.share-btn {
+  display: inline-grid; place-items: center;
+  width: 44px; height: 44px;
+  border: 0; border-radius: 50%;
+  background: var(--surface); color: var(--text-dark);
+  cursor: pointer; text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s var(--ease-out);
+}
+.share-btn:hover { background: var(--text-dark); color: var(--white); }
+.share-btn:active { transform: scale(0.94); }
+.share-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.share-btn.is-done { background: var(--text-dark); color: var(--white); }
+.share-icon { display: grid; place-items: center; }
+
+.share-status {
+  font-size: 0.85rem; color: var(--text-mid);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity 0.25s, transform 0.25s var(--ease-out);
+}
+.share.has-status .share-status { opacity: 1; transform: none; }
+/* empty, it would still take a gap and push the buttons off the text edge */
+.share-status:empty { display: none; }
+
+/* ---------- where each page puts it ---------- */
+
+/* Under the heading: the date on the left, the row on the right. */
+.share-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem 1.5rem;
+  margin: clamp(1.25rem, 2.5vw, 1.75rem) 0 0;
+}
+.share-meta > p { margin: 0; }
+/* the note appears to the left, so the buttons hold still at the right edge */
+.share-meta .share-status { order: -1; transform: translateX(4px); }
+.share-meta .share-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* After the article: a hairline, then a labeled row. */
+.share--end {
+  margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--hairline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-btn, .share-status { transition: none; }
+  .share-btn:active { transform: none; }
+}

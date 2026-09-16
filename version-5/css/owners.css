@@ -1,0 +1,744 @@
+/* ===================================================
+   Jayco — the Owners pages
+   owner-services.html (.ows-page), warranty.html
+   (.owr-page), recalls.html (.orc-page),
+   jayco-companion.html (.oapp-page), faqs.html
+   (.ofq-page)
+   ---------------------------------------------------
+   These pages are built on about.css — its hero, intro,
+   section heads, bands, stats, steps, lists, CTA band
+   and notes — and load it first. This sheet is only what
+   an owner page adds: the contact directory and form,
+   the coverage columns, the recall lookup, the app page
+   and the FAQ hub. Shared pieces carry an ow- prefix;
+   one-page pieces carry their page's prefix.
+
+   Blue stays rationed (DESIGN.md): primary buttons,
+   eyebrows, text links, and the selected state of a
+   control. Panels are Surface; nothing is a card inside
+   a card.
+   =================================================== */
+
+/* ---------- Shared ---------- */
+
+/* ---------- On this page: the sticky section bar ----------
+   The model page's floating sub-nav (css/model.css .md-subnav), in the flow
+   rather than fixed: it sits under the hero and sticks beneath the header from
+   there, the frosted pill DESIGN.md calls the floating nav bar. owners.js sets
+   --ow-stick to wherever the header's foot is, since the header changes height
+   as it compacts, and slides the highlight to the section in view. */
+.ow-jump {
+  position: sticky;
+  top: calc(var(--ow-stick, 86px) + 0.75rem);
+  z-index: 890;                       /* under the header (1000) and the menus */
+  display: flex; justify-content: center;
+  /* Spaced from the hero with a margin, not padding: padding would travel
+     with it and leave a gap under the header once it sticks. */
+  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding: 0 var(--page-pad);
+  pointer-events: none;               /* only the bar takes clicks */
+}
+.ow-jump-bar {
+  position: relative;
+  display: flex; align-items: center; gap: 0.15rem;
+  max-width: 100%;
+  padding: 0.35rem;
+  overflow-x: auto; scrollbar-width: none;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-btn);
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1), 0 6px 24px rgba(15,11,9,0.08);
+  pointer-events: auto;
+}
+.ow-jump-bar::-webkit-scrollbar { display: none; }
+.ow-jump-pill {
+  /* The whole width of the links, clipped down to the active one. Moving the
+     clip rather than left/width keeps the slide off layout, and `round` keeps
+     the ends pill-shaped at every width. owners.js sets --pl and --pr. */
+  position: absolute; top: 0.35rem; bottom: 0.35rem; left: 0;
+  width: var(--pw, 100%);
+  border-radius: var(--radius-btn);
+  background: var(--blue);
+  opacity: 0;
+  clip-path: inset(0 var(--pr, 100%) 0 var(--pl, 0px) round 999px);
+  transition: clip-path 0.45s var(--ease-morph), opacity 0.25s;
+  pointer-events: none;
+}
+.ow-jump-bar a {
+  position: relative; z-index: 1;
+  display: block; padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-btn);
+  font-size: 0.9rem; font-weight: 600; letter-spacing: 0.01em;
+  color: var(--text-dark); white-space: nowrap;
+  transition: color 0.3s var(--ease-out), background 0.2s;
+}
+.ow-jump-bar a:not(.is-active):hover { background: rgba(15,11,9,0.06); color: var(--blue); }
+.ow-jump-bar a.is-active { color: #fff; }
+.ow-jump-bar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+[id="contact"], [id="service"], [id="roadside"], [id="learn"], [id="more"], [id="coverage"], [id="canada"] {
+  scroll-margin-top: 170px;
+}
+
+.ow-cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+/* Link under a page's FAQ panel, to the same topic on faqs.html. */
+.ow-faq-more { margin: 0; }
+.ow-faq-more a {
+  font-size: 0.92rem; font-weight: 500; color: var(--blue);
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.ow-faq-more a:hover { border-bottom-color: var(--blue); }
+
+/* Three ways in, each a media card: the photograph on top, the words beneath,
+   the whole card the link. DESIGN.md's media card: Surface, 20px, the image
+   growing a little on hover. Three different destinations, not a grid of
+   same-size feature tiles. */
+.ow-trio {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.6vw, 1.5rem);
+}
+.ow-card {
+  display: flex; flex-direction: column; height: 100%;
+  border-radius: var(--radius-card); overflow: hidden;
+  background: var(--surface); color: var(--text-dark);
+  transition: background 0.3s var(--ease-out);
+}
+.ow-card-media { display: block; aspect-ratio: 3 / 2; overflow: hidden; }
+.ow-card-media img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.9s var(--ease-out);
+}
+.ow-card-body { display: flex; flex-direction: column; flex: 1; padding: clamp(1.25rem, 2vw, 1.6rem); }
+.ow-card-h {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1.2;
+}
+.ow-card-p { margin-top: 0.5rem; font-size: 0.94rem; line-height: 1.65; color: var(--text-mid); }
+.ow-card-go {
+  margin-top: auto; padding-top: 1.1rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.88rem; font-weight: 600; color: var(--blue);
+}
+.ow-card-go::after {
+  content: ''; width: 14px; height: 14px; flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.25s var(--ease-out);
+}
+.ow-card-go--out::after {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E");
+}
+.ow-card:hover { background: var(--surface-hover); }
+.ow-card:hover .ow-card-media img { transform: scale(1.04); }
+.ow-card:hover .ow-card-go::after { transform: translateX(3px); }
+.ow-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+/* Four more places to go, two by two: the same media card at a wider,
+   landscape crop, since each image is half the frame wide. */
+.ow-duo {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.6vw, 1.5rem);
+}
+.ow-card--wide .ow-card-media { aspect-ratio: 16 / 9; }
+.ow-card--wide .ow-card-h { font-size: clamp(1.4rem, 2vw, 1.75rem); }
+.ow-card--wide .ow-card-body { padding: clamp(1.4rem, 2.6vw, 2.1rem); }
+.ow-card--wide .ow-card-p { max-width: 48ch; font-size: 0.98rem; }
+
+/* ===================================================
+   Owner Services (.ows-page)
+   =================================================== */
+
+.ows-contact {
+  display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem); align-items: start;
+}
+
+/* The four desks: a hairline table, not four cards. The number is the thing a
+   reader came for, so it is the largest type in the row. */
+.ows-desks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
+.ows-desk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name line" "for mail";
+  column-gap: 1.5rem; row-gap: 0.3rem;
+  padding: clamp(1.1rem, 2vw, 1.45rem) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.ows-desk-name {
+  grid-area: name; margin: 0;
+  font-family: var(--font-display); font-size: 1.12rem; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--text-dark);
+}
+.ows-desk-for { grid-area: for; margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--text-mid); }
+.ows-desk-line {
+  grid-area: line; margin: 0; justify-self: end;
+  display: flex; align-items: baseline; gap: 0.55rem; white-space: nowrap;
+}
+.ows-tel {
+  font-family: var(--font-display); font-size: 1.12rem; font-weight: 700;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s, color 0.2s;
+}
+.ows-tel:hover { color: var(--blue); border-bottom-color: var(--blue); }
+.ows-opt {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-mid);
+}
+.ows-mail {
+  grid-area: mail; justify-self: end; align-self: start;
+  font-size: 0.9rem; color: var(--blue);
+  border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.ows-mail:hover { border-bottom-color: var(--blue); }
+.ows-tel:focus-visible, .ows-mail:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 2px; }
+
+.ows-mailbox {
+  display: grid; gap: 1.5rem;
+  padding: clamp(1.5rem, 2.4vw, 2rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.ows-addr + .ows-addr { padding-top: 1.5rem; border-top: 1px solid rgba(15,11,9,0.1); }
+.ows-addr-h {
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-mid);
+}
+.ows-addr address { font-style: normal; font-size: 0.98rem; line-height: 1.6; color: var(--text-dark); }
+.ows-addr-meta { margin: 0.45rem 0 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-mid); }
+.ows-vin { margin: 0.75rem 0 0; display: grid; gap: 0.55rem; }
+.ows-vin div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.75rem; }
+.ows-vin dt { font-size: 0.84rem; font-weight: 600; color: var(--text-dark); line-height: 1.45; }
+.ows-vin dd { margin: 0; font-size: 0.84rem; color: var(--text-mid); line-height: 1.45; }
+
+/* ----- the form ----- */
+.ows-form-wrap {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(1.75rem, 4vw, 3.25rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.ows-form-h {
+  margin: 0; font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark); outline: none;
+}
+.ows-form-copy p, .ows-done p { margin: 0.9rem 0 0; font-size: 0.96rem; line-height: 1.7; color: var(--text-mid); max-width: 40ch; }
+.ows-form-copy .ows-form-small { font-size: 0.84rem; }
+.ows-form {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.1rem;
+}
+.ows-field { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.ows-field--full { grid-column: 1 / -1; }
+.ows-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-mid);
+}
+.ows-opt-label { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.8; }
+/* DESIGN.md's input: white, 14px, no border at rest, a 2px blue ring on focus.
+   On Surface the white carries the edge by itself. */
+.ows-input {
+  width: 100%; min-height: 48px;
+  font-family: var(--font-body); font-size: 1rem; color: var(--text-dark);
+  background: #fff; border: 0; border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  box-shadow: 0 0 0 1px rgba(15,11,9,0.06);
+  transition: box-shadow 0.15s;
+}
+.ows-input:hover { box-shadow: 0 0 0 1px rgba(15,11,9,0.18); }
+.ows-input:focus { outline: none; box-shadow: 0 0 0 2px var(--blue); }
+.ows-input::placeholder { color: rgba(92,86,82,0.75); }
+select.ows-input {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 2.5rem; cursor: pointer;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A1410' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.95rem center;
+}
+textarea.ows-input { resize: vertical; min-height: 8rem; line-height: 1.55; }
+.ows-go { justify-self: start; align-self: flex-start; margin-top: 0.25rem; }
+.ows-note { margin: 0.6rem 0 0; font-size: 0.86rem; color: var(--text-mid); min-height: 1.3em; }
+.ows-done { grid-column: 2; align-self: center; }
+
+.ows-ticks {
+  list-style: none; margin: 1.1rem 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); gap: 0.55rem 2rem;
+}
+.ows-ticks li {
+  position: relative; padding-left: 1.6rem;
+  font-size: 0.96rem; font-weight: 500; color: var(--text-dark);
+}
+.ows-ticks li::before {
+  content: ''; position: absolute; left: 0; top: 0.28em; width: 1rem; height: 1rem;
+  background: var(--blue);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ===================================================
+   Warranty (.owr-page)
+   =================================================== */
+
+/* The hero (client photograph, 2026-09-16) is an aerial with the motorhome
+   near the middle of the frame, which is exactly where the heading sits. On a
+   wide screen the picture is taller than the hero, so the crop slides down and
+   the coach rides above the type. On a phone the type spans the width and
+   nothing clears it, so the crop slides left instead and keeps the coach at the
+   right edge, clear of where the lines begin. */
+.owr-page .ab-hero-img { object-position: 50% 80%; }
+@media (max-width: 768px) {
+  .owr-page .ab-hero-img { object-position: 8% 50%; }
+}
+
+.owr-intro {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(2rem, 5vw, 5rem); align-items: center;
+}
+.owr-badge { width: clamp(160px, 18vw, 250px); height: auto; }
+.ab-band-copy > .ow-cta-row { margin-top: 1.75rem; }
+/* the dispute note belongs to the manuals band above it, so no section step */
+.owr-dispute { padding-top: 0; }
+
+.owr-cov {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.owr-cov-col {
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+/* The exclusions are the same panel on a lighter ground with a hairline: set
+   apart without a warning color, which DESIGN.md does not have. */
+.owr-cov-col--not { background: transparent; box-shadow: inset 0 0 0 1px var(--hairline); }
+.owr-cov-h {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.owr-bullets + .owr-cov-h { margin-top: 1.9rem; }
+.owr-bullets { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.owr-bullets li {
+  position: relative; padding-left: 1.25rem;
+  font-size: 0.96rem; line-height: 1.65; color: var(--text-mid);
+}
+.owr-bullets li::before {
+  content: ''; position: absolute; left: 0; top: 0.72em;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--blue);
+}
+.owr-cov-col--not .owr-bullets li::before { background: rgba(15,11,9,0.35); }
+.owr-cov-note {
+  margin: 1.4rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--hairline);
+  font-size: 0.92rem; line-height: 1.65; color: var(--text-dark);
+}
+
+/* The four steps to a repair, as cards: one row on a wide screen so the
+   sequence reads left to right, the Recalls step card's recipe (Surface, a
+   white numeral disc) so an owner meets the same pattern on both pages. */
+.ow-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.9rem, 1.6vw, 1.25rem);
+}
+.ow-step {
+  display: flex; flex-direction: column;
+  padding: clamp(1.4rem, 2.2vw, 1.9rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.ow-step-n {
+  display: inline-flex; align-items: center; justify-content: center; align-self: flex-start;
+  width: 2.6rem; height: 2.6rem; border-radius: 50%;
+  background: #fff;
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.ow-step-h {
+  margin: 1.25rem 0 0;
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;
+  color: var(--text-dark);
+}
+.ow-step-p { margin: 0.55rem 0 0; font-size: 0.95rem; line-height: 1.65; color: var(--text-mid); }
+.ow-step-p a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s; }
+.ow-step-p a:hover { border-bottom-color: var(--blue); }
+.ow-steps + .ab-note { max-width: none; }
+
+.ab-step-body a, .ab-item-body a, .owr-cov a {
+  color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.ab-step-body a:hover, .ab-item-body a:hover { border-bottom-color: var(--blue); }
+
+/* The supplier warranties, longest term last: each term a column with its
+   figure on a blue rule — .ab-stat's idiom — and the parts under it. */
+.owr-years {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.25rem) clamp(1.25rem, 2.5vw, 2rem);
+}
+.owr-year { border-top: 2px solid var(--blue); padding-top: 1rem; }
+.owr-year-n {
+  display: block; font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  color: var(--text-dark);
+}
+.owr-year ul { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; gap: 0.45rem; }
+.owr-year li { font-size: 0.9rem; line-height: 1.5; color: var(--text-mid); }
+.owr-disclaimer { font-size: 0.76rem; line-height: 1.65; max-width: none; }
+
+/* ===================================================
+   Recalls (.orc-page)
+   =================================================== */
+
+/* The hero (client photograph, 2026-09-16) has the motorhome at its left
+   edge. A phone's narrow crop centers on the lake and loses the coach
+   entirely, so there the crop slides left to keep it in the frame. */
+@media (max-width: 768px) {
+  .orc-page .ab-hero-img { object-position: 20% 50%; }
+}
+
+/* The switch: a segmented pill control, one choice solid. */
+.orc-switch {
+  display: inline-flex; gap: 0.3rem; padding: 0.3rem;
+  background: var(--surface); border-radius: var(--radius-btn);
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+.orc-tab {
+  display: inline-flex; align-items: center; gap: 0.65rem;
+  min-height: 48px; padding: 0.55rem 1.35rem 0.55rem 0.7rem;
+  border: 0; border-radius: var(--radius-btn); background: transparent;
+  font-size: 0.95rem; font-weight: 600; color: var(--text-mid); cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.25s;
+}
+.orc-flag {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: rgba(15,11,9,0.07);
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text-dark);
+}
+.orc-tab:hover { color: var(--text-dark); }
+.orc-tab[aria-selected="true"] {
+  background: #fff; color: var(--text-dark);
+  box-shadow: 0 4px 16px rgba(15,11,9,0.1);
+}
+.orc-tab[aria-selected="true"] .orc-flag { background: var(--blue); color: #fff; }
+.orc-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* With the switch working, its label is the heading; without JS both panels
+   show, so each keeps its own. */
+.orc-armed .orc-panel-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.orc-panel-h {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;
+}
+.orc-panel + .orc-panel { margin-top: 3rem; }
+.orc-armed .orc-panel + .orc-panel { margin-top: 0; }
+
+.orc-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.orc-step {
+  display: grid; grid-template-rows: auto 1fr; gap: 1rem;
+  padding: clamp(1.4rem, 2.4vw, 2rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.orc-step > div { display: flex; flex-direction: column; }
+.orc-step-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.4rem; height: 2.4rem; border-radius: 50%;
+  background: #fff; font-family: var(--font-display); font-weight: 800; color: var(--blue);
+}
+.orc-step-h {
+  margin: 0; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em;
+}
+.orc-step p { margin: 0.55rem 0 0; font-size: 0.94rem; line-height: 1.65; color: var(--text-mid); }
+.orc-step .btn-primary, .orc-step .btn-secondary-light { margin-top: auto; align-self: flex-start; }
+.orc-step p + .btn-primary, .orc-step p + .btn-secondary-light { margin-top: 1.25rem; }
+
+.orc-aside {
+  margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.25rem, 3vw, 3rem);
+  padding-top: clamp(1.5rem, 3vw, 2.25rem); border-top: 1px solid var(--hairline);
+}
+.orc-aside-h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display); font-size: 1.08rem; font-weight: 700; letter-spacing: -0.02em;
+}
+.orc-aside-item p { margin: 0; font-size: 0.94rem; line-height: 1.7; color: var(--text-mid); max-width: 56ch; }
+.orc-aside-item p + p { margin-top: 0.75rem; }
+.orc-aside-item .btn-secondary-light { margin-top: 1.1rem; }
+.orc-aside a:not([class]), .orc-lead a, .orc-table-note a, .orc-form-links a {
+  color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.orc-aside a:not([class]):hover, .orc-table-note a:hover, .orc-form-links a:hover { border-bottom-color: var(--blue); }
+.orc-form-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
+
+.orc-lead { margin: 0 0 1.5rem; max-width: var(--measure-wide); font-size: 1.02rem; line-height: 1.75; color: var(--text-mid); }
+
+/* The table scrolls sideways inside its own box on a phone rather than
+   pushing the page wide. */
+.orc-table-wrap {
+  overflow-x: auto; border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.orc-table-wrap:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.orc-table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 0.94rem; }
+.orc-table th, .orc-table td { text-align: left; padding: 1rem 1.25rem; border-bottom: 1px solid var(--hairline); vertical-align: middle; }
+.orc-table tbody tr:last-child > * { border-bottom: 0; }
+.orc-table thead th {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mid); background: var(--surface);
+}
+.orc-sub { display: block; margin-top: 0.2rem; font-size: 0.66rem; letter-spacing: 0.06em; opacity: 0.85; }
+.orc-table tbody th { font-weight: 400; }
+.orc-no {
+  display: block; font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+  color: var(--text-dark); font-variant-numeric: tabular-nums;
+}
+.orc-no-ca { display: block; font-size: 0.84rem; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.orc-table td { color: var(--text-dark); font-variant-numeric: tabular-nums; }
+.orc-docs { white-space: nowrap; }
+.orc-docs a {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.38rem 0.8rem; margin: 0.15rem 0.35rem 0.15rem 0;
+  border: 1.5px solid rgba(15,11,9,0.16); border-radius: var(--radius-btn);
+  font-size: 0.82rem; font-weight: 500; color: var(--text-dark);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.orc-docs a::before {
+  content: 'PDF'; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text-mid);
+}
+.orc-docs a:hover { border-color: var(--blue); color: var(--blue); }
+.orc-docs a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.orc-table-note { margin: 0.9rem 0 0; font-size: 0.86rem; color: var(--text-mid); }
+
+/* ===================================================
+   Jayco Companion (.oapp-page)
+   =================================================== */
+
+/* Not the photographic hero: the app's own screens are the picture, on Band
+   Navy — DESIGN.md's dark blue ground, which is what the app itself is drawn
+   in. The copy keeps the About hero's type. */
+.oapp-hero {
+  position: relative; overflow: hidden;
+  background: var(--band-navy); color: #fff;
+  padding: calc(var(--oapp-top, 150px) + clamp(1.5rem, 4vw, 3rem)) 0 0;
+}
+.oapp-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60% 70% at 78% 60%, rgba(0,122,194,0.28), rgba(0,122,194,0) 70%);
+}
+.oapp-hero-inner {
+  position: relative;
+  max-width: 1440px; margin: 0 auto; padding: 0 var(--page-pad);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(2rem, 5vw, 5rem); align-items: end;
+}
+.oapp-hero-copy { padding-bottom: clamp(3rem, 8vw, 7rem); }
+.oapp-hero-h {
+  margin: 0; font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6vw, 5.25rem); font-weight: 900; line-height: 0.92; letter-spacing: -0.01em;
+}
+.oapp-hero-tagline { margin: 1.35rem 0 0; max-width: 44ch; font-size: clamp(0.98rem, 1.15vw, 1.12rem); line-height: 1.7; color: rgba(255,255,255,0.88); }
+.oapp-get { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.25rem; }
+.oapp-badge { display: inline-block; border-radius: 10px; transition: transform 0.25s var(--ease-out), opacity 0.2s; }
+.oapp-badge img { display: block; height: 50px; width: auto; }
+/* The supplied badge is Apple's black artwork, which vanishes on Band Navy;
+   drawn white here, the treatment the footer gives the same file. */
+.oapp-hero .oapp-badge img, .oapp-dl .oapp-badge img { filter: brightness(0) invert(1); }
+.oapp-badge:hover { transform: translateY(-2px); }
+.oapp-badge:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.oapp-req { font-size: 0.86rem; color: rgba(255,255,255,0.78); }
+
+/* Two phones, the back one higher and smaller, standing on the hero's foot so
+   they read as objects rather than floating screenshots. */
+.oapp-phones { position: relative; height: clamp(380px, 46vw, 640px); }
+.oapp-phone {
+  position: absolute; bottom: 0; height: auto;
+  border-radius: clamp(22px, 2.6vw, 38px);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.4);
+}
+.oapp-phone--back { width: 42%; right: 44%; bottom: 8%; opacity: 0.92; }
+.oapp-phone--front { width: 48%; right: 4%; bottom: -12%; }
+
+.oapp-feats { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(3rem, 7vw, 6rem); }
+.oapp-feat {
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 6rem); align-items: center;
+}
+.oapp-feat.is-flip .oapp-shot { order: 2; }
+.oapp-shot {
+  margin: 0; display: flex; justify-content: center;
+  padding: clamp(2rem, 4vw, 3.5rem) 0;
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.oapp-shot img {
+  width: min(62%, 300px); height: auto;
+  border-radius: clamp(20px, 2.4vw, 34px);
+  box-shadow: 0 16px 40px rgba(15,11,9,0.2);
+}
+.oapp-feat-h {
+  margin: 0.5rem 0 0; font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.02;
+  max-width: 18ch;
+}
+.oapp-feat-copy p { margin: 1.1rem 0 0; max-width: 46ch; font-size: 1.02rem; line-height: 1.75; color: var(--text-mid); }
+
+.oapp-dl {
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center;
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(1.75rem, 5vw, 4.5rem) 0;
+  background: var(--band-navy); border-radius: var(--radius-card); color: #fff;
+}
+.oapp-dl-shot {
+  width: clamp(150px, 16vw, 220px); height: auto; align-self: end;
+  border-radius: 28px 28px 0 0; box-shadow: 0 18px 44px rgba(0,0,0,0.4);
+  margin-bottom: -40px;
+}
+.oapp-dl-copy { padding-bottom: clamp(2rem, 4vw, 3.5rem); }
+.oapp-dl-copy .section-heading { margin: 0; }
+.oapp-dl-copy p { margin: 0.8rem 0 1.5rem; color: rgba(255,255,255,0.85); font-size: 1.02rem; }
+
+/* ===================================================
+   FAQs (.ofq-page)
+   =================================================== */
+
+/* Hero (client photograph, 2026-09-16): the family's faces are in the top
+   third, so a centered crop hides the girl's head under the header. Anchored
+   near the top instead; on a phone, slid left to keep her in the frame. */
+.ofq-page .ab-hero-img { object-position: 50% 8%; }
+@media (max-width: 768px) {
+  .ofq-page .ab-hero-img { object-position: 28% 50%; }
+  /* "Still wondering?" on a phone: the band is taller than wide, the copy
+     climbs to the top, and the top of this picture is the white coach. The
+     scrim reaches the whole height there so the heading keeps its contrast. */
+  .ofq-page .ab-cta-scrim {
+    background: linear-gradient(to top,
+      rgba(15,11,9,0.9) 0%, rgba(15,11,9,0.78) 45%, rgba(15,11,9,0.6) 80%, rgba(15,11,9,0.45) 100%);
+  }
+}
+
+.ofq-bar {
+  display: grid; gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  background: var(--surface); border-radius: var(--radius-card);
+}
+.ofq-search { position: relative; }
+.ofq-search svg { position: absolute; left: 1.05rem; top: 50%; transform: translateY(-50%); color: var(--text-mid); pointer-events: none; }
+.ofq-input {
+  width: 100%; min-height: 54px;
+  font-family: var(--font-body); font-size: 1.02rem; color: var(--text-dark);
+  background: #fff; border: 0; border-radius: 14px;
+  padding: 0.85rem 1rem 0.85rem 2.9rem;
+  transition: box-shadow 0.15s;
+}
+.ofq-input:focus { outline: none; box-shadow: 0 0 0 2px var(--blue); }
+.ofq-input::-webkit-search-cancel-button { cursor: pointer; }
+.ofq-topics { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ofq-topic {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 44px; padding: 0.5rem 1rem;
+  border: 0; border-radius: var(--radius-btn); background: #fff;
+  font-size: 0.9rem; font-weight: 500; color: var(--text-dark); cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.ofq-n { font-size: 0.74rem; color: var(--text-mid); font-variant-numeric: tabular-nums; transition: color 0.2s; }
+.ofq-topic:hover { box-shadow: inset 0 0 0 1.5px rgba(15,11,9,0.2); }
+.ofq-topic[aria-pressed="true"] { background: var(--blue); color: #fff; box-shadow: none; }
+.ofq-topic[aria-pressed="true"] .ofq-n { color: rgba(255,255,255,0.82); }
+.ofq-topic:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.ofq-count { margin: 1.5rem 0 0; font-size: 0.86rem; color: var(--text-mid); }
+
+/* The homepage accordion items, set on the page rather than in its grey
+   panel: this page is the FAQ, so a panel around it would frame the whole
+   page. Groups keep a 2-column rhythm on wide screens — heading left, questions
+   right — so a topic reads as a section. */
+.ofq-groups { margin-top: 0.5rem; }
+.ofq-group {
+  display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  padding: clamp(1.75rem, 3.5vw, 2.75rem) 0;
+  border-top: 1px solid var(--hairline);
+}
+.ofq-group:first-child { border-top: 0; }
+.ofq-group-h {
+  margin: 0; font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+  position: sticky; top: 100px; align-self: start;
+}
+.ofq .faq-list { max-width: none; margin: 0; }
+.ofq .faq-item { background: var(--surface); }
+.ofq .faq-question:hover span:first-child { color: var(--blue); }
+.faq-answer a { color: var(--blue); border-bottom: 1.5px solid transparent; transition: border-color 0.2s; }
+.faq-answer a:hover { border-bottom-color: var(--blue); }
+
+.ofq-empty {
+  padding: clamp(2rem, 5vw, 3.5rem); margin-top: 1rem;
+  background: var(--surface); border-radius: var(--radius-card); text-align: center;
+}
+.ofq-empty-h { margin: 0; font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; }
+.ofq-empty p { margin: 0.6rem 0 1.4rem; color: var(--text-mid); }
+
+/* ===================================================
+   Responsive
+   =================================================== */
+
+@media (max-width: 1024px) {
+  .ow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ows-contact { grid-template-columns: 1fr; }
+  .ows-form-wrap { grid-template-columns: 1fr; }
+  .ows-done { grid-column: 1; }
+  .orc-steps { grid-template-columns: 1fr; }
+  .ow-trio { grid-template-columns: 1fr 1fr; }
+  .ow-trio li:last-child { grid-column: 1 / -1; }
+  .ow-trio li:last-child .ow-card { flex-direction: row; }
+  .ow-trio li:last-child .ow-card-media { width: 45%; aspect-ratio: auto; }
+}
+
+@media (max-width: 900px) {
+  .oapp-hero-inner { grid-template-columns: 1fr; }
+  .oapp-hero-copy { padding-bottom: 0; }
+  .oapp-phones { height: clamp(340px, 92vw, 520px); max-width: 520px; width: 100%; margin: 0 auto; }
+  .oapp-feat, .oapp-feat.is-flip { grid-template-columns: 1fr; gap: 1.5rem; }
+  .oapp-feat.is-flip .oapp-shot { order: 0; }
+  .ofq-group { grid-template-columns: 1fr; gap: 1rem; }
+  .ofq-group-h { position: static; }
+}
+
+@media (max-width: 768px) {
+  .ows-desk { grid-template-columns: 1fr; grid-template-areas: "name" "for" "line" "mail"; }
+  .ows-desk-line, .ows-mail { justify-self: start; }
+  .ows-desk-line { margin-top: 0.35rem; }
+  .ows-form { grid-template-columns: 1fr; }
+  .ows-ticks { grid-template-columns: 1fr 1fr; }
+  .ow-trio { grid-template-columns: 1fr; }
+  .ow-trio li:last-child .ow-card { flex-direction: column; }
+  .ow-trio li:last-child .ow-card-media { width: auto; aspect-ratio: 3 / 2; }
+  .ow-duo { grid-template-columns: 1fr; }
+  .ow-steps { grid-template-columns: 1fr; }
+  /* full-bleed on a phone, so it meets the header with no gap for the page to
+     show through */
+  .ow-jump { top: var(--ow-stick, 72px); justify-content: flex-start; padding-left: 0; padding-right: 0; }
+  .ow-jump-bar { border-radius: 0; border-left: 0; border-right: 0; width: 100%; padding: 0.35rem var(--page-pad); scroll-padding-inline: var(--page-pad); }
+  .ow-jump-bar a { padding: 0.62rem 1rem; font-size: 0.86rem; }
+  .owr-intro { grid-template-columns: 1fr; }
+  .owr-badge { width: 170px; }
+  .owr-cov { grid-template-columns: 1fr; }
+  .orc-aside { grid-template-columns: 1fr; }
+  .orc-switch { display: flex; width: 100%; }
+  .orc-tab { flex: 1; justify-content: center; padding-right: 1rem; }
+  .oapp-dl { grid-template-columns: 1fr; padding-top: 2.25rem; }
+  .oapp-dl-shot { order: 2; justify-self: center; margin-bottom: -60px; }
+  .ows-vin div { grid-template-columns: 1fr; gap: 0.1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ow-card-media img, .ow-card-go::after, .oapp-badge, .ow-jump-pill { transition: none; }
+  .ow-card:hover .ow-card-media img { transform: none; }
+}

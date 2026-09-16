@@ -98,136 +98,680 @@
     updateHeaderBg(); // set correct state on load
   }
 
-  /* ---------- Mobile full-screen menu ----------
-     Builds the RVs → category → model accordion from window.JAYCO,
-     and drives open/close + nested expand behaviour. */
+  /* ---------- Desktop navigation ----------
+     The six links on the left of the bar become two kinds of menu.
+
+     RVs opens the model drawer, after porsche.com's: a white panel of RV types
+     down the left, and beside it a Surface panel of that type's models, each a
+     render with its sleeps and length. No prices: the menu is for finding a
+     model, and the model and type pages carry the MSRP. Choosing a type, by
+     hover, click or arrow key, swaps the second panel. The page behind is
+     dimmed and held still, since the drawer is the size of a page.
+
+     The other five open a dropdown of their pages under the link.
+
+     Nothing here is typed twice. The types and models come from models-data.js,
+     which every page loads, and the dropdowns from the footer's own columns,
+     the list initMobileMenu() already mirrors, so the bar, the phone menu and
+     the footer cannot disagree. Built at boot rather than with the animations,
+     so the menus work even if GSAP never arrives.
+
+     Hover opens a menu after a short pause, so a pointer crossing the bar on its
+     way somewhere else opens nothing; once one is open, moving to another link
+     switches straight to it. Click and the keyboard open them too. Only above
+     1280px, where the bar shows these links; narrower widths use the phone menu. */
+  function initDesktopNav() {
+    const header = document.getElementById('site-header');
+    const list = header && header.querySelector('.nav-left');
+    const data = window.JAYCO;
+    if (!list) return;
+
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const CHEVRON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+    const ARROW = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    /* a link that leaves for another site says so, and opens in a new tab */
+    const OUT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+    const wide = window.matchMedia('(min-width: 1280px)');
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    /* footer columns by heading: "Find Your RV" -> [{label, href}] */
+    const columns = {};
+    document.querySelectorAll('.footer-col').forEach((col) => {
+      const h = col.querySelector('h4');
+      if (!h) return;
+      columns[h.textContent.trim().toLowerCase()] = Array.from(col.querySelectorAll('ul a'))
+        .map((a) => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#',
+          external: a.getAttribute('target') === '_blank' }));
+    });
+
+    const menus = [];      // { trigger, panel, kind, open(), close() }
+    let current = null;
+    let openTimer = 0, closeTimer = 0;
+
+    /* ---------------- RVs: the model drawer ---------------- */
+    function buildDrawer(trigger) {
+      if (!data || !data.categories || !data.models) return null;
+
+      const pages = window.JAYCO_MODEL_PAGES || [];
+      const modelHref = (slug, cat) => pages.indexOf(slug) !== -1
+        ? 'model.html?model=' + slug : 'type.html?type=' + cat;
+
+      const byCat = {};
+      Object.keys(data.models).forEach((slug) => {
+        const m = data.models[slug];
+        (byCat[m.category] = byCat[m.category] || []).push(Object.assign({ slug: slug }, m));
+      });
+      const cats = data.categories.filter((c) => (byCat[c.id] || []).length);
+      if (!cats.length) return null;
+
+      /* the footer's RVs column, less the eight types the drawer already lists */
+      const typeHref = /type\.html/;
+      const extras = (columns.rvs || []).filter((l) => !typeHref.test(l.href));
+
+      const row = (c) => {
+        const ms = byCat[c.id];
+        return `
+          <button type="button" class="dn-type" role="tab" id="dn-type-${c.id}"
+                  aria-selected="false" aria-controls="dn-models" tabindex="-1" data-cat="${c.id}">
+            <span class="dn-type-text">
+              <span class="dn-type-name">${esc(c.name)}</span>
+              <span class="dn-type-meta">${ms.length} model${ms.length > 1 ? 's' : ''}</span>
+            </span>
+            ${CHEVRON}
+          </button>`;
+      };
+      const group = (type, label) => {
+        const rows = cats.filter((c) => c.type === type).map(row).join('');
+        return rows ? `<div class="dn-group" role="presentation">
+          <span class="dn-group-label" role="presentation">${label}</span>${rows}</div>` : '';
+      };
+
+      const drawer = document.createElement('div');
+      drawer.className = 'dn-drawer';
+      drawer.id = 'dn-drawer';
+      drawer.hidden = true;
+      drawer.innerHTML = `
+        <div class="dn-scrim" data-dn-close="1"></div>
+        <div class="dn-panels" role="region" aria-label="RVs">
+          <nav class="dn-types" aria-label="RV types" data-lenis-prevent>
+            <div class="dn-typelist" role="tablist" aria-orientation="vertical" aria-label="RV types">
+              ${group('towable', 'Towable')}
+              ${group('motorized', 'Motorized')}
+            </div>
+            ${extras.length ? `<ul class="dn-extras">${extras.map((l) =>
+              `<li><a class="dn-extra" href="${esc(l.href)}">${esc(l.label)}${ARROW}</a></li>`).join('')}
+              <li><a class="dn-extra" href="quiz.html">Not sure? Take the RV Finder Quiz${ARROW}</a></li></ul>` : ''}
+          </nav>
+          <section class="dn-models" id="dn-models" role="tabpanel" data-lenis-prevent></section>
+          <button type="button" class="dn-close" aria-label="Close the RVs menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>`;
+      document.body.appendChild(drawer);
+
+      const panel = drawer.querySelector('#dn-models');
+      const tabs = Array.from(drawer.querySelectorAll('.dn-type'));
+      let active = null, swapTimer = 0, hoverTimer = 0;
+
+      /* The model panel for one type, written when the type is chosen, so the
+         renders of the seven types nobody looks at are never requested. */
+      function modelsHtml(c) {
+        const ms = byCat[c.id];
+        const cards = ms.map((m) => {
+          const s = m.specs || {};
+          const chips = [
+            s.Sleeps ? 'Sleeps ' + String(s.Sleeps).replace(/^Up to/, 'up to') : '',
+            s.Length || '',
+          ].filter(Boolean);
+          return `
+            <li>
+              <a class="dn-model" href="${modelHref(m.slug, c.id)}">
+                <span class="dn-model-name">${esc(m.name)}</span>
+                <span class="dn-model-art">
+                  <img src="../assets/models/web/${m.slug}.webp" alt="" width="400" height="248" decoding="async" />
+                </span>
+                <span class="dn-model-foot">
+                  <span class="dn-chips">${chips.map((t) => `<span class="dn-chip">${esc(t)}</span>`).join('')}</span>
+                </span>
+              </a>
+            </li>`;
+        }).join('');
+        return `
+          <div class="dn-models-inner">
+            <header class="dn-models-head">
+              <h2 class="dn-models-title">${esc(c.name)}</h2>
+              <a class="dn-models-all" href="type.html?type=${c.id}">Explore ${esc(c.name)}${ARROW}</a>
+            </header>
+            <ul class="dn-model-grid">${cards}</ul>
+          </div>
+          <div class="dn-models-foot">
+            <a class="btn-primary dn-foot-btn" href="build-price.html?type=${c.id}">Build &amp; Price</a>
+            <a class="btn-secondary-light dn-foot-btn" href="floorplans.html">View All Floorplans</a>
+          </div>`;
+      }
+
+      function select(id, instant) {
+        const c = cats.find((x) => x.id === id);
+        if (!c || id === active) return;
+        active = id;
+        tabs.forEach((t) => {
+          const on = t.dataset.cat === id;
+          t.classList.toggle('is-on', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+        });
+        panel.setAttribute('aria-labelledby', 'dn-type-' + id);
+        clearTimeout(swapTimer);
+        /* the old set leaves before the new one arrives — a straight swap under
+           a moving pointer reads as a flicker */
+        if (instant || reduce.matches || !panel.firstChild) {
+          panel.innerHTML = modelsHtml(c);
+          panel.scrollTop = 0;
+          return;
+        }
+        panel.classList.add('is-swapping');
+        swapTimer = setTimeout(() => {
+          panel.innerHTML = modelsHtml(c);
+          panel.scrollTop = 0;
+          panel.classList.remove('is-swapping');
+        }, 120);
+      }
+
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => select(t.dataset.cat));
+        t.addEventListener('focus', () => select(t.dataset.cat));
+        /* a short pause before a hover commits, so a diagonal run from the
+           list toward a card does not flip the panel through every type the
+           pointer crosses on the way */
+        t.addEventListener('pointerenter', (e) => {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(() => select(t.dataset.cat), 90);
+        });
+        t.addEventListener('pointerleave', () => clearTimeout(hoverTimer));
+        t.addEventListener('keydown', (e) => {
+          let n = null;
+          if (e.key === 'ArrowDown') n = (i + 1) % tabs.length;
+          if (e.key === 'ArrowUp') n = (i - 1 + tabs.length) % tabs.length;
+          if (e.key === 'Home') n = 0;
+          if (e.key === 'End') n = tabs.length - 1;
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const first = panel.querySelector('a');
+            if (first) first.focus();
+            return;
+          }
+          if (n === null) return;
+          e.preventDefault();
+          tabs[n].focus();
+        });
+      });
+      panel.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' || !e.target.closest('.dn-model')) return;
+        e.preventDefault();
+        const on = tabs.find((t) => t.dataset.cat === active);
+        if (on) on.focus();
+      });
+
+      /* Opens on the type the reader is already looking at, when the page says:
+         a type page's ?type=, or a model's own category. Otherwise the first. */
+      function startingType() {
+        const q = new URLSearchParams(location.search);
+        const t = q.get('type');
+        if (t && byCat[t]) return t;
+        const m = data.models[q.get('model')];
+        if (m && byCat[m.category]) return m.category;
+        return cats[0].id;
+      }
+
+      let hideTimer = 0;
+      const menu = {
+        trigger: trigger, panel: drawer, kind: 'drawer',
+        contains: (el) => drawer.contains(el),
+        open(viaKeyboard) {
+          clearTimeout(hideTimer);
+          select(active || startingType(), true);
+          /* the panels start under the bar, whatever height it is at */
+          drawer.style.setProperty('--dn-top', Math.round(header.getBoundingClientRect().bottom) + 'px');
+          drawer.hidden = false;
+          document.body.classList.add('dn-locked');
+          if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
+          requestAnimationFrame(() => requestAnimationFrame(() => drawer.classList.add('is-open')));
+          if (viaKeyboard) {
+            const on = tabs.find((t) => t.dataset.cat === active);
+            if (on) on.focus();
+          }
+        },
+        close() {
+          drawer.classList.remove('is-open');
+          document.body.classList.remove('dn-locked');
+          if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { drawer.hidden = true; }, reduce.matches ? 0 : 420);
+        },
+      };
+
+      drawer.addEventListener('click', (e) => {
+        if (e.target.closest('[data-dn-close]') || e.target.closest('.dn-close')) {
+          closeAll(true);
+        } else if (e.target.closest('a')) {
+          closeAll(false);
+        }
+      });
+      return menu;
+    }
+
+    /* ---------------- The other five: dropdowns ---------------- */
+    function buildDropdown(li, trigger, links, n) {
+      const panel = document.createElement('div');
+      panel.className = 'dn-drop';
+      panel.id = 'dn-drop-' + n;
+      panel.hidden = true;
+      panel.innerHTML = `<ul class="dn-drop-list">${links.map((l) => `
+        <li><a class="dn-drop-link${l.external ? ' is-external' : ''}" href="${esc(l.href)}"${
+          l.external ? ' target="_blank" rel="noopener noreferrer"' : ''}><span>${esc(l.label)}</span>${
+          l.external ? OUT + '<span class="sr-only"> (opens in a new tab)</span>' : ARROW}</a></li>`).join('')}
+      </ul>`;
+      li.appendChild(panel);
+      /* stubs the footer carries as "#" do nothing, rather than jumping the page
+         to the top — the same rule initHeader applies to the action pills */
+      panel.querySelectorAll('a[href="#"]').forEach((a) => {
+        a.setAttribute('aria-disabled', 'true');
+        a.addEventListener('click', (e) => e.preventDefault());
+      });
+
+      let hideTimer = 0;
+      return {
+        trigger: trigger, panel: panel, kind: 'drop',
+        contains: (el) => li.contains(el),
+        open(viaKeyboard) {
+          clearTimeout(hideTimer);
+          panel.hidden = false;
+          requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('is-open')));
+          if (viaKeyboard) {
+            const first = panel.querySelector('a');
+            if (first) first.focus();
+          }
+        },
+        close() {
+          panel.classList.remove('is-open');
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { panel.hidden = true; }, reduce.matches ? 0 : 220);
+        },
+      };
+    }
+
+    /* ---------------- wiring ---------------- */
+    function openMenu(menu, viaKeyboard) {
+      clearTimeout(openTimer);
+      clearTimeout(closeTimer);
+      if (current === menu) return;
+      if (current) closeMenu(current);
+      current = menu;
+      menu.trigger.setAttribute('aria-expanded', 'true');
+      menu.trigger.classList.add('is-open');
+      header.classList.add('dn-active');
+      header.classList.toggle('dn-drawer-open', menu.kind === 'drawer');
+      menu.open(viaKeyboard);
+    }
+    function closeMenu(menu) {
+      menu.trigger.setAttribute('aria-expanded', 'false');
+      menu.trigger.classList.remove('is-open');
+      menu.close();
+    }
+    function closeAll(refocus) {
+      clearTimeout(openTimer);
+      clearTimeout(closeTimer);
+      if (!current) return;
+      const was = current;
+      closeMenu(was);
+      current = null;
+      header.classList.remove('dn-active', 'dn-drawer-open');
+      if (refocus) was.trigger.focus();
+    }
+
+    Array.from(list.children).forEach((li, n) => {
+      const a = li.querySelector('a');
+      if (!a) return;
+      const label = a.textContent.trim();
+      const key = label.toLowerCase();
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'dn-trigger';
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.innerHTML = `<span>${esc(label)}</span>`;
+
+      let menu = null;
+      if (key === 'rvs') menu = buildDrawer(trigger);
+      else if ((columns[key] || []).length) menu = buildDropdown(li, trigger, columns[key], n);
+      if (!menu) return;              // no data: leave the plain link in place
+
+      trigger.setAttribute('aria-controls', menu.panel.id);
+      a.replaceWith(trigger);
+      li.classList.add('dn-item');
+      menus.push(menu);
+
+      /* e.detail is 0 for a keyboard press, which moves focus into the menu */
+      trigger.addEventListener('click', (e) => {
+        clearTimeout(openTimer);
+        const keyboard = e.detail === 0;
+        if (current !== menu) { openMenu(menu, keyboard); return; }
+        /* a click that lands just after hover opened the menu is the same
+           intent arriving late, not a request to close it */
+        if (trigger.dataset.hoverOpened === '1') return;
+        closeAll(keyboard);
+      });
+      trigger.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); openMenu(menu, true); }
+      });
+
+      li.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse' || !finePointer.matches || !wide.matches) return;
+        clearTimeout(closeTimer);
+        clearTimeout(openTimer);
+        if (current === menu) return;
+        const delay = current ? 0 : (menu.kind === 'drawer' ? 220 : 140);
+        openTimer = setTimeout(() => {
+          openMenu(menu, false);
+          trigger.dataset.hoverOpened = '1';
+          setTimeout(() => { trigger.dataset.hoverOpened = ''; }, 500);
+        }, delay);
+      });
+      /* Dropdowns close once the pointer has left the link and its panel. The
+         drawer does not: it covers the page, and a pointer drifting onto its
+         scrim is not a decision to close it. */
+      li.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        clearTimeout(openTimer);
+        if (current !== menu || menu.kind !== 'drop') return;
+        closeTimer = setTimeout(() => { if (current === menu) closeAll(false); }, 260);
+      });
+    });
+
+    if (!menus.length) return;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && current) { e.preventDefault(); closeAll(true); }
+    });
+    /* a press outside the bar and the open menu dismisses it */
+    document.addEventListener('pointerdown', (e) => {
+      if (!current) return;
+      if (header.contains(e.target) || current.contains(e.target)) return;
+      closeAll(false);
+    });
+    /* tabbing out of a dropdown closes it; the drawer is left to Escape, since
+       Tab moves from its type list to the models beside it */
+    document.addEventListener('focusin', (e) => {
+      if (!current || current.kind !== 'drop') return;
+      if (!current.contains(e.target)) closeAll(false);
+    });
+    window.addEventListener('scroll', () => { if (current && current.kind === 'drop') closeAll(false); }, { passive: true });
+    wide.addEventListener('change', () => { if (!wide.matches) closeAll(false); });
+  }
+
+  /* ---------- Phone menu ----------
+     Below 1280px the hamburger opens a white sheet over the whole screen, after
+     porsche.com's phone menu. It is a stack of screens rather than an accordion:
+     tapping a row slides its screen in from the right, with a back arrow and the
+     screen's name in a bar across the top and a round close beside them.
+
+       Menu                RVs, Find Your RV, Shop & Tools, Owners, Resources,
+                           About; the three header actions pinned to the foot
+       RVs                 the eight types, Towable then Motorized, and the
+                           footer's other RVs links
+       a type              its models as cards (render, sleeps, length), with
+                           Build & Price and View All Floorplans pinned below
+       any other section   its pages, from the footer column of the same name
+
+     The same data as the desktop drawer (initDesktopNav): models-data.js for the
+     types and models, the footer columns for everything else. No prices, for the
+     same reason as there. A type's screen is written the first time it is
+     opened, so no render is fetched for a type nobody looks at.
+
+     The hamburger stays the only way in, and the sheet's own close is the way
+     out; openSearch() still closes it through the hamburger's click. */
   function initMobileMenu() {
     const hamburger = document.getElementById('hamburger');
     const menu      = document.getElementById('mobile-menu');
     if (!hamburger || !menu) return;
 
-    // ----- build the RVs accordion from the model data -----
     const data = window.JAYCO;
-    const catsWrap = document.getElementById('mm-rvs-cats');
-    if (data && catsWrap) {
-      const priceFmt = (n) =>
-        '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const CHEVRON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+    const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    const BACK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+    const OUT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+    const CLOSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
-      /* A model with a real detail record goes to its own page; everything else
-         goes to its category overview, which still shows that model's card with
-         real name, price, render and specs. Never '#'.
-         The !stub test matters: model-data.js carries a deliberately minimal
-         'comet' record marked stub:true as a degradation test, and linking it
-         would render a placeholder as if it were product. renderSimilar() in
-         model-detail.js makes the same check. */
-      const detail = window.JAYCO_MODEL_DETAIL || {};
-      const exploreHref = (id, catId) =>
-        (detail[id] && !detail[id].stub) ? 'model.html?model=' + id
-                                         : 'type.html?type=' + catId;
-
-      // group models by category id, preserving data order
-      // (each row carries its slug so it can link to the model detail page)
-      const byCat = {};
-      Object.keys(data.models).forEach((id) => {
-        const m = data.models[id];
-        (byCat[m.category] = byCat[m.category] || []).push(Object.assign({ slug: id }, m));
-      });
-
-      data.categories.forEach((cat) => {
-        const models = byCat[cat.id];
-        if (!models || !models.length) return;   // skip empty classes
-
-        const rows = models.map((m) => `
-          <div class="mm-model">
-            <img class="mm-model-img" src="${m.img}" alt="" loading="lazy" />
-            <div class="mm-model-text">
-              <span class="mm-model-name">${m.name}</span>
-              <span class="mm-model-price">Starting at ${priceFmt(m.basePrice)}</span>
-              <div class="mm-model-ctas">
-                <a href="${exploreHref(m.slug, cat.id)}" class="mm-model-cta mm-model-discover">Explore</a>
-                <a href="build-price.html?model=${m.slug}" class="mm-model-cta mm-model-build">Build Yours</a>
-              </div>
-            </div>
-          </div>`).join('');
-
-        const group = document.createElement('div');
-        group.className = 'mm-cat';
-        group.innerHTML = `
-          <button class="mm-cat-btn" aria-expanded="false">
-            <span>${cat.name}</span>
-            <svg class="mm-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="mm-cat-panel">${rows}</div>`;
-        catsWrap.appendChild(group);
-      });
-    }
-
-    // ----- build the remaining nav groups from the footer columns -----
-    // The footer already lists every sub-page per section; mirror it here so the
-    // two stay in sync. RVs is handled above (model browser), so skip that column.
-    const nav = menu.querySelector('.mm-nav');
-    let panelId = 0;
+    /* the section names, in the bar's order, and each one's pages from the footer */
+    /* The label only: by now initDesktopNav() has put each dropdown's own links
+       inside its <li>, so the item's whole text is no longer just its name. */
+    const sections = Array.from(document.querySelectorAll('.nav-left > li'))
+      .map((li) => { const t = li.querySelector('.dn-trigger, a'); return (t || li).textContent.trim(); })
+      .filter(Boolean);
+    const columns = {};
     document.querySelectorAll('.footer-col').forEach((col) => {
-      const heading = col.querySelector('h4');
-      const links   = col.querySelectorAll('ul a');
-      if (!heading || !links.length) return;
-      if (heading.textContent.trim().toLowerCase() === 'rvs') return;  // special-cased above
-
-      const id = `mm-sub-${panelId++}`;
-      const items = Array.from(links).map((a) =>
-        `<a href="${a.getAttribute('href') || '#'}" class="mm-sublink">${a.textContent.trim()}</a>`
-      ).join('');
-
-      const group = document.createElement('div');
-      group.className = 'mm-group';
-      group.innerHTML = `
-        <button class="mm-top" data-target="${id}" aria-expanded="false">
-          <span>${heading.textContent.trim()}</span>
-          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="mm-panel" id="${id}"><div class="mm-sublinks">${items}</div></div>`;
-      nav.appendChild(group);
+      const h = col.querySelector('h4');
+      if (!h) return;
+      columns[h.textContent.trim().toLowerCase()] = Array.from(col.querySelectorAll('ul a'))
+        .map((a) => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#',
+          external: a.getAttribute('target') === '_blank' }));
     });
+    /* the header's action pills, read rather than retyped */
+    const actions = Array.from(document.querySelectorAll('.nav-actions a'))
+      .map((a) => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#',
+        primary: a.classList.contains('btn-nav-filled') }));
 
-    // ----- generic accordion toggle (works for RVs panel + category panels) -----
-    function bindToggle(btn, panel) {
-      btn.addEventListener('click', () => {
-        const open = panel.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    const byCat = {};
+    let cats = [];
+    if (data && data.models && data.categories) {
+      Object.keys(data.models).forEach((slug) => {
+        const m = data.models[slug];
+        (byCat[m.category] = byCat[m.category] || []).push(Object.assign({ slug: slug }, m));
       });
+      cats = data.categories.filter((c) => (byCat[c.id] || []).length);
     }
-    // top-level expandable groups (currently just RVs)
-    menu.querySelectorAll('.mm-top[data-target]').forEach((btn) => {
-      const panel = document.getElementById(btn.dataset.target);
-      if (panel) bindToggle(btn, panel);
+    const pages = window.JAYCO_MODEL_PAGES || [];
+    const modelHref = (slug, cat) => pages.indexOf(slug) !== -1
+      ? 'model.html?model=' + slug : 'type.html?type=' + cat;
+
+    /* ---- one screen ---- */
+    let uid = 0;
+    function screen(id, title, body, foot) {
+      const tid = 'pm-title-' + (uid++);
+      return `
+        <section class="pm-view" data-view="${id}" aria-labelledby="${tid}" hidden>
+          <div class="pm-bar">
+            ${id === 'root'
+              ? `<span class="pm-title pm-title--root" id="${tid}">Menu</span>`
+              : `<button type="button" class="pm-icon pm-back" data-back aria-label="Back">${BACK}</button>
+                 <h2 class="pm-title" id="${tid}" tabindex="-1">${esc(title)}</h2>`}
+            <button type="button" class="pm-icon pm-close" data-close aria-label="Close the menu">${CLOSE}</button>
+          </div>
+          <div class="pm-body" data-lenis-prevent>${body}</div>
+          ${foot ? `<div class="pm-foot">${foot}</div>` : ''}
+        </section>`;
+    }
+    const row = (label, target, meta) => `
+      <li><button type="button" class="pm-row" data-go="${target}">
+        <span class="pm-row-text"><span class="pm-row-label">${esc(label)}</span>${
+          meta ? `<span class="pm-row-meta">${esc(meta)}</span>` : ''}</span>${CHEVRON}
+      </button></li>`;
+    const link = (l) => `
+      <li><a class="pm-link" href="${esc(l.href)}"${l.href === '#' ? ' aria-disabled="true"' : ''}${
+        l.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>
+        <span>${esc(l.label)}</span>${l.external ? OUT + '<span class="sr-only"> (opens in a new tab)</span>' : ARROW}</a></li>`;
+
+    const views = { };
+    const rootRows = sections.map((name) => {
+      const key = name.toLowerCase();
+      if (key === 'rvs' && cats.length) return row(name, 'rvs');
+      if ((columns[key] || []).length) { views['sec-' + key] = { title: name, links: columns[key] }; return row(name, 'sec-' + key); }
+      return '';
+    }).join('');
+
+    const foot = actions.length ? `<div class="pm-actions">${actions.map((a) =>
+      `<a class="${a.primary ? 'btn-primary' : 'btn-secondary-light'} pm-action" href="${esc(a.href)}">${esc(a.label)}</a>`).join('')}</div>` : '';
+
+    function rvsScreen() {
+      const group = (type, label) => {
+        const rows = cats.filter((c) => c.type === type).map((c) =>
+          row(c.name, 'type-' + c.id, byCat[c.id].length + (byCat[c.id].length > 1 ? ' models' : ' model'))).join('');
+        return rows ? `<p class="pm-group">${label}</p><ul class="pm-list">${rows}</ul>` : '';
+      };
+      const extras = (columns.rvs || []).filter((l) => !/type\.html/.test(l.href));
+      return screen('rvs', 'RVs',
+        group('towable', 'Towable') + group('motorized', 'Motorized') +
+        `<ul class="pm-links pm-links--quiet">${extras.map(link).join('')}${link({ label: 'Not sure? Take the RV Finder Quiz', href: 'quiz.html' })}</ul>`);
+    }
+
+    function typeScreen(id) {
+      const c = cats.find((x) => x.id === id);
+      const cards = byCat[id].map((m) => {
+        const s = m.specs || {};
+        const chips = [s.Sleeps ? 'Sleeps ' + String(s.Sleeps).replace(/^Up to/, 'up to') : '', s.Length || '']
+          .filter(Boolean).map((t) => `<span class="pm-chip">${esc(t)}</span>`).join('');
+        return `
+          <li><a class="pm-card" href="${modelHref(m.slug, id)}">
+            <span class="pm-card-name">${esc(m.name)}</span>
+            <span class="pm-card-art"><img src="../assets/models/web/${m.slug}.webp" alt="" width="400" height="248" decoding="async" /></span>
+            <span class="pm-chips">${chips}</span>
+          </a></li>`;
+      }).join('');
+      return screen('type-' + id, c.name,
+        `<a class="pm-explore" href="type.html?type=${id}">Explore ${esc(c.name)}${ARROW}</a>
+         <ul class="pm-cards">${cards}</ul>`,
+        `<div class="pm-actions">
+           <a class="btn-primary pm-action" href="build-price.html?type=${id}">Build &amp; Price</a>
+           <a class="btn-secondary-light pm-action" href="floorplans.html">View All Floorplans</a>
+         </div>`);
+    }
+
+    menu.className = 'mobile-menu pm-sheet';
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-modal', 'true');
+    menu.setAttribute('aria-label', 'Menu');
+    menu.innerHTML = screen('root', 'Menu', `<ul class="pm-list pm-list--root">${rootRows}</ul>`, foot);
+
+    /* ---- the stack ---- */
+    let stack = ['root'];
+    const viewEl = (id) => menu.querySelector(`.pm-view[data-view="${id}"]`);
+
+    function ensure(id) {
+      if (viewEl(id)) return viewEl(id);
+      let html = '';
+      if (id === 'rvs') html = rvsScreen();
+      else if (id.indexOf('type-') === 0) html = typeScreen(id.slice(5));
+      else if (views[id]) html = screen(id, views[id].title, `<ul class="pm-links">${views[id].links.map(link).join('')}</ul>`);
+      if (!html) return null;
+      menu.insertAdjacentHTML('beforeend', html);
+      const el = viewEl(id);
+      el.querySelectorAll('a[aria-disabled="true"]').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+      return el;
+    }
+
+    /* Screens sit side by side: the one on show at 0, those behind it off to
+       the left, the one arriving from the right. Only the two in motion are
+       unhidden, so a screen reader reads one screen at a time. */
+    function show(nextId, dir) {
+      const from = viewEl(stack[stack.length - 1]);
+      const to = ensure(nextId);
+      if (!to || to === from) return;
+      if (dir > 0) stack.push(nextId); else stack.pop();
+
+      to.hidden = false;
+      to.classList.remove('is-left', 'is-right', 'is-on');
+      to.classList.add(dir > 0 ? 'is-right' : 'is-left');
+      void to.offsetWidth;                         // commit the start position
+      to.classList.remove('is-right', 'is-left');
+      to.classList.add('is-on');
+      if (from) {
+        from.classList.remove('is-on');
+        from.classList.add(dir > 0 ? 'is-left' : 'is-right');
+        setTimeout(() => { if (!from.classList.contains('is-on')) from.hidden = true; }, reduce.matches ? 0 : 460);
+      }
+      const body = to.querySelector('.pm-body');
+      if (dir > 0 && body) body.scrollTop = 0;
+      const focusTo = dir > 0 ? to.querySelector('.pm-title[tabindex]') : from && menu.querySelector(`[data-go="${from.dataset.view}"]`);
+      if (focusTo) focusTo.focus({ preventScroll: true });
+    }
+
+    function reset() {
+      menu.querySelectorAll('.pm-view').forEach((v) => {
+        const root = v.dataset.view === 'root';
+        v.hidden = !root;
+        v.classList.remove('is-left', 'is-right');
+        v.classList.toggle('is-on', root);
+      });
+      stack = ['root'];
+    }
+    reset();
+
+    menu.addEventListener('click', (e) => {
+      const go = e.target.closest('[data-go]');
+      if (go) { show(go.dataset.go, 1); return; }
+      if (e.target.closest('[data-back]')) { if (stack.length > 1) show(stack[stack.length - 2], -1); return; }
+      if (e.target.closest('[data-close]')) { setMenu(false); hamburger.focus(); return; }
+      const a = e.target.closest('a');
+      if (a && a.getAttribute('aria-disabled') !== 'true' && a.getAttribute('href') !== '#') setMenu(false);
     });
-    // category rows (built above)
-    menu.querySelectorAll('.mm-cat-btn').forEach((btn) => {
-      bindToggle(btn, btn.nextElementSibling);
-    });
+    menu.querySelectorAll('.pm-actions a[href="#"]').forEach((a) =>
+      a.addEventListener('click', (e) => e.preventDefault()));
 
     // ----- open / close the whole menu -----
+    let resetTimer = 0;
     function setMenu(open) {
+      clearTimeout(resetTimer);
+      if (open) reset();
       hamburger.classList.toggle('open', open);
       menu.classList.toggle('open', open);
       document.body.classList.toggle('menu-open', open);
       hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
       menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (window.__jaycoLenis) window.__jaycoLenis[open ? 'stop' : 'start']();
+      if (open) {
+        const first = menu.querySelector('.pm-view.is-on .pm-row, .pm-view.is-on .pm-close');
+        setTimeout(() => { if (first) first.focus({ preventScroll: true }); }, 60);
+      } else {
+        /* back to the first screen once it is out of sight */
+        resetTimer = setTimeout(reset, 450);
+      }
     }
 
     hamburger.addEventListener('click', () => {
       setMenu(!menu.classList.contains('open'));
     });
 
-    // close when any real link inside the menu is tapped
-    menu.querySelectorAll('a').forEach((a) => {
-      a.addEventListener('click', () => setMenu(false));
+    document.addEventListener('keydown', (e) => {
+      if (!menu.classList.contains('open')) return;
+      if (e.key === 'Escape') { setMenu(false); hamburger.focus(); return; }
+      /* the sheet covers the page, so Tab stays inside the screen on show */
+      if (e.key !== 'Tab') return;
+      const on = menu.querySelector('.pm-view.is-on');
+      const f = on ? Array.from(on.querySelectorAll('button, a[href], [tabindex="-1"]'))
+        .filter((el) => el.offsetParent !== null && el.getAttribute('tabindex') !== '-1') : [];
+      if (!f.length) return;
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === f.length - 1 || i === -1)) { e.preventDefault(); f[0].focus(); }
     });
 
-    // close on Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && menu.classList.contains('open')) setMenu(false);
-    });
+    /* widening past the phone menu's range closes it */
+    window.matchMedia('(min-width: 1280px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
   }
 
   /* ---------- Site search ----------
@@ -242,7 +786,7 @@
      Bound at boot rather than in initAnimations(), so search works even if the
      animation libraries never arrive. Bump SEARCH_VERSION whenever search.js,
      search.css or the index is rebuilt. */
-  const SEARCH_VERSION = 'v5-search-8';
+  const SEARCH_VERSION = 'v5-search-9';
   const SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
     'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
@@ -1435,6 +1979,7 @@ initParallax();
 
   /* ---------- Boot ---------- */
   initSearch();
+  initDesktopNav();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', runLoader);
   } else {

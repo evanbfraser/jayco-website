@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Warranty Coverage — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-18" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
+  <link rel="stylesheet" href="css/owners.css?v=v5-ow-8" />
+  </head>
+<body class="ab-page ow-page owr-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+
+  <!-- ===== 100% PDI =====
+       Pre-delivery inspection: what it is, when it became every unit rather
+       than some of them, and what an inspector actually checks.
+
+       PROVENANCE. Every date, figure and place below is Jayco's own, harvested
+       on 2026-09-07 from two pages:
+         • jayco.com/newsroom/100-percent-pdi/  — the announcement, the
+           facility, the milestone dates, and the CEO quotation.
+         • jaycofamily.com/PDI/                 — the inspection itself and the
+           second CEO quotation.
+       Nothing is rounded and nothing is inferred. Where Jayco says
+       "approximately 70,000 square feet", so does this.
+
+       THE ONE AUTHORED MOTION MOMENT is the ramp in "New Standards": three
+       dated rules that fill to the share of the lineup being inspected at each
+       date. The bar is the claim, not a decoration beside it. The only other
+       authored moments are the tick that draws on each "What gets checked"
+       card and the "Watch it" photograph opening from the centre.
+       Everything else on the page uses the shared quiet handoff — arriving
+       copy, drifting media. See js/about.js. -->
+  <!-- Warranty Coverage. The sitemap's module list: intro, features, details,
+       a manuals CTA, the FAQ.
+
+       PROVENANCE. jayco.com/about/warranty/ (read 2026-09-16) for the 2+3
+       framing, "Dare To Compare", the supplier warranties and the disclaimer,
+       which is quoted in full. The terms themselves — who and what is covered,
+       Structure Components, the exclusions, how to get service, registration and
+       the model-specific variants — are the 2027 Jayco Towable Warranty Guide,
+       quoted or closely summarized. Motorhome terms are what jayco.com's FAQ
+       states (24 months or 24,000 miles; the structural year does not apply to
+       Class B); Jayco publishes no motorized warranty document online, so this
+       page says no more about them than that. -->
+  <main class="ab ow" id="warranty">
+
+    <section class="ab-hero">
+      <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-16 as
+             assets/jayco-warranty-hero.jpg (2400x1797), exported to owners/web
+             at 1200, 1800 and 2400. -->
+        <img class="ab-hero-img"
+             src="../assets/owners/web/warranty-hero-v2-1800.webp"
+             srcset="../assets/owners/web/warranty-hero-v2-1200.webp 1200w,
+                     ../assets/owners/web/warranty-hero-v2-1800.webp 1800w,
+                     ../assets/owners/web/warranty-hero-v2-2400.webp 2400w"
+             sizes="100vw" width="2400" height="1797"
+             fetchpriority="high" decoding="async"
+             alt="A Jayco motorhome parked in a clearing among pines at sunrise, seen from above, two people walking beside it" />
+      </div>
+      <div class="ab-hero-overlay" aria-hidden="true"></div>
+      <div class="ab-hero-content">
+        <span class="ab-hero-eyebrow">Warranty Coverage</span>
+        <h1 class="ab-hero-heading">Two years. Then three.</h1>
+        <p class="ab-hero-tagline">A 2-year limited warranty, twice as long as the industry
+          standard, and 3 years of structural protection — straight from the people who built the
+          coach.</p>
+      </div>
+    </section>
+
+    <section class="ab-intro">
+      <div class="ab-inner owr-intro">
+        <div>
+          <p class="ab-intro-body ab-rise">When you buy a Jayco RV, you get the best manufacturer’s
+            warranty — and then some. Two camping seasons of limited warranty coverage, three years
+            of structural protection, and the warranties Jayco’s supplier-partners put on their own
+            components.</p>
+          <p class="ab-intro-body ab-rise">It comes directly from Jayco, because Jayco believes in the
+            work it does and counts its owners as family. Your dealer is who services it.</p>
+        </div>
+        <img class="owr-badge ab-rise" src="../assets/warranty_2+3.svg" width="359" height="295"
+             alt="2-year limited, 3-year structural warranty" />
+      </div>
+    </section>
+
+    <!-- ===== Features ===== -->
+    <section class="ab-sec" aria-labelledby="owr-feat-h">
+      <div class="ab-inner">
+        <h2 class="sr-only" id="owr-feat-h">The warranty in four numbers</h2>
+        <ul class="ab-stats ab-rise">
+          <li class="ab-stat">
+            <span class="ab-stat-fig">2 years</span>
+            <span class="ab-stat-txt">Limited warranty, starting the day the RV is delivered to its
+              first retail buyer. Two full camping seasons.</span>
+          </li>
+          <li class="ab-stat">
+            <span class="ab-stat-fig">3 years</span>
+            <span class="ab-stat-txt">Structural coverage for the walls, roof and floor framing and
+              the lamination of the fiberglass walls. Not on Class B motorhomes.</span>
+          </li>
+          <li class="ab-stat">
+            <span class="ab-stat-fig">24,000 mi</span>
+            <span class="ab-stat-txt">The limit on a motorhome’s 24-month limited warranty, whichever
+              comes first.</span>
+          </li>
+          <li class="ab-stat">
+            <span class="ab-stat-fig">10 days</span>
+            <span class="ab-stat-txt">To report a defect once you find it, so a small fault is fixed
+              while it is still small.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Details: covered / not covered ===== -->
+    <section class="ab-sec" id="coverage" aria-labelledby="owr-cov-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">The details</span>
+          <h2 class="section-heading dark" id="owr-cov-h">What’s covered.</h2>
+          <p class="ab-sec-lead">If a substantial defect in material or workmanship attributable to
+            Jayco is found and reported during the warranty period, Jayco repairs or replaces it, at
+            its option, at no charge to you.</p>
+        </div>
+
+        <div class="owr-cov">
+          <div class="owr-cov-col ab-rise">
+            <h3 class="owr-cov-h">Who and what</h3>
+            <ul class="owr-bullets">
+              <li>The first consumer purchaser of a new Jayco.</li>
+              <li>RVs sold in, and that remain in, the United States, U.S. Territories and Canada.</li>
+              <li>Used for their intended purpose: recreational travel and camping.</li>
+              <li>Service through an independent, authorized Jayco dealer, or Jayco.</li>
+            </ul>
+            <h3 class="owr-cov-h">Structure Components, for 3 years</h3>
+            <ul class="owr-bullets">
+              <li>Lamination of the fiberglass sidewall, rear wall and front wall (wrap) assemblies —
+                the bond between the fiberglass skin and its substrate.</li>
+              <li>Sidewall, end wall, and front and rear wall frame assemblies, wood and aluminum.</li>
+              <li>Roof frame and floor frame assemblies, wood and aluminum.</li>
+            </ul>
+          </div>
+
+          <div class="owr-cov-col owr-cov-col--not ab-rise">
+            <h3 class="owr-cov-h">Not covered, for example</h3>
+            <ul class="owr-bullets">
+              <li>Components warranted by their own manufacturer — tires, batteries, generator,
+                awning, refrigerator, water heater, furnace, air conditioner and more. Those makers
+                cover them directly.</li>
+              <li>Items added or changed after the RV leaves Jayco, including dealer-installed
+                equipment.</li>
+              <li>Normal wear and tear, condensation, and mold.</li>
+              <li>Damage from accidents, weather, overloading, off-road use or missed routine
+                maintenance, such as resealing.</li>
+              <li>RVs used for rental or business, bought at auction or wholesale, or from a dealer
+                that is not authorized by Jayco.</li>
+              <li>Structure Components exclude the front and rear fiberglass caps, exterior roof
+                material, floor coverings, and delamination from water intrusion caused by missed
+                seal maintenance.</li>
+            </ul>
+            <p class="owr-cov-note">Cosmetic damage from the factory is covered only if you point it
+              out to the selling dealer when you take delivery — so look the coach over before you
+              drive away.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== How to get service ===== -->
+    <section class="ab-sec" aria-labelledby="owr-svc-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Getting service</span>
+          <h2 class="section-heading dark" id="owr-svc-h">Four steps to a repair.</h2>
+          <p class="ab-sec-lead">Some warranty service during the term is normal. To get it, the
+            warranty asks you to:</p>
+        </div>
+        <!-- Four cards, one per step, in order: an <ol>, so the sequence is the
+             markup's and not only the numerals'. -->
+        <ol class="ow-steps ab-rise" role="list">
+          <li class="ow-step">
+            <span class="ow-step-n" aria-hidden="true">1</span>
+            <h3 class="ow-step-h">Tell a dealer, or Jayco</h3>
+            <p class="ow-step-p">Notify an independent, authorized Jayco <a href="dealers.html">dealer</a>, or Jayco, of the defect within the coverage period.</p>
+          </li>
+          <li class="ow-step">
+            <span class="ow-step-n" aria-hidden="true">2</span>
+            <h3 class="ow-step-h">Within 10 days</h3>
+            <p class="ow-step-p">Report it within ten days of when you discovered it, or should have.</p>
+          </li>
+          <li class="ow-step">
+            <span class="ow-step-n" aria-hidden="true">3</span>
+            <h3 class="ow-step-h">Book the repair</h3>
+            <p class="ow-step-p">Promptly schedule an appointment and take the RV in. Jayco does not control dealers’ schedules, so call early — before the week you want to travel.</p>
+          </li>
+          <li class="ow-step">
+            <span class="ow-step-n" aria-hidden="true">4</span>
+            <h3 class="ow-step-h">Cover the trip there</h3>
+            <p class="ow-step-p">Freight, transportation and other incidental costs of getting the RV to service are yours.</p>
+          </li>
+        </ol>
+        <p class="ab-note ab-rise">If two or more service attempts have not corrected a covered
+          defect, or repairs have taken longer than 30 days, notify Jayco directly, in writing:
+          Jayco, Inc., Attn: Customer Service, 903 S. Main Street, P.O. Box 460, Middlebury, Indiana
+          46540. For help at any time, call <a href="tel:+18002838267">800-283-8267</a>.</p>
+      </div>
+    </section>
+
+    <!-- ===== Dare to compare ===== -->
+    <section class="ab-band" aria-labelledby="owr-dare-h">
+      <div class="ab-inner">
+        <div class="ab-band-grid">
+          <div class="ab-band-media-wrap ab-rise">
+            <div class="ab-band-media">
+              <img class="ab-band-img"
+                   src="../assets/owners/web/warranty-factory-1200.webp"
+                   srcset="../assets/owners/web/warranty-factory-800.webp 800w,
+                           ../assets/owners/web/warranty-factory-1200.webp 1200w"
+                   sizes="(max-width: 900px) 92vw, 46vw"
+                   width="1200" height="694" loading="lazy" decoding="async"
+                   alt="Travel trailer wall and roof frames on the production line in Middlebury" />
+            </div>
+          </div>
+          <div class="ab-band-copy ab-rise">
+            <span class="section-label">Dare to compare</span>
+            <h2 class="section-heading dark" id="owr-dare-h">A warranty says how it was built.</h2>
+            <p>Jayco’s 2-year limited warranty is twice as long and offers much more coverage than
+              any other manufacturer’s. The completeness of a warranty, how long it runs and who
+              stands behind it are direct indicators of how an RV is built.</p>
+            <p>Warranty claims help too: two seasons of them show Jayco’s engineers which features
+              get used most and how they hold up, and that goes into every new model year.</p>
+            <a class="btn-secondary-light" href="blog-post.html?post=what-a-warranty-says-about-an-rv">What a warranty says about an RV</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Registration, transfer, variants ===== -->
+    <section class="ab-sec" aria-labelledby="owr-more-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Good to know</span>
+          <h2 class="section-heading dark" id="owr-more-h">Before you need it.</h2>
+        </div>
+        <ul class="ab-list ab-rise">
+          <li class="ab-item">
+            <h3 class="ab-item-name">Registration</h3>
+            <p class="ab-item-body">Your dealer registers the warranty. They complete Jayco’s online
+              Warranty Registration and Customer Delivery Form within 10 days of delivery, and the
+              limited warranty becomes active once they do. They also help you register the
+              components that carry their own warranty.</p>
+          </li>
+          <li class="ab-item">
+            <h3 class="ab-item-name">Transfer</h3>
+            <p class="ab-item-body">The Jayco warranty applies to the first consumer purchaser and is
+              not transferable. A motorhome’s chassis warranty is transferable while it lasts. If you
+              buy a Jayco used, send the <a href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">Change
+              of Ownership Form</a> so recall notices reach you.</p>
+          </li>
+          <li class="ab-item">
+            <h3 class="ab-item-name">Extended warranties</h3>
+            <p class="ab-item-body">Offered by your local Jayco <a href="dealers.html">dealer</a>, not
+              by Jayco.</p>
+          </li>
+          <li class="ab-item">
+            <h3 class="ab-item-name">Away from home</h3>
+            <p class="ab-item-body">Call 800-283-8267 or use <a href="dealers.html">Find a Dealer</a>
+              to locate the nearest authorized dealer. If there is none nearby, ask campground staff
+              or your selling dealer about a repair facility, and have them talk to Jayco Customer
+              Service about coverage before the repair. After hours, get it fixed and call Customer
+              Service the next business day.</p>
+          </li>
+          <li class="ab-item">
+            <h3 class="ab-item-name">Pinnacle, North Point, Eagle and Seismic</h3>
+            <p class="ab-item-body">The same warranty, without the exclusion for an RV used as a
+              residence.</p>
+          </li>
+          <li class="ab-item">
+            <h3 class="ab-item-name">Jay Flight Bungalow</h3>
+            <p class="ab-item-body">Written for a semi-permanent site. Jayco covers the cost of
+              service at the site for the first three service calls within the first two years, when
+              the site is within an hour’s round trip of an authorized dealer.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Partner warranties ===== -->
+    <section class="ab-sec" aria-labelledby="owr-partners-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Supplier warranties</span>
+          <h2 class="section-heading dark" id="owr-partners-h">Our partners have your back too.</h2>
+          <p class="ab-sec-lead">Jayco carefully selects suppliers that share a dedication to quality
+            and RVer support, and many put long warranties on their own parts.</p>
+        </div>
+        <ul class="owr-years ab-rise" role="list">
+          <li class="owr-year"><span class="owr-year-n">3 years</span>
+            <ul><li>Congoleum<sup>&reg;</sup> Designer Carefree Flooring</li><li>MORryde<sup>&reg;</sup> Rubber Pin Box Assembly</li><li>Onan<sup>&reg;</sup> Generator</li><li>Standard Technologies Fuel Pump System</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">5 years</span>
+            <ul><li>BGS Graphics</li><li>Winegard<sup>&reg;</sup> Rayzar<sup>&reg;</sup> &amp; Roadstar Antenna Parts</li><li>Dexter<sup>&reg;</sup> Axles</li><li>Samsung<sup>&reg;</sup> Refrigerator — sealed system and labor on the digital inverter compressor (10 years on compressor parts)</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">6 years</span>
+            <ul><li>Intervac&trade; Central Vacuum</li><li>Goodyear<sup>&reg;</sup> Endurance<sup>&reg;</sup> Tires</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">7 years</span>
+            <ul><li>Shaw<sup>&reg;</sup> Vinyl Flooring (cold cracking only)</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">20 years</span>
+            <ul><li>Dicor Roofing Material</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">25 years</span>
+            <ul><li>Huber Industrial Floor Decking</li></ul></li>
+          <li class="owr-year"><span class="owr-year-n">Lifetime</span>
+            <ul><li>Tredit&trade; Aluminum Wheels (steel, 2 years)</li></ul></li>
+        </ul>
+        <p class="ab-note ab-rise owr-disclaimer"><strong>Disclaimer:</strong> This webpage is
+          provided for informational and convenience purposes only. This webpage does not create any
+          legal and/or warranty rights, obligations and/or duties. Jayco makes no warranty of any
+          nature whatsoever other than the applicable Jayco Limited Warranty that came with the
+          recreational vehicle at the time of purchase. Any other warranty issued by a supplier for a
+          component part is separate from the Jayco Limited Warranty. For complete information
+          concerning actual warranty eligibility and/or coverage regarding a specific component
+          and/or supplier, please consult the warranty information and/or owner’s manual applicable
+          to the specific component and/or contact the supplier of the specific component directly.
+          Components may vary depending on the year, model, and/or floor plan of the recreational
+          vehicle. The recreational vehicle may not be equipped with all of the components listed on
+          this webpage. Simply because a component is listed on this webpage, does not mean the
+          recreational vehicle comes equipped with the component. The components and suppliers listed
+          on this webpage are subject to change by Jayco without notice to the dealer and/or the
+          consumer.</p>
+      </div>
+    </section>
+
+    <!-- ===== Manuals CTA =====
+         A paired band, photograph right, rather than the photograph behind the
+         copy: this picture is two faces in a bright kitchen, and type laid over
+         it covered both and lost its label against the white cabinets. -->
+    <section class="ab-band is-flip owr-manuals" aria-labelledby="owr-cta-h">
+      <div class="ab-inner">
+        <div class="ab-band-grid">
+          <div class="ab-band-media-wrap ab-rise">
+            <div class="ab-band-media">
+              <!-- Client photography, supplied 2026-09-16 as
+                   assets/jayco-warranty-owner-manuals.jpg (1981x1321). -->
+              <img class="ab-band-img"
+                   src="../assets/owners/web/warranty-manuals-1200.webp"
+                   srcset="../assets/owners/web/warranty-manuals-1200.webp 1200w,
+                           ../assets/owners/web/warranty-manuals-1981.webp 1981w"
+                   sizes="(max-width: 900px) 92vw, 46vw"
+                   width="1981" height="1321" loading="lazy" decoding="async"
+                   alt="A couple laughing together in the kitchen of their Jayco" />
+            </div>
+          </div>
+          <div class="ab-band-copy ab-rise">
+            <span class="section-label">Owner’s manuals</span>
+            <h2 class="section-heading dark" id="owr-cta-h">Read every word of it.</h2>
+            <p>The warranty guide has the full terms and exclusions, and your owner’s manual has the
+              maintenance checklist that keeps the limited warranty in force.</p>
+            <div class="ow-cta-row">
+              <a class="btn-primary" href="https://www.jayco.com/uploads/rvs/manuals/660-2027-Jayco-Warranty-Guide---Web.pdf"
+                 target="_blank" rel="noopener noreferrer">2027 Towable Warranty Guide (PDF)<span class="sr-only"> (opens in a new tab)</span></a>
+              <a class="btn-secondary-light" href="manuals.html">Owner’s Manuals</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ab-sec owr-dispute" aria-label="Warranty dispute program">
+      <div class="ab-inner">
+        <p class="ab-note ab-rise">If you believe Jayco has not met its warranty obligations, you may
+          be eligible for the RV Warranty Dispute Program: no-cost, voluntary and independent.
+          <a href="https://www.demarsassociates.com/rv-warranty-dispute-program" target="_blank"
+             rel="noopener noreferrer">About the program</a>.</p>
+      </div>
+    </section>
+
+    <div class="ab-tail" aria-hidden="true"></div>
+
+    <!-- ===== FAQ — the "Warranty" questions from js/faqs-data.js, written in at
+         build time so they read the same here and on faqs.html. Edit them there. ===== -->
+    <section class="faq-section" id="faq">
+      <div class="faq-inner">
+        <div class="faq-header">
+          <span class="section-label">Frequently Asked Questions</span>
+          <h2 class="section-heading dark">The warranty, answered.</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How long does Jayco’s warranty last?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>All Jayco towable products come with a 2-year limited/3-year structural warranty. The limited warranty on Jayco motorhomes covers you for 24 months or 24,000 miles, whichever comes first. The 3-year structural coverage does not apply to Class B motorhomes.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What does Jayco warranty cover?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>The Jayco warranty covers substantial defects in materials or workmanship that are attributable to Jayco. Components with their own manufacturer’s warranty, such as the refrigerator, generator, tires and air conditioner, are covered by that manufacturer. <a href="warranty.html#coverage">What is and is not covered</a>.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Can you transfer a Jayco warranty?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Our Jayco 2-year limited warranty/3-year limited structural warranty applies to the first consumer purchaser and is non-transferable. The chassis warranty on a Jayco motorhome is transferable if it has not yet expired.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Does Jayco offer an extended warranty?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Extended warranties on Jayco products are provided by your local Jayco dealer. You can find your nearest Jayco dealer using <a href="dealers.html">Find a Dealer</a>.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>Do I need to register my warranty?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Your dealer does it. The selling dealer completes Jayco’s online Warranty Registration and Customer Delivery Form within 10 days of delivery, and the limited warranty becomes active once they have. Ask them to confirm it at handover.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How soon do I have to report a problem?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Within 10 days of discovering it, and within the coverage period. Tell an authorized Jayco dealer, or Jayco, then book the repair. If two or more attempts have not fixed a covered defect, or repairs have taken longer than 30 days, notify Jayco in writing at 903 S. Main Street, P.O. Box 460, Middlebury, Indiana 46540.</p></div>
+          </div>
+        </div>
+        <p class="ow-faq-more"><a href="faqs.html?topic=warranty">All Warranty questions</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <!-- Jayco Companion, the owner app. iPhone only: Wingmate, which had an
+               Android version too, is gone from both stores, and Companion has no
+               Google Play listing. -->
+          <a href="https://apps.apple.com/us/app/jayco-companion/id6792838188" class="footer-app-badge"
+             target="_blank" rel="noopener noreferrer" aria-label="Download Jayco Companion on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="owner-services.html">Owner Services</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
+            <li><a href="warranty.html">Warranty Coverage</a></li>
+            <li><a href="recalls.html">Recalls</a></li>
+            <li><a href="jayco-companion.html">Jayco Companion App</a></li>
+            <li><a href="https://www.jaycofamily.com/ambassadors/" target="_blank" rel="noopener noreferrer">Ambassador Program</a></li>
+            <li><a href="https://www.jaycofamily.com/JFOC-University-NRVTA/" target="_blank" rel="noopener noreferrer">Jayco University</a></li>
+            <li><a href="https://jaycostore.myshopify.com/" target="_blank" rel="noopener noreferrer">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="https://jayco.gopremierpro.com/shop/catalog" target="_blank" rel="noopener noreferrer">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
+            <li><a href="https://www.jaycofamily.com/" target="_blank" rel="noopener noreferrer">Careers</a></li>
+            <li><a href="newsroom.html">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/owners.js?v=v5-ow-3"></script>
+  <!-- The RVs menu, desktop and phone, is built from the model library. -->
+  <script src="js/models-data.js?v=v5-6"></script>
+  <script src="js/app.js?v=v5-core-21"></script>
+</body>
+</html>

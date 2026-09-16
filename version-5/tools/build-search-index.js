@@ -299,7 +299,7 @@ DEALERS.dealers.forEach((d) => {
    as the title, so the page leads the videos and articles that merely mention
    the word. The four query-driven templates are left out — they are not pages a
    reader can arrive at without a record. */
-const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'floorplan.html', 'type.html']);
+const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'floorplan.html', 'type.html', 'event.html', 'news.html']);
 const EXTRA = {
   'index.html': 'home homepage',
   'jayco-difference.html': 'warranty 2+3 construction magnum truss stronghold climate shield jride jaysmart quality features',
@@ -327,6 +327,13 @@ const EXTRA = {
   'buyers-guide.html': 'buying guide how to buy',
   'videos.html': 'videos walkthrough youtube',
   'blog.html': 'blog articles news tips',
+  'owner-services.html': 'contact customer service support phone email parts service center owner relations roadside assistance',
+  'warranty.html': 'warranty 2+3 coverage structural limited registration transfer extended',
+  'recalls.html': 'recall recalls vin nhtsa transport canada safety defect',
+  'jayco-companion.html': 'app mobile iphone ipad companion wingmate download',
+  'faqs.html': 'faq faqs questions answers help',
+  'events.html': 'events rv shows show schedule rally giveaway',
+  'newsroom.html': 'news newsroom press releases announcements',
 };
 fs.readdirSync(ROOT).filter((f) => f.endsWith('.html') && !SKIP.has(f)).sort().forEach((f) => {
   const html = fs.readFileSync(path.join(ROOT, f), 'utf8');

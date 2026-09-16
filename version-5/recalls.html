@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Recalls — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-18" />
+  <link rel="stylesheet" href="css/about.css?v=v5-ab-55" />
+  <link rel="stylesheet" href="css/owners.css?v=v5-ow-8" />
+  </head>
+<body class="ab-page ow-page orc-page">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+
+  <!-- ===== 100% PDI =====
+       Pre-delivery inspection: what it is, when it became every unit rather
+       than some of them, and what an inspector actually checks.
+
+       PROVENANCE. Every date, figure and place below is Jayco's own, harvested
+       on 2026-09-07 from two pages:
+         • jayco.com/newsroom/100-percent-pdi/  — the announcement, the
+           facility, the milestone dates, and the CEO quotation.
+         • jaycofamily.com/PDI/                 — the inspection itself and the
+           second CEO quotation.
+       Nothing is rounded and nothing is inferred. Where Jayco says
+       "approximately 70,000 square feet", so does this.
+
+       THE ONE AUTHORED MOTION MOMENT is the ramp in "New Standards": three
+       dated rules that fill to the share of the lineup being inspected at each
+       date. The bar is the claim, not a decoration beside it. The only other
+       authored moments are the tick that draws on each "What gets checked"
+       card and the "Watch it" photograph opening from the centre.
+       Everything else on the page uses the shared quiet handoff — arriving
+       copy, drifting media. See js/about.js. -->
+  <!-- Recalls (US + Canada). The sitemap's modules: select US or Canada, then
+       the FAQ.
+
+       PROVENANCE. jayco.com's "Recalls" goes to NHTSA and its "Canadian Recalls"
+       to jaycofamily.com/canadian-recalls/, both read 2026-09-16. The Canadian
+       table is Jayco RV's own table on that page, every link included; the other
+       brands' tables stay on jaycofamily.com, linked below. Safety-defect phone
+       numbers are the 2027 Jayco Towable Warranty Guide's. NHTSA's lookup is
+       linked, not described beyond what it does.
+
+       The switch is a real tablist (owners.js). Without JS both panels show, one
+       after the other, headed by their country. #canada opens on Canada. -->
+  <main class="ab ow" id="recalls">
+
+    <section class="ab-hero">
+      <div class="ab-hero-media">
+        <!-- Client photography, supplied 2026-09-16 as
+             assets/jayco-recalls-hero.jpg (2364x1576), exported to owners/web
+             at 1200, 1800 and full size. -->
+        <img class="ab-hero-img"
+             src="../assets/owners/web/recalls-hero-v2-1800.webp"
+             srcset="../assets/owners/web/recalls-hero-v2-1200.webp 1200w,
+                     ../assets/owners/web/recalls-hero-v2-1800.webp 1800w,
+                     ../assets/owners/web/recalls-hero-v2-2364.webp 2364w"
+             sizes="100vw" width="2364" height="1576"
+             fetchpriority="high" decoding="async"
+             alt="A campsite on a lakeshore at dusk, a motorhome parked beside a picnic table and a snowcapped mountain across the water" />
+      </div>
+      <div class="ab-hero-overlay" aria-hidden="true"></div>
+      <div class="ab-hero-content">
+        <span class="ab-hero-eyebrow">Recalls</span>
+        <h1 class="ab-hero-heading">Check your VIN.</h1>
+        <p class="ab-hero-tagline">Recall notices are mailed to the owner Jayco has on file. You can
+          also look up your own RV at any time, in the United States or in Canada.</p>
+      </div>
+    </section>
+
+    <section class="ab-sec orc" aria-labelledby="orc-h">
+      <div class="ab-inner">
+        <div class="ab-sec-head ab-rise">
+          <span class="section-label">Recall lookup</span>
+          <h2 class="section-heading dark" id="orc-h">Where is your RV registered?</h2>
+        </div>
+
+        <div class="orc-switch ab-rise" role="tablist" aria-label="Country" hidden>
+          <button type="button" class="orc-tab" role="tab" id="orc-tab-us" aria-controls="orc-us"
+                  aria-selected="true" data-country="us">
+            <span class="orc-flag" aria-hidden="true">US</span>United States
+          </button>
+          <button type="button" class="orc-tab" role="tab" id="orc-tab-canada" aria-controls="canada"
+                  aria-selected="false" tabindex="-1" data-country="canada">
+            <span class="orc-flag" aria-hidden="true">CA</span>Canada
+          </button>
+        </div>
+
+        <!-- ===== United States ===== -->
+        <div class="orc-panel" id="orc-us" role="tabpanel" aria-labelledby="orc-tab-us">
+          <h3 class="orc-panel-h">United States</h3>
+          <ol class="orc-steps" role="list">
+            <li class="orc-step">
+              <span class="orc-step-n" aria-hidden="true">1</span>
+              <div>
+                <h4 class="orc-step-h">Find your VIN</h4>
+                <p>The 17-character number on the weight sticker. On a travel trailer or fifth wheel
+                  it is inside the entrance door and on the outside roadside wall; on a Class B, the
+                  driver’s doorjamb; on a Class C, inside the entrance door and the driver’s
+                  doorjamb; on a Class A, inside the entrance door and on the wall behind the
+                  driver’s seat.</p>
+              </div>
+            </li>
+            <li class="orc-step">
+              <span class="orc-step-n" aria-hidden="true">2</span>
+              <div>
+                <h4 class="orc-step-h">Look it up at NHTSA</h4>
+                <p>The National Highway Traffic Safety Administration’s lookup shows any open safety
+                  recall on your VIN.</p>
+                <a class="btn-primary" href="https://www.nhtsa.gov/recalls" target="_blank"
+                   rel="noopener noreferrer">Check for recalls at NHTSA.gov<span class="sr-only"> (opens in a new tab)</span></a>
+              </div>
+            </li>
+            <li class="orc-step">
+              <span class="orc-step-n" aria-hidden="true">3</span>
+              <div>
+                <h4 class="orc-step-h">Book the repair</h4>
+                <p>If a recall is open, contact an authorized Jayco dealer to schedule it, with your
+                  VIN and the recall number to hand.</p>
+                <a class="btn-secondary-light" href="dealers.html">Find a Dealer</a>
+              </div>
+            </li>
+          </ol>
+
+          <div class="orc-aside">
+            <div class="orc-aside-item">
+              <h4 class="orc-aside-h">Report a safety defect</h4>
+              <p>NHTSA Vehicle Safety Hotline: <a href="tel:+18883274236">1-888-327-4236</a>
+                (TTY <a href="tel:+18004249153">1-800-424-9153</a>). Or report it to Jayco Customer
+                Service at <a href="tel:+18002838267">800-283-8267</a>.</p>
+            </div>
+            <div class="orc-aside-item">
+              <h4 class="orc-aside-h">Bought it used, or moved?</h4>
+              <p>A notice can only reach the owner on file. Send the
+                <a href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">Change of
+                Ownership Form</a> to update it.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Canada ===== -->
+        <div class="orc-panel" id="canada" role="tabpanel" aria-labelledby="orc-tab-canada">
+          <h3 class="orc-panel-h">Canada</h3>
+          <p class="orc-lead">Recalls and related notices Jayco has filed with Transport Canada on or
+            after January 1, 2026. Information about recalls filed before then is not available
+            online; contact Jayco Customer Service for it.</p>
+
+          <div class="orc-table-wrap" tabindex="0" role="region" aria-label="Jayco RV recalls filed with Transport Canada">
+            <table class="orc-table">
+              <thead>
+                <tr>
+                  <th scope="col">Recall no.<span class="orc-sub">US / Canada</span></th>
+                  <th scope="col">Notice given to Minister</th>
+                  <th scope="col">Notice to Transport Canada</th>
+                  <th scope="col">Owner’s letter</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-554</span><span class="orc-no-ca">2026-415</span></th>
+                  <td><time datetime="2026-08-31">August 31, 2026</time></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/76-26V-554_2026-415-Defect-Report-Jayco-Motorized.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/78-26V-554_2026-415-Defect-Report-Jayco-Motorized(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/79-26V-554_2026-415-2026-415-Canada-Retail-Notification.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/77-26V-554_2026-415-2026-415-Canada-Retail-Notification---merged.pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-518</span><span class="orc-no-ca">2026-385</span></th>
+                  <td><time datetime="2026-08-06">August 6, 2026</time></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/65-26V-518_2026-385-Defect-Report-Jayco-Motorized.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/64-26V-518_2026-385-Defect-Report-Jayco-Motorized(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/67-26V-518_2026-385-2026-385-Canada-Retail-Notification.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/66-26V-518_2026-385-2026-385-Canada-Retail-Notification-MERGED.pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-484</span><span class="orc-no-ca">2026-366</span></th>
+                  <td><time datetime="2026-07-27">July 27, 2026</time></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/63-26V-484_2026-366-Defect-Report-Jayco-Motorized.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/61-26V-484_2026-366-Defect-Report-Jayco-Motorized(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://www.jaycofamily.com/uploads/media/60-26V-484_2026-366-2026-366-(26V-292)-Canadian-Retail-Letter---English.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/62-26V-484_2026-366-2026-366-(26V-292)-Canadian-Retail-Letter(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-426</span><span class="orc-no-ca">2026-322</span></th>
+                  <td><time datetime="2026-07-02">July 2, 2026</time></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/54-26V-426_2026-322-Defect-Report-Jayco-Towable---JT.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://jaycofamily.com/uploads/media/52-26V-426_2026-322-Defect-Report-Jayco-Towable---JT(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/55-26V-426_2026-322-2026-322-Canada-Retail-Notification-JT.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://jaycofamily.com/uploads/media/53-26V-426_2026-322-2026-322-Canada-Retail-Notification-JT(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-361</span><span class="orc-no-ca">2026-269</span></th>
+                  <td><time datetime="2026-06-03">June 3, 2026</time></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/44-26v3612026269Defect-Report-Jayco-Motorized[1].pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://jaycofamily.com/uploads/media/43-26v3612026269Defect-Report-Jayco-Motorized---Request-2(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/46-2026-269-Canadian-Retail-Letter---English.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://jaycofamily.com/uploads/media/45-2026-269-Canadian-Retail-Letter(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+                <tr>
+                  <th scope="row"><span class="orc-no">26V-360</span><span class="orc-no-ca">2026-268</span></th>
+                  <td><time datetime="2026-06-03">June 3, 2026</time></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/40-Defect-Report-Jayco-Motorized.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://www.jaycofamily.com/uploads/media/39-Defect-Report-Jayco-Motorized--Request-1(FR_CA).pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                  <td class="orc-docs"><a href="https://jaycofamily.com/uploads/media/42-2026-268-Canadian-Retail-Letter---English.pdf" target="_blank" rel="noopener noreferrer">English</a><a href="https://jaycofamily.com/uploads/media/41-2026-268-Canadian-Retail-Letter---FR-CA.pdf" target="_blank" rel="noopener noreferrer" lang="fr">Français</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="orc-table-note">Each document is a PDF and opens in a new tab. Recalls for Jayco’s
+            other brands are on the
+            <a href="https://www.jaycofamily.com/canadian-recalls/" target="_blank" rel="noopener noreferrer">Jayco
+            Family of Companies site</a>.</p>
+
+          <div class="orc-aside">
+            <div class="orc-aside-item">
+              <h4 class="orc-aside-h">Jayco Customer Service</h4>
+              <p>For questions about a recall, to report a safety concern, a change of ownership or a
+                new address: <a href="tel:+18002838267">800-283-8267</a> (toll-free),
+                <a href="mailto:service@jayco.com">service@jayco.com</a>, or Jayco, Inc., Customer
+                Service, P.O. Box 460, 903 S. Main Street, Middlebury, IN 46540.</p>
+              <p class="orc-form-links">
+                <a href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">Change of Ownership Form</a>
+                <a href="https://qrco.de/bgAriU" target="_blank" rel="noopener noreferrer" lang="fr">Formulaire de changement de propriétaire</a>
+              </p>
+            </div>
+            <div class="orc-aside-item">
+              <h4 class="orc-aside-h">Transport Canada</h4>
+              <p>Search every vehicle recall issued in Canada, or report a defect toll-free at
+                <a href="tel:+18003330510">1-800-333-0510</a>.</p>
+              <a class="btn-secondary-light" href="https://tc.canada.ca/en/road-transportation/defects-recalls-vehicles-tires-child-car-seats"
+                 target="_blank" rel="noopener noreferrer">Transport Canada recalls<span class="sr-only"> (opens in a new tab)</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ab-tail" aria-hidden="true"></div>
+
+    <!-- ===== FAQ — the "Recalls" questions from js/faqs-data.js, written in at
+         build time so they read the same here and on faqs.html. Edit them there. ===== -->
+    <section class="faq-section" id="faq">
+      <div class="faq-inner">
+        <div class="faq-header">
+          <span class="section-label">Frequently Asked Questions</span>
+          <h2 class="section-heading dark">About recalls.</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How do I find out if my Jayco has an open recall?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>In the United States, enter your 17-character VIN at <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener noreferrer">NHTSA’s recall lookup</a>. In Canada, Jayco lists the recalls it has filed with Transport Canada since January 1, 2026 on the <a href="recalls.html#canada">Canada tab</a>, with each notice and owner’s letter.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>How will Jayco tell me about a recall?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>By mail, to the owner Jayco has on file. If you bought your Jayco used or have moved, send the <a href="https://qrco.de/bg45ju" target="_blank" rel="noopener noreferrer">Change of Ownership Form</a> so the letter reaches you.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>What do I do if my RV is part of a recall?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Contact an authorized Jayco <a href="dealers.html">dealer</a> to schedule the repair, and have your VIN and the recall number ready. Jayco Customer Service can help at 800-283-8267 or service@jayco.com.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>I found a Canadian recall from before 2026. Where is it?</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer"><p>Recalls filed with Transport Canada before January 1, 2026 are not listed online. Contact Jayco Customer Service at 800-283-8267, service@jayco.com, or Jayco, Inc., Customer Service, P.O. Box 460, 903 S. Main Street, Middlebury, IN 46540.</p></div>
+          </div>
+        </div>
+        <p class="ow-faq-more"><a href="faqs.html?topic=recalls">All Recalls questions</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <!-- Jayco Companion, the owner app. iPhone only: Wingmate, which had an
+               Android version too, is gone from both stores, and Companion has no
+               Google Play listing. -->
+          <a href="https://apps.apple.com/us/app/jayco-companion/id6792838188" class="footer-app-badge"
+             target="_blank" rel="noopener noreferrer" aria-label="Download Jayco Companion on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="owner-services.html">Owner Services</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
+            <li><a href="warranty.html">Warranty Coverage</a></li>
+            <li><a href="recalls.html">Recalls</a></li>
+            <li><a href="jayco-companion.html">Jayco Companion App</a></li>
+            <li><a href="https://www.jaycofamily.com/ambassadors/" target="_blank" rel="noopener noreferrer">Ambassador Program</a></li>
+            <li><a href="https://www.jaycofamily.com/JFOC-University-NRVTA/" target="_blank" rel="noopener noreferrer">Jayco University</a></li>
+            <li><a href="https://jaycostore.myshopify.com/" target="_blank" rel="noopener noreferrer">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="https://jayco.gopremierpro.com/shop/catalog" target="_blank" rel="noopener noreferrer">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
+            <li><a href="https://www.jaycofamily.com/" target="_blank" rel="noopener noreferrer">Careers</a></li>
+            <li><a href="newsroom.html">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/about.js?v=v5-ab-18"></script>
+  <script src="js/owners.js?v=v5-ow-3"></script>
+  <!-- The RVs menu, desktop and phone, is built from the model library. -->
+  <script src="js/models-data.js?v=v5-6"></script>
+  <script src="js/app.js?v=v5-core-21"></script>
+</body>
+</html>

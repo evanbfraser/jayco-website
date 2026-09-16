@@ -981,6 +981,11 @@
   /* ----- deep link ?model= ----- */
   function applyDeepLink() {
     const params = new URLSearchParams(window.location.search);
+    /* ?type= alone opens the model step filtered to one category — the menus'
+       Build & Price under a type. A ?model= below overrides it with that
+       model's own category. */
+    const t = params.get('type');
+    if (t && JAYCO.categories.some((c) => c.id === t)) state.catFilter = t;
     const q = params.get('model');
     if (!q || !JAYCO.models[q]) return;
     selectModel(q);
