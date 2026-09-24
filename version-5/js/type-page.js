@@ -144,7 +144,10 @@
       ? `<video class="tp-hero-video" src="${h.video}" poster="${h.poster || ''}" muted loop playsinline preload="auto" autoplay></video>`
       : `<img class="tp-hero-img" src="${h.poster || ''}" alt="${esc(type.name)}" />`;
 
-    const ctas = (h.ctas || []).map((c) =>
+    /* View Inventory rides on every type's hero, authored or synthesised, as
+       it does on the model pages — "#" until the dealer inventory page is
+       built, the same placeholder as the header's. */
+    const ctas = (h.ctas || []).concat({ label: 'View Inventory', href: '#', style: 'secondary' }).map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`
     ).join('');
 
