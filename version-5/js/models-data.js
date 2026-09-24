@@ -282,7 +282,11 @@ window.JAYCO_MODEL_PAGES = ['swift', 'jay-feather', 'greyhawk'];
    Jayco's own scans, harvested from the "360°" button on each floorplan page
    at jayco.com. Only the capture id is stored — the host is written once, in
    JAYCO_TOUR_URL below, so a change of platform is one edit rather than
-   fifteen.
+   a hundred and thirty-five.
+
+   Re-harvested 2026-09-24 from all 209 jayco.com floorplan pages: 135 of our
+   181 plans have a scan. A plan missing here has no 360° button on jayco.com.
+   Pinnacle 39FBRL's page carries two scans; this is the one its page embeds.
 
    It lives HERE, in the light library every page loads, for the same reason
    JAYCO_MODEL_PAGES does: two pages need the answer and only one of them loads
@@ -297,31 +301,184 @@ window.JAYCO_MODEL_PAGES = ['swift', 'jay-feather', 'greyhawk'];
    pass either case.
    --------------------------------------------------- */
 window.JAYCO_TOURS = {
-  swift: {
-    /* The 20E page carries no tour, which is why only the 20T is listed — the
-       button renders for the plans that actually have a walkthrough. */
-    '20t': 'PgNjsbhY4xw',
+  'alante': {
+    '29s': '7dkZsAyJr2U',
+  },
+  'alante-se': {
+    '27ase': 'AQ2PH3E6jvK',
+  },
+  'eagle-fw': {
+    '29rlc': 'Sy3LUEtxCX7',
+    '31qbh': 'Eihhg2F9kLN',
+    '28rlt': 'w1dDsCAYeHs',
+    '31rlt': 'N36RNrSJfgq',
+    '321rsts': '7L1FrKVRFTA',
+    '335lsts': 'hCSMdq6QmTN',
+    '365ukts': '2jvZyMMb42k',
+    '367tbts': 'QacZx989bVD',
+    '355mbqs': '8cbivC8fbLi',
+  },
+  'eagle-sle-fw': {
+    '24mle': 'Rvb3yPNBTRe',
+    '28bhu': 'i7unw7HC3af',
+    '28rks': 'TFo2eF4uBVb',
+    '30rlt': 'bYy7NHy7YMe',
+  },
+  'eagle-tt': {
+    '265fkds': 'v2pKWFeXpgo',
+    '294ckbs': 'GhP4vpTJCzf',
+    '312bhok': 'eNqyTaxP1Rd',
+    '320mkts': '1Wpip88xMKz',
+  },
+  'greyhawk': {
+    '27u': 'MS4auzGZkd9',
+    '30z-csa': '5DPntrZM8iX',
+  },
+  'greyhawk-xl': {
+    '32u': 'WBuefPPPoat',
   },
   'jay-feather': {
     '18rbf': 'ZXK81dW5BzW',
     '19mrk': 'dPPsKuKYr2W',
-    '21mbh': '5uijhpVu1ym',
     '21mml': 'Ujr3WT8Vnxn',
+    '21mbh': '5uijhpVu1ym',
+    '23rk': '9GR5kfu29CF',
+    '25rb': 'nHT6XTvNyAz',
+    '25bh': 'hC84MC3emEz',
     '23mbd': 'LPDBt7fkUpn',
-    '24fk':  'LuiPLPmW6Ed',
-    '25bh':  'hC84MC3emEz',
-    '25rb':  'nHT6XTvNyAz',
-    '26fk':  'hGZZv1CeN5P',
-    '27bh':  'nmzZHq3wCT4',
-    '27mk':  'j7i3th8UMmS',
+    '24fk': 'LuiPLPmW6Ed',
+    '27bh': 'nmzZHq3wCT4',
     '29bhb': 'kuEjvCcL8Tg',
-    '29qbh': 'guqqhXsbD9z',
+    '27mk': 'j7i3th8UMmS',
+    '26fk': 'hGZZv1CeN5P',
     '30rkb': '4GuJB9u464t',
+    '29qbh': 'guqqhXsbD9z',
+    '33bh': '7V2pTdRB6sG',
   },
-  greyhawk: {
-    /* Only the 27U page carries a 360° button; the 29MV, 30Z and 31F pages
-       have none, so theirs render as the disabled tour control. */
-    '27u': 'MS4auzGZkd9',
+  'jay-feather-air': {
+    '15mrb': 'kQRb9sb3AZD',
+    '16db': 'ehnu7bWQRXD',
+    '16rb': 'EStZ839yGcp',
+    '19mbs': '4Sk4x6ywBdf',
+    '18fbs': 'xdVmfReAgpL',
+  },
+  'jay-feather-air-sl': {
+    '15tbsl': 'oQaDiwZATHK',
+    '17bhsl': '4cFGbcFp7bu',
+  },
+  'jay-feather-sl': {
+    '25rlsl': 'ctKqaZxdFyS',
+    '26bhsl': 'hMLjXoqrQYf',
+  },
+  'jay-flight': {
+    '130bh': 'cde7bRujaSS',
+    '130rd-': 'qV3t11P5PmE',
+    '140tb': '9BWRDUGAroG',
+    '170bh': 'cNKiU64xKtN',
+    '170fq': 'suHzbBK4Umk',
+    '130bhw': 'cde7bRujaSS',
+    '130rdw': 'qV3t11P5PmE',
+    '140tbw': '9BWRDUGAroG',
+    '172db': 'CNYem9ksAZD',
+    '170bhw': 'cNKiU64xKtN',
+    '170fqw': 'suHzbBK4Umk',
+    '172dbw': 'CNYem9ksAZD',
+    '175bh': 'jzuV82yL8ME',
+    '175fq': 'GjQUB2NA433',
+    '178dbs': 'E7CeyWJAi2k',
+    '250bh': 'PKp2ob6274U',
+    '175bhw': 'jzuV82yL8ME',
+    '175fqw': 'GjQUB2NA433',
+    '178dbsw': 'E7CeyWJAi2k',
+    '250bhw': 'xLkkMbCq6c9',
+    '180lk': 'SYUGrHL94wc',
+    '197mb': '99VKKUr61p1',
+    '180lkw': 'SYUGrHL94wc',
+    '197mbw': '99VKKUr61p1',
+    '210qb': 'HwHJn12pCzZ',
+    '260bh': 'xpJKxCy6ZM4',
+    '270bhs': 'ukmPYFX68d1',
+    '210qbw': 'HwHJn12pCzZ',
+    '260bhw': 'xpJKxCy6ZM4',
+    '200mks': 'xLkkMbCq6c9',
+    '245bhs': 'HD3iE8v97SE',
+    '261bhs': 'BefqDc9qav3',
+    '262rls': 'SRtvhbr6fWQ',
+    '200mksw': 'xLkkMbCq6c9',
+    '265mws': 'YcK9UExAFrx',
+    '225mls': 'pphZC68nRH3',
+    '263bhs': 'WzxazF8xUzQ',
+    '245bhsw': 'HD3iE8v97SE',
+    '265th': 'ZYoPjk9SnoW',
+    '261bhsw': 'BefqDc9qav3',
+    '262rlsw': 'SRtvhbr6fWQ',
+    '265mwsw': 'YcK9UExAFrx',
+    '225mlsw': 'pphZC68nRH3',
+    '263bhsw': 'WzxazF8xUzQ',
+    '280bhs': 'Tk62BZT7kBV',
+    '330tbs': 'w9aM7TxxNh1',
+    '295tbs': 'TxeWVqDVesF',
+    '321bds': 'SLBtifqcGUD',
+    '290rls': 'ijaRmE7MhGB',
+    '325bht': 'pB4KocDqeUy',
+    '380dqs': 'nsnz5tYDPvN',
+    '333bts': 'oiAk7yWzudh',
+    '334rts': 'uaRv4MHDfAQ',
+    '270bhsw': 'ukmPYFX68d1',
+    '280bhsw': 'Tk62BZT7kBV',
+    '335bhs': 'znM6o6Ncf1N',
+  },
+  'jay-flight-bungalow': {
+    '401flts': '4igxLCoJHjB',
+    '401loft': 'VivCHiqmpZ2',
+    '404loft': 'S1MaZ5WJCsH',
+    '402rlts': 'mjpky4JDA2p',
+  },
+  'north-point': {
+    '310rlts': '5RiBViJpYpy',
+    '365rkts': 's8JkkSd7cww',
+    '381ckre': 'buHQaByaAAm',
+    '395dsdb': 'WEKGEZS9GRt',
+    '361rlbh': 'G4JK1r3jiTQ',
+    '375tbdb': 'kPZFfHfQwc4',
+    '391tbbh': 'aew7AcrmHWE',
+  },
+  'pinnacle': {
+    '32rlts': 'Q4BvCEMq3Jf',
+    '36fbts': 'vntDm1Fipsn',
+    '38fbrk': 'UN4ovD6GsMi',
+    '38ssws': 'A5evBQfBkX5',
+    '39dsdb': 'LfVzy6JYXpf',
+    '39flok': 'LY5bkRywpfD',
+    '39fbrl': '96dyCqkTm9i',
+  },
+  'precept': {
+    '31ul': 'tmJkuzq7FsH',
+    '36c': 'X6NFN2Rhc3V',
+  },
+  'redhawk': {
+    '24b': 'T8XQTgbMAmr',
+    '26m': 'ECWniaFTg64',
+  },
+  'seismic-fw': {
+    '399': 'yjhLXbCxX18',
+    '413': '8k6Jfddv98p',
+  },
+  'seismic-tt': {
+    '214': '6SS8xyum5Mv',
+  },
+  'seneca': {
+    '37k': 'YtrpmD7sDpW',
+    '37l': 'MEnwWzf6nhm',
+    '37m': 'zfLFuxXrH9q',
+  },
+  'seneca-prestige': {
+    '37k': 'Zbsuzj6bX9d',
+    '37l': 'T4r3BKBSNeR',
+    '37m': 'FnttGyCwsxt',
+  },
+  'swift': {
+    '20t': 'PgNjsbhY4xw',
   },
 };
 

@@ -233,7 +233,7 @@
         <a class="tp-model-card" href="${hrefFor(s)}">
           <h3 class="tp-model-name">${esc(m.name)}</h3>
           <p class="tp-model-tagline">${esc(m.tagline)}</p>
-          <span class="tp-model-price">Starting at ${money(m.basePrice)}${m.year ? ' · ' + m.year : ''}</span>
+          <span class="tp-model-price">MSRP Starting At ${money(m.basePrice)}${m.year ? ' · ' + m.year : ''}</span>
           <div class="tp-model-media"><img src="${m.img}" alt="${esc(m.name)}" loading="lazy" /></div>
           <div class="tp-model-stats">${stats}</div>
         </a>`;

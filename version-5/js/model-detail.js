@@ -200,9 +200,12 @@
   const NAV = [
     { id: 'md-intro',     label: 'Overview' },
     { id: 'md-overview',  label: 'Floorplan' },   /* floorplan.html's own overview */
+    { id: 'md-tour',      label: '3D Tour' },     /* floorplan.html only */
     { id: 'md-scenery',   label: 'Gallery'  },
+    { id: 'fp-topfeat',   label: 'Top Features' },  /* floorplan.html only */
     { id: 'md-plan',      label: 'Floorplans' },
     { id: 'md-features',  label: 'Features' },
+    { id: 'md-finishes',  label: 'Decor & Paint' },
     { id: 'md-cutaway', label: 'Construction' },
     { id: 'md-videos',    label: 'Videos'   },
     { id: 'md-specs',     label: 'Specs'    },
@@ -248,10 +251,14 @@
     /* A floorplan page keeps the model's footage and swaps everything written
        on top of it for the plan's own: its code, its line, its MSRP, and a
        build that opens with this plan already chosen. */
+    /* "#" until the dealer inventory page is built — the same placeholder as
+       View Inventory in the header */
+    const inventory = { label: 'View Inventory', href: '#', style: 'secondary' };
     const heroCtas = plan ? [
       { label: 'Price this Floorplan', href: priceHref(), style: 'primary' },
       { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
-    ] : (h.ctas || []);
+      inventory,
+    ] : (h.ctas || []).concat(inventory);
     /* the code on its own line: it is the name of this page, and a model name
        and a code broken wherever the measure falls reads as one long word */
     const heading = plan
@@ -260,8 +267,8 @@
     const sub = plan ? (plan.blurb || factLine()) : h.sub;
     const price = plan
       ? (plan.price == null ? '<p class="md-hero-price">Pricing to come</p>'
-        : `<p class="md-hero-price">Starting at <strong>${money(plan.price)}</strong></p>`)
-      : `<p class="md-hero-price">Starting at <strong>${money(model.priceFrom)}</strong></p>`;
+        : `<p class="md-hero-price">MSRP Starting At <strong>${money(plan.price)}</strong></p>`)
+      : `<p class="md-hero-price">MSRP Starting At <strong>${money(model.priceFrom)}</strong></p>`;
 
     const ctas = heroCtas.map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`
@@ -384,7 +391,7 @@
           <div class="md-section-head">
             <span class="section-label">Floorplan</span>
             <h2 class="section-heading dark">${esc(heading)}</h2>
-            <a class="fp-all-link" href="${allHref}">All ${sibs.length} ${esc(model.name)} floorplans</a>
+            <a class="fp-all-link" id="fp-all-link" href="${allHref}" aria-haspopup="dialog">All ${sibs.length} ${esc(model.name)} floorplans</a>
           </div>
         </div>
 
@@ -432,6 +439,152 @@
       </div>`);
 
     initZoom();
+    initAllPlans();
+  }
+
+  /* ---------- Every floorplan of the model, in a dialog (floorplan.html) ----
+     The overview's "All 16 Jay Feather floorplans" opens this rather than
+     leaving the page: the whole model's plans as cards, the one on screen
+     marked, each a link to its own page. The link keeps its href, so without
+     script it still goes to the model's floorplans. Built like the zoom
+     dialog: appended to <body>, [hidden] when closed, Lenis stopped while
+     open, focus held inside and handed back on close. */
+  function initAllPlans() {
+    const link = $('#fp-all-link');
+    const sibs = plan && plan.siblings;
+    if (!link || !sibs || sibs.length < 2) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'fp-all';
+    modal.hidden = true;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'fp-all-title');
+    modal.innerHTML = `
+      <div class="fp-all-scrim" data-all-close="1"></div>
+      <div class="fp-all-panel">
+        <div class="fp-all-head">
+          <h2 class="fp-all-title" id="fp-all-title">${model.year} ${esc(model.name)} floorplans</h2>
+          <span class="fp-all-count">${sibs.length} floorplans</span>
+          <button type="button" class="fp-all-close" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <ul class="fp-all-grid" data-lenis-prevent role="list">
+          ${sibs.map((p) => {
+            const here = p.id === plan.id;
+            return `
+            <li>
+              <a class="fp-other-card fp-all-card${here ? ' is-here' : ''}" href="${planHref(p.id)}"${here ? ' aria-current="page"' : ''}>
+                <span class="fp-other-art">
+                  <img src="${p.img}" alt="" loading="lazy" decoding="async" />
+                  ${here ? '<span class="fp-all-here">Viewing</span>' : ''}
+                </span>
+                <span class="fp-other-name">${esc(p.name)}</span>
+                <span class="fp-other-facts">${esc([
+                  p.sleeps ? 'Sleeps ' + p.sleeps : '', p.length || ''].filter(Boolean).join(' · '))}</span>
+                <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(p.price)}</span>
+              </a>
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const close = modal.querySelector('.fp-all-close');
+    const grid = modal.querySelector('.fp-all-grid');
+    let hideT = null;
+
+    function open(e) {
+      if (e) e.preventDefault();
+      clearTimeout(hideT);
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
+      close.focus();
+      /* start with the current plan in view — Jay Flight has fifty-eight */
+      const here = grid.querySelector('.is-here');
+      if (here) grid.scrollTop = Math.max(0, here.parentNode.offsetTop - grid.clientHeight / 3);
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+    function shut() {
+      if (modal.hidden) return;
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+      if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
+      link.focus();
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { modal.hidden = true; }, 320);
+    }
+
+    link.addEventListener('click', open);
+    close.addEventListener('click', shut);
+    modal.addEventListener('click', (e) => { if (e.target.dataset.allClose) shut(); });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); shut(); return; }
+      if (e.key !== 'Tab') return;
+      const f = Array.from(modal.querySelectorAll('button, a[href]'));
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  /* ---------- 3D tour ----------
+     Jayco's Matterport walkthrough of this plan, embedded the way jayco.com's
+     own floorplan pages embed it. Lazy: it is a heavy frame, and it sits a
+     screen below the fold. A plan with no scan drops the section — the
+     drawing's "View 3D Tour" control above already says so. */
+  function renderTour() {
+    if (!plan || !$('#md-tour')) { drop('#md-tour'); return; }
+    if (!plan.tour360) { drop('#md-tour'); return; }
+    const who = `${model.name} ${plan.name}`;
+    set('#md-tour', `
+      <div class="fp-tour-inner">
+        <div class="md-section-head">
+          <span class="section-label">3D Tour</span>
+          <h2 class="section-heading dark">Walk the ${esc(plan.name)}.</h2>
+          <p class="section-body">Step inside and look around every room, the way you would on the lot.</p>
+        </div>
+        <div class="fp-tour-frame" id="fp-tour-frame">
+          <iframe src="${esc(plan.tour360)}" title="3D tour of the ${esc(who)}" tabindex="-1"
+                  loading="lazy" allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; xr-spatial-tracking"></iframe>
+          <button type="button" class="fp-tour-shield" id="fp-tour-shield"
+                  aria-label="Start the 3D tour of the ${esc(who)}"></button>
+          <button type="button" class="fp-tour-done" id="fp-tour-done" hidden>Done</button>
+        </div>
+        <p class="fp-tour-note">Virtual Floorplan Showings and Product Specifics Are Subject to Change Without Notice</p>
+      </div>`);
+
+    /* An iframe swallows the wheel and touch-drag — Matterport uses both to
+       move through the coach — so a live tour traps the page's scroll the
+       moment the pointer crosses it. It sits asleep under a clear shield
+       instead, and wakes when the tour itself is clicked. The frame itself is jayco.com's embed exactly —
+       same URL, same permissions, never reloaded. Leaving the frame, Esc or
+       Done put it back to sleep, and the page scrolls past it again. */
+    const frame = $('#fp-tour-frame');
+    const shield = $('#fp-tour-shield');
+    const done = $('#fp-tour-done');
+    const iframe = frame && frame.querySelector('iframe');
+    if (!frame || !shield || !done || !iframe) return;
+    function wake() {
+      frame.classList.add('is-live');
+      done.hidden = false;
+      iframe.tabIndex = 0;
+      iframe.focus();
+    }
+    function sleep() {
+      if (!frame.classList.contains('is-live')) return;
+      frame.classList.remove('is-live');
+      done.hidden = true;
+      iframe.tabIndex = -1;
+    }
+    shield.addEventListener('click', wake);
+    done.addEventListener('click', () => { sleep(); shield.focus(); });
+    frame.addEventListener('mouseleave', sleep);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') sleep(); });
   }
 
   /* ---------- Scenery band + detail carousel ----------
@@ -832,7 +985,7 @@
        Kept as a JS comment rather than an HTML one: this template runs once per
        floorplan, and Jay Feather would ship sixteen copies of it. */
     /* A towable's plans each have their own page (floorplan.html), so the
-       slide's second button goes there; "View All Floorplans" still sits under
+       slide's second button goes there; "View All Floorplans" still sits above
        the rail. A motorhome's plans have no page, and keep it on the slide. */
     const planPages = isTowable() && !!(window.JAYCO_BUILD && window.JAYCO_BUILD[slug]);
     const panels = plans.map((p, i) => {
@@ -908,7 +1061,7 @@
             ${p.sleeps ? `<li><span>Sleeps</span><span>${esc(p.sleeps)}</span></li>` : ''}
             ${p.length ? `<li><span>Length</span><span>${esc(p.length)}</span></li>` : ''}
             ${(p.specs || []).map(([k, v]) => `<li><span>${esc(k)}</span><span>${esc(v)}</span></li>`).join('')}
-            <li><span>Starting at</span><span>${
+            <li><span>MSRP Starting At</span><span>${
               p.price == null ? 'Pricing to come' : money(p.price)}</span></li>
           </ul>
           <!-- Build, then all of them side by side. The primary keeps the
@@ -958,12 +1111,13 @@
         </div>` : ''}
       </div>
       ${filterRow ? `<div class="md-fp-bar">${filterRow}${barArrows ? controls : ''}</div>` : ''}
-      <div class="md-fp-track" id="md-fp-track" role="region" aria-roledescription="carousel"
-           aria-label="${esc(model.name)} floorplans">${panels}</div>
-      <p class="md-fp-empty" id="md-fp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>
+      <!-- above the rail, under the chips when there are any -->
       <div class="md-fp-more">
         <a href="build-price.html?model=${slug}&amp;step=floorplan" class="btn-secondary">View All Floorplans</a>
-      </div>`);
+      </div>
+      <div class="md-fp-track" id="md-fp-track" role="region" aria-roledescription="carousel"
+           aria-label="${esc(model.name)} floorplans">${panels}</div>
+      <p class="md-fp-empty" id="md-fp-empty" hidden>No floorplan matches every filter — clear one to see more.</p>`);
 
     /* ---- the rail ---- */
     const rail = initRail($('#md-fp-track'), $('#md-fp-prev'), $('#md-fp-next'),
@@ -1226,6 +1380,67 @@
         tabs[next].focus();
       });
     });
+  }
+
+  /* ---------- Decor & Paint ----------
+     Directly under Features: the exterior paint schemes and interior decors
+     from jayco.com's Build and Price table (finishes-data.js). A floorplan page
+     shows only what that plan offers — North Point and Pinnacle paint, for one,
+     is offered on some plans and not others. Either half drops out when there
+     is nothing in it, and the section when both do. */
+  function renderFinishes() {
+    const F = (window.JAYCO_FINISHES || {})[slug];
+    if (!F) { drop('#md-finishes'); return; }
+    const only = plan && F.plans && F.plans[plan.id];
+    const pick = (key) => only ? F[key].filter((x) => only[key].indexOf(x.id) > -1) : F[key];
+    const paint = pick('exterior'), decor = pick('interior');
+    if (!paint.length && !decor.length) { drop('#md-finishes'); return; }
+
+    const who = `${model.name}${plan ? ' ' + plan.name : ''}`;
+    const lede = 'The ' + [
+      paint.length ? (paint.length === 1 ? 'exterior finish' : 'exterior finishes') : '',
+      decor.length ? (decor.length === 1 ? 'interior decor' : 'interior decors') : '',
+    ].filter(Boolean).join(' and ') + ' offered on the ' + who + '.';
+    const img = (x, cls) => x.img
+      ? `<img class="${cls}" src="${x.img}" alt="${esc(who + ' — ' + x.name + (x.kind ? ' ' + x.kind.toLowerCase() : ''))}"
+             width="${x.w}" height="${x.h}" loading="lazy" decoding="async" />`
+      : '';
+
+    const paintBlock = paint.length ? `
+      <div class="md-fin-group">
+        <h3 class="md-fin-title">Exterior</h3>
+        <ul class="md-fin-paints">
+          ${paint.map((x) => `
+            <li class="md-fin-paint${x.img ? '' : ' md-fin-paint--bare'}">
+              ${x.img ? `<div class="md-fin-well">${img(x, 'md-fin-coach')}</div>` : ''}
+              <span class="md-fin-name">${esc(x.name)}</span>
+              ${x.kind ? `<span class="md-fin-kind">${esc(x.kind)}</span>` : ''}
+            </li>`).join('')}
+        </ul>
+      </div>` : '';
+
+    const decorBlock = decor.length ? `
+      <div class="md-fin-group">
+        <h3 class="md-fin-title">Interior decor</h3>
+        <ul class="md-fin-decors">
+          ${decor.map((x) => `
+            <li class="md-fin-decor">
+              <span class="md-fin-name">${esc(x.name)}</span>
+              ${img(x, 'md-fin-swatch')}
+            </li>`).join('')}
+        </ul>
+      </div>` : '';
+
+    set('#md-finishes', `
+      <div class="md-finishes-inner">
+        <div class="md-section-head">
+          <span class="section-label">Decor &amp; Paint</span>
+          <h2 class="section-heading dark">Make it yours.</h2>
+          <p class="section-body">${esc(lede)}</p>
+        </div>
+        ${paintBlock}
+        ${decorBlock}
+      </div>`);
   }
 
   /* ---------- Full specifications ---------- */
@@ -1501,6 +1716,43 @@
     ].filter(Boolean) }].filter((g) => g.rows.length);
   }
 
+  /* The Options and Packages tabs, drawn in the spec table's own rows. A
+     floorplan page keeps only the lines its plan can take; a model page keeps
+     them all and names the plans a line is limited to. */
+  function specExtras() {
+    const O = (window.JAYCO_OPTIONS || {})[slug];
+    if (!O) return {};
+    const pid = plan ? String(plan.id).toLowerCase() : null;
+    const fits = (o) => !pid ||
+      ((!o.only || o.only.indexOf(pid) > -1) && (!o.except || o.except.indexOf(pid) < 0));
+    const up = (a) => a.map((x) => x.toUpperCase()).join(', ');
+    const detail = (o) => [o.note,
+      pid ? '' : o.only ? 'Only on the ' + up(o.only) : o['except'] ? 'Not on the ' + up(o['except']) : '',
+    ].filter(Boolean).join('. ');
+    const rows = (list) => list.filter(fits).map((o) => `
+          <tr><td class="md-opt-name">${esc(o.title)}</td><td class="md-opt-note">${esc(detail(o))}</td></tr>`).join('');
+    const table = (inner) => `
+        <div class="md-spec-table-wrap">
+          <table class="md-spec-table md-opt-table"><tbody>${inner}</tbody></table>
+        </div>`;
+
+    const optRows = rows(O.options || []);
+    const pkgRows = (O.packages || []).map((p) => {
+      const r = rows(p.items);
+      if (!r) return '';
+      return `
+          <tr class="md-spec-group"><th colspan="2">
+            <span class="md-spec-group-name">${esc(p.name)}${p.status
+              ? ` <span class="md-pkg-status md-pkg-status--${p.status.toLowerCase()}">${esc(p.status)}</span>` : ''}</span>
+            ${p.note ? `<span class="md-spec-group-note">${esc(p.note)}</span>` : ''}
+          </th></tr>${r}`;
+    }).join('');
+    return {
+      options: optRows ? table(optRows) : '',
+      packages: pkgRows ? table(pkgRows) : '',
+    };
+  }
+
   function renderSpecs() {
     const s = plan ? {
       heading: 'Every number.',
@@ -1532,11 +1784,7 @@
         ${cols.slice(0, 3).map((c, i) => `<button class="md-spec-switch-btn${i === 0 ? ' is-active' : ''}" data-col="${i}">${esc(c)}</button>`).join('')}
       </div>` : '';
 
-    set('#md-specs', `
-      <div class="md-specs-inner">
-        <div class="md-section-head">
-          <h2 class="section-heading dark">${esc(s.heading)}</h2>
-        </div>
+    const standard = `
         ${toggle}
         <div class="md-spec-table-wrap">
           <table class="md-spec-table is-col-0">
@@ -1544,8 +1792,51 @@
             <tbody>${body}</tbody>
           </table>
         </div>
-        ${s.footnote ? `<p class="md-spec-foot">${esc(s.footnote)}</p>` : ''}
+        ${s.footnote ? `<p class="md-spec-foot">${esc(s.footnote)}</p>` : ''}`;
+
+    /* Standard | Options | Packages. The numbers are the Standard tab; the
+       other two are jayco.com's "Standard Features and Options" panel
+       (options-data.js). Each tab is one tab only if it has something in it. */
+    const extra = specExtras();
+    const tabs = [{ id: 'standard', name: 'Standard', html: standard }]
+      .concat(extra.options ? [{ id: 'options', name: 'Options', html: extra.options }] : [])
+      .concat(extra.packages ? [{ id: 'packages', name: 'Packages', html: extra.packages }] : []);
+
+    set('#md-specs', `
+      <div class="md-specs-inner">
+        <div class="md-section-head">
+          <h2 class="section-heading dark">${esc(s.heading)}</h2>
+        </div>
+        ${tabs.length > 1 ? `<div class="md-spec-tabs" role="tablist" aria-label="Specifications, options and packages">
+          ${tabs.map((t, i) => `<button type="button" class="md-spec-tab${i === 0 ? ' is-active' : ''}" role="tab"
+              id="spec-tab-${t.id}" aria-controls="spec-panel-${t.id}" aria-selected="${i === 0}"
+              tabindex="${i === 0 ? 0 : -1}" data-tab="${t.id}">${t.name}</button>`).join('')}
+        </div>` : ''}
+        ${tabs.map((t, i) => `<div class="md-spec-panel" id="spec-panel-${t.id}"${tabs.length > 1
+            ? ` role="tabpanel" aria-labelledby="spec-tab-${t.id}"` : ''}${i === 0 ? '' : ' hidden'}>${t.html}</div>`).join('')}
       </div>`);
+
+    const tabEls = Array.from(document.querySelectorAll('.md-spec-tab'));
+    function pick(id, focus) {
+      tabEls.forEach((b) => {
+        const on = b.dataset.tab === id;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-selected', on);
+        b.tabIndex = on ? 0 : -1;
+        if (on && focus) b.focus();
+      });
+      document.querySelectorAll('.md-spec-panel').forEach((p) => { p.hidden = p.id !== 'spec-panel-' + id; });
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+    }
+    tabEls.forEach((b, i) => {
+      b.addEventListener('click', () => pick(b.dataset.tab));
+      b.addEventListener('keydown', (e) => {
+        const n = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : null;
+        if (n === null) return;
+        e.preventDefault();
+        pick(tabEls[(n + tabEls.length) % tabEls.length].dataset.tab, true);
+      });
+    });
 
     /* the switch only matters at mobile widths, where one column shows at a time */
     const table = document.querySelector('.md-spec-table');
@@ -1717,6 +2008,60 @@
     }
   }
 
+  /* ---------- Top features (floorplan.html) ----------
+     jayco.com's "Top Feature Gallery" for this plan: a photograph and Jayco's
+     caption per item (top-features-data.js), directly under the gallery. The
+     rail and its arrows are the video rail's, as the other floorplans' are.
+     Jayco's Interior/Exterior tabs become a tag on each card — with three to
+     twelve items, a tab would mostly hide one or two photographs. */
+  function renderTopFeatures() {
+    const T = (window.JAYCO_TOP_FEATURES || {})[slug];
+    const ids = plan && T && T.plans[plan.id];
+    if (!ids || !ids.length) { drop('#fp-topfeat'); return; }
+    const items = ids.map((id) => T.items.find((x) => x.id === id)).filter(Boolean);
+    if (!items.length) { drop('#fp-topfeat'); return; }
+
+    const arrow = (dir, d) => `
+      <button type="button" class="md-video-nav" id="fp-topfeat-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} features" aria-controls="fp-topfeat-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+
+    set('#fp-topfeat', `
+      <div class="md-videos-inner">
+        <div class="md-videos-head">
+          <div class="md-section-head">
+            <span class="section-label">Top Features</span>
+            <h2 class="section-heading dark">A closer look at the ${esc(plan.name)}.</h2>
+          </div>
+          ${items.length > 1 ? `<div class="md-video-controls">
+            ${arrow('prev', 'M15 5l-7 7 7 7')}
+            ${arrow('next', 'M9 5l7 7-7 7')}
+          </div>` : ''}
+        </div>
+      </div>
+      <ul class="md-video-track fp-topfeat-track" id="fp-topfeat-track" role="list">
+        ${items.map((it) => `
+          <li class="md-video fp-topfeat">
+            <figure class="fp-topfeat-card">
+              <span class="fp-topfeat-art">
+                <img src="${it.img}" alt="${esc(it.title)}" width="${it.w}" height="${it.h}"
+                     loading="lazy" decoding="async" />
+                ${it.cat ? `<span class="fp-topfeat-tag">${esc(it.cat)}</span>` : ''}
+              </span>
+              <figcaption>
+                <span class="fp-topfeat-title">${esc(it.title)}</span>
+                ${it.body ? `<span class="fp-topfeat-body">${esc(it.body)}</span>` : ''}
+              </figcaption>
+            </figure>
+          </li>`).join('')}
+      </ul>`);
+
+    if (items.length > 1)
+      initRail($('#fp-topfeat-track'), $('#fp-topfeat-prev'), $('#fp-topfeat-next'), '.fp-topfeat');
+  }
+
   /* ---------- The model's other floorplans (floorplan.html) ----------
      Where the model page offers similar models, a floorplan page offers the
      rest of its own model, since that is the decision still open. A rail of
@@ -1755,7 +2100,7 @@
               <span class="fp-other-name">${esc(p.name)}</span>
               <span class="fp-other-facts">${esc([
                 p.sleeps ? 'Sleeps ' + p.sleeps : '', p.length || ''].filter(Boolean).join(' · '))}</span>
-              <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'Starting at ' + money(p.price)}</span>
+              <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(p.price)}</span>
             </a>
           </li>`).join('')}
       </ul>`);
@@ -1789,7 +2134,7 @@
         <a class="md-similar-card" href="${hrefFor(s)}">
           <h3 class="md-similar-name">${esc(m.name)}</h3>
           <p class="md-similar-tagline">${esc(m.tagline)}</p>
-          <span class="md-similar-price">Starting at ${money(m.basePrice)}${m.year ? ' · ' + m.year : ''}</span>
+          <span class="md-similar-price">MSRP Starting At ${money(m.basePrice)}${m.year ? ' · ' + m.year : ''}</span>
           <div class="md-similar-media"><img src="${m.img}" alt="${esc(m.name)}" loading="lazy" /></div>
           <div class="md-similar-stats">${stats}</div>
         </a>`;
@@ -2170,9 +2515,12 @@
   renderHero();
   renderIntro();
   renderOverview();
+  renderTour();
   renderScenery();
+  renderTopFeatures();
   renderPlan();
   renderFeatures();
+  renderFinishes();
   renderCutaway();
   renderVideos();
   renderSpecs();

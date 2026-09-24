@@ -980,7 +980,7 @@
    spine. .btn-secondary is the site's outline button for a dark ground. */
 .md-fp-more {
   max-width: var(--md-frame);
-  margin: var(--space-md) auto 0;
+  margin: 0 auto var(--space-md);
   padding: 0 var(--md-pad);
 }
 
@@ -1392,6 +1392,85 @@
 .md-zoom-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.06); }
 .md-zoom-close:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
 
+/* ---------- Decor & Paint ----------
+   Under Features, on the same frame and the same --surface panels. Paint is a
+   grid of side elevations, each trimmed to the coach and set in its own well;
+   a decor is a full-width strip, because Jayco's decor art is six labelled
+   material swatches in a row and cropping it loses the labels. */
+.md-finishes { padding-top: var(--md-gap-section); }
+.md-finishes-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+.md-finishes .md-section-head { padding-left: 0; padding-right: 0; max-width: none; }
+
+.md-fin-group + .md-fin-group { margin-top: var(--md-gap-tight); }
+.md-fin-title {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+}
+.md-fin-paints,
+.md-fin-decors { list-style: none; margin: 0; padding: 0; }
+
+.md-fin-paints {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+.md-fin-paint { display: flex; flex-direction: column; gap: 0.2rem; }
+.md-fin-well {
+  display: grid;
+  /* a 0-floored track: an auto one sizes to the drawing and overrides the
+     aspect ratio, so a taller one (Swift's 3/4 photograph) stretches its card */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  aspect-ratio: 16 / 7;
+  min-height: 0;                /* else aspect-ratio's auto minimum lets content grow it */
+  margin-bottom: 0.75rem;
+  padding: 8% 7%;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+/* fills the well's content box and contains within it, so a taller drawing
+   (Standard Graphics is 674×390, the paints 730×215) cannot grow its card */
+.md-fin-coach { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+/* no art on jayco.com: the name alone, on the panel the art would have sat on */
+.md-fin-paint--bare {
+  align-self: start;            /* the height of a well beside it, not of the row */
+  justify-content: center;
+  aspect-ratio: 16 / 7;
+  min-height: 5.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-fin-name { font-size: 0.98rem; font-weight: 600; color: var(--text-dark); }
+.md-fin-kind { font-size: 0.86rem; color: var(--text-mid); }
+
+.md-fin-decors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+  gap: 1.5rem clamp(1.5rem, 3vw, 2.75rem);
+  padding: var(--md-feat-pad);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.md-fin-decor { display: grid; align-content: start; gap: 0.75rem; }
+.md-fin-swatch { display: block; width: 100%; height: auto; border-radius: 6px; }
+
+/* two across on a phone: a single column of full-width coaches runs six
+   screens long for a six-paint model */
+@media (max-width: 600px) {
+  .md-fin-paints { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 0.75rem; }
+  .md-fin-well { margin-bottom: 0.5rem; padding: 10% 8%; border-radius: 14px; }
+  .md-fin-name { font-size: 0.92rem; }
+  .md-fin-kind { font-size: 0.8rem; }
+}
+
 /* ---------- Cutaway ----------
    The construction diagram, below the feature list it illustrates. A sibling
    of the floorplan hotspots — same interaction language, different needs:
@@ -1750,6 +1829,52 @@
 }
 .md-spec-key { color: var(--text-mid); width: 42%; }
 .md-spec-table td.md-spec-col { font-weight: 500; color: var(--text-dark); }
+/* Standard | Options | Packages — the page's switch idiom (.md-feat-tab):
+   no fill, no box, ink and a blue rule on the active one */
+.md-spec-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  max-width: var(--measure-wide);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.md-spec-tab {
+  margin-bottom: -1px;
+  padding: 0.6rem 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.md-spec-tab:hover { color: var(--text-dark); }
+.md-spec-tab.is-active { color: var(--text-dark); border-bottom-color: var(--blue); }
+.md-spec-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.md-spec-panel[hidden] { display: none; }
+/* the first group in a panel needs no step above it — the tabs are the step */
+.md-opt-table tr:first-child th { padding-top: 1.1rem; }
+.md-opt-name { width: 58%; font-weight: 500; color: var(--text-dark); }
+.md-opt-note { color: var(--text-mid); }
+.md-pkg-status {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  vertical-align: 0.1em;
+}
+.md-pkg-status--mandatory { background: var(--surface); color: var(--text-mid); }
+.md-pkg-status--optional { background: var(--blue); color: #fff; }
+
 .md-spec-foot {
   margin-top: 2rem;
   font-size: 0.75rem;

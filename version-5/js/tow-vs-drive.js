@@ -82,9 +82,9 @@
      Measured first, then the three that are true of the shape rather than of
      any particular coach. */
   const ROWS = [
-    { label: 'Starting price',
+    { label: 'MSRP Starting At',
       tow: usd(lo(side.towable.price)), mot: usd(lo(side.motorized.price)),
-      note: 'The “starting at” MSRP for the least expensive model in each group.' },
+      note: 'For the least expensive model in each group.' },
     { label: 'Floorplans to choose from',
       tow: String(side.towable.plans), mot: String(side.motorized.plans),
       note: 'Every published 2027 floorplan, counted.' },

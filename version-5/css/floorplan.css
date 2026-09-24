@@ -170,6 +170,157 @@
   color: var(--text-mid);
 }
 
+/* ---------- All floorplans dialog ----------
+   The zoom dialog's frame (fixed, [hidden] when closed, a fade, the dark
+   scrim) around a light panel of the "More floorplans" cards. Only the grid
+   scrolls, so the title and close stay put through fifty-eight Jay Flights. */
+.fp-all {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+.fp-all[hidden] { display: none; }
+.fp-all.is-open { opacity: 1; }
+.fp-all:not(.is-open) { pointer-events: none; }
+.fp-all-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(1,38,56,0.78);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.fp-all-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1240px;
+  max-height: 100%;
+  border-radius: var(--radius-card);
+  background: var(--canvas);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: transform 0.4s var(--ease-out);
+}
+.fp-all.is-open .fp-all-panel { transform: none; }
+.fp-all-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.4vw, 1.75rem) clamp(1.25rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--hairline);
+}
+.fp-all-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-dark);
+}
+.fp-all-count { font-size: 0.86rem; color: var(--text-mid); }
+.fp-all-close {
+  flex: none;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.fp-all-close:hover { background: var(--surface); }
+.fp-all-close:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.fp-all-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: clamp(1.25rem, 2vw, 2rem) clamp(1rem, 1.6vw, 1.5rem);
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fp-all-card .fp-other-art { position: relative; }
+.fp-all-card.is-here .fp-other-art { box-shadow: inset 0 0 0 2px var(--blue); }
+.fp-all-here {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@media (max-width: 600px) {
+  .fp-all { padding: 0; align-items: flex-end; }
+  .fp-all-panel { max-height: 92vh; border-radius: var(--radius-card) var(--radius-card) 0 0; }
+  .fp-all-count { display: none; }
+  .fp-all-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fp-all-grid .fp-other-name { font-size: 1rem; }
+}
+
+/* ---------- Top features ----------
+   The same rail and card width as the other floorplans below; a photograph
+   fills the well here rather than a drawing sitting in it, so the art is
+   cropped to one 4:3 frame whatever shape Jayco shot it in. */
+.fp-topfeat-card { margin: 0; }
+.fp-topfeat-art {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--surface);
+}
+.fp-topfeat-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fp-topfeat-tag {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+}
+.fp-topfeat-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-dark);
+}
+.fp-topfeat-body {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-mid);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .fp-pair { grid-template-columns: 1fr; --fp-art-h: clamp(180px, 50vw, 360px); }
@@ -213,4 +364,64 @@
     padding: calc(var(--md-header-h) + 1.5rem) var(--md-pad) 2rem;
   }
   .md-hero-render { width: min(100%, 560px); max-height: none; }
+}
+
+/* ---------- 3D tour ----------
+   The overview's frame and gutter, so the walkthrough lines up with the
+   drawing above it. 16:9 like jayco.com's embed; the frame is dark so the
+   Matterport splash does not flash white while it loads. */
+.fp-tour { padding: 0 0 var(--md-gap-section); }
+.fp-tour-inner {
+  max-width: var(--md-frame);
+  margin: 0 auto;
+  padding: 0 var(--md-pad);
+}
+.fp-tour .md-section-head { padding-left: 0; padding-right: 0; max-width: none; margin-bottom: var(--md-gap-tight); }
+.fp-tour-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--band-navy);
+}
+.fp-tour-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+.fp-tour-frame.is-live iframe { pointer-events: auto; }
+/* Asleep, the tour is a picture the page scrolls over: the shield takes the
+   pointer so the wheel reaches the page, not Matterport (see renderTour). */
+.fp-tour-shield {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.fp-tour-frame.is-live .fp-tour-shield { display: none; }
+.fp-tour-shield:focus-visible { outline: 2px solid var(--blue); outline-offset: -4px; border-radius: var(--radius-card); }
+/* awake: the way back out, for a touch screen where there is no mouseleave */
+.fp-tour-done {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fp-tour-done[hidden] { display: none; }
+.fp-tour-done:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.fp-tour-note {
+  margin: 1rem 0 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-mid);
+  text-align: center;
+}
+@media (max-width: 768px) {
+  /* a phone held upright gets a taller window into the coach */
+  .fp-tour-frame { aspect-ratio: 4 / 5; }
 }

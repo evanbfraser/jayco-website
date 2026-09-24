@@ -225,7 +225,7 @@
             <li class="vt-class">
               <a class="vt-class-name" href="type.html?type=${esc(c.id)}">${esc(c.name)}</a>
               <span class="vt-class-n">${c.models} model${c.models === 1 ? '' : 's'} ·
-                ${c.plans} floorplan${c.plans === 1 ? '' : 's'}${c.from ? ' · from ' + esc(usd(c.from)) : ''}</span>
+                ${c.plans} floorplan${c.plans === 1 ? '' : 's'}${c.from ? ' · MSRP Starting At ' + esc(usd(c.from)) : ''}</span>
             </li>`).join('')}
         </ul>
       </div>`;

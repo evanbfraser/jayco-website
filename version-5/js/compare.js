@@ -438,7 +438,7 @@
           ${stat(r.weight ? r.weight.toLocaleString('en-US') + ' lb' : '', 'Dry weight')}
         </span>
         <span class="cmp-card-foot">
-          <span class="fp-card-price${r.price == null ? ' fp-card-price--tbd' : ''}">${r.price == null ? 'Pricing to come' : money(r.price)}</span>
+          <span class="fp-card-price${r.price == null ? ' fp-card-price--tbd' : ''}">${r.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(r.price)}</span>
           ${pickBtn(r.key, on, full)}
         </span>
       </span>

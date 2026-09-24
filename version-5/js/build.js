@@ -336,7 +336,7 @@
         <div class="model-tile-body">
           <span class="model-tile-cat">${cat.name}</span>
           <span class="model-tile-name">${m.name}</span>
-          <span class="model-tile-price">Starting at <b>${fmt(m.basePrice)}</b></span>
+          <span class="model-tile-price">MSRP Starting At <b>${fmt(m.basePrice)}</b></span>
           <button type="button" class="model-tile-build" data-action="build" data-id="${id}">Build Yours</button>
         </div>
         <div class="model-specs-panel" aria-hidden="true">
@@ -939,9 +939,16 @@
     $('#build-back').addEventListener('click', () => goStep(state.step - 1));
     $('#build-next').addEventListener('click', () => goStep(state.step + 1));
     $('#mobile-next').addEventListener('click', () => goStep(state.step + 1));
-    /* the sidebar's Shop Inventory — the same "#" placeholder. The quote form
-       (openQuote) stays wired below but nothing in the builder opens it now. */
+    /* the sidebar's Shop Inventory — the same "#" placeholder */
     $('#summary-inventory').addEventListener('click', (e) => e.preventDefault());
+    /* Request a Quote opens the quote dialog on this build. With no model
+       picked there is no build to quote, so the link's own href — the Request
+       a Quote page — is left to do its job. */
+    $('#summary-quote').addEventListener('click', (e) => {
+      if (!state.modelId) return;
+      e.preventDefault();
+      openQuote();
+    });
 
     wireQuoteModal();
   }

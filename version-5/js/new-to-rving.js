@@ -399,7 +399,7 @@
             <span class="ntr-type-meta">${n.models} model${n.models === 1 ? '' : 's'} ·
               ${n.plans} floorplan${n.plans === 1 ? '' : 's'}</span>
             <p class="ntr-type-why">${esc(s.why)}</p>
-            <span class="ntr-type-from">${n.from ? 'From ' + usd(n.from) : ''}</span>
+            <span class="ntr-type-from">${n.from ? 'MSRP Starting At ' + usd(n.from) : ''}</span>
           </div>
         </a>
       </li>`;

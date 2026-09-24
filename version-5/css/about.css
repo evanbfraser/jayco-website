@@ -867,6 +867,8 @@ body.ab-playing { overflow: hidden; }
   gap: clamp(1.5rem, 3vw, 2.5rem);
   margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
 }
+/* the two numbers under Book a tour: a pair, not a row stretched to the frame */
+.vu-facts--phones { grid-template-columns: repeat(auto-fit, minmax(220px, 280px)); }
 .vu-fact { border-top: 2px solid var(--blue); padding-top: 1.1rem; }
 .vu-fact-k { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 0.7rem; }
 .vu-fact-v { display: block; font-size: 1rem; line-height: 1.65; color: var(--text-dark); }

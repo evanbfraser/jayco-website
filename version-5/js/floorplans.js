@@ -105,12 +105,26 @@
   const ROWS = [];
   const SECTIONS = [];
 
-  JAYCO.categories.forEach((cat) => {
-    Object.keys(BUILD).forEach((modelId) => {
-      const m = JAYCO.models[modelId];
-      if (!m || m.category !== cat.id) return;
+  /* Smallest to largest, the way jayco.com/rvs/floorplans/ runs: a plain
+     character sort on the floorplan code, which leads with the length class —
+     130BH, 140TB, 15MRB, 16DB, 170BH … 413, JayLoft. Uppercased so "JayLoft"
+     sorts as Jayco sorts it, after every numeric code. */
+  const code = (f) => String(f.name || f.id).toUpperCase();
+  const byCode = (a, b) => (code(a) < code(b) ? -1 : code(a) > code(b) ? 1 : 0);
 
-      const rows = (BUILD[modelId].floorplans || []).map((f) => {
+  JAYCO.categories.forEach((cat) => {
+    /* Within a type, a model sits where its smallest plan would on
+       jayco.com — so Jay Flight (130BH) leads the travel trailers and the
+       Eagle (230MLCS) follows the Jay Feathers. */
+    const ids = Object.keys(BUILD)
+      .filter((id) => JAYCO.models[id] && JAYCO.models[id].category === cat.id)
+      .sort((a, b) => byCode(
+        (BUILD[a].floorplans || []).slice().sort(byCode)[0] || {},
+        (BUILD[b].floorplans || []).slice().sort(byCode)[0] || {}));
+    ids.forEach((modelId) => {
+      const m = JAYCO.models[modelId];
+
+      const rows = (BUILD[modelId].floorplans || []).slice().sort(byCode).map((f) => {
         const row = {
           key: modelId + '__' + f.id,
           modelId: modelId, model: m.name, planId: f.id, name: f.name,
@@ -665,7 +679,7 @@
   function card(r) {
     const price = r.price == null
       ? '<p class="fpc-price fpc-price--tbd">Pricing to come</p>'
-      : `<p class="fpc-price"><span class="fpc-price-label">MSRP Starting at</span>
+      : `<p class="fpc-price"><span class="fpc-price-label">MSRP Starting At</span>
            <span class="fpc-price-fig">${esc(money(r.price))}</span></p>`;
     return `<li class="fpc-card${picked.indexOf(r.key) > -1 ? ' is-comparing' : ''}">
       <div class="fpc-well">
@@ -862,7 +876,7 @@
         ? s.n + (s.n === 1 ? ' floorplan' : ' floorplans')
         : s.n + ' of ' + s.total + ' floorplans';
       const bits = [plans];
-      if (s.from != null) bits.push('from ' + money(s.from));
+      if (s.from != null) bits.push('MSRP Starting At ' + money(s.from));
       if (s.upTo != null) bits.push('sleeps up to ' + s.upTo);
       if (s.metaEl) s.metaEl.textContent = bits.join(' · ');
       if (s.jumpEl) {
@@ -976,7 +990,7 @@
     $('#fpc-modal-model').textContent = r.model;
     $('#fpc-modal-title').textContent = r.name;
     $('#fpc-modal-meta').textContent = specLine(r) || 'Specifications to come.';
-    $('#fpc-modal-price').textContent = r.price == null ? 'Pricing to come' : money(r.price);
+    $('#fpc-modal-price').textContent = r.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(r.price);
     $('#fpc-modal-flags').innerHTML = r.features.map((k) =>
       `<span class="fpc-flag">${esc(FEAT.labels[k] || k)}</span>`).join('');
     $('#fpc-modal-specs').innerHTML = specTable(r);

@@ -159,7 +159,7 @@ const isLight = (m) => /\blight/i.test(m.tagline || '') || /feather/i.test(m.nam
 Object.entries(JAYCO.models).forEach(([slug, m]) => {
   const c = catById[m.category] || {};
   add('model', m.name,
-    [c.name, m.basePrice ? 'Starting at ' + money(m.basePrice) : ''].filter(Boolean).join(DOT),
+    [c.name, m.basePrice ? 'MSRP Starting At ' + money(m.basePrice) : ''].filter(Boolean).join(DOT),
     modelHref(slug, m.category), m.img,
     keywords(m.tagline, c.type, (m.floorplans || []).map((f) => f.name)), false,
     keywords(c.name, c.type === 'motorized' ? 'motorhome' : 'towable trailer',

@@ -49,7 +49,7 @@ window.JAYCO_COMPARE_TABLE = (function () {
           <span class="cmp-col-text">
             <span class="cmp-col-name">${esc(r.name)}</span>
             <span class="cmp-col-model"><span class="cmp-col-year">${esc(r.year)} </span>${esc(r.model)}</span>
-            <span class="cmp-col-price">${r.price == null ? 'Pricing to come' : money(r.price)}</span>
+            <span class="cmp-col-price">${r.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(r.price)}</span>
           </span>
         </span>
       </th>`).join('')}</tr>`;
