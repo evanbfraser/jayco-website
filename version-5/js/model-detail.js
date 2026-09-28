@@ -170,10 +170,10 @@
   /* ---------- Floorplan page helpers ---------- */
   const planHref = (id) => `floorplan.html?model=${slug}&plan=${id}`;
   /* build.js reads &plan= and opens on the step after the floorplan, since the
-     floorplan is the thing already decided. An unpriced plan cannot be built,
-     so it opens on the floorplan grid instead. */
+     floorplan is the thing already decided. An unpriced plan builds too; its
+     total is a Request a Quote. */
   function priceHref() {
-    return plan && plan.price != null
+    return plan
       ? `build-price.html?model=${slug}&plan=${plan.id}&step=exterior`
       : `build-price.html?model=${slug}&step=floorplan`;
   }
@@ -270,8 +270,11 @@
         : `<p class="md-hero-price">MSRP Starting At <strong>${money(plan.price)}</strong></p>`)
       : `<p class="md-hero-price">MSRP Starting At <strong>${money(model.priceFrom)}</strong></p>`;
 
+    /* "View Floorplans" keeps its builder href for no-script, and opens the
+       model's floorplans dialog (initAllPlans) once renderPlan has run */
     const ctas = heroCtas.map((c) =>
-      `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}">${esc(c.label)}</a>`
+      `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}"${
+        !plan && c.label === 'View Floorplans' ? ' data-fp-all' : ''}>${esc(c.label)}</a>`
     ).join('');
 
     /* an in-page CTA ("View Floorplans" → #md-plan) scrolls like the sub-nav */
@@ -439,20 +442,23 @@
       </div>`);
 
     initZoom();
-    initAllPlans();
+    if (sibs.length >= 2) {
+      initAllPlans([$('#fp-all-link')], sibs.map((p) => Object.assign({ href: planHref(p.id) }, p)), plan.id);
+    }
   }
 
-  /* ---------- Every floorplan of the model, in a dialog (floorplan.html) ----
-     The overview's "All 16 Jay Feather floorplans" opens this rather than
-     leaving the page: the whole model's plans as cards, the one on screen
-     marked, each a link to its own page. The link keeps its href, so without
-     script it still goes to the model's floorplans. Built like the zoom
-     dialog: appended to <body>, [hidden] when closed, Lenis stopped while
-     open, focus held inside and handed back on close. */
-  function initAllPlans() {
-    const link = $('#fp-all-link');
-    const sibs = plan && plan.siblings;
-    if (!link || !sibs || sibs.length < 2) return;
+  /* ---------- Every floorplan of the model, in a dialog ----------
+     floorplan.html's "All 16 Jay Feather floorplans", and model.html's "View
+     Floorplans" in the hero and "View All Floorplans" in the floorplan band,
+     open this rather than leaving the page: the whole model's plans as cards,
+     the one on screen (hereId, floorplan.html only) marked, each a link to its
+     own page. The triggers keep their hrefs, so without script they still go
+     somewhere useful. Built like the zoom dialog: appended to <body>, [hidden]
+     when closed, Lenis stopped while open, focus held inside and handed back
+     to whichever trigger opened it. */
+  function initAllPlans(triggers, sibs, hereId) {
+    triggers = triggers.filter(Boolean);
+    if (!triggers.length || !sibs.length) return;
 
     const modal = document.createElement('div');
     modal.className = 'fp-all';
@@ -465,7 +471,7 @@
       <div class="fp-all-panel">
         <div class="fp-all-head">
           <h2 class="fp-all-title" id="fp-all-title">${model.year} ${esc(model.name)} floorplans</h2>
-          <span class="fp-all-count">${sibs.length} floorplans</span>
+          <span class="fp-all-count">${sibs.length} floorplan${sibs.length > 1 ? 's' : ''}</span>
           <button type="button" class="fp-all-close" aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -473,10 +479,10 @@
         </div>
         <ul class="fp-all-grid" data-lenis-prevent role="list">
           ${sibs.map((p) => {
-            const here = p.id === plan.id;
+            const here = p.id === hereId;
             return `
             <li>
-              <a class="fp-other-card fp-all-card${here ? ' is-here' : ''}" href="${planHref(p.id)}"${here ? ' aria-current="page"' : ''}>
+              <a class="fp-other-card fp-all-card${here ? ' is-here' : ''}" href="${p.href}"${here ? ' aria-current="page"' : ''}>
                 <span class="fp-other-art">
                   <img src="${p.img}" alt="" loading="lazy" decoding="async" />
                   ${here ? '<span class="fp-all-here">Viewing</span>' : ''}
@@ -495,9 +501,11 @@
     const close = modal.querySelector('.fp-all-close');
     const grid = modal.querySelector('.fp-all-grid');
     let hideT = null;
+    let opener = null;
 
     function open(e) {
       if (e) e.preventDefault();
+      opener = e ? e.currentTarget : null;
       clearTimeout(hideT);
       modal.hidden = false;
       document.body.style.overflow = 'hidden';
@@ -513,12 +521,15 @@
       modal.classList.remove('is-open');
       document.body.style.overflow = '';
       if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
-      link.focus();
+      if (opener) opener.focus();
       clearTimeout(hideT);
       hideT = setTimeout(() => { modal.hidden = true; }, 320);
     }
 
-    link.addEventListener('click', open);
+    triggers.forEach((t) => {
+      t.setAttribute('aria-haspopup', 'dialog');
+      t.addEventListener('click', open);
+    });
     close.addEventListener('click', shut);
     modal.addEventListener('click', (e) => { if (e.target.dataset.allClose) shut(); });
     modal.addEventListener('keydown', (e) => {
@@ -1079,12 +1090,11 @@
                drawing itself, where it is one of that component's two actions —
                see .md-plan-tools above. -->
           <div class="md-fp-ctas">
-            <a href="${p.price == null ? `build-price.html?model=${slug}&amp;step=floorplan`
-              : `build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior`}" class="btn-primary">Price this Floorplan</a>
+            <a href="build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior" class="btn-primary">Price this Floorplan</a>
             ${planPages ? `<a href="${planHref(p.id)}" class="btn-secondary-light"
                aria-label="Floorplan details for the ${esc(p.name)}">Floorplan Details</a>`
             : `<a href="build-price.html?model=${slug}&amp;step=floorplan"
-               class="btn-secondary-light">View All Floorplans</a>`}
+               class="btn-secondary-light" data-fp-all>View All Floorplans</a>`}
           </div>
         </div>
       </div>`;
@@ -1113,7 +1123,7 @@
       ${filterRow ? `<div class="md-fp-bar">${filterRow}${barArrows ? controls : ''}</div>` : ''}
       <!-- above the rail, under the chips when there are any -->
       <div class="md-fp-more">
-        <a href="build-price.html?model=${slug}&amp;step=floorplan" class="btn-secondary">View All Floorplans</a>
+        <a href="build-price.html?model=${slug}&amp;step=floorplan" class="btn-secondary" data-fp-all>View All Floorplans</a>
       </div>
       <div class="md-fp-track" id="md-fp-track" role="region" aria-roledescription="carousel"
            aria-label="${esc(model.name)} floorplans">${panels}</div>
@@ -1124,6 +1134,17 @@
       '.md-fp-slide:not([hidden])');
 
     initZoom();
+
+    /* Every "View (All) Floorplans" on the page opens the model's plans in a
+       dialog. A towable's cards go to each plan's own page; a motorhome's,
+       which have none, to the builder with the plan chosen. */
+    initAllPlans(Array.from(document.querySelectorAll('[data-fp-all]')), plans.map((p) => ({
+      id: p.id, name: p.name, img: p.image, length: p.length, price: p.price,
+      /* model-data writes "Up to 6"; the card already says "Sleeps" */
+      sleeps: p.sleeps ? String(p.sleeps).replace(/^up to\s*/i, '') : null,
+      href: planPages ? planHref(p.id)
+        : `build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior`,
+    })));
 
     if (!showFilter) return;
 
@@ -1166,98 +1187,101 @@
     });
   }
 
+  /* ---------- Enlarge dialog ----------
+     One modal for every "Enlarge" on the page: the floorplan drawings and the
+     exterior paint cards. Built on first use and appended to <body> rather than
+     left inside a section: Lenis can transform a scroll wrapper, and
+     position:fixed inside a transformed ancestor resolves against that ancestor
+     instead of the viewport.
+     Closed state is the [hidden] attribute, not visibility: display:none is not
+     transitioned, so the close button is focusable the instant it is unhidden. */
+  let zoomApi = null;
+  function zoomDialog() {
+    if (zoomApi) return zoomApi;
+    const modal = document.createElement('div');
+    modal.className = 'md-zoom';
+    modal.hidden = true;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.innerHTML = `
+      <div class="md-zoom-scrim" data-zoom-close="1"></div>
+      <button type="button" class="md-zoom-close" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="md-zoom-inner">
+        <img class="md-zoom-img" alt="" />
+        <span class="md-zoom-caption"></span>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const zImg   = modal.querySelector('.md-zoom-img');
+    const zCap   = modal.querySelector('.md-zoom-caption');
+    const zClose = modal.querySelector('.md-zoom-close');
+    let returnTo = null;
+    let hideT = null;
+
+    /* kind: 'plan' | 'paint' — a paint drawing sits on a light panel, as it
+       does on its card, and is held nearer its own small export size */
+    function open(o) {
+      zImg.src = o.src;
+      zImg.alt = o.alt || '';
+      zCap.textContent = o.caption || '';
+      modal.dataset.kind = o.kind || 'plan';
+      modal.setAttribute('aria-label', o.label || 'Enlarged image');
+      zClose.setAttribute('aria-label', 'Close the ' + (o.label || 'enlarged image').toLowerCase());
+      returnTo = o.from || null;
+      clearTimeout(hideT);         /* a previous close may still be fading */
+      modal.hidden = false;        /* display:flex, opacity still 0 */
+      /* Lenis keeps scrolling the page under a fixed overlay, so stopping it
+         is the actual scroll lock here; overflow:hidden covers the no-Lenis
+         case and native touch scrolling. */
+      document.body.style.overflow = 'hidden';
+      if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
+      zClose.focus();
+      /* the fade starts next frame, so there is a 0-opacity state to run from */
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+    function close() {
+      if (modal.hidden) return;
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+      if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
+      if (returnTo) returnTo.focus();
+      returnTo = null;
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { modal.hidden = true; }, 320);
+    }
+
+    zClose.addEventListener('click', close);
+    modal.addEventListener('click', (e) => { if (e.target.dataset.zoomClose) close(); });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      /* the close button is the only focusable thing in here */
+      if (e.key === 'Tab') { e.preventDefault(); zClose.focus(); }
+    });
+    zoomApi = { open: open, close: close };
+    return zoomApi;
+  }
+
   function initZoom() {
     /* ---- Floorplan zoom ----
-       One modal serves every plan and reads the drawing and its caption off
-       the [data-caption] container whose button opened it — a rail slide on
-       the model page, the drawing's pane on the floorplan page. It is appended to
-       <body> rather than left inside the section: Lenis can transform a scroll
-       wrapper, and position:fixed inside a transformed ancestor resolves
-       against that ancestor instead of the viewport.
-       Closed state is visibility+opacity, not [hidden] — visibility already
-       takes it out of the a11y tree and out of hit-testing, and it leaves the
-       fade able to run in both directions without a timer to undo display. */
-    const zoomBtns = Array.from(document.querySelectorAll('.md-plan-zoom'));
-    const first = document.querySelector('[data-caption] .md-plan-drawing');
-    if (zoomBtns.length && first) {
-      const modal = document.createElement('div');
-      modal.className = 'md-zoom';
-      modal.hidden = true;
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-modal', 'true');
-      modal.setAttribute('aria-label', 'Floorplan, enlarged');
-      modal.innerHTML = `
-        <div class="md-zoom-scrim" data-zoom-close="1"></div>
-        <button type="button" class="md-zoom-close" aria-label="Close the enlarged floorplan">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18"/>
-          </svg>
-        </button>
-        <div class="md-zoom-inner">
-          <!-- seeded with the first plan so the document never carries an image
-               with an empty src; openZoom overwrites both from the live drawing.
-               The file is already on the page, so this costs no extra request. -->
-          <img class="md-zoom-img" src="${first.src}" alt="${esc(first.alt)}" />
-          <span class="md-zoom-caption"></span>
-        </div>`;
-      document.body.appendChild(modal);
-
-      const zImg   = modal.querySelector('.md-zoom-img');
-      const zCap   = modal.querySelector('.md-zoom-caption');
-      const zClose = modal.querySelector('.md-zoom-close');
-      let returnTo = null;
-
-      let hideT = null;
-
-      function openZoom(btn) {
-        const panel = btn && btn.closest('[data-caption]');
+       Reads the drawing and its caption off the [data-caption] container whose
+       button opened it — a rail slide on the model page, the drawing's pane on
+       the floorplan page. Bound once per button, since renderPlan and the
+       floorplan overview can both call this. */
+    document.querySelectorAll('.md-plan-zoom:not([data-zoom-bound])').forEach((btn) => {
+      btn.dataset.zoomBound = '1';
+      btn.addEventListener('click', () => {
+        const panel = btn.closest('[data-caption]');
         const art   = panel && panel.querySelector('.md-plan-drawing');
         if (!art) return;
-        zImg.src = art.src;
-        zImg.alt = art.alt;
-        zCap.textContent = panel.dataset.caption;
-        returnTo = btn || null;
-        clearTimeout(hideT);         /* a previous close may still be fading */
-        modal.hidden = false;        /* display:flex, opacity still 0 */
-        /* Lenis keeps scrolling the page under a fixed overlay, so stopping it
-           is the actual scroll lock here; overflow:hidden covers the no-Lenis
-           case and native touch scrolling. */
-        document.body.style.overflow = 'hidden';
-        if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
-        /* Focus straight away: display:none -> flex is not a transition, so the
-           button is focusable the moment the attribute comes off. The fade is
-           kicked off on the next frame — starting it in this tick would give the
-           browser no 0-opacity state to animate from. */
-        zClose.focus();
-        requestAnimationFrame(() => modal.classList.add('is-open'));
-      }
-
-      function closeZoom() {
-        if (modal.hidden) return;
-        modal.classList.remove('is-open');
-        document.body.style.overflow = '';
-        if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
-        if (returnTo) returnTo.focus();
-        returnTo = null;
-        /* back to display:none once the fade is done, so it leaves the
-           accessibility tree rather than lingering as a transparent layer */
-        clearTimeout(hideT);
-        hideT = setTimeout(() => { modal.hidden = true; }, 320);
-      }
-
-      zoomBtns.forEach((b) => b.addEventListener('click', () => openZoom(b)));
-      zClose.addEventListener('click', closeZoom);
-      modal.addEventListener('click', (e) => {
-        if (e.target.dataset.zoomClose) closeZoom();
+        zoomDialog().open({ src: art.src, alt: art.alt, caption: panel.dataset.caption,
+          kind: 'plan', label: 'Floorplan, enlarged', from: btn });
       });
-      modal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { e.preventDefault(); closeZoom(); return; }
-        /* the close button is the only focusable thing in here, so the trap is
-           simply: Tab cannot leave */
-        if (e.key === 'Tab') { e.preventDefault(); zClose.focus(); }
-      });
-    }
+    });
   }
 
   /* ---------- Features ----------
@@ -1406,31 +1430,95 @@
              width="${x.w}" height="${x.h}" loading="lazy" decoding="async" />`
       : '';
 
-    const paintBlock = paint.length ? `
-      <div class="md-fin-group">
+    /* Exterior is a rail, like the videos: bigger cards than a grid of five
+       had room for, and the next one peeking in says there are more. The
+       whole drawing well is the enlarge button, with the glyph in its corner
+       saying so; a paint with no art on jayco.com is a name on a panel and
+       opens nothing. */
+    const paintArrow = (dir, d) => `
+      <button type="button" class="md-video-nav" id="md-fin-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} exterior finishes" aria-controls="md-fin-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+    const paintHead = paint.length ? `
+      <div class="md-fin-head">
         <h3 class="md-fin-title">Exterior</h3>
-        <ul class="md-fin-paints">
-          ${paint.map((x) => `
-            <li class="md-fin-paint${x.img ? '' : ' md-fin-paint--bare'}">
-              ${x.img ? `<div class="md-fin-well">${img(x, 'md-fin-coach')}</div>` : ''}
-              <span class="md-fin-name">${esc(x.name)}</span>
-              ${x.kind ? `<span class="md-fin-kind">${esc(x.kind)}</span>` : ''}
-            </li>`).join('')}
-        </ul>
+        <div class="md-video-controls md-fin-controls" id="md-fin-controls">
+          ${paintArrow('prev', 'M15 5l-7 7 7 7')}
+          ${paintArrow('next', 'M9 5l7 7-7 7')}
+        </div>
       </div>` : '';
+    const paintRail = paint.length ? `
+      <ul class="md-fin-paints" id="md-fin-track" role="list" aria-label="${esc(who)} exterior finishes">
+        ${paint.map((x) => `
+          <li class="md-fin-paint${x.img ? '' : ' md-fin-paint--bare'}">
+            ${x.img ? `
+            <button type="button" class="md-fin-well md-fin-zoom"
+                    data-caption="${esc(x.name)}"
+                    aria-label="Enlarge the ${esc(x.name)} exterior">
+              ${img(x, 'md-fin-coach')}
+              <span class="md-fin-zoom-ico" aria-hidden="true">${ZOOM_ICON}</span>
+            </button>` : ''}
+            <span class="md-fin-name">${esc(x.name)}</span>
+            ${x.kind ? `<span class="md-fin-kind">${esc(x.kind)}</span>` : ''}
+          </li>`).join('')}
+      </ul>` : '';
 
-    const decorBlock = decor.length ? `
-      <div class="md-fin-group">
+    /* Interior decor: each decor is its own card — its name, then its swatches
+       (cut from Jayco's strip by tools/crop-decor-swatches.py) with the labels
+       as live text. Two cards to the frame; with more than two decors the row
+       becomes a rail like Exterior, arrows and all. A swatch is its own enlarge
+       button, like the paint cards. A decor with no cut pieces falls back to
+       the strip as published. */
+    const PIECES = window.JAYCO_DECOR_PIECES || {};
+    const PIECE_DIR = '../assets/model%20details/finishes/pieces/';
+    const piecesOf = (x) => (x.img && PIECES[decodeURIComponent(x.img.split('/').pop())]) || [];
+    const decorRail = decor.length > 2;
+    const decorCard = (x) => {
+      const ps = piecesOf(x);
+      return `
+        <li class="md-fin-decor">
+          <h4 class="md-fin-decor-name">${esc(x.name)}</h4>
+          ${ps.length ? `
+          <ul class="md-fin-pieces" role="list">
+            ${ps.map((p) => `
+            <li class="md-fin-piece">
+              <button type="button" class="md-fin-swatch-btn md-fin-zoom"
+                      data-caption="${esc(x.name + ' · ' + p.label)}"
+                      aria-label="Enlarge the ${esc(x.name)} ${esc(p.label.toLowerCase())} swatch">
+                <img class="md-fin-piece-img" src="${PIECE_DIR + p.img}"
+                     alt="${esc(who + ' — ' + x.name + ' decor, ' + p.label.toLowerCase())}"
+                     width="${p.w}" height="${p.h}" loading="lazy" decoding="async" />
+                <span class="md-fin-zoom-ico" aria-hidden="true">${ZOOM_ICON}</span>
+              </button>
+              <span class="md-fin-piece-label">${esc(p.label)}</span>
+            </li>`).join('')}
+          </ul>` : img(x, 'md-fin-swatch')}
+        </li>`;
+    };
+    const decorArrow = (dir, d) => `
+      <button type="button" class="md-video-nav" id="md-decor-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} interior decors" aria-controls="md-decor-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+    const decorHead = decor.length ? `
+      <div class="md-fin-head">
         <h3 class="md-fin-title">Interior decor</h3>
-        <ul class="md-fin-decors">
-          ${decor.map((x) => `
-            <li class="md-fin-decor">
-              <span class="md-fin-name">${esc(x.name)}</span>
-              ${img(x, 'md-fin-swatch')}
-            </li>`).join('')}
-        </ul>
+        ${decorRail ? `<div class="md-video-controls md-fin-controls" id="md-decor-controls">
+          ${decorArrow('prev', 'M15 5l-7 7 7 7')}
+          ${decorArrow('next', 'M9 5l7 7-7 7')}
+        </div>` : ''}
       </div>` : '';
+    const decorList = decor.length ? `
+      <ul class="md-fin-decors${decorRail ? ' md-fin-decors--rail' : ''}"${decorRail ? ' id="md-decor-track"' : ''}
+          role="list" aria-label="${esc(who)} interior decors">
+        ${decor.map(decorCard).join('')}
+      </ul>` : '';
 
+    /* The rail is a sibling of the contained frames, not a child, so it can
+       run to the viewport edge the way the video rail does. */
     set('#md-finishes', `
       <div class="md-finishes-inner">
         <div class="md-section-head">
@@ -1438,9 +1526,38 @@
           <h2 class="section-heading dark">Make it yours.</h2>
           <p class="section-body">${esc(lede)}</p>
         </div>
-        ${paintBlock}
-        ${decorBlock}
-      </div>`);
+        ${paintHead}
+      </div>
+      ${paintRail}
+      ${decor.length ? `<div class="md-finishes-inner md-fin-decor-wrap">
+        ${decorHead}
+        ${decorRail ? '' : decorList}
+      </div>
+      ${decorRail ? decorList : ''}` : ''}`);
+
+    /* one handler for paint cards and decor swatches: the art is the <img>
+       inside the button, the caption is on the button */
+    document.querySelectorAll('#md-finishes .md-fin-zoom').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const art = btn.querySelector('img');
+        const swatch = btn.classList.contains('md-fin-swatch-btn');
+        zoomDialog().open({ src: art.src, alt: art.alt, caption: `${who} · ${btn.dataset.caption}`,
+          kind: swatch ? 'swatch' : 'paint', label: swatch ? 'Swatch, enlarged' : 'Exterior, enlarged',
+          from: btn });
+      });
+    });
+
+    /* the two rails; arrows hide when every card is already on screen */
+    [['#md-fin-track', '#md-fin-prev', '#md-fin-next', '#md-fin-controls', '.md-fin-paint'],
+     ['#md-decor-track', '#md-decor-prev', '#md-decor-next', '#md-decor-controls', '.md-fin-decor']]
+      .forEach(([t, p, n, c, card]) => {
+        if (!$(t)) return;
+        const rail = initRail($(t), $(p), $(n), card);
+        const fits = () => { $(c).hidden = $(t).scrollWidth <= $(t).clientWidth + 1; };
+        requestAnimationFrame(fits);
+        window.addEventListener('resize', fits);
+        if (rail) rail.sync();
+      });
   }
 
   /* ---------- Full specifications ---------- */

@@ -1363,6 +1363,17 @@
   border-radius: var(--radius-card);
   background: rgba(255,255,255,0.06);
 }
+/* An exterior drawing is a small export (Jayco publishes them at 730px), so
+   it is held near that size rather than stretched soft across the screen, and
+   sits on the light panel it has on its card. */
+.md-zoom[data-kind="paint"] .md-zoom-inner { max-width: 1100px; }
+.md-zoom[data-kind="paint"] .md-zoom-img {
+  padding: clamp(1.5rem, 5vw, 4rem);
+  background: var(--surface);
+}
+/* a swatch is a 180–222px texture: held small enough to stay sharp */
+.md-zoom[data-kind="swatch"] .md-zoom-inner { max-width: min(560px, 100%); }
+.md-zoom[data-kind="swatch"] .md-zoom-img { aspect-ratio: auto; }
 .md-zoom-caption {
   font-size: 0.64rem;
   font-weight: 600;
@@ -1406,22 +1417,56 @@
 .md-finishes .md-section-head { padding-left: 0; padding-right: 0; max-width: none; }
 
 .md-fin-group + .md-fin-group { margin-top: var(--md-gap-tight); }
+/* A subhead, not an eyebrow: the section already has one (Decor & Paint),
+   and a second tracked-caps label under it read as more of the same. Set a
+   step above .md-cutaway-title and below .md-fp-name. */
 .md-fin-title {
-  margin: 0 0 1rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
   color: var(--text-dark);
 }
 .md-fin-paints,
 .md-fin-decors { list-style: none; margin: 0; padding: 0; }
 
-.md-fin-paints {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: clamp(1rem, 1.6vw, 1.5rem);
+/* Exterior: the video rail's track (see .md-video-track for the --vlead /
+   --vframe arithmetic), at two and a half cards to the frame rather than three
+   and a half, so each coach is drawn nearly twice the size the grid gave it. */
+.md-fin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
+.md-fin-head .md-fin-title { margin: 0; }
+.md-fin-controls { padding-bottom: 0; }
+.md-fin-controls[hidden] { display: none; }
+.md-fin-paints {
+  --vgap: clamp(1rem, 1.6vw, 1.5rem);
+  --vframe: min(100%, calc(var(--md-frame) - 2 * var(--md-pad)));
+  --vcard: calc((var(--vframe) - var(--vgap) * 2) / 2.5);
+  --vlead: max(var(--md-pad), calc((100% - var(--md-frame)) / 2 + var(--md-pad)));
+  display: flex;
+  gap: var(--vgap);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 7px var(--md-pad) 7px var(--vlead);
+  scroll-padding-inline-start: var(--vlead);
+}
+.md-fin-paints::-webkit-scrollbar { display: none; }
+.md-fin-paints > li { flex: 0 0 var(--vcard); min-width: 0; scroll-snap-align: start; }
+/* taller than the grid's 16:7 wells, with less side padding, so the coach
+   is drawn wider as well as given more room above and below */
+.md-fin-paints .md-fin-well,
+.md-fin-paints .md-fin-paint--bare { aspect-ratio: 16 / 10; }
+.md-fin-paints .md-fin-well { padding: 9% 5%; }
 .md-fin-paint { display: flex; flex-direction: column; gap: 0.2rem; }
 .md-fin-well {
   display: grid;
@@ -1435,6 +1480,38 @@
   border-radius: var(--radius-card);
   background: var(--surface);
 }
+/* the well is the enlarge button: reset the button, keep the well */
+button.md-fin-well {
+  position: relative;
+  width: 100%;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: zoom-in;
+  transition: background 0.3s;
+}
+button.md-fin-well:hover { background: var(--surface-hover); }
+button.md-fin-well:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.md-fin-well .md-fin-coach { transition: transform 0.7s var(--ease-out); }
+button.md-fin-well:hover .md-fin-coach { transform: scale(1.03); }
+/* the arrows' chrome, smaller, in the corner of the well */
+.md-fin-zoom-ico {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(15,11,9,0.14);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  color: var(--text-dark);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.md-fin-zoom-ico svg { width: 17px; height: 17px; }
+button.md-fin-well:hover .md-fin-zoom-ico { transform: scale(1.08); box-shadow: 0 8px 24px rgba(15,11,9,0.14); }
 /* fills the well's content box and contains within it, so a taller drawing
    (Standard Graphics is 674×390, the paints 730×215) cannot grow its card */
 .md-fin-coach { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
@@ -1451,23 +1528,106 @@
 .md-fin-name { font-size: 0.98rem; font-weight: 600; color: var(--text-dark); }
 .md-fin-kind { font-size: 0.86rem; color: var(--text-mid); }
 
+/* Interior decor: one card per decor, two to the frame. More than two and the
+   list becomes the Exterior rail's track (.md-fin-decors--rail) at two cards
+   to the frame, the third peeking in from the right. Inside a card the
+   swatches run three across whatever the count, so every swatch on the rail
+   is one size — a four-piece decor set two by two came out half again as big
+   as a five-piece one beside it. */
+.md-fin-decor-wrap { margin-top: var(--md-gap-tight); }
 .md-fin-decors {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
-  gap: 1.5rem clamp(1.5rem, 3vw, 2.75rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.md-fin-decors--rail {
+  --vgap: clamp(1rem, 1.6vw, 1.5rem);
+  --vframe: min(100%, calc(var(--md-frame) - 2 * var(--md-pad)));
+  --vcard: calc((var(--vframe) - var(--vgap)) / 2);
+  --vlead: max(var(--md-pad), calc((100% - var(--md-frame)) / 2 + var(--md-pad)));
+  display: flex;
+  gap: var(--vgap);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 7px var(--md-pad) 7px var(--vlead);
+  scroll-padding-inline-start: var(--vlead);
+}
+.md-fin-decors--rail::-webkit-scrollbar { display: none; }
+.md-fin-decors--rail > .md-fin-decor { flex: 0 0 var(--vcard); scroll-snap-align: start; }
+.md-fin-decor {
+  display: grid;
+  align-content: start;
+  gap: 1.1rem;
+  min-width: 0;
   padding: var(--md-feat-pad);
   border-radius: var(--radius-card);
   background: var(--surface);
 }
-.md-fin-decor { display: grid; align-content: start; gap: 0.75rem; }
+.md-fin-decor-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.6vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-dark);
+}
+.md-fin-pieces {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.2vw, 1.1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.md-fin-piece { display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; }
+.md-fin-swatch-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  cursor: zoom-in;
+}
+.md-fin-swatch-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.md-fin-piece-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+.md-fin-swatch-btn:hover .md-fin-piece-img { transform: scale(1.04); }
+.md-fin-swatch-btn .md-fin-zoom-ico { right: 0.6rem; bottom: 0.6rem; width: 34px; height: 34px; }
+.md-fin-swatch-btn .md-fin-zoom-ico svg { width: 15px; height: 15px; }
+.md-fin-swatch-btn:hover .md-fin-zoom-ico { transform: scale(1.08); box-shadow: 0 8px 24px rgba(15,11,9,0.14); }
+.md-fin-piece-label { font-size: 0.86rem; font-weight: 500; line-height: 1.3; color: var(--text-dark); }
 .md-fin-swatch { display: block; width: 100%; height: auto; border-radius: 6px; }
 
-/* two across on a phone: a single column of full-width coaches runs six
-   screens long for a six-paint model */
+/* the rail narrows to 1.6 cards on a tablet and one-and-a-bit on a phone */
+@media (max-width: 900px) {
+  .md-fin-paints { --vcard: calc((var(--vframe) - var(--vgap)) / 1.6); }
+  .md-fin-decors { grid-template-columns: 1fr; }
+  .md-fin-decors--rail { --vcard: calc(var(--vframe) / 1.12); }
+}
 @media (max-width: 600px) {
-  .md-fin-paints { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 0.75rem; }
+  .md-fin-paints { --vcard: calc(var(--vframe) / 1.15); }
   .md-fin-well { margin-bottom: 0.5rem; padding: 10% 8%; border-radius: 14px; }
+  .md-fin-zoom-ico { width: 36px; height: 36px; right: 0.6rem; bottom: 0.6rem; }
+  .md-fin-swatch-btn .md-fin-zoom-ico { width: 26px; height: 26px; right: 0.35rem; bottom: 0.35rem; border-width: 1px; }
+  .md-fin-swatch-btn .md-fin-zoom-ico svg { width: 12px; height: 12px; }
+  .md-fin-piece-label { font-size: 0.78rem; }
   .md-fin-name { font-size: 0.92rem; }
+  .md-fin-title { margin-bottom: 1rem; }
   .md-fin-kind { font-size: 0.8rem; }
 }
 
@@ -2079,21 +2239,10 @@
      callout is readable without tapping. The !important is because the
      crossfade sets both properties inline via .is-on, and a list has to
      outrank it. */
-  /* The art scrolls sideways rather than shrinking to fit. At 390px the figure
-     is ~310px wide, which renders a 1636px diagram at 19% and puts eight 32px
-     pins 23px apart — they overlap, and nothing on the drawing is legible
-     anyway. A floor of 640px keeps the pins ~48px apart and the structure
-     readable; a wide technical diagram earning a sideways scroll is a fair
-     trade, and the numbered list below still carries every callout in full.
-     Horizontal only, so it does not fight Lenis the way a nested vertical
-     scroller does. */
-  .md-cutaway-figure {
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-  .md-cutaway-stage { min-width: 640px; }
-  .md-cutaway-pin { width: 32px; height: 32px; font-size: 0.78rem; }
+  /* The whole diagram fits the width — no sideways scroll. It renders small
+     (~310px of a 1636px drawing), so the pins shrink with it; the numbered
+     list below still carries every callout in full, readable without a tap. */
+  .md-cutaway-pin { width: 24px; height: 24px; font-size: 0.66rem; }
   .md-cutaway-pin.is-on::after { animation: none; }
   .md-cutaway-panels { display: block; }
   .md-cutaway-panel {
@@ -2107,6 +2256,21 @@
   .md-fp-info .md-fp-specs { grid-column: 1; grid-row: auto; margin-top: 1.25rem; }
   /* a phone gives the slide more of the width; the peek still shows */
   .md-fp-track { --fpslide: calc(var(--fpframe) * 0.9); }
+
+  /* Every slide one size. The drawings differ in proportion and the blurbs in
+     length, so left to themselves the slides came out 680–840px tall and the
+     rail looked ragged. The stage box takes a fixed height with the drawing
+     contained in it, the slides stretch to the tallest, and each info panel
+     fills its slide with the buttons pinned to its foot. */
+  .md-fp-track { align-items: stretch; --fp-stage-h: 200px; }
+  .md-fp-slide { display: flex; flex-direction: column; }
+  .md-fp-slide .md-plan-stage-box { height: var(--fp-stage-h); flex: none; }
+  .md-fp-slide .md-plan-drawing {
+    max-height: calc(var(--fp-stage-h) - 2 * clamp(1.25rem, 1.8vw, 1.75rem));
+    object-fit: contain;
+  }
+  .md-fp-slide .md-fp-info { flex: 1; display: flex; flex-direction: column; }
+  .md-fp-slide .md-fp-ctas { margin-top: auto; padding-top: 1.5rem; }
 }
 
 @media (max-width: 1024px) {
@@ -2312,3 +2476,164 @@
   color: var(--blue-dark);
 }
 .md-cta-ctas .btn-primary:hover { background-position: 0% 0; color: var(--blue-dark); }
+
+/* ---------- Floorplan cards, and the all-floorplans dialog ----------
+   Shared by floorplan.html (its "More floorplans" rail and "All 16 …" link)
+   and model.html ("View Floorplans" in the hero and the floorplan band). */
+.fp-other-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.fp-other-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+.fp-other-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  padding: clamp(1rem, 1.6vw, 1.5rem);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  transition: background 0.3s;
+}
+.fp-other-art img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.7s var(--ease-out);
+}
+.fp-other-card:hover .fp-other-art { background: var(--surface-hover); }
+.fp-other-card:hover .fp-other-art img { transform: scale(1.03); }
+.fp-other-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-dark);
+}
+.fp-other-facts,
+.fp-other-price {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--text-mid);
+}
+
+/* ---------- All floorplans dialog ----------
+   The zoom dialog's frame (fixed, [hidden] when closed, a fade, the dark
+   scrim) around a light panel of the "More floorplans" cards. Only the grid
+   scrolls, so the title and close stay put through fifty-eight Jay Flights. */
+.fp-all {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+.fp-all[hidden] { display: none; }
+.fp-all.is-open { opacity: 1; }
+.fp-all:not(.is-open) { pointer-events: none; }
+.fp-all-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(1,38,56,0.78);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.fp-all-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1240px;
+  max-height: 100%;
+  border-radius: var(--radius-card);
+  background: var(--canvas);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: transform 0.4s var(--ease-out);
+}
+.fp-all.is-open .fp-all-panel { transform: none; }
+.fp-all-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.4vw, 1.75rem) clamp(1.25rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--hairline);
+}
+.fp-all-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-dark);
+}
+.fp-all-count { font-size: 0.86rem; color: var(--text-mid); }
+.fp-all-close {
+  flex: none;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.fp-all-close:hover { background: var(--surface); }
+.fp-all-close:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.fp-all-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: clamp(1.25rem, 2vw, 2rem) clamp(1rem, 1.6vw, 1.5rem);
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fp-all-card .fp-other-art { position: relative; }
+.fp-all-card.is-here .fp-other-art { box-shadow: inset 0 0 0 2px var(--blue); }
+.fp-all-here {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@media (max-width: 600px) {
+  .fp-all { padding: 0; align-items: flex-end; }
+  .fp-all-panel { max-height: 92vh; border-radius: var(--radius-card) var(--radius-card) 0 0; }
+  .fp-all-count { display: none; }
+  .fp-all-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fp-all-grid .fp-other-name { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-other-art img { transition: none; }
+  .fp-other-card:hover .fp-other-art img { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-fin-well .md-fin-coach, .md-fin-zoom-ico, .md-fin-piece-img { transition: none; }
+  .md-fin-swatch-btn:hover .md-fin-piece-img { transform: none; }
+  button.md-fin-well:hover .md-fin-coach, button.md-fin-well:hover .md-fin-zoom-ico { transform: none; }
+}
