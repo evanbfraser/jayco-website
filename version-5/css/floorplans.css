@@ -67,6 +67,37 @@
   font-size: clamp(0.92rem, 1.1vw, 1.05rem); line-height: 1.78; color: var(--text-mid);
 }
 
+/* ---------- Region ----------
+   jayco.com shows nothing until a region is picked. The picker sits in the
+   page head under the count in both states; until a region is chosen the
+   filter rail is hidden and the catalog is empty, and the first pick builds
+   both in place. The select is the site's field recipe: white, 14px radius,
+   blue focus ring. */
+.fpc--gated .fpc-rail { display: none; }
+.fpc--gated .fpc-head { margin-bottom: var(--space-lg); }
+.fpc-region.is-empty { flex-direction: column; align-items: flex-start; gap: 0.6rem; margin-top: 1.75rem; }
+.fpc-region.is-empty .fpc-region-label {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.35rem); font-weight: 700;
+  letter-spacing: 0; text-transform: none; color: var(--text-dark);
+}
+.fpc-region.is-empty .fpc-region-select { min-width: min(360px, 100%); }
+.fpc-region { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.1rem; flex-wrap: wrap; }
+.fpc-region-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.fpc-region-select {
+  appearance: none; -webkit-appearance: none;
+  min-width: 240px; max-width: 100%;
+  padding: 0.75rem 2.4rem 0.75rem 0.95rem;
+  border: 1px solid var(--hairline); border-radius: 14px;
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C5652' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.95rem center;
+  font-family: inherit; font-size: 0.95rem; color: var(--text-dark);
+  cursor: pointer;
+}
+.fpc-region-select:focus { outline: none; box-shadow: 0 0 0 2px var(--blue); }
+
 /* ---------- The filter, collapsed and open ----------
    ONE container, two literal boxes, so every animated property has a real
    from/to. `right: 20px -> auto` cannot transition; width can. */

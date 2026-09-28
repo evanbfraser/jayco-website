@@ -99,6 +99,94 @@
     return (window.JAYCO_MODEL_PAGES || []).indexOf(slug) >= 0;
   }
 
+  /* ---------- Region ----------
+     jayco.com shows no floorplans until a region is picked, and which plans a
+     region sees differs: Jay Flight's West lineup is its "W" plans, Canada gets
+     CSA builds of the Greyhawk 30Z. The picker, the five regions behind its 65
+     options, and each model's plans in Jayco's own order per region come from
+     floorplan-regions.js (tools/harvest-floorplan-regions.js).
+
+     The choice is kept in localStorage and carried in ?region= (the option's
+     label), so a link says which list it shows and a blocked storage still
+     works. Changing it reloads the page: every index below is built once. */
+  const REG = window.JAYCO_REGIONS || null;
+  const REGION_KEY = 'jayco-region';
+  function readRegion() {
+    if (!REG) return null;
+    const find = (label) => REG.options.find((o) => o.label === label) || null;
+    const q = new URLSearchParams(location.search).get('region');
+    if (q && find(q)) return find(q);
+    try { return find(localStorage.getItem(REGION_KEY)); } catch (e) { return null; }
+  }
+  function setRegion(label) {
+    try { localStorage.setItem(REGION_KEY, label); } catch (e) { /* the URL carries it */ }
+    const u = new URL(location.href);
+    u.searchParams.set('region', label);
+    location.href = u.toString();
+  }
+  function regionSelect(id, current) {
+    const opt = (o) => `<option value="${esc(o.label)}"${current && current.label === o.label ? ' selected' : ''}>${esc(o.label)}</option>`;
+    const groups = [];
+    REG.options.forEach((o) => {
+      const last = groups[groups.length - 1];
+      if (last && last.name === o.group) last.opts.push(o); else groups.push({ name: o.group, opts: [o] });
+    });
+    return `<select class="fpc-region-select" id="${id}">
+      ${current ? '' : '<option value="">Select your region</option>'}
+      ${groups.map((g) => g.name
+        ? `<optgroup label="${esc(g.name)}">${g.opts.map(opt).join('')}</optgroup>`
+        : g.opts.map(opt).join('')).join('')}
+    </select>`;
+  }
+  let REGION = readRegion();
+
+  /* The picker lives in the page head, under the count, in both states. With
+     no region yet it is the only thing on the page below the title — the rail
+     and catalog stay hidden, as on jayco.com — and the first pick builds the
+     catalog in place. Changing an existing region reloads (setRegion), since
+     every index here is built once. */
+  let animReady = false;
+  document.addEventListener('jayco:animations-ready', () => { animReady = true; }, { once: true });
+  function mountRegion() {
+    if (!REG) return;
+    $('#fpc-sub').insertAdjacentHTML('afterend', `
+      <div class="fpc-region${REGION ? '' : ' is-empty'}">
+        <label class="fpc-region-label" for="fpc-region-pick">${REGION ? 'Your region' : 'Please select your region.'}</label>
+        ${regionSelect('fpc-region-pick', REGION)}
+      </div>`);
+    $('#fpc-region-pick').addEventListener('change', (e) => {
+      const label = e.target.value;
+      if (!label) return;
+      if (REGION) { setRegion(label); return; }
+      REGION = REG.options.find((o) => o.label === label);
+      try { localStorage.setItem(REGION_KEY, label); } catch (err) { /* the URL carries it */ }
+      const u = new URL(location.href);
+      u.searchParams.set('region', label);
+      history.replaceState(null, '', u.toString());
+      $('#fpc-region-pick option[value=""]') && $('#fpc-region-pick option[value=""]').remove();
+      $('.fpc-region').classList.remove('is-empty');
+      $('.fpc-region-label').textContent = 'Your region';
+      $('#floorplans').classList.remove('fpc--gated');
+      start(true);
+    });
+  }
+  if (REGION) {
+    try { localStorage.setItem(REGION_KEY, REGION.label); } catch (e) { /* fine */ }
+  }
+
+  /* A model's plans for the chosen region, in Jayco's order. Matched ignoring
+     punctuation: jayco.com's slug for the 130RD is "130rd-", its CSA 30Z is
+     "30z-csa". A plan the region does not list is not shown. */
+  const norm = (x) => String(x).toLowerCase().replace(/[^a-z0-9]/g, '');
+  function regionPlans(modelId) {
+    const all = BUILD[modelId].floorplans || [];
+    const list = REG && REGION && REG.order[modelId] && REG.order[modelId][REGION.value];
+    if (!list) return all.slice().sort(byCode);
+    const byNorm = {};
+    all.forEach((f) => { byNorm[norm(f.id)] = f; });
+    return list.map((slug) => byNorm[norm(slug)]).filter(Boolean);
+  }
+
   /* ---------- Index ----------
      Flattened once at boot so filtering is a synchronous pass over plain
      numbers rather than re-parsing 181 strings on every click. */
@@ -112,72 +200,74 @@
   const code = (f) => String(f.name || f.id).toUpperCase();
   const byCode = (a, b) => (code(a) < code(b) ? -1 : code(a) > code(b) ? 1 : 0);
 
-  JAYCO.categories.forEach((cat) => {
-    /* Within a type, a model sits where its smallest plan would on
-       jayco.com — so Jay Flight (130BH) leads the travel trailers and the
-       Eagle (230MLCS) follows the Jay Feathers. */
-    const ids = Object.keys(BUILD)
-      .filter((id) => JAYCO.models[id] && JAYCO.models[id].category === cat.id)
-      .sort((a, b) => byCode(
-        (BUILD[a].floorplans || []).slice().sort(byCode)[0] || {},
-        (BUILD[b].floorplans || []).slice().sort(byCode)[0] || {}));
-    ids.forEach((modelId) => {
-      const m = JAYCO.models[modelId];
+  function buildIndex() {
+    JAYCO.categories.forEach((cat) => {
+      /* Within a type, a model sits where its smallest plan would on
+         jayco.com — so Jay Flight (130BH) leads the travel trailers and the
+         Eagle (230MLCS) follows the Jay Feathers. */
+      const ids = Object.keys(BUILD)
+        .filter((id) => JAYCO.models[id] && JAYCO.models[id].category === cat.id)
+        .sort((a, b) => byCode(
+          regionPlans(a).slice().sort(byCode)[0] || {},
+          regionPlans(b).slice().sort(byCode)[0] || {}));
+      ids.forEach((modelId) => {
+        const m = JAYCO.models[modelId];
 
-      const rows = (BUILD[modelId].floorplans || []).slice().sort(byCode).map((f) => {
-        const row = {
-          key: modelId + '__' + f.id,
-          modelId: modelId, model: m.name, planId: f.id, name: f.name,
-          year: m.year, modelImg: m.img,       // read by the Side by side table
-          category: m.category, catType: cat.type,
-          img: f.img,
-          price: f.price == null ? null : m.basePrice + f.price,
-          sleeps: f.sleeps || null,
-          lengthText: prettyLen(f.length), lengthIn: inches(f.length),
-          weight: int(f.weight),
-          slide: !!f.slide, sport: !!f.sport, isNew: !!f.isNew, toyHauler: !!f.toyHauler,
-          specs: f.specs || null,
-          features: FEAT.plans[modelId + '__' + f.id] || [],
-          tour: TOUR(modelId, f.id),
-          pass: true, el: null,
-        };
-        ROWS.push(row);
-        return row;
-      });
-      if (!rows.length) return;
+        const rows = regionPlans(modelId).map((f) => {
+          const row = {
+            key: modelId + '__' + f.id,
+            modelId: modelId, model: m.name, planId: f.id, name: f.name,
+            year: m.year, modelImg: m.img,       // read by the Side by side table
+            category: m.category, catType: cat.type,
+            img: f.img,
+            price: f.price == null ? null : m.basePrice + f.price,
+            sleeps: f.sleeps || null,
+            lengthText: prettyLen(f.length), lengthIn: inches(f.length),
+            weight: int(f.weight),
+            slide: !!f.slide, sport: !!f.sport, isNew: !!f.isNew, toyHauler: !!f.toyHauler,
+            specs: f.specs || null,
+            features: FEAT.plans[modelId + '__' + f.id] || [],
+            tour: TOUR(modelId, f.id),
+            pass: true, el: null,
+          };
+          ROWS.push(row);
+          return row;
+        });
+        if (!rows.length) return;
 
-      SECTIONS.push({
-        modelId: modelId, model: m.name, year: m.year,
-        catId: cat.id, catName: cat.name, catType: cat.type,
-        img: m.img, rows: rows, total: rows.length,
-        /* A 400px webp derivative of the model render. The originals in
-           assets/models/ average 1.4MB, and 27 section heads would pull ~38MB
-           of decoration to introduce 46KB line drawings — lazy loading defers
-           that, it does not reduce it. Generated once with cwebp, committed
-           alongside the source; the full-size PNG is the fallback if a
-           derivative is ever missing. All 27 are 400x248, so the size hint on
-           the tag is exact and the heads do not shift when they land. */
-        render: '../assets/models/web/' + modelId + '.webp',
-        href: hasModelPage(modelId) ? 'model.html?model=' + modelId : 'type.html?type=' + cat.id,
-        /* Always the model name, never the category — a row headed "Jay Feather
-           Air" whose button says "Explore Travel Trailers" reads as a link to
-           something else. The destination still differs (25 of 27 models have no
-           page of their own and land on their category), but the label names
-           what you clicked from.
+        SECTIONS.push({
+          modelId: modelId, model: m.name, year: m.year,
+          catId: cat.id, catName: cat.name, catType: cat.type,
+          img: m.img, rows: rows, total: rows.length,
+          /* A 400px webp derivative of the model render. The originals in
+             assets/models/ average 1.4MB, and 27 section heads would pull ~38MB
+             of decoration to introduce 46KB line drawings — lazy loading defers
+             that, it does not reduce it. Generated once with cwebp, committed
+             alongside the source; the full-size PNG is the fallback if a
+             derivative is ever missing. All 27 are 400x248, so the size hint on
+             the tag is exact and the heads do not shift when they land. */
+          render: '../assets/models/web/' + modelId + '.webp',
+          href: hasModelPage(modelId) ? 'model.html?model=' + modelId : 'type.html?type=' + cat.id,
+          /* Always the model name, never the category — a row headed "Jay Feather
+             Air" whose button says "Explore Travel Trailers" reads as a link to
+             something else. The destination still differs (25 of 27 models have no
+             page of their own and land on their category), but the label names
+             what you clicked from.
 
-           No article: "Explore Jay Feather" and "Explore Eagle Travel Trailers"
-           both read, where "Explore the Eagle Travel Trailers" does not. */
-        hrefLabel: 'Explore ' + m.name,
-        el: null, countEl: null, metaEl: null, jumpEl: null, jumpCountEl: null, rail: null,
+             No article: "Explore Jay Feather" and "Explore Eagle Travel Trailers"
+             both read, where "Explore the Eagle Travel Trailers" does not. */
+          hrefLabel: 'Explore ' + m.name,
+          el: null, countEl: null, metaEl: null, jumpEl: null, jumpCountEl: null, rail: null,
+        });
       });
     });
-  });
+  }
 
   const span = (key) => {
     const v = ROWS.map((r) => r[key]).filter((x) => x != null);
     return v.length ? [Math.min.apply(null, v), Math.max.apply(null, v)] : [0, 0];
   };
-  const RANGE = { price: span('price'), length: span('lengthIn') };
+  const RANGE = { price: [0, 0], length: [0, 0] };   // measured in start()
 
   const state = {
     types: new Set(),
@@ -1422,27 +1512,45 @@
     document.addEventListener('jayco:animations-ready', () => requestAnimationFrame(go), { once: true });
   }
 
-  /* ---------- Boot ---------- */
-  if (!ROWS.length || !SECTIONS.length) return;
+  /* ---------- Boot ----------
+     start() runs at load when a region is already known, or on the first pick
+     from the head's picker. `late` is that second case: the window has loaded
+     and the animations are ready by then, so what normally waits on those
+     events runs directly. */
+  function start(late) {
+    buildIndex();
+    RANGE.price = span('price'); RANGE.length = span('lengthIn');
+    state.price = RANGE.price.slice(); state.length = RANGE.length.slice();
+    if (!ROWS.length || !SECTIONS.length) return;
 
-  $('#fpc-sub').textContent =
-    ROWS.length + ' floorplans across ' + SECTIONS.length +
-    " models, with drawings and full specifications.";
+    $('#fpc-sub').textContent =
+      ROWS.length + ' floorplans across ' + SECTIONS.length +
+      " models, with drawings and full specifications.";
 
-  renderFacets();
-  renderJump();
-  readPicks();          // before the cards render, so a ?c= link paints them picked
-  renderCatalog();
-  initRails();
-  wire();
-  applyFilters();
-  renderTray();
-  initSpy();
-  focusPlan();
+    renderFacets();
+    renderJump();
+    readPicks();          // before the cards render, so a ?c= link paints them picked
+    renderCatalog();
+    initRails();
+    wire();
+    applyFilters();
+    renderTray();
+    initSpy();
+    focusPlan();
 
-  /* A rail measured before its drawings land measures wrong, so every rail is
-     re-read once the page has actually loaded. */
-  window.addEventListener('load', () => { syncAllRails(); refresh(); measureTray(); }, { once: true });
+    /* A rail measured before its drawings land measures wrong, so every rail
+       is re-read once the page has actually loaded. */
+    const settle = () => { syncAllRails(); refresh(); measureTray(); };
+    if (late || document.readyState === 'complete') requestAnimationFrame(settle);
+    else window.addEventListener('load', settle, { once: true });
+    if (late || animReady) initRowReveal();
+    else document.addEventListener('jayco:animations-ready', initRowReveal, { once: true });
+  }
 
-  document.addEventListener('jayco:animations-ready', initRowReveal, { once: true });
+  mountRegion();
+  if (!REG || REGION) start(false);
+  else {
+    $('#floorplans').classList.add('fpc--gated');
+    $('#fpc-sub').textContent = 'Floorplans vary by region. Choose yours to see the lineup sold there.';
+  }
 }());
