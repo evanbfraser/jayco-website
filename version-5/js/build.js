@@ -86,11 +86,34 @@
      one catalogue. */
   function packagesFor(m) {
     const b = buildOf(m), fp = planOf(m);
-    if (!b || !fp || !fp.optionIds) return null;
-    return fp.optionIds
+    const ids = fp && (fp.optionIds || (optionSource(m, fp) || {}).optionIds);
+    if (!b || !ids) return null;
+    return ids
       .map((id) => Object.assign({ id }, b.options[id]))
       .filter((o) => o.name);
   }
+
+  /* A plan too new for Jayco to have priced has no option list either, but it
+     can still be built. It borrows the list of the closest priced plan in the
+     same model: the same kind first (Sport, toy hauler), then the nearest plan
+     number — 270BHSW takes 267BHSW's — then the nearest length. The Packages
+     step names the plan the list came from, and the dealer confirms it. */
+  const planNum = (f) => parseInt(String(f.name).replace(/^\D+/, ''), 10);
+  const feet = (f) => { const x = /(\d+)'\s*(\d+)?/.exec(f.length || ''); return x ? +x[1] + (+x[2] || 0) / 12 : NaN; };
+  function optionSource(m, fp) {
+    if (!fp || !fp.isNew || fp.optionIds) return null;
+    const priced = floorplansOf(m).filter((f) => !f.isNew && f.optionIds && f.optionIds.length);
+    const same = priced.filter((f) => !!f.sport === !!fp.sport && !!f.toyHauler === !!fp.toyHauler);
+    const pool = same.length ? same : priced;
+    if (!pool.length) return null;
+    const gap = (a, b) => (isNaN(a) || isNaN(b) ? Infinity : Math.abs(a - b));
+    return pool.slice().sort((a, b) =>
+      (gap(planNum(a), planNum(fp)) - gap(planNum(b), planNum(fp))) ||
+      (gap(feet(a), feet(fp)) - gap(feet(b), feet(fp))))[0];
+  }
+  /* the chosen plan has no published price, so the build has no total */
+  const unpriced = () => { const f = planOf(model()); return !!(f && f.isNew); };
+  const planCode = () => { const f = planOf(model()); return f ? f.name : ''; };
 
   function optionSets(m) {
     const b = buildOf(m);
@@ -383,8 +406,7 @@
          <button> — picking the plan is the whole point of this step — and a
          button inside a button is invalid markup that browsers resolve however
          they like. Wrapping all of it in a positioned div keeps each control
-         its own element, and means they still work on a plan whose card is
-         disabled because Jayco has not priced it yet.
+         its own element.
 
          Jayco has scanned some floorplans and not others, but the control is on
          EVERY card either way: a row where the pair appears and disappears
@@ -441,7 +463,7 @@
       return `
       <div class="fp-card-wrap">
       <button type="button" class="fp-card${state.floorplanId === f.id ? ' selected' : ''}${f.isNew ? ' is-new' : ''}"
-              data-select="fp" data-id="${f.id}"${f.isNew ? ' disabled aria-disabled="true"' : ''}>
+              data-select="fp" data-id="${f.id}">
         <span class="fp-card-media">${media}<span class="fp-card-plan">${f.name}</span></span>
         <span class="fp-card-body">
           ${badges ? `<span class="fp-badges">${badges}</span>` : ''}
@@ -457,7 +479,7 @@
 
     const newCount = plans.filter((f) => f.isNew).length;
     const note = newCount
-      ? ` ${newCount} plan${newCount > 1 ? 's are' : ' is'} too new for Jayco to have published pricing — your dealer can quote ${newCount > 1 ? 'them' : 'it'}.`
+      ? ` ${newCount} ${newCount > 1 ? 'are' : 'is'} too new for published pricing — build ${newCount > 1 ? 'any of them' : 'it'} and request a quote.`
       : '';
     return `<div class="step-head"><h2>Choose a floorplan</h2>
         <p>${plans.length} ${m.name} layout${plans.length > 1 ? 's' : ''}.${note}</p></div>
@@ -535,9 +557,14 @@
       </button>`).join('');
     /* The list is the SELECTED plan's, so say which — otherwise switching
        floorplans silently changes what is on offer here. */
+    const src = optionSource(m, fp);
     const scope = fp && fp.optionIds
       ? `Options for the ${fp.name}. Required packages are priced into every build of this plan.`
-      : 'Select any upgrades — your price updates instantly.';
+      : src
+        ? `The ${fp.name} is new for ${m.year}, so these are the options offered on the ${src.name}. Your dealer will confirm which apply when they quote your build.`
+        : fp && fp.isNew
+          ? `The ${fp.name} is new for ${m.year}. Your dealer will take you through its options when they quote your build.`
+          : 'Select any upgrades — your price updates instantly.';
 
     /* Everything selectable comes first; the spec sheet sits underneath as
        reference. A plan Jayco has not costed yet has no option list at all, so
@@ -660,7 +687,10 @@
         <div>
           <div class="review-ctas review-ctas--top">${ctas}</div>
           <div class="review-lines">${rows}</div>
-          <div class="review-total"><span class="rt-label">Total MSRP as built</span><span class="rt-val">${fmt(total())}</span></div>
+          <div class="review-total">${unpriced()
+            ? `<span class="rt-label">Total MSRP as built<small>The ${planCode()} is too new for published pricing.</small></span>
+               <button type="button" class="btn-primary rt-quote" data-action="quote">Request a Quote</button>`
+            : `<span class="rt-label">Total MSRP as built</span><span class="rt-val">${fmt(total())}</span>`}</div>
           <div class="review-ctas">${ctas}</div>
         </div>
       </div>
@@ -751,8 +781,22 @@
   function renderSidebar() {
     const m = model();
     const totalStr = m ? fmt(total()) : '$0';
-    $('#summary-total').textContent = totalStr;
-    $('#mobile-total').textContent  = totalStr;
+    /* No price for the plan means no total to show: the figure's place is
+       taken by the ask that gets one. The separate Request a Quote under it
+       would then say the same thing twice, so it steps aside. */
+    const tbd = !!m && unpriced();
+    const quoteBtn = (cls) => `<button type="button" class="${cls}" data-quote-open>Request a Quote</button>`;
+    if (tbd) {
+      $('#summary-total').innerHTML = quoteBtn('summary-total-quote');
+      $('#mobile-total').innerHTML  = quoteBtn('mobile-total-quote');
+    } else {
+      $('#summary-total').textContent = totalStr;
+      $('#mobile-total').textContent  = totalStr;
+    }
+    $('#summary-quote').hidden = tbd;
+    $('#summary-disclaimer').textContent = tbd
+      ? 'This floorplan is too new for published pricing. Request a quote and a Jayco dealer will price your build as configured.'
+      : 'Estimated MSRP. Excludes tax, title, freight & dealer prep. See your dealer for final pricing.';
 
     if (!m) {
       $('#summary-name').textContent = 'Select a model';
@@ -944,6 +988,9 @@
     /* Request a Quote opens the quote dialog on this build. With no model
        picked there is no build to quote, so the link's own href — the Request
        a Quote page — is left to do its job. */
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-quote-open]')) { e.preventDefault(); openQuote(); }
+    });
     $('#summary-quote').addEventListener('click', (e) => {
       if (!state.modelId) return;
       e.preventDefault();
@@ -957,7 +1004,9 @@
   function openQuote() {
     if (!state.modelId) return;
     const m = model();
-    $('#quote-sub').textContent = `A Jayco dealer will reach out with a no-obligation quote on your ${m.name} (${fmt(total())} as built).`;
+    $('#quote-sub').textContent = unpriced()
+      ? `A Jayco dealer will reach out with a no-obligation quote on your ${m.name} ${planCode()}, built the way you configured it.`
+      : `A Jayco dealer will reach out with a no-obligation quote on your ${m.name} (${fmt(total())} as built).`;
     $('#quote-form').hidden = false;
     $('#quote-body').hidden = false;
     $('#quote-success').hidden = true;
@@ -979,7 +1028,7 @@
     $('#quote-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const m = model();
-      $('#quote-success-sub').textContent = `Thanks! A dealer near you will be in touch about your ${m.year} ${m.name} build (${fmt(total())}).`;
+      $('#quote-success-sub').textContent = `Thanks! A dealer near you will be in touch about your ${m.year} ${m.name} build${unpriced() ? '' : ` (${fmt(total())})`}.`;
       $('#quote-body').hidden = true;
       $('#quote-success').hidden = false;
     });
@@ -1011,10 +1060,10 @@
        Added for the model page's "View All Floorplans" button, which wants the
        floorplan grid and not the model picker. */
     /* ?plan= preselects a floorplan — from a floorplan page's "Price this
-       Floorplan", which opens past the floorplan step. An unpriced plan cannot
-       be totalled, so it is ignored and the model's default plan stands. */
+       Floorplan", which opens past the floorplan step. An unpriced plan opens
+       too: it builds like any other, and its total is a Request a Quote. */
     const want = (params.get('plan') || '').toLowerCase();
-    const fp = want && floorplansOf(model()).find((f) => f.id === want && !f.isNew);
+    const fp = want && floorplansOf(model()).find((f) => f.id === want);
     if (fp) { state.floorplanId = fp.id; seedPackages(); }
 
     const step = STEPS.findIndex((st) => st.id === params.get('step'));

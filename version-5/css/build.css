@@ -674,8 +674,8 @@
    Shown rather than hidden — the drawing is real and people are looking for
    it — but visibly inert, and the button carries `disabled` so it is not
    merely styled that way. */
-.fp-card.is-new { cursor: default; opacity: 0.72; }
-.fp-card.is-new:hover { border-color: var(--warm-gray); transform: none; box-shadow: none; }
+/* A plan too new to be priced builds like any other; only its price line
+   differs ("Pricing to come"), and its total becomes a Request a Quote. */
 .fp-card-price--tbd { font-size: 0.85rem; font-weight: 600; color: var(--text-mid); font-style: italic; }
 
 .step-note {
@@ -1009,6 +1009,9 @@
 }
 .review-total .rt-label { font-size: 0.95rem; color: var(--text-mid); }
 .review-total .rt-val { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; color: var(--text-dark); }
+.review-total:has(.rt-quote) { align-items: center; gap: 1rem; }
+.review-total .rt-label small { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-mid); }
+.rt-quote { flex: none; }
 .review-ctas { display: flex; gap: 0.8rem; margin-top: 1.6rem; flex-wrap: wrap; }
 /* The same three asks, repeated at the head of the selections. It leads the
    column, so the gap the bottom row keeps above itself goes below this one. */
@@ -1093,6 +1096,23 @@
 }
 .summary-total-label { font-size: 0.82rem; color: var(--text-mid); }
 .summary-total-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+/* In place of the figure when the plan has no published price: the ask that
+   gets one, sized to sit on the total's line. */
+.summary-total-quote,
+.mobile-total-quote {
+  display: inline-flex; align-items: center;
+  border: none; border-radius: 999px;
+  background: var(--blue); color: #fff;
+  font-family: var(--font-body); font-weight: 600; letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.summary-total-quote { padding: 0.6rem 1.15rem; font-size: 0.82rem; }
+.summary-total-quote:hover,
+.mobile-total-quote:hover { background: var(--blue-deep, #005E96); }
+.summary-total-quote:focus-visible,
+.mobile-total-quote:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.summary-total:has(.summary-total-quote) { align-items: center; }
 .summary-disclaimer { font-size: 0.68rem; color: var(--text-mid); line-height: 1.4; padding: 0 1rem 0.8rem; }
 .summary-cta { display: block; width: calc(100% - 2rem); margin: 0 1rem 0.6rem; text-align: center; }
 .build-summary-dealer {
@@ -1259,6 +1279,7 @@
   }
   .mobile-bar-label { font-size: 0.68rem; color: var(--text-mid); display: block; }
   .mobile-bar-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
+  .mobile-total-quote { margin-top: 0.2rem; padding: 0.45rem 0.95rem; font-size: 0.74rem; white-space: nowrap; }
   .mobile-bar-next { border: none; padding: 0.7rem 1.6rem; }
 
   /* v5 pins a chat button to the bottom-right of every page. It is fixed at
