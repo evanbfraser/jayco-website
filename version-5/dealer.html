@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sitewide favicon. SVG so it stays sharp at every tab size and on
+       retina; browsers that predate SVG icon support fall back to
+       nothing rather than a blurry raster, which is the better failure. -->
+  <link rel="icon" type="image/svg+xml" href="../assets/jayco-favicon.svg" />
+  <title>Jayco Dealer — Jayco (v5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=v5-core-18" />
+  <link rel="stylesheet" href="css/dealer.css?v=v5-dd-1" />
+</head>
+<!-- data-header="solid": this page opens on canvas rather than a dark hero,
+     so the white logo and nav need the bar filled in from the first paint.
+     app.js reads this in initHeader(). -->
+<body class="dealer-page" data-header="solid">
+
+  <!-- ===== LOADER ===== -->
+  <div id="loader">
+    <div class="loader-inner">
+      <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="loader-logo" />
+      <div class="loader-bar-wrap">
+        <div id="loader-bar"></div>
+      </div>
+      <span id="loader-percent">0%</span>
+    </div>
+
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" />
+      </a>
+      <nav class="header-nav" id="main-nav">
+        <ul class="nav-primary nav-left">
+          <li><a href="index.html">RVs</a></li>
+          <li><a href="index.html">Find Your RV</a></li>
+          <li><a href="index.html">Shop &amp; Tools</a></li>
+          <li><a href="index.html">Owners</a></li>
+          <li><a href="index.html">Resources</a></li>
+          <li><a href="index.html">About</a></li>
+        </ul>
+        <div class="nav-right">
+          <!-- Actions only. Resources and About sit with the other four links
+               on the left; the header hands over to the hamburger at the width
+               where that group reaches the centred logo. -->
+          <ul class="nav-actions">
+            <li><a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a></li>
+            <li><a href="dealers.html" class="btn-nav-outline">Find a Dealer</a></li>
+            <!-- The dealer inventory page is still to be built. "#" is the site's
+                 convention for a destination that does not exist yet; app.js
+                 neutralises the click so it does nothing rather than jumping the
+                 page to the top. Point the href at the page to retire both. -->
+            <li><a href="#" class="btn-nav-outline">View Inventory</a></li>
+            <li>
+              <button class="nav-search-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE FULL-SCREEN MENU ===== -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <nav class="mm-nav">
+      <!-- RVs: expandable, with View All + per-class model lists (built by JS) -->
+      <div class="mm-group">
+        <button class="mm-top" data-target="mm-rvs" aria-expanded="false">
+          <span>RVs</span>
+          <svg class="mm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mm-panel" id="mm-rvs">
+          <a href="index.html#categories" class="mm-viewall">View All RVs</a>
+          <div class="mm-cats" id="mm-rvs-cats"><!-- categories injected here --></div>
+        </div>
+      </div>
+      <!-- remaining nav groups (Find Your RV, Shop & Tools, …) built by JS from the footer -->
+    </nav>
+
+    <div class="mm-actions">
+      <a href="build-price.html" class="btn-nav-filled">Build &amp; Price</a>
+      <a href="dealers.html" class="btn-nav-outline">Find a Dealer</a>
+      <a href="#" class="btn-nav-outline">View Inventory</a>
+    </div>
+
+  </div>
+
+  <!-- ===== AI CHAT — global pinned button ===== -->
+  <button class="hero-chat-btn" id="hero-chat-btn" aria-label="Chat with our AI assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      <circle cx="8.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11.5" r="0.9" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <!-- ===== DEALER =====
+       One dealer's page: dealer.html?dealer=<slug>, and /dealers/<slug> on
+       Netlify. It carries what jayco.com's dealer page carries (name, contact
+       form, phone, address and directions, models carried) from the same
+       dealer-data.js the locator reads, plus the nearest other dealers. The
+       slots are filled by dealer.js; the form is written out here in full so
+       Netlify registers it at deploy. -->
+  <main class="dd" id="dealer">
+
+    <section class="dd-head">
+      <div class="dd-inner">
+        <a class="dd-back" href="dealers.html">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          Find a Dealer
+        </a>
+        <span class="section-label">Jayco Dealer</span>
+        <h1 class="dd-title" id="dd-title">Jayco Dealer</h1>
+        <p class="dd-place" id="dd-place"></p>
+        <div class="dd-actions" id="dd-actions"></div>
+      </div>
+    </section>
+
+    <section class="dd-main" id="dd-main">
+      <div class="dd-inner dd-grid">
+
+        <!-- Everything jayco.com lists under "Phone" and "Address", as one card -->
+        <aside class="dd-card dd-info" id="dd-info" aria-label="Dealer details"></aside>
+
+        <div class="dd-card dd-contact">
+          <h2 class="dd-h2" id="dd-contact-h">Contact the dealer</h2>
+          <p class="dd-sub" id="dd-contact-sub">Ask about a model, a floorplan or a visit. The dealership replies directly.</p>
+
+          <form class="dd-form" id="dd-form" name="dealer-contact" method="POST"
+                data-netlify="true" netlify-honeypot="bot-field">
+            <input type="hidden" name="form-name" value="dealer-contact" />
+            <p hidden><label>Leave this empty <input name="bot-field" /></label></p>
+            <!-- Written by dealer.js. Names, not just the slug, since a person
+                 reads the submission and routes it. -->
+            <input type="hidden" name="dealer" id="dd-in-dealer" value="" />
+            <input type="hidden" name="dealer-slug" id="dd-in-slug" value="" />
+
+            <div class="dd-row">
+              <div class="dd-field">
+                <label class="dd-label" for="dd-first">First name</label>
+                <input class="dd-input" id="dd-first" name="first-name" type="text" required
+                       autocomplete="given-name" placeholder="First name" />
+              </div>
+              <div class="dd-field">
+                <label class="dd-label" for="dd-last">Last name</label>
+                <input class="dd-input" id="dd-last" name="last-name" type="text" required
+                       autocomplete="family-name" placeholder="Last name" />
+              </div>
+            </div>
+            <div class="dd-row">
+              <div class="dd-field">
+                <label class="dd-label" for="dd-email">Email</label>
+                <input class="dd-input" id="dd-email" name="email" type="email" required
+                       autocomplete="email" placeholder="you@example.com" />
+              </div>
+              <div class="dd-field">
+                <label class="dd-label" for="dd-phone">Phone <span class="dd-opt">optional</span></label>
+                <input class="dd-input" id="dd-phone" name="phone" type="tel"
+                       autocomplete="tel" placeholder="(574) 555-0134" />
+              </div>
+            </div>
+            <div class="dd-row">
+              <div class="dd-field">
+                <label class="dd-label" for="dd-city">City <span class="dd-opt">optional</span></label>
+                <input class="dd-input" id="dd-city" name="city" type="text"
+                       autocomplete="address-level2" placeholder="City" />
+              </div>
+              <div class="dd-field">
+                <!-- "ZIP code" or "Postal code", by the dealer's country -->
+                <label class="dd-label" for="dd-zip" id="dd-zip-label">ZIP code</label>
+                <input class="dd-input" id="dd-zip" name="zip" type="text" required
+                       autocomplete="postal-code" placeholder="46526" />
+              </div>
+            </div>
+            <div class="dd-field">
+              <label class="dd-label" for="dd-model">Model of interest <span class="dd-opt">optional</span></label>
+              <select class="dd-input dd-select" id="dd-model" name="model">
+                <option value="">Not sure yet</option>
+              </select>
+            </div>
+            <div class="dd-field">
+              <label class="dd-label" for="dd-msg">Comments or questions <span class="dd-opt">optional</span></label>
+              <textarea class="dd-input" id="dd-msg" name="message" rows="4"
+                        placeholder="Timing, a trade-in, a floorplan you want to see…"></textarea>
+            </div>
+            <label class="dd-agree">
+              <input type="checkbox" name="agree" value="yes" required />
+              <span>I agree to the <a href="#">Terms of Use</a> and have read the <a href="#">Privacy Policy</a>.</span>
+            </label>
+            <button type="submit" class="btn-primary dd-go">Send to the dealer</button>
+          </form>
+          <p class="dd-note" id="dd-note" role="status" aria-live="polite"></p>
+
+          <!-- Replaces the form on success, so a second send is not invited -->
+          <div class="dd-done" id="dd-done" hidden>
+            <h3 class="dd-done-h" id="dd-done-h" tabindex="-1">Message sent.</h3>
+            <p class="dd-done-body" id="dd-done-body"></p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="dd-models" id="dd-models" aria-labelledby="dd-models-h"></section>
+
+    <section class="dd-nearby" id="dd-nearby" aria-labelledby="dd-nearby-h"></section>
+
+    <!-- An unknown slug: said plainly, with the way back -->
+    <section class="dd-missing" id="dd-missing" hidden>
+      <div class="dd-inner">
+        <h2 class="dd-h2">We could not find that dealer.</h2>
+        <p class="dd-sub">The link may be out of date. Search by city, state or ZIP code to find the nearest one.</p>
+        <a class="btn-primary" href="dealers.html">Find a Dealer</a>
+      </div>
+    </section>
+
+  </main>
+
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../assets/jayco-logo-white.svg" alt="Jayco" class="footer-logo" />
+        <p class="footer-tagline">Built for the Road.<br>Built for Life.</p>
+        <div class="footer-ctas">
+          <a href="build-price.html" class="footer-btn-primary">Build &amp; Price</a>
+          <a href="dealers.html" class="footer-btn-outline">Find a Dealer</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="footer-social-link" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon fill="#080604" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"/>
+            </svg>
+          </a>
+          <a href="#" class="footer-social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-apps">
+          <!-- Jayco Companion, the owner app. iPhone only: Wingmate, which had an
+               Android version too, is gone from both stores, and Companion has no
+               Google Play listing. -->
+          <a href="https://apps.apple.com/us/app/jayco-companion/id6792838188" class="footer-app-badge"
+             target="_blank" rel="noopener noreferrer" aria-label="Download Jayco Companion on the App Store">
+            <img src="../assets/apple_badge-new.svg" alt="Download on the App Store" class="footer-app-badge-img" />
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>RVs</h4>
+          <ul>
+            <li><a href="index.html#categories">All RVs</a></li>
+            <li><a href="type.html?type=travel-trailers">Travel Trailers</a></li>
+            <li><a href="type.html?type=destination">Destination Travel Trailers</a></li>
+            <li><a href="type.html?type=fifth-wheels">Fifth Wheels</a></li>
+            <li><a href="type.html?type=toy-haulers">Toy Haulers</a></li>
+            <li><a href="type.html?type=class-b">Class B Motorhomes</a></li>
+            <li><a href="type.html?type=class-a">Class A Motorhomes</a></li>
+            <li><a href="type.html?type=class-c">Class C Motorhomes</a></li>
+            <!-- Super C has three real models in models-data.js and no footer row
+                 until now. app.js builds the mobile menu's nav groups from these
+                 columns, so adding it here adds it in both places. -->
+            <li><a href="type.html?type=super-c">Super C Motorhomes</a></li>
+            <li><a href="compare.html">Compare RVs</a></li>
+            <li><a href="floorplans.html">All Floorplans</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Find Your RV</h4>
+          <ul>
+            <li><a href="quiz.html">RV Finder Quiz</a></li>
+            <li><a href="top-selling.html">Top-Selling RVs</a></li>
+            <li><a href="buyers-guide.html">Buyer's Guide</a></li>
+            <li><a href="tow-vs-drive.html">Tow vs. Drive Guide</a></li>
+            <li><a href="new-to-rving.html">New to RVing?</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shop &amp; Tools</h4>
+          <ul>
+            <li><a href="dealers.html">Find a Dealer</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+            <li><a href="build-price.html">Build &amp; Price</a></li>
+            <li><a href="brochures.html">Brochures</a></li>
+            <li><a href="testimonials.html">Reviews &amp; Testimonials</a></li>
+            <li><a href="towing.html">Towing Calculator</a></li>
+            <li><a href="value-tool.html">Value Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Owners</h4>
+          <ul>
+            <li><a href="owner-services.html">Owner Services</a></li>
+            <li><a href="manuals.html">Manuals</a></li>
+            <li><a href="warranty.html">Warranty Coverage</a></li>
+            <li><a href="recalls.html">Recalls</a></li>
+            <li><a href="jayco-companion.html">Jayco Companion App</a></li>
+            <li><a href="https://www.jaycofamily.com/ambassadors/" target="_blank" rel="noopener noreferrer">Ambassador Program</a></li>
+            <li><a href="https://www.jaycofamily.com/JFOC-University-NRVTA/" target="_blank" rel="noopener noreferrer">Jayco University</a></li>
+            <li><a href="https://jaycostore.myshopify.com/" target="_blank" rel="noopener noreferrer">Apparel Store</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="videos.html">Video Gallery</a></li>
+            <li><a href="buyers-guide.html">Buyer&rsquo;s Guide</a></li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="https://jayco.gopremierpro.com/shop/catalog" target="_blank" rel="noopener noreferrer">Dealer Marketing Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="our-story.html">Our Story</a></li>
+            <li><a href="jayco-difference.html">The Jayco Difference</a></li>
+            <li><a href="pdi.html">100% PDI</a></li>
+            <li><a href="rd.html">R&amp;D &amp; Innovation</a></li>
+            <li><a href="safety.html">Safety &amp; JaySMART</a></li>
+            <li><a href="awards.html">Award-Winning RVs</a></li>
+            <li><a href="solar.html">Sustainability</a></li>
+            <li><a href="visit-us.html">Visit Us</a></li>
+            <li><a href="https://www.jaycofamily.com/" target="_blank" rel="noopener noreferrer">Careers</a></li>
+            <li><a href="newsroom.html">Newsroom</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>© 2026 Jayco, Inc. All rights reserved. A Thor Industries Company.</p>
+        <ul class="footer-legal">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Cookie Settings</a></li>
+          <li><a href="#">California Consumers</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- dealer.js before app.js, so the page is written before app.js binds
+       its reveals. ScrollTrigger is required: app.js registers it
+       unconditionally. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <script src="js/models-data.js?v=v5-7"></script>
+  <script src="js/dealer-data.js?v=v5-dl-13"></script>
+  <script src="js/dealer.js?v=v5-dd-1"></script>
+  <script src="js/app.js?v=v5-core-22"></script>
+</body>
+</html>

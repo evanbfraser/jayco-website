@@ -1,0 +1,219 @@
+/* ===================================================
+   Jayco — one dealer's page (dealer.html)
+   The request-quote form recipe (white fields on a Surface panel, 14px radius,
+   blue focus ring) beside a details card, then the models the dealer carries
+   and the nearest other dealers. Opens on canvas under a solid header.
+   =================================================== */
+
+.dd { --dd-frame: 1440px; background: var(--canvas); }
+.dd-inner { max-width: var(--dd-frame); margin: 0 auto; padding: 0 var(--page-pad); }
+
+/* ---------- Head ---------- */
+.dd-head { padding: calc(var(--header-h, 86px) + clamp(2rem, 4vw, 3.5rem)) 0 clamp(2rem, 4vw, 3rem); }
+.dd-back {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-mid); text-decoration: none;
+  transition: color 0.2s;
+}
+.dd-back:hover { color: var(--blue); }
+.dd-back:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.dd-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.6vw, 4.4rem);
+  font-weight: 800; line-height: 0.98; letter-spacing: -0.015em;
+  color: var(--text-dark);
+  max-width: 20ch;
+  text-wrap: balance;
+}
+.dd-place { margin: 0.9rem 0 0; font-size: 1.05rem; color: var(--text-mid); }
+.dd-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: clamp(1.5rem, 3vw, 2rem); }
+
+/* ---------- Details + form ---------- */
+.dd-main { padding-bottom: var(--space-lg); }
+.dd-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+  gap: clamp(1rem, 2vw, 1.5rem);
+  align-items: start;
+}
+.dd-card {
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+.dd-info { display: grid; gap: 1.75rem; }
+.dd-info-row { display: grid; grid-template-columns: auto 1fr; gap: 0.9rem; align-items: start; }
+.dd-info-ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--white); color: var(--blue);
+}
+.dd-info-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.dd-info-val { margin: 0; font-size: 1.02rem; line-height: 1.55; color: var(--text-dark); }
+.dd-tel { color: inherit; text-decoration: none; font-weight: 600; }
+.dd-tel:hover { color: var(--blue); }
+.dd-link {
+  display: inline-block; margin-top: 0.55rem;
+  font-size: 0.86rem; font-weight: 600; color: var(--blue); text-decoration: none;
+}
+.dd-link:hover { text-decoration: underline; }
+.dd-tel:focus-visible, .dd-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
+
+.dd-h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+.dd-sub { margin: 0.7rem 0 1.6rem; max-width: 52ch; font-size: 0.95rem; line-height: 1.65; color: var(--text-mid); }
+
+.dd-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.dd-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.dd-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.dd-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-mid);
+}
+.dd-opt { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
+.dd-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: none; border-radius: 14px;
+  background: var(--white);
+  font-family: inherit; font-size: 0.92rem; color: var(--text-dark);
+  transition: box-shadow 0.2s;
+}
+.dd-input::placeholder { color: rgba(92,86,82,0.55); }
+.dd-input:focus { outline: none; box-shadow: 0 0 0 2px var(--blue); }
+textarea.dd-input { resize: vertical; min-height: 6.5rem; line-height: 1.6; }
+.dd-select {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C5652' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.95rem center;
+  cursor: pointer;
+}
+.dd-agree {
+  display: flex; gap: 0.6rem; align-items: flex-start;
+  margin-top: 0.2rem;
+  font-size: 0.82rem; line-height: 1.5; color: var(--text-mid);
+  cursor: pointer;
+}
+.dd-agree input { flex: none; width: 18px; height: 18px; margin: 0.08rem 0 0; accent-color: var(--blue); cursor: pointer; }
+.dd-agree a { color: var(--blue); font-weight: 600; text-decoration: none; }
+.dd-agree a:hover { text-decoration: underline; }
+.dd-go { margin-top: 0.4rem; align-self: flex-start; }
+.dd-note { margin: 0.9rem 0 0; font-size: 0.82rem; color: var(--text-mid); }
+.dd-note:empty { display: none; }
+.dd-done-h {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--text-dark);
+}
+.dd-done-h:focus { outline: none; }
+.dd-done-body { margin: 0; max-width: 52ch; font-size: 0.95rem; line-height: 1.7; color: var(--text-mid); }
+
+/* ---------- Models carried ---------- */
+.dd-models, .dd-nearby { padding: var(--space-lg) 0; border-top: 1px solid var(--hairline); }
+.dd-section-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+.dd-section-head .section-heading { margin-top: 0.5rem; }
+.dd-group + .dd-group { margin-top: clamp(2.25rem, 4vw, 3.25rem); }
+.dd-group-h {
+  display: flex; align-items: baseline; gap: 0.6rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--text-dark);
+}
+.dd-group-n { font-family: inherit; font-size: 0.86rem; font-weight: 500; color: var(--text-mid); }
+.dd-model-grid, .dd-near-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: clamp(1.25rem, 2vw, 2rem) clamp(1rem, 1.6vw, 1.5rem);
+  margin: 0; padding: 0; list-style: none;
+}
+.dd-model { display: block; color: inherit; text-decoration: none; }
+.dd-model:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: var(--radius-card); }
+.dd-model-art {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 16 / 10;
+  padding: clamp(1rem, 1.6vw, 1.5rem);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  transition: background 0.3s;
+}
+.dd-model-art img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  transition: transform 0.7s var(--ease-out);
+}
+.dd-model:hover .dd-model-art { background: var(--surface-hover); }
+.dd-model:hover .dd-model-art img { transform: scale(1.03); }
+.dd-model-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.2rem; font-weight: 700; line-height: 1.2;
+  color: var(--text-dark);
+}
+.dd-model-price { display: block; margin-top: 0.3rem; font-size: 0.86rem; color: var(--text-mid); }
+.dd-other {
+  margin: clamp(2rem, 4vw, 3rem) 0 0; max-width: 80ch;
+  font-size: 0.9rem; line-height: 1.7; color: var(--text-mid);
+}
+.dd-other span {
+  display: block; margin-bottom: 0.3rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* ---------- Nearby ---------- */
+.dd-near {
+  display: flex; flex-direction: column; height: 100%;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit; text-decoration: none;
+  transition: background 0.3s;
+}
+.dd-near:hover { background: var(--surface-hover); }
+.dd-near:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.dd-near-dist {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--blue);
+}
+.dd-near-name {
+  margin-top: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem; font-weight: 700; line-height: 1.2;
+  color: var(--text-dark);
+}
+.dd-near-addr { margin-top: 0.4rem; font-size: 0.88rem; line-height: 1.55; color: var(--text-mid); }
+.dd-all { margin-top: clamp(1.75rem, 3vw, 2.5rem); }
+
+/* ---------- Not found ---------- */
+.dd-missing { padding: 0 0 var(--space-lg); }
+.dd-missing .btn-primary { margin-top: 0.4rem; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .dd-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .dd-row { grid-template-columns: 1fr; }
+  .dd-actions > * { flex: 1 1 100%; text-align: center; }
+  .dd-go { align-self: stretch; }
+  .dd-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-model-name { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-model-art img { transition: none; }
+  .dd-model:hover .dd-model-art img { transform: none; }
+}

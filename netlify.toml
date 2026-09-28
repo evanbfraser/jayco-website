@@ -136,6 +136,13 @@
   to = "/version-5/compare.html"
   status = 302
 
+# /dealers/traveland-rv-superstore-langley — one dealer's page. Above the bare
+# /dealers, as with floorplans.
+[[redirects]]
+  from = "/dealers/:slug"
+  to = "/version-5/dealer.html?dealer=:slug"
+  status = 302
+
 [[redirects]]
   from = "/dealers"
   to = "/version-5/dealers.html"

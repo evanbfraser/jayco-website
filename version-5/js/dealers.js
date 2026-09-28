@@ -212,8 +212,7 @@
       <span class="dl-card-acts">
         ${tel}
         <a class="dl-link" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a>
-        <a class="dl-link" href="${esc(d.url || ('https://www.jayco.com/dealers/' + d.slug + '/'))}"
-           target="_blank" rel="noopener">Dealer page</a>
+        <a class="dl-link" href="dealer.html?dealer=${encodeURIComponent(d.slug)}">Dealer page</a>
       </span>
     </li>`;
   }

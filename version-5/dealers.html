@@ -173,20 +173,6 @@
           </select>
         </div>
 
-        <!-- The two lookups jayco.com offers under its own search, for someone
-             who knows the town but not the code. "CLICK HERE" is their wording
-             and stays the visible text; the aria-label says where each goes,
-             since a screen reader's link list would otherwise read two
-             identical "CLICK HERE"s. -->
-        <ul class="dl-lookups">
-          <li><a href="https://tools.usps.com/zip-code-lookup.htm?bycitystate" target="_blank" rel="noopener"
-                 aria-label="Look up a United States ZIP code by city and state on USPS.com (opens in a new tab)">CLICK HERE</a>
-            to determine the United States ZIP Code for a City and State</li>
-          <li><a href="https://www.canadapost-postescanada.ca/cpo/mc/personal/postalcode/fpc.jsf" target="_blank" rel="noopener"
-                 aria-label="Look up a Canadian postal code for an address on Canada Post (opens in a new tab)">CLICK HERE</a>
-            to determine the Canadian Postal Code for an Address</li>
-        </ul>
-
         <!-- Geolocation is offered, never taken. It only runs on this press, and
              it needs a secure context — on plain http it fails and the message
              sends people to the field above, which is a first-class path. -->
@@ -237,6 +223,20 @@
       <div class="dl-cta">
         <p class="dl-cta-text">Know what you want? See what is on the lot near you.</p>
         <a href="#" class="btn-primary dl-cta-btn">View Inventory</a>
+        <!-- The two lookups jayco.com offers, for someone who knows the town
+             but not the code. In the panel foot under View Inventory, so the
+             search controls above stay short. "CLICK HERE" is their wording
+             and stays the visible text; the aria-label says where each goes,
+             since a screen reader's link list would otherwise read two
+             identical "CLICK HERE"s. -->
+        <ul class="dl-lookups">
+          <li><a href="https://tools.usps.com/zip-code-lookup.htm?bycitystate" target="_blank" rel="noopener"
+                 aria-label="Look up a United States ZIP code by city and state on USPS.com (opens in a new tab)">CLICK HERE</a>
+            to determine the United States ZIP Code for a City and State</li>
+          <li><a href="https://www.canadapost-postescanada.ca/cpo/mc/personal/postalcode/fpc.jsf" target="_blank" rel="noopener"
+                 aria-label="Look up a Canadian postal code for an address on Canada Post (opens in a new tab)">CLICK HERE</a>
+            to determine the Canadian Postal Code for an Address</li>
+        </ul>
       </div>
     </section>
   </main>
@@ -403,7 +403,7 @@
 
   <script src="js/models-data.js?v=v5-7"></script>
   <script src="js/dealer-data.js?v=v5-dl-13"></script>
-  <script src="js/dealers.js?v=v5-dl-17"></script>
+  <script src="js/dealers.js?v=v5-dl-18"></script>
   <script src="js/app.js?v=v5-core-22"></script>
 </body>
 </html>
