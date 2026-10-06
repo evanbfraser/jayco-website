@@ -344,7 +344,10 @@ window.JAYCO_TOURS = {
     '21mbh': '5uijhpVu1ym',
     '23rk': '9GR5kfu29CF',
     '25rb': 'nHT6XTvNyAz',
-    '25bh': 'hC84MC3emEz',
+    /* PLACEHOLDER: the same scan twice, so the floorplan page's tour carousel
+       has two slides to show. Swap the second id for the plan's other tour,
+       or put the line back to a single string. */
+    '25bh': ['hC84MC3emEz', 'hC84MC3emEz'],
     '23mbd': 'LPDBt7fkUpn',
     '24fk': 'LuiPLPmW6Ed',
     '27bh': 'nmzZHq3wCT4',
@@ -485,8 +488,14 @@ window.JAYCO_TOURS = {
 /* The one place the tour URL is built. Returns null for a plan with no scan,
    which is what both callers test — a missing tour is the common case, not an
    error. */
-window.JAYCO_TOUR_URL = function (slug, planId) {
+window.JAYCO_TOUR_URLS = function (slug, planId) {
   const plans = (window.JAYCO_TOURS || {})[slug];
-  const id = plans && planId != null && plans[String(planId).toLowerCase()];
-  return id ? 'https://my.matterport.com/show/?m=' + id : null;
+  const ids = plans && planId != null && plans[String(planId).toLowerCase()];
+  return [].concat(ids || []).map((id) => 'https://my.matterport.com/show/?m=' + id);
+};
+/* A plan with more than one scan lists its ids in an array. Everything that
+   shows a single "3D Tour" link takes the first; the floorplan page's tour
+   section takes them all, through JAYCO_TOUR_URLS. */
+window.JAYCO_TOUR_URL = function (slug, planId) {
+  return window.JAYCO_TOUR_URLS(slug, planId)[0] || null;
 };

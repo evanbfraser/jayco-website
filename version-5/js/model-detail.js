@@ -123,6 +123,7 @@
       render: (detail && detail.intro && detail.intro.image && detail.intro.image.type === 'render')
         ? detail.intro.image : { src: lib.img, alt: lib.year + ' Jayco ' + lib.name },
       tour360: window.JAYCO_TOUR_URL ? window.JAYCO_TOUR_URL(s, b.id) : null,
+      tours: window.JAYCO_TOUR_URLS ? window.JAYCO_TOUR_URLS(s, b.id) : [],
       blurb: (d && d.blurb) || '',
       sheet: b.specs || null,
       siblings: (window.JAYCO_BUILD[s].floorplans || []).map((p) => ({
@@ -546,26 +547,58 @@
      Jayco's Matterport walkthrough of this plan, embedded the way jayco.com's
      own floorplan pages embed it. Lazy: it is a heavy frame, and it sits a
      screen below the fold. A plan with no scan drops the section — the
-     drawing's "View 3D Tour" control above already says so. */
+     drawing's "View 3D Tour" control above already says so.
+
+     A plan can have more than one scan, so the frames sit in a rail: one
+     slide wide, native scroll with snap, the video rail's arrows and a count
+     in the head. One scan renders exactly as it always did — no arrows, no
+     count, nothing to scroll. */
   function renderTour() {
     if (!plan || !$('#md-tour')) { drop('#md-tour'); return; }
-    if (!plan.tour360) { drop('#md-tour'); return; }
+    const tours = (plan.tours && plan.tours.length) ? plan.tours : (plan.tour360 ? [plan.tour360] : []);
+    if (!tours.length) { drop('#md-tour'); return; }
     const who = `${model.name} ${plan.name}`;
+    const many = tours.length > 1;
+    const of = (i) => (many ? ` ${i + 1} of ${tours.length}` : '');
+
+    const arrow = (dir, d) => `
+      <button type="button" class="md-video-nav" id="fp-tour-${dir}"
+              aria-label="${dir === 'prev' ? 'Previous' : 'Next'} tour" aria-controls="fp-tour-track">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+      </button>`;
+
+    /* Only the first frame is given its src here. The rest carry it in
+       data-src and are loaded when their slide is reached — loading="lazy"
+       alone is not trusted to hold back a frame that is offscreen sideways,
+       and each one is a full Matterport player. */
     set('#md-tour', `
       <div class="fp-tour-inner">
-        <div class="md-section-head">
-          <span class="section-label">3D Tour</span>
-          <h2 class="section-heading dark">Walk the ${esc(plan.name)}.</h2>
-          <p class="section-body">Step inside and look around every room, the way you would on the lot.</p>
+        <div class="fp-tour-head">
+          <div class="md-section-head">
+            <span class="section-label">3D Tour</span>
+            <h2 class="section-heading dark">Walk the ${esc(plan.name)}.</h2>
+            <p class="section-body">Step inside and look around every room, the way you would on the lot.</p>
+          </div>
+          ${many ? `<div class="md-video-controls fp-tour-controls">
+            <span class="fp-tour-count" id="fp-tour-count" aria-live="polite">1 / ${tours.length}</span>
+            ${arrow('prev', 'M15 5l-7 7 7 7')}
+            ${arrow('next', 'M9 5l7 7-7 7')}
+          </div>` : ''}
         </div>
-        <div class="fp-tour-frame" id="fp-tour-frame">
-          <iframe src="${esc(plan.tour360)}" title="3D tour of the ${esc(who)}" tabindex="-1"
-                  loading="lazy" allowfullscreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; xr-spatial-tracking"></iframe>
-          <button type="button" class="fp-tour-shield" id="fp-tour-shield"
-                  aria-label="Start the 3D tour of the ${esc(who)}"></button>
-          <button type="button" class="fp-tour-done" id="fp-tour-done" hidden>Done</button>
-        </div>
+        <ul class="fp-tour-track" id="fp-tour-track" role="list">
+          ${tours.map((url, i) => `
+          <li class="fp-tour-slide">
+            <div class="fp-tour-frame">
+              <iframe ${i === 0 ? 'src' : 'data-src'}="${esc(url)}" title="3D tour${of(i)} of the ${esc(who)}" tabindex="-1"
+                      loading="lazy" allowfullscreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; xr-spatial-tracking"></iframe>
+              <button type="button" class="fp-tour-shield"
+                      aria-label="Start 3D tour${of(i)} of the ${esc(who)}"></button>
+              <button type="button" class="fp-tour-done" hidden>Done</button>
+            </div>
+          </li>`).join('')}
+        </ul>
         <p class="fp-tour-note">Virtual Floorplan Showings and Product Specifics Are Subject to Change Without Notice</p>
       </div>`);
 
@@ -575,27 +608,55 @@
        instead, and wakes when the tour itself is clicked. The frame itself is jayco.com's embed exactly —
        same URL, same permissions, never reloaded. Leaving the frame, Esc or
        Done put it back to sleep, and the page scrolls past it again. */
-    const frame = $('#fp-tour-frame');
-    const shield = $('#fp-tour-shield');
-    const done = $('#fp-tour-done');
-    const iframe = frame && frame.querySelector('iframe');
-    if (!frame || !shield || !done || !iframe) return;
-    function wake() {
-      frame.classList.add('is-live');
-      done.hidden = false;
-      iframe.tabIndex = 0;
-      iframe.focus();
+    const track = $('#fp-tour-track');
+    if (!track) return;
+    const sleepers = [];
+    track.querySelectorAll('.fp-tour-frame').forEach((frame) => {
+      const shield = frame.querySelector('.fp-tour-shield');
+      const done = frame.querySelector('.fp-tour-done');
+      const iframe = frame.querySelector('iframe');
+      if (!shield || !done || !iframe) return;
+      function wake() {
+        frame.classList.add('is-live');
+        done.hidden = false;
+        iframe.tabIndex = 0;
+        iframe.focus();
+      }
+      function sleep() {
+        if (!frame.classList.contains('is-live')) return;
+        frame.classList.remove('is-live');
+        done.hidden = true;
+        iframe.tabIndex = -1;
+      }
+      shield.addEventListener('click', wake);
+      done.addEventListener('click', () => { sleep(); shield.focus(); });
+      frame.addEventListener('mouseleave', sleep);
+      sleepers.push(sleep);
+    });
+    const sleepAll = () => sleepers.forEach((s) => s());
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') sleepAll(); });
+
+    if (!many) return;
+    const slides = Array.from(track.querySelectorAll('.fp-tour-slide'));
+    const count = $('#fp-tour-count');
+    let current = 0;
+    function load(i) {
+      const f = slides[i] && slides[i].querySelector('iframe[data-src]');
+      if (f) { f.src = f.dataset.src; f.removeAttribute('data-src'); }
     }
-    function sleep() {
-      if (!frame.classList.contains('is-live')) return;
-      frame.classList.remove('is-live');
-      done.hidden = true;
-      iframe.tabIndex = -1;
+    /* read from scrollLeft, as the rails are, so a swipe and an arrow agree */
+    function settle() {
+      const w = slides[0].getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0);
+      const i = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / (w || 1))));
+      load(i);
+      if (i === current) return;
+      current = i;
+      /* a tour left running offscreen would keep the keyboard and the wheel */
+      sleepAll();
+      if (count) count.textContent = `${i + 1} / ${slides.length}`;
     }
-    shield.addEventListener('click', wake);
-    done.addEventListener('click', () => { sleep(); shield.focus(); });
-    frame.addEventListener('mouseleave', sleep);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') sleep(); });
+    track.addEventListener('scroll', settle, { passive: true });
+    initRail(track, $('#fp-tour-prev'), $('#fp-tour-next'), '.fp-tour-slide');
   }
 
   /* ---------- Scenery band + detail carousel ----------

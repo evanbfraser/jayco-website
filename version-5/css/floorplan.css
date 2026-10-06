@@ -226,7 +226,39 @@
   margin: 0 auto;
   padding: 0 var(--md-pad);
 }
-.fp-tour .md-section-head { padding-left: 0; padding-right: 0; max-width: none; margin-bottom: var(--md-gap-tight); }
+.fp-tour .md-section-head { padding-left: 0; padding-right: 0; max-width: none; margin-bottom: 0; }
+/* Heading left, count and arrows right, as on the video rail. With one tour
+   there are no controls and the head is the heading alone. */
+.fp-tour-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: var(--md-gap-tight);
+}
+.fp-tour-count {
+  margin-right: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-mid);
+}
+/* One tour to a slide. Native scroll with snap, so a swipe on the sleeping
+   frame moves the rail; the gap is only seen mid-scroll. */
+.fp-tour-track {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: var(--radius-card);
+}
+.fp-tour-track::-webkit-scrollbar { display: none; }
+.fp-tour-slide { flex: 0 0 100%; width: 100%; min-width: 0; scroll-snap-align: start; }
 .fp-tour-frame {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -274,4 +306,9 @@
 @media (max-width: 768px) {
   /* a phone held upright gets a taller window into the coach */
   .fp-tour-frame { aspect-ratio: 4 / 5; }
+  /* The arrows stay, unlike the video rail's: a tour that is awake takes the
+     swipe for itself, so the buttons are the sure way to the next one. They
+     drop under the heading rather than squeeze it. */
+  .fp-tour-head { display: block; }
+  .fp-tour-controls { display: flex; margin-top: 1.25rem; padding-bottom: 0; }
 }
