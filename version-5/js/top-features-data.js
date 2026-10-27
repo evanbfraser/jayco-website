@@ -88,6 +88,25 @@ window.JAYCO_TOP_FEATURES = (function () {
         "320mkts": ["348", "349", "350", "351"],
       },
     },
+    /* Motorized: jayco.com's 2027 pages carry no usable gallery (Swift has
+       none; Greyhawk's is paint and decor alone), so these are its 2025
+       galleries, kept to items the 2027 coach still has. Swift's Tecnoform
+       cabinetry is left out — the 2027 Swift no longer lists it. */
+    'greyhawk': {
+      items: [
+        i("22", "Optional LED HD Smart TV in Bedroom", "", "Interior", "greyhawk__22.webp", 1200, 675),
+        i("24", "Sony® Infotainment Center", "", "Interior", "greyhawk__24.webp", 800, 450),
+        i("23", "Automatic Hydraulic Leveling Jacks", "", "Exterior", "greyhawk__23.webp", 1200, 675),
+        i("25", "One-Piece Seamless Front Cap with Automotive-Bonded Panoramic Window", "", "Exterior", "greyhawk__25.webp", 1200, 675),
+      ],
+      plans: {
+        "27u": ["22", "24", "23", "25"],
+        "29mv": ["22", "24", "23", "25"],
+        "31f": ["22", "24", "23", "25"],
+        "30z": ["22", "24", "23", "25"],
+        "30z-csa": ["22", "24", "23", "25"],
+      },
+    },
     'jay-feather': {
       items: [
         i("336", "MaxxAir Vent - Premier Package only", "Vent fan in living room and bathroom", "Interior", "jay-feather__336.webp", 1200, 800),
@@ -174,6 +193,17 @@ window.JAYCO_TOP_FEATURES = (function () {
         "270mks": ["403", "404"],
         "280bhsw": ["403", "404"],
         "335bhs": ["403", "404"],
+      },
+    },
+    'swift': {
+      items: [
+        i("74", "Firefly Total Coach Control System with Wall-Mounted Touchscreen and Mobile App", "", "Interior", "swift__74.webp", 1200, 675),
+        i("76", "Aqua View® SHOWERMI$ER™ Water Management System", "", "Interior", "swift__76.webp", 1200, 675),
+        i("78", "Truma Combi Hot Water Heater/Furnace", "", "Interior", "swift__78.webp", 1200, 675),
+      ],
+      plans: {
+        "20e": ["74", "76", "78"],
+        "20t": ["74", "76", "78"],
       },
     },
   };

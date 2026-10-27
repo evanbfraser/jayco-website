@@ -203,7 +203,7 @@
     { id: 'md-overview',  label: 'Floorplan' },   /* floorplan.html's own overview */
     { id: 'md-tour',      label: '3D Tour' },     /* floorplan.html only */
     { id: 'md-scenery',   label: 'Gallery'  },
-    { id: 'fp-topfeat',   label: 'Top Features' },  /* floorplan.html only */
+    { id: 'fp-topfeat',   label: 'Top Features' },
     { id: 'md-plan',      label: 'Floorplans' },
     { id: 'md-features',  label: 'Features' },
     { id: 'md-finishes',  label: 'Decor & Paint' },
@@ -2186,15 +2186,18 @@
     }
   }
 
-  /* ---------- Top features (floorplan.html) ----------
-     jayco.com's "Top Feature Gallery" for this plan: a photograph and Jayco's
-     caption per item (top-features-data.js), directly under the gallery. The
-     rail and its arrows are the video rail's, as the other floorplans' are.
-     Jayco's Interior/Exterior tabs become a tag on each card — with three to
-     twelve items, a tab would mostly hide one or two photographs. */
+  /* ---------- Top features ----------
+     jayco.com's "Top Feature Gallery": a photograph and Jayco's caption per
+     item (top-features-data.js), directly under the gallery. A floorplan page
+     shows the items its plan's jayco.com page shows; the model page shows
+     every item the model has. The rail and its arrows are the video rail's,
+     as the other floorplans' are. Jayco's Interior/Exterior tabs become a tag
+     on each card — with three to twelve items, a tab would mostly hide one or
+     two photographs. A model with no entry drops the section. */
   function renderTopFeatures() {
     const T = (window.JAYCO_TOP_FEATURES || {})[slug];
-    const ids = plan && T && T.plans[plan.id];
+    if (!T) { drop('#fp-topfeat'); return; }
+    const ids = plan ? T.plans[plan.id] : T.items.map((x) => x.id);
     if (!ids || !ids.length) { drop('#fp-topfeat'); return; }
     const items = ids.map((id) => T.items.find((x) => x.id === id)).filter(Boolean);
     if (!items.length) { drop('#fp-topfeat'); return; }
@@ -2211,7 +2214,7 @@
         <div class="md-videos-head">
           <div class="md-section-head">
             <span class="section-label">Top Features</span>
-            <h2 class="section-heading dark">A closer look at the ${esc(plan.name)}.</h2>
+            <h2 class="section-heading dark">A closer look at the ${esc(plan ? plan.name : model.name)}.</h2>
           </div>
           ${items.length > 1 ? `<div class="md-video-controls">
             ${arrow('prev', 'M15 5l-7 7 7 7')}

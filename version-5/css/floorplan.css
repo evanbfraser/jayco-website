@@ -131,49 +131,7 @@
 /* .fp-other-card and the all-floorplans dialog live in model.css: model.html
    opens the same dialog. */
 
-/* ---------- Top features ----------
-   The same rail and card width as the other floorplans below; a photograph
-   fills the well here rather than a drawing sitting in it, so the art is
-   cropped to one 4:3 frame whatever shape Jayco shot it in. */
-.fp-topfeat-card { margin: 0; }
-.fp-topfeat-art {
-  position: relative;
-  display: block;
-  aspect-ratio: 4 / 3;
-  margin-bottom: 1rem;
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  background: var(--surface);
-}
-.fp-topfeat-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.fp-topfeat-tag {
-  position: absolute;
-  top: 0.85rem;
-  left: 0.85rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.92);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-dark);
-}
-.fp-topfeat-title {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--text-dark);
-}
-.fp-topfeat-body {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--text-mid);
-}
+/* Top features: the cards live in model.css, since model.html shows them too. */
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
