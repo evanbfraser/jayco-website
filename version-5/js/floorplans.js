@@ -58,6 +58,13 @@
   const $ = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => Array.prototype.slice.call((c || document).querySelectorAll(s));
 
+  /* ---------- One model (model-floorplans.html?model=<slug>) ----------
+     The same cards for a single model: the model page's "View All Floorplans"
+     lands here. No filter rail, no jump list, no rails — one grid of cards —
+     so everything below that touches those is guarded on ONE. */
+  const ONE = document.body.classList.contains('fpc-one-page')
+    ? (new URLSearchParams(location.search).get('model') || '') : null;
+
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
@@ -207,6 +214,7 @@
          Eagle (230MLCS) follows the Jay Feathers. */
       const ids = Object.keys(BUILD)
         .filter((id) => JAYCO.models[id] && JAYCO.models[id].category === cat.id)
+        .filter((id) => ONE === null || id === ONE)
         .sort((a, b) => byCode(
           regionPlans(a).slice().sort(byCode)[0] || {},
           regionPlans(b).slice().sort(byCode)[0] || {}));
@@ -713,8 +721,13 @@
      not a page, and a history entry per click would break the back button. */
   function syncPicksURL() {
     if (!window.history || !window.history.replaceState) return;
-    const q = picked.length ? '?c=' + picked.join(',') : '';
-    window.history.replaceState({}, '', 'floorplans.html' + q + window.location.hash);
+    /* the rest of the query stays (?model=, ?region=); ?plan= was a one-time
+       jump to a card and is dropped */
+    const u = new URL(window.location.href);
+    u.searchParams.delete('plan');
+    if (picked.length) u.searchParams.set('c', picked.join(','));
+    else u.searchParams.delete('c');
+    window.history.replaceState({}, '', u.pathname.split('/').pop() + u.search + u.hash);
   }
   function readPicks() {
     const c = new URLSearchParams(window.location.search).get('c');
@@ -820,8 +833,17 @@
     </section>`;
   }
 
+  /* One model: no row head (the page head is the model) and no rail — the
+     cards wrap into a grid, so every plan is on screen without paging. */
+  function sectionOne(s) {
+    return `<section class="fpc-model" id="fpc-m-${esc(s.modelId)}" data-model="${esc(s.modelId)}"
+      aria-label="${esc(s.model)} floorplans">
+      <ul class="fpc-cards fpc-cards--grid" role="list">${s.rows.map(card).join('')}</ul>
+    </section>`;
+  }
+
   function renderCatalog() {
-    $('#fpc-catalog').innerHTML = SECTIONS.map(section).join('');
+    $('#fpc-catalog').innerHTML = SECTIONS.map(ONE !== null ? sectionOne : section).join('');
     SECTIONS.forEach((s) => {
       s.el = $('#fpc-m-' + s.modelId);
       s.metaEl = $('[data-meta="' + s.modelId + '"]', s.el);
@@ -1232,7 +1254,7 @@
   /* ---------- Open / close ----------
      A disclosure: the page behind stays scrollable and clickable, so there is no
      scroll lock, no inert, and no focus trap to maintain. */
-  const panelOpen = () => $('#fpc-rail').classList.contains('is-open');
+  const panelOpen = () => !!$('#fpc-rail') && $('#fpc-rail').classList.contains('is-open');
 
   /* Below 1024 the same control is a SHEET, not a disclosure: it covers the
      screen, so a page still scrolling behind it is content moving unseen under
@@ -1294,6 +1316,11 @@
   const toggle = (set, v) => (set.has(v) ? set.delete(v) : set.add(v));
 
   function wire() {
+    if ($('#fpc-rail')) wireFilters();
+    wireCards();
+  }
+
+  function wireFilters() {
     /* Bound to the RAIL for the same reason paintChips() queries it: the type
        pair sits in the collapsed bar, outside the facets form. */
     $('#fpc-rail').addEventListener('click', (e) => {
@@ -1345,7 +1372,9 @@
       e.preventDefault();
       scrollToSection(a.dataset.jump);
     });
+  }
 
+  function wireCards() {
     /* One listener for 181 cards and 54 arrows. */
     $('#fpc-catalog').addEventListener('click', (e) => {
       const nav = e.target.closest('.fpc-nav');
@@ -1521,6 +1550,7 @@
     buildIndex();
     RANGE.price = span('price'); RANGE.length = span('lengthIn');
     state.price = RANGE.price.slice(); state.length = RANGE.length.slice();
+    if (ONE !== null) { startOne(late); return; }
     if (!ROWS.length || !SECTIONS.length) return;
 
     $('#fpc-sub').textContent =
@@ -1547,6 +1577,57 @@
     else document.addEventListener('jayco:animations-ready', initRowReveal, { once: true });
   }
 
+  /* One model's page. The head is the model's, the cards are a grid, and the
+     detail panel, enlarge, tour and compare tray are the catalog's own. */
+  function startOne(late) {
+    const s = SECTIONS[0];
+    if (!s) {
+      $('#fpc-sub').textContent = REGION
+        ? 'This model has no floorplans listed for ' + REGION.label + '.'
+        : '';
+      $('#fpc-empty').hidden = !!REGION;
+      return;
+    }
+    const n = s.rows.length;
+    const prices = s.rows.map((r) => r.price).filter((v) => v != null);
+    const bits = [n + (n === 1 ? ' floorplan' : ' floorplans')];
+    if (prices.length) bits.push('MSRP starting at ' + money(Math.min.apply(null, prices)));
+    $('#fpc-sub').textContent = bits.join(' · ');
+
+    $('#fpc-one-ctas').hidden = false;
+    $('#fpc-one-build').href = 'build-price.html?model=' + s.modelId + '&step=floorplan';
+
+    readPicks();
+    renderCatalog();
+    wire();
+    renderTray();
+    focusPlan();
+
+    const settle = () => { refresh(); measureTray(); };
+    if (late || document.readyState === 'complete') requestAnimationFrame(settle);
+    else window.addEventListener('load', settle, { once: true });
+  }
+
+  /* The head names the model before any region is picked, so the page says
+     what it is even while it waits on the picker. */
+  function headOne() {
+    const m = JAYCO.models[ONE];
+    if (!m || !BUILD[ONE]) {
+      $('#fpc-one-title').textContent = 'Model not found';
+      $('#fpc-empty').hidden = false;
+      return false;
+    }
+    const cat = (JAYCO.categories || []).find((c) => c.id === m.category);
+    $('#fpc-one-label').textContent = m.year + ' · ' + (cat ? cat.name : 'Floorplans');
+    $('#fpc-one-title').textContent = m.name + ' floorplans';
+    document.title = m.year + ' ' + m.name + ' Floorplans — Jayco';
+    const back = $('#fpc-one-back');
+    back.href = hasModelPage(ONE) ? 'model.html?model=' + ONE : 'floorplans.html#fpc-m-' + ONE;
+    $('#fpc-one-back-label').textContent = hasModelPage(ONE) ? m.name : 'All Floorplans';
+    return true;
+  }
+
+  if (ONE !== null && !headOne()) return;
   mountRegion();
   if (!REG || REGION) start(false);
   else {

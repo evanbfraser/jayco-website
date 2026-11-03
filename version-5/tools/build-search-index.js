@@ -299,7 +299,7 @@ DEALERS.dealers.forEach((d) => {
    as the title, so the page leads the videos and articles that merely mention
    the word. The four query-driven templates are left out — they are not pages a
    reader can arrive at without a record. */
-const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'floorplan.html', 'type.html', 'event.html', 'news.html']);
+const SKIP = new Set(['blog-category.html', 'blog-post.html', 'model.html', 'floorplan.html', 'model-floorplans.html', 'type.html', 'event.html', 'news.html']);
 const EXTRA = {
   'index.html': 'home homepage',
   'jayco-difference.html': 'warranty 2+3 construction magnum truss stronghold climate shield jride jaysmart quality features',

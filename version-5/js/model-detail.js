@@ -271,8 +271,8 @@
         : `<p class="md-hero-price">MSRP Starting At <strong>${money(plan.price)}</strong></p>`)
       : `<p class="md-hero-price">MSRP Starting At <strong>${money(model.priceFrom)}</strong></p>`;
 
-    /* "View Floorplans" keeps its builder href for no-script, and opens the
-       model's floorplans dialog (initAllPlans) once renderPlan has run */
+    /* "View Floorplans" keeps its builder href for no-script, and points at
+       the model's floorplans page (linkAllPlans) once renderPlan has run */
     const ctas = heroCtas.map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}"${
         !plan && c.label === 'View Floorplans' ? ' data-fp-all' : ''}>${esc(c.label)}</a>`
@@ -395,7 +395,7 @@
           <div class="md-section-head">
             <span class="section-label">Floorplan</span>
             <h2 class="section-heading dark">${esc(heading)}</h2>
-            <a class="fp-all-link" id="fp-all-link" href="${allHref}" aria-haspopup="dialog">All ${sibs.length} ${esc(model.name)} floorplans</a>
+            <a class="fp-all-link" id="fp-all-link" href="${allHref}">All ${sibs.length} ${esc(model.name)} floorplans</a>
           </div>
         </div>
 
@@ -443,103 +443,23 @@
       </div>`);
 
     initZoom();
-    if (sibs.length >= 2) {
-      initAllPlans([$('#fp-all-link')], sibs.map((p) => Object.assign({ href: planHref(p.id) }, p)), plan.id);
-    }
+    if (sibs.length >= 2) linkAllPlans([$('#fp-all-link')], plan.id);
   }
 
-  /* ---------- Every floorplan of the model, in a dialog ----------
+  /* ---------- Every floorplan of the model ----------
      floorplan.html's "All 16 Jay Feather floorplans", and model.html's "View
      Floorplans" in the hero and "View All Floorplans" in the floorplan band,
-     open this rather than leaving the page: the whole model's plans as cards,
-     the one on screen (hereId, floorplan.html only) marked, each a link to its
-     own page. The triggers keep their hrefs, so without script they still go
-     somewhere useful. Built like the zoom dialog: appended to <body>, [hidden]
-     when closed, Lenis stopped while open, focus held inside and handed back
-     to whichever trigger opened it. */
-  function initAllPlans(triggers, sibs, hereId) {
-    triggers = triggers.filter(Boolean);
-    if (!triggers.length || !sibs.length) return;
-
-    const modal = document.createElement('div');
-    modal.className = 'fp-all';
-    modal.hidden = true;
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-labelledby', 'fp-all-title');
-    modal.innerHTML = `
-      <div class="fp-all-scrim" data-all-close="1"></div>
-      <div class="fp-all-panel">
-        <div class="fp-all-head">
-          <h2 class="fp-all-title" id="fp-all-title">${model.year} ${esc(model.name)} floorplans</h2>
-          <span class="fp-all-count">${sibs.length} floorplan${sibs.length > 1 ? 's' : ''}</span>
-          <button type="button" class="fp-all-close" aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-          </button>
-        </div>
-        <ul class="fp-all-grid" data-lenis-prevent role="list">
-          ${sibs.map((p) => {
-            const here = p.id === hereId;
-            return `
-            <li>
-              <a class="fp-other-card fp-all-card${here ? ' is-here' : ''}" href="${p.href}"${here ? ' aria-current="page"' : ''}>
-                <span class="fp-other-art">
-                  <img src="${p.img}" alt="" loading="lazy" decoding="async" />
-                  ${here ? '<span class="fp-all-here">Viewing</span>' : ''}
-                </span>
-                <span class="fp-other-name">${esc(p.name)}</span>
-                <span class="fp-other-facts">${esc([
-                  p.sleeps ? 'Sleeps ' + p.sleeps : '', p.length || ''].filter(Boolean).join(' · '))}</span>
-                <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(p.price)}</span>
-              </a>
-            </li>`;
-          }).join('')}
-        </ul>
-      </div>`;
-    document.body.appendChild(modal);
-
-    const close = modal.querySelector('.fp-all-close');
-    const grid = modal.querySelector('.fp-all-grid');
-    let hideT = null;
-    let opener = null;
-
-    function open(e) {
-      if (e) e.preventDefault();
-      opener = e ? e.currentTarget : null;
-      clearTimeout(hideT);
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
-      close.focus();
-      /* start with the current plan in view — Jay Flight has fifty-eight */
-      const here = grid.querySelector('.is-here');
-      if (here) grid.scrollTop = Math.max(0, here.parentNode.offsetTop - grid.clientHeight / 3);
-      requestAnimationFrame(() => modal.classList.add('is-open'));
-    }
-    function shut() {
-      if (modal.hidden) return;
-      modal.classList.remove('is-open');
-      document.body.style.overflow = '';
-      if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
-      if (opener) opener.focus();
-      clearTimeout(hideT);
-      hideT = setTimeout(() => { modal.hidden = true; }, 320);
-    }
-
-    triggers.forEach((t) => {
-      t.setAttribute('aria-haspopup', 'dialog');
-      t.addEventListener('click', open);
-    });
-    close.addEventListener('click', shut);
-    modal.addEventListener('click', (e) => { if (e.target.dataset.allClose) shut(); });
-    modal.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); shut(); return; }
-      if (e.key !== 'Tab') return;
-      const f = Array.from(modal.querySelectorAll('button, a[href]'));
-      const first = f[0], last = f[f.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+     go to model-floorplans.html: the model's plans as the All Floorplans
+     catalog's cards. From a floorplan page, ?plan= brings the plan you were
+     on into view and marks it. Only models with builder data have that page;
+     the rest keep the href they were written with. */
+  function linkAllPlans(triggers, hereId) {
+    if (!(window.JAYCO_BUILD && window.JAYCO_BUILD[slug])) return;
+    const href = 'model-floorplans.html?model=' + encodeURIComponent(slug) +
+      (hereId ? '&plan=' + encodeURIComponent(slug + '__' + hereId) : '');
+    triggers.filter(Boolean).forEach((t) => {
+      t.setAttribute('href', href);
+      t.removeAttribute('aria-haspopup');
     });
   }
 
@@ -1196,16 +1116,9 @@
 
     initZoom();
 
-    /* Every "View (All) Floorplans" on the page opens the model's plans in a
-       dialog. A towable's cards go to each plan's own page; a motorhome's,
-       which have none, to the builder with the plan chosen. */
-    initAllPlans(Array.from(document.querySelectorAll('[data-fp-all]')), plans.map((p) => ({
-      id: p.id, name: p.name, img: p.image, length: p.length, price: p.price,
-      /* model-data writes "Up to 6"; the card already says "Sleeps" */
-      sleeps: p.sleeps ? String(p.sleeps).replace(/^up to\s*/i, '') : null,
-      href: planPages ? planHref(p.id)
-        : `build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior`,
-    })));
+    /* Every "View (All) Floorplans" on the page goes to the model's
+       floorplans page. */
+    linkAllPlans(Array.from(document.querySelectorAll('[data-fp-all]')));
 
     if (!showFilter) return;
 
