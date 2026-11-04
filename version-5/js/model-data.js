@@ -109,10 +109,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
       poster:  img('swift-hero-poster.jpg'),
       heading: 'Swift',
       sub: 'A camper van that parks in a normal spot, drives like the van it is, and sleeps you wherever the day ends.',
-      ctas: [
-        { label: 'View Floorplans', href: 'build-price.html?model=swift&step=floorplan', style: 'primary' },
-        { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
-      ],
     },
 
     /* ---- Intro: Class B persona — couples & solo travellers entering van life ---- */
@@ -792,10 +788,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
       poster: jfImg('jf-hero-poster.jpg') + '?v=2',
       heading: 'Jay Feather',
       sub: 'Sixteen floorplans on a half-ton hitch — from a 23-foot couple’s coach to a 36-foot bunkhouse that sleeps eleven.',
-      ctas: [
-        { label: 'View Floorplans', href: 'build-price.html?model=jay-feather&step=floorplan', style: 'primary' },
-        { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
-      ],
     },
 
     intro: {
@@ -1188,10 +1180,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
       poster: ghImg('gh-hero-poster.jpg'),
       heading: 'Greyhawk',
       sub: 'Jayco’s top-of-the-line gas Class C — a Ford® E-450 underneath, a seamless one-piece cap up front, and room for up to seven.',
-      ctas: [
-        { label: 'View Floorplans', href: 'build-price.html?model=greyhawk&step=floorplan', style: 'primary' },
-        { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
-      ],
     },
 
     intro: {
@@ -1526,7 +1514,6 @@ window.JAYCO_MODEL_DETAIL = (function () {
       poster: img('swift-hero-poster.jpg'),
       heading: 'Comet',
       sub: 'Compact camper van, endless range.',
-      ctas: [{ label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' }],
     },
 
     intro: {

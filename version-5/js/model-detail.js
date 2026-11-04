@@ -252,14 +252,17 @@
     /* A floorplan page keeps the model's footage and swaps everything written
        on top of it for the plan's own: its code, its line, its MSRP, and a
        build that opens with this plan already chosen. */
-    /* "#" until the dealer inventory page is built — the same placeholder as
-       View Inventory in the header */
-    const inventory = { label: 'View Inventory', href: '#', style: 'secondary' };
+    /* A model page asks for two things only: build one, or see its plans.
+       View Inventory's "#" stays until the dealer inventory page is built —
+       the same placeholder as View Inventory in the header. */
     const heroCtas = plan ? [
       { label: 'Price this Floorplan', href: priceHref(), style: 'primary' },
       { label: 'Find a Dealer', href: 'dealers.html', style: 'secondary' },
-      inventory,
-    ] : (h.ctas || []).concat(inventory);
+      { label: 'View Inventory', href: '#', style: 'secondary' },
+    ] : [
+      { label: 'Build & Price', href: priceHref(), style: 'primary' },
+      { label: 'View All Floorplans', href: priceHref(), style: 'secondary', allPlans: true },
+    ];
     /* the code on its own line: it is the name of this page, and a model name
        and a code broken wherever the measure falls reads as one long word */
     const heading = plan
@@ -271,11 +274,11 @@
         : `<p class="md-hero-price">MSRP Starting At <strong>${money(plan.price)}</strong></p>`)
       : `<p class="md-hero-price">MSRP Starting At <strong>${money(model.priceFrom)}</strong></p>`;
 
-    /* "View Floorplans" keeps its builder href for no-script, and points at
-       the model's floorplans page (linkAllPlans) once renderPlan has run */
+    /* "View All Floorplans" starts on the builder's floorplan step, and points
+       at the model's floorplans page (linkAllPlans) once renderPlan has run */
     const ctas = heroCtas.map((c) =>
       `<a href="${c.href}" class="btn-${c.style === 'secondary' ? 'secondary' : 'primary'}"${
-        !plan && c.label === 'View Floorplans' ? ' data-fp-all' : ''}>${esc(c.label)}</a>`
+        c.allPlans ? ' data-fp-all' : ''}>${esc(c.label)}</a>`
     ).join('');
 
     /* an in-page CTA ("View Floorplans" → #md-plan) scrolls like the sub-nav */
@@ -978,8 +981,11 @@
        floorplan, and Jay Feather would ship sixteen copies of it. */
     /* A towable's plans each have their own page (floorplan.html), so the
        slide's second button goes there; "View All Floorplans" still sits above
-       the rail. A motorhome's plans have no page, and keep it on the slide. */
+       the rail. A motorhome's plans have no page, so the slide sends you down
+       to the specs table instead (renderSpecs draws it for motorhomes only);
+       with no table to go to, it keeps "View All Floorplans". */
     const planPages = isTowable() && !!(window.JAYCO_BUILD && window.JAYCO_BUILD[slug]);
+    const hasSpecs = !plan && !isTowable() && !!(model.specs && model.specs.groups && model.specs.groups.length);
     const panels = plans.map((p, i) => {
       const first = i === 0;
 
@@ -1060,12 +1066,9 @@
                leading slot it has on every other band, and the second is an
                outline button so the row still has a single obvious action.
 
-               "View All Floorplans" goes to the configurator's floorplan step,
-               which is the one view on the site that puts every plan in a model
-               up at once, each with its drawing. It carries &step=floorplan
-               because build-price.html otherwise opens on the model step with
-               the model merely preselected — see applyDeepLink() in build.js,
-               which grew the parameter for this link.
+               The second button is Floorplan Details (towables), View Specs
+               (motorhomes), or View All Floorplans when neither exists — see
+               planPages and hasSpecs above.
 
                The 3D tour was the third button here. It has moved onto the
                drawing itself, where it is one of that component's two actions —
@@ -1074,6 +1077,8 @@
             <a href="build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior" class="btn-primary">Price this Floorplan</a>
             ${planPages ? `<a href="${planHref(p.id)}" class="btn-secondary-light"
                aria-label="Floorplan details for the ${esc(p.name)}">Floorplan Details</a>`
+            : hasSpecs ? `<a href="#md-specs" class="btn-secondary-light" data-spec-plan="${esc(p.name)}"
+               aria-label="Specs for the ${esc(p.name)}">View Specs</a>`
             : `<a href="build-price.html?model=${slug}&amp;step=floorplan"
                class="btn-secondary-light" data-fp-all>View All Floorplans</a>`}
           </div>
@@ -1119,6 +1124,19 @@
     /* Every "View (All) Floorplans" on the page goes to the model's
        floorplans page. */
     linkAllPlans(Array.from(document.querySelectorAll('[data-fp-all]')));
+
+    /* "View Specs" scrolls to the table, turned to this plan's column — the
+       one a phone shows when the table is narrowed to a single plan */
+    $('#md-fp-track').addEventListener('click', (e) => {
+      const a = e.target.closest('[data-spec-plan]');
+      const target = a && document.getElementById('md-specs');
+      if (!target) return;
+      e.preventDefault();
+      const col = Array.from(document.querySelectorAll('.md-spec-switch-btn'))
+        .find((b) => b.textContent.trim() === a.dataset.specPlan);
+      if (col) col.click();
+      scrollToSection(target);
+    });
 
     if (!showFilter) return;
 
