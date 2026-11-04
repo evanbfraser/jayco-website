@@ -980,7 +980,7 @@
        Kept as a JS comment rather than an HTML one: this template runs once per
        floorplan, and Jay Feather would ship sixteen copies of it. */
     /* A towable's plans each have their own page (floorplan.html), so the
-       slide's second button goes there; "View All Floorplans" still sits above
+       slide's View Specs opens that page at its specs; "View All Floorplans" sits above
        the rail. A motorhome's plans have no page, so the slide sends you down
        to the specs table instead (renderSpecs draws it for motorhomes only);
        with no table to go to, it keeps "View All Floorplans". */
@@ -1066,17 +1066,17 @@
                leading slot it has on every other band, and the second is an
                outline button so the row still has a single obvious action.
 
-               The second button is Floorplan Details (towables), View Specs
-               (motorhomes), or View All Floorplans when neither exists — see
-               planPages and hasSpecs above.
+               The second button is View Specs: a towable's goes to its plan
+               page's specs, a motorhome's scrolls to this page's table. With
+               neither, it is View All Floorplans — see planPages and hasSpecs.
 
                The 3D tour was the third button here. It has moved onto the
                drawing itself, where it is one of that component's two actions —
                see .md-plan-tools above. -->
           <div class="md-fp-ctas">
             <a href="build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior" class="btn-primary">Price this Floorplan</a>
-            ${planPages ? `<a href="${planHref(p.id)}" class="btn-secondary-light"
-               aria-label="Floorplan details for the ${esc(p.name)}">Floorplan Details</a>`
+            ${planPages ? `<a href="${planHref(p.id)}#md-specs" class="btn-secondary-light"
+               aria-label="Specs for the ${esc(p.name)}">View Specs</a>`
             : hasSpecs ? `<a href="#md-specs" class="btn-secondary-light" data-spec-plan="${esc(p.name)}"
                aria-label="Specs for the ${esc(p.name)}">View Specs</a>`
             : `<a href="build-price.html?model=${slug}&amp;step=floorplan"
@@ -2647,4 +2647,14 @@
   initCreaseAlign();
 
   document.addEventListener('jayco:animations-ready', initMotion);
+
+  /* A towable card's "View Specs" opens its plan page at #md-specs. The
+     section is injected, so the browser's own jump to the hash finds nothing;
+     go there once the page and its scroll engine are up. */
+  if (location.hash === '#md-specs') {
+    document.addEventListener('jayco:animations-ready', () => {
+      const target = document.getElementById('md-specs');
+      if (target) setTimeout(() => scrollToSection(target), 100);
+    });
+  }
 }());
