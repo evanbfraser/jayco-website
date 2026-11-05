@@ -818,6 +818,7 @@
   cursor: pointer;
   transition: background 0.25s, border-color 0.25s, color 0.25s;
 }
+a.fpc-details { display: inline-block; text-decoration: none; }
 .fpc-details:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
 .fpc-details:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 

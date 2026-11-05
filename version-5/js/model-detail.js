@@ -261,7 +261,11 @@
       { label: 'View Inventory', href: '#', style: 'secondary' },
     ] : [
       { label: 'Build & Price', href: priceHref(), style: 'primary' },
-      { label: 'View All Floorplans', href: priceHref(), style: 'secondary', allPlans: true },
+      /* Motorhomes have no floorplan pages, so their second button is View
+         Inventory (the same "#" placeholder as above) instead. */
+      isTowable()
+        ? { label: 'View All Floorplans', href: priceHref(), style: 'secondary', allPlans: true }
+        : { label: 'View Inventory', href: '#', style: 'secondary' },
     ];
     /* the code on its own line: it is the name of this page, and a model name
        and a code broken wherever the measure falls reads as one long word */
@@ -466,6 +470,98 @@
     });
   }
 
+  /* ---------- Every floorplan of a motorhome, in a dialog ----------
+     Motorhomes have no plan pages and no model-floorplans.html page, so their
+     "View All Floorplans" opens the model's plans here instead: cards, each
+     going to the builder with that plan chosen. The trigger keeps its builder
+     href, so without script it still goes somewhere useful. Built like the
+     zoom dialog: appended to <body>, [hidden] when closed, Lenis stopped while
+     open, focus held inside and handed back to the button that opened it. */
+  function initAllPlans(triggers, sibs, hereId) {
+    triggers = triggers.filter(Boolean);
+    if (!triggers.length || !sibs.length) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'fp-all';
+    modal.hidden = true;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'fp-all-title');
+    modal.innerHTML = `
+      <div class="fp-all-scrim" data-all-close="1"></div>
+      <div class="fp-all-panel">
+        <div class="fp-all-head">
+          <h2 class="fp-all-title" id="fp-all-title">${model.year} ${esc(model.name)} floorplans</h2>
+          <span class="fp-all-count">${sibs.length} floorplan${sibs.length > 1 ? 's' : ''}</span>
+          <button type="button" class="fp-all-close" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <ul class="fp-all-grid" data-lenis-prevent role="list">
+          ${sibs.map((p) => {
+            const here = p.id === hereId;
+            return `
+            <li>
+              <a class="fp-other-card fp-all-card${here ? ' is-here' : ''}" href="${p.href}"${here ? ' aria-current="page"' : ''}>
+                <span class="fp-other-art">
+                  <img src="${p.img}" alt="" loading="lazy" decoding="async" />
+                  ${here ? '<span class="fp-all-here">Viewing</span>' : ''}
+                </span>
+                <span class="fp-other-name">${esc(p.name)}</span>
+                <span class="fp-other-facts">${esc([
+                  p.sleeps ? 'Sleeps ' + p.sleeps : '', p.length || ''].filter(Boolean).join(' · '))}</span>
+                <span class="fp-other-price">${p.price == null ? 'Pricing to come' : 'MSRP Starting At ' + money(p.price)}</span>
+              </a>
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const close = modal.querySelector('.fp-all-close');
+    const grid = modal.querySelector('.fp-all-grid');
+    let hideT = null;
+    let opener = null;
+
+    function open(e) {
+      if (e) e.preventDefault();
+      opener = e ? e.currentTarget : null;
+      clearTimeout(hideT);
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (window.__jaycoLenis && window.__jaycoLenis.stop) window.__jaycoLenis.stop();
+      close.focus();
+      /* start with the current plan in view — Jay Flight has fifty-eight */
+      const here = grid.querySelector('.is-here');
+      if (here) grid.scrollTop = Math.max(0, here.parentNode.offsetTop - grid.clientHeight / 3);
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+    function shut() {
+      if (modal.hidden) return;
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+      if (window.__jaycoLenis && window.__jaycoLenis.start) window.__jaycoLenis.start();
+      if (opener) opener.focus();
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { modal.hidden = true; }, 320);
+    }
+
+    triggers.forEach((t) => {
+      t.setAttribute('aria-haspopup', 'dialog');
+      t.addEventListener('click', open);
+    });
+    close.addEventListener('click', shut);
+    modal.addEventListener('click', (e) => { if (e.target.dataset.allClose) shut(); });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); shut(); return; }
+      if (e.key !== 'Tab') return;
+      const f = Array.from(modal.querySelectorAll('button, a[href]'));
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
   /* ---------- 3D tour ----------
      Jayco's Matterport walkthrough of this plan, embedded the way jayco.com's
      own floorplan pages embed it. Lazy: it is a heavy frame, and it sits a
@@ -1066,8 +1162,9 @@
                leading slot it has on every other band, and the second is an
                outline button so the row still has a single obvious action.
 
-               The second button is View Specs: a towable's goes to its plan
-               page's specs, a motorhome's scrolls to this page's table. With
+               The second button is View Details on a towable, opening its
+               plan page; on a motorhome it is View Specs, which scrolls to
+               this page's table. With
                neither, it is View All Floorplans — see planPages and hasSpecs.
 
                The 3D tour was the third button here. It has moved onto the
@@ -1075,8 +1172,8 @@
                see .md-plan-tools above. -->
           <div class="md-fp-ctas">
             <a href="build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior" class="btn-primary">Price this Floorplan</a>
-            ${planPages ? `<a href="${planHref(p.id)}#md-specs" class="btn-secondary-light"
-               aria-label="Specs for the ${esc(p.name)}">View Specs</a>`
+            ${planPages ? `<a href="${planHref(p.id)}" class="btn-secondary-light"
+               aria-label="View details for the ${esc(p.name)}">View Details</a>`
             : hasSpecs ? `<a href="#md-specs" class="btn-secondary-light" data-spec-plan="${esc(p.name)}"
                aria-label="Specs for the ${esc(p.name)}">View Specs</a>`
             : `<a href="build-price.html?model=${slug}&amp;step=floorplan"
@@ -1121,9 +1218,16 @@
 
     initZoom();
 
-    /* Every "View (All) Floorplans" on the page goes to the model's
-       floorplans page. */
-    linkAllPlans(Array.from(document.querySelectorAll('[data-fp-all]')));
+    /* Every "View All Floorplans" on the page: a towable's goes to the
+       model's floorplans page, a motorhome's opens the plans in a dialog. */
+    const allTriggers = Array.from(document.querySelectorAll('[data-fp-all]'));
+    if (isTowable()) linkAllPlans(allTriggers);
+    else initAllPlans(allTriggers, plans.map((p) => ({
+      id: p.id, name: p.name, img: p.image, length: p.length ? primes(p.length) : null, price: p.price,
+      /* model-data writes "Up to 6"; the card already says "Sleeps" */
+      sleeps: p.sleeps ? String(p.sleeps).replace(/^up to\s*/i, '') : null,
+      href: `build-price.html?model=${slug}&amp;plan=${p.id}&amp;step=exterior`,
+    })));
 
     /* "View Specs" scrolls to the table, turned to this plan's column — the
        one a phone shows when the table is narrowed to a single plan */
@@ -1661,10 +1765,34 @@
     ].map((p) => ({ ...p, img: `../assets/videos/eagle-fw/eagle-fw-${p.img}.jpg` })),
   };
 
+  /* A plan page's own films, from the site's video library (video-data.js):
+     the model's full walkthrough on every plan, and a review only on the plan
+     its title names — the 27BH review belongs on the 27BH page, not the 18RBF.
+     Shorts are left out; this rail's cards are landscape. */
+  function planVideos() {
+    const lib = (window.JAYCO_VIDEOS && window.JAYCO_VIDEOS.items) || [];
+    const code = new RegExp('\\b' + plan.name.replace(/[^\w]/g, '') + '\\b', 'i');
+    const mine = lib.filter((it) => it.slug === slug && !it.short);
+    const walk = mine.filter((it) => it.cat === 'towable' && /walkthrough/i.test(it.title))
+      .sort((a, b) => b.year - a.year).slice(0, 1)
+      .map((it) => ({ id: it.id, title: 'Full walkthrough', note: `The ${it.year} ${model.name}, end to end.` }));
+    const reviews = mine.filter((it) => it.cat === 'reviews' && code.test(it.title))
+      .map((it) => ({ id: it.id, title: `${plan.name} review`, note: `An independent tour of the ${it.year} ${plan.name}.`, review: true }));
+    return walk.concat(reviews);
+  }
+
   function renderVideos() {
     const v = model.videos || {};
     let items = v.items || [];
-    if (!items.length && PLAN_PAGE) items = MODEL_VIDEO_PLACEHOLDERS[slug] || VIDEO_PLACEHOLDERS;
+    if (!items.length && PLAN_PAGE) {
+      /* Real films lead; the placeholder cards fill the rest of the rail. A
+         real review stands in for the placeholder "Reviews" card. */
+      const own = planVideos();
+      const hasReview = own.some((it) => it.review);
+      const fill = (MODEL_VIDEO_PLACEHOLDERS[slug] || VIDEO_PLACEHOLDERS)
+        .filter((p) => !(hasReview && p.title === 'Reviews'));
+      items = own.concat(fill);
+    }
     if (!items.length) { drop('#md-videos'); return; }
 
     /* The plan page names the model: "Eagle Fifth Wheel Videos". Names stored

@@ -775,6 +775,20 @@
         aria-label="Enlarge the ${who} floorplan">${ZOOM_ICON}</button></div>`;
   }
 
+  /* On the one-model page View Details goes to the floorplan's own page, not
+     the modal. Only the models listed here have plan pages that are finished;
+     the rest get a "#" placeholder that wireCards() stops from doing anything.
+     Add a model's slug once its plan pages are ready. */
+  const PLAN_PAGES_READY = ['jay-feather'];
+
+  function detailsCtl(r) {
+    const label = `aria-label="View details for the ${esc(r.model + ' ' + r.name)}"`;
+    if (!ONE) return `<button type="button" class="fpc-details" data-key="${esc(r.key)}" ${label}>View Details</button>`;
+    const ready = r.catType === 'towable' && PLAN_PAGES_READY.indexOf(r.modelId) !== -1;
+    const href = ready ? `floorplan.html?model=${esc(r.modelId)}&amp;plan=${esc(r.planId)}` : '#';
+    return `<a class="fpc-details" href="${href}"${ready ? '' : ' aria-disabled="true"'} data-key="${esc(r.key)}" ${label}>View Details</a>`;
+  }
+
   /* The card is no longer a single <button>. It carries three controls of its
      own now, and a button inside a button is markup browsers resolve however
      they like — so the drawing, the figures and the badges are plain content,
@@ -796,8 +810,7 @@
         ${price}
         ${badges(r)}
       </div>
-      <button type="button" class="fpc-details" data-key="${esc(r.key)}"
-        aria-label="View details for the ${esc(r.model + ' ' + r.name)}">View Details</button>
+      ${detailsCtl(r)}
     </li>`;
   }
 
@@ -1388,7 +1401,8 @@
       const z = e.target.closest('.fpc-zoom');
       if (z) { openZoom(z.dataset.key, z); return; }
       const d = e.target.closest('.fpc-details');
-      if (d) openDetail(d.dataset.key, d);
+      if (d && d.getAttribute('href') === '#') { e.preventDefault(); return; }
+      if (d && d.tagName === 'BUTTON') openDetail(d.dataset.key, d);
     });
 
     $('#fpc-modal-x').addEventListener('click', hide);
