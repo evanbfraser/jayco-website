@@ -1635,10 +1635,43 @@
      inner, not a child, so it can run to the viewport edge while the heading
      and arrows stay on the page's 1440 spine. Its lead padding puts card one
      back on that same spine, so only the right side bleeds. */
+  /* Placeholder cards for the floorplan page, shown until a plan has videos
+     of its own. They carry no YouTube id, so they render as still cards
+     rather than play buttons. */
+  const VIDEO_PLACEHOLDERS = [
+    { img: 'walkthrough-towable', title: 'Floorplan walkthrough', note: 'A room-by-room tour.' },
+    { img: 'why-buy',             title: 'Why this floorplan',    note: 'What sets it apart.' },
+    { img: 'jayco-difference',    title: 'The Jayco Difference',  note: 'How it is built.' },
+    { img: 'reviews',             title: 'Reviews',               note: 'What owners think.' },
+    { img: 'owners-stories',      title: 'Owner stories',         note: 'Life on the road.' },
+    { img: 'questions',           title: 'Your questions',        note: 'Answered by Jayco.' },
+  ].map((p) => ({ ...p, img: `../assets/videos/jayco-videos-${p.img}.jpg` }));
+
+  /* Model-specific placeholder sets, keyed by slug, used in place of the
+     generic set above. Photos are web copies of assets/Eagle Fifth Wheel videos/. */
+  const MODEL_VIDEO_PLACEHOLDERS = {
+    'eagle-fw': [
+      { img: 'overview',         title: 'Eagle Fifth Wheel overview', note: 'What sets it apart.' },
+      { img: 'walkthrough',      title: 'Floorplan walkthrough',      note: 'A room-by-room tour.' },
+      { img: 'jayco-difference', title: 'The Jayco Difference',       note: 'How it is built.' },
+      { img: 'reviews',          title: 'Reviews',                    note: 'What owners think.' },
+      { img: 'owner-stories',    title: 'Owner stories',              note: 'Life on the road.' },
+      { img: 'questions',        title: 'Your questions',             note: 'Answered by Jayco.' },
+      { img: 'getting-started',  title: 'Getting started',            note: 'Your first trip out.' },
+    ].map((p) => ({ ...p, img: `../assets/videos/eagle-fw/eagle-fw-${p.img}.jpg` })),
+  };
+
   function renderVideos() {
-    const v = model.videos;
-    const items = (v && v.items) || [];
+    const v = model.videos || {};
+    let items = v.items || [];
+    if (!items.length && PLAN_PAGE) items = MODEL_VIDEO_PLACEHOLDERS[slug] || VIDEO_PLACEHOLDERS;
     if (!items.length) { drop('#md-videos'); return; }
+
+    /* The plan page names the model: "Eagle Fifth Wheel Videos". Names stored
+       in the plural ("Eagle Fifth Wheels") read singular in front of "Videos". */
+    const heading = PLAN_PAGE
+      ? `${model.name.replace(/(Wheel|Trailer|Motorhome|Hauler)s$/, '$1')} Videos`
+      : (v.heading || 'Watch the walkthroughs.');
 
     const arrow = (dir, d) => `
       <button type="button" class="md-video-nav" id="md-video-${dir}"
@@ -1652,7 +1685,7 @@
         <div class="md-videos-head">
           <div class="md-section-head">
             <span class="section-label">${esc(v.label || 'Videos')}</span>
-            <h2 class="section-heading dark">${esc(v.heading || 'Watch the walkthroughs.')}</h2>
+            <h2 class="section-heading dark">${esc(heading)}</h2>
             ${v.body ? `<p class="section-body">${esc(v.body)}</p>` : ''}
           </div>
           <div class="md-video-controls">
@@ -1662,7 +1695,23 @@
         </div>
       </div>
       <ul class="md-video-track" id="md-video-track" role="list">
-          ${items.map((it) => `
+          ${items.map((it) => !it.id ? `
+            <li class="md-video">
+              <div class="md-video-btn is-placeholder">
+                <span class="md-video-thumb">
+                  <img src="${esc(it.img)}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                  <span class="md-video-play" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.2-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2z"/>
+                    </svg>
+                  </span>
+                </span>
+                <span class="md-video-text">
+                  <span class="md-video-title">${esc(it.title)}</span>
+                  ${it.note ? `<span class="md-video-note">${esc(it.note)}</span>` : ''}
+                </span>
+              </div>
+            </li>` : `
             <li class="md-video">
               <button type="button" class="md-video-btn" data-video="${esc(it.id)}"
                       aria-label="Play video: ${esc(it.title)}">
@@ -2285,7 +2334,11 @@
     if (model_el) model_el.textContent = `${model.year} ${model.name}${plan ? ' ' + plan.name : ''}`;
 
     /* only the sections that actually rendered */
-    const items = NAV.filter((n) => document.getElementById(n.id));
+    /* in page order, so a section placed differently on floorplan.html
+       (Videos, under the 3D tour) still gets its link in the right spot */
+    const items = NAV.filter((n) => document.getElementById(n.id))
+      .sort((a, b) => document.getElementById(a.id)
+        .compareDocumentPosition(document.getElementById(b.id)) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
     if (!items.length) { drop('#md-subnav'); return; }
 
     /* the highlight is one element that slides between items, not a background

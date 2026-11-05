@@ -270,3 +270,17 @@
   .fp-tour-head { display: block; }
   .fp-tour-controls { display: flex; margin-top: 1.25rem; padding-bottom: 0; }
 }
+
+/* Videos sit under the 3D tour (or the overview, when a plan has no tour) on
+   this page. Both already end on a section gap, so the rail drops its own top
+   gap and adds one below, ahead of the scenery band. */
+.floorplan-page #md-videos { padding-top: 0; padding-bottom: var(--md-gap-section); }
+.md-video-btn.is-placeholder { cursor: default; }
+/* Landscape cards here, matching the tour above, rather than the model
+   page's portrait ones. */
+.floorplan-page #md-videos .md-video-thumb { aspect-ratio: 16 / 9; }
+/* the model's name is the heading here; keep it on one line */
+.floorplan-page #md-videos .section-heading { max-width: none; }
+/* Top Features carries its own top gap; right after the videos rail, the
+   rail's bottom gap already covers it. */
+.floorplan-page #md-videos + #fp-topfeat { padding-top: 0; }
