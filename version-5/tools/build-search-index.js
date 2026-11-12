@@ -314,6 +314,7 @@ const EXTRA = {
   'towing.html': 'towing calculator tow capacity truck hitch',
   'tow-vs-drive.html': 'tow vs drive towable motorhome guide',
   'value-tool.html': 'value calculator hidden value tool',
+  'all-rvs.html': 'all rvs every rv types classes lineup towable motorized motorhomes trailers',
   'compare.html': 'compare comparison side by side',
   'floorplans.html': 'floorplans floor plans layouts catalog',
   'awards.html': 'awards award winning dsi readers choice',

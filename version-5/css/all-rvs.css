@@ -1,0 +1,145 @@
+/* ===================================================
+   Jayco — All RVs (all-rvs.html)
+   ---------------------------------------------------
+   Loads after style.css only. The class card is ported
+   from .ntr-type in new-to-rving.css under ar- names —
+   the house rule is port, rename, name the source, so a
+   change to one is a deliberate change to both.
+   =================================================== */
+
+.all-rvs-page { background: var(--canvas); padding-top: 68px; }
+
+.ar { padding: clamp(3rem, 6vw, 5.5rem) 0 0; }
+/* The FAQ (.faq-section, style.css) closes the page and brings its own bottom
+   padding; only its top is tightened to sit under the closing band. */
+.all-rvs-page .faq-section { padding-top: clamp(4rem, 8vw, 7rem); }
+.ar-inner { max-width: 1600px; margin: 0 auto; padding: 0 var(--page-pad); }
+
+/* ---------- Page head (fpc-head recipe, floorplans.css) ---------- */
+.ar-head { max-width: var(--measure-wide); }
+.ar-title {
+  font-size: clamp(2.4rem, 3.8vw, 3.8rem);
+  font-weight: 800; line-height: 0.98; letter-spacing: -0.01em;
+  color: var(--text-dark); margin: 0.5rem 0 0.75rem;
+}
+.ar-sub {
+  max-width: var(--measure); margin: 0;
+  font-size: clamp(0.92rem, 1.1vw, 1.05rem); line-height: 1.78; color: var(--text-mid);
+}
+.ar-count {
+  display: block; margin-top: 0.9rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--blue-dark);
+  font-variant-numeric: tabular-nums;
+}
+.ar-ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+
+/* ---------- Groups ---------- */
+.ar-group { margin-top: clamp(3.5rem, 7vw, 6rem); padding-top: clamp(2.5rem, 4vw, 3.5rem); border-top: 1px solid var(--hairline); }
+.ar-group-head { max-width: var(--measure-wide); margin-bottom: clamp(1.75rem, 3vw, 2.5rem); }
+.ar-group-head .section-heading { margin-bottom: 0.75rem; }
+.ar-group-head .section-body { max-width: var(--measure); margin: 0; }
+
+.ar-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(2rem, 3vw, 2.75rem) clamp(1rem, 1.8vw, 1.75rem);
+}
+
+/* ---------- Class card (ported from .ntr-type, new-to-rving.css) ---------- */
+.ar-card { display: flex; }
+.ar-card-link {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  width: 100%; height: 100%;
+  text-decoration: none; color: inherit;
+}
+.ar-card-link:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 4px;
+  border-radius: var(--radius-card);
+}
+.ar-card-plate {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  aspect-ratio: 3 / 4; overflow: hidden;
+  border-radius: var(--radius-card);
+  margin-bottom: 0.35rem;
+}
+.ar-card-img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.ar-card-link:hover .ar-card-img { transform: scale(1.04); }
+.ar-card-scrim { position: absolute; inset: 0; z-index: 1; background: var(--scrim-card); }
+.ar-card-name {
+  position: relative; z-index: 2;
+  margin: 0; padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+  color: #fff;
+}
+.ar-card-body { display: flex; flex-direction: column; flex: 1; }
+.ar-card-meta {
+  display: block; margin-bottom: 0.4rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--blue-dark);
+}
+.ar-card-desc { margin: 0 0 1rem; font-size: 0.92rem; line-height: 1.65; color: var(--text-mid); }
+/* auto top margin pins the price row to the foot of the tallest card in a row. */
+.ar-card-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin-top: auto; padding-top: 0.9rem; border-top: 1px solid var(--hairline);
+}
+.ar-card-from {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem; font-weight: 700; color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+}
+.ar-card-from-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; color: var(--text-mid);
+}
+.ar-card-foot { align-items: flex-end; }
+.ar-card-more {
+  display: inline-flex; align-items: center; gap: 0.35rem; flex-shrink: 0;
+  font-size: 0.82rem; font-weight: 600; color: var(--blue-dark);
+}
+.ar-card-more svg { transition: transform 0.3s var(--ease-out); }
+.ar-card-link:hover .ar-card-more svg { transform: translateX(4px); }
+
+/* ---------- Closing band ---------- */
+/* A plain band on a hairline, like the groups above it, rather than a grey
+   panel: the FAQ panel follows directly, and two panels in two greys stacked
+   back to back read as a mistake. */
+.ar-close {
+  margin-top: clamp(4rem, 8vw, 7rem);
+  padding-top: clamp(2.5rem, 4vw, 3.5rem);
+  border-top: 1px solid var(--hairline);
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 2rem;
+}
+.ar-close-copy { flex: 1 1 min(100%, 34rem); }
+.ar-close-copy .section-heading { margin-bottom: 0.75rem; }
+.ar-close-copy .section-body { max-width: var(--measure); margin: 0; }
+.ar-close .ar-ctas { margin-top: 0; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .ar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 599px) {
+  /* One card per row, so the row gap is all that separates one type from the
+     next — the shared 2rem left a card's price line crowding the photo below. */
+  .ar-grid { grid-template-columns: minmax(0, 1fr); row-gap: 3.5rem; }
+  /* Taller than the old 4 / 3, which trimmed the coach off the sides of these
+     portrait plates. 4 / 5 keeps each one whole while a card still fits a
+     phone screen. */
+  .ar-card-plate { aspect-ratio: 4 / 5; }
+  .ar-ctas > a { flex: 1 1 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ar-card-img, .ar-card-more svg { transition: none; }
+  .ar-card-link:hover .ar-card-img,
+  .ar-card-link:hover .ar-card-more svg { transform: none; }
+}
