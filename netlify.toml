@@ -132,6 +132,11 @@
   status = 302
 
 [[redirects]]
+  from = "/all-rvs"
+  to = "/version-5/all-rvs.html"
+  status = 302
+
+[[redirects]]
   from = "/compare"
   to = "/version-5/compare.html"
   status = 302
